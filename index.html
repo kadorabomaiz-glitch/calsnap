@@ -140,7 +140,6 @@
         <p id="currentDateDisplay" class="text-xs text-slate-400">Heute</p>
       </div>
       <div class="flex items-center gap-1.5">
-        <!-- Sprach-Umschalter Button -->
         <button onclick="toggleLanguage()" class="h-9 px-3 rounded-full glass flex items-center gap-1.5 text-xs font-bold text-white hover:border-emerald-400/50 active:scale-95 transition" title="Sprache wechseln / Zmień język">
           <span id="headerLangBtn">🇩🇪 DE</span>
         </button>
@@ -238,7 +237,7 @@
       <div>
         <div class="flex items-center justify-between mb-2 px-1">
           <span id="lblQuickAdd" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Schnell-Log (1 Fingertipp)</span>
-          <span id="lblQuickAddHint" class="text-[11px] text-slate-500">Sofort hinzufügen</span>
+          <span id="lblQuickAddHint" class="text-[11px] text-slate-500">Antippen zum Hinzufügen</span>
         </div>
         <div id="quickAddContainer" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
       </div>
@@ -250,9 +249,9 @@
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="lblScannerTitle" class="text-xs font-bold uppercase tracking-wider text-emerald-400">KI-Scanner (Auto-Foto & Text)</span>
           </div>
-          <span id="aiModeStatus" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
-            Auto-Portion aktiv
-          </span>
+          <button onclick="switchTab('access')" id="aiModeStatus" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+            Smart-Auto Modus
+          </button>
         </div>
 
         <!-- Kamera-Foto Vorschau -->
@@ -263,26 +262,24 @@
           </button>
           <div class="p-2.5 bg-slate-900/95 text-xs text-emerald-300 flex items-center gap-2">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span id="photoAutoHint">KI schätzt Portionsgröße (g) & Kalorien automatisch...</span>
+            <span id="photoAutoHint">Foto bereit – klicke auf Berechnen oder ergänze unten das Gericht</span>
           </div>
         </div>
 
         <textarea
           id="naturalInput"
           rows="2"
-          placeholder="Schreibe z. B.: „Heute habe ich 2 Äpfel und 1 Käsebrötchen gegessen“ oder mache direkt ein Foto..."
+          placeholder="Schreibe z. B.: „1 Portion Lasagne“ oder „2 Äpfel und 1 Käsebrötchen“..."
           class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-emerald-400 rounded-2xl p-3 text-sm text-white placeholder-slate-500 outline-none resize-none transition"
         ></textarea>
 
         <div class="flex items-center gap-2 mt-2.5">
-          <!-- Kamera Button (startet sofort die automatische KI-Portionsschätzung) -->
           <label class="cursor-pointer shrink-0 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 active:scale-95 transition border border-emerald-500/30">
             <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
             <span id="btnPhotoText">Foto machen</span>
             <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoSelect(event)" />
           </label>
 
-          <!-- Analysieren Button -->
           <button
             id="analyzeBtn"
             onclick="analyzeInput()"
@@ -294,7 +291,7 @@
         </div>
       </div>
 
-      <!-- KI-Ergebnis-Vorschau (mit Einzel-Löschen & Portionsschätzung) -->
+      <!-- KI-Ergebnis-Vorschau -->
       <div id="reviewCard" class="hidden glass rounded-3xl p-4 border-2 border-emerald-500/40 shadow-2xl space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
@@ -306,11 +303,10 @@
 
         <div id="detectedItemsList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
 
-        <!-- Optionaler Korrektur-Regler falls man doch anpassen möchte -->
         <div class="bg-slate-900/80 rounded-2xl p-3">
           <div class="flex justify-between text-xs mb-1">
-            <span id="lblPortionAdjust" class="text-slate-400">KI-Portionsgröße bei Bedarf anpassen:</span>
-            <span id="portionScaleLabel" class="font-bold text-emerald-400">100% (KI-Schätzung)</span>
+            <span id="lblPortionAdjust" class="text-slate-400">Portionsgröße bei Bedarf feinjustieren:</span>
+            <span id="portionScaleLabel" class="font-bold text-emerald-400">100% (Normal)</span>
           </div>
           <input
             id="portionSlider"
@@ -332,7 +328,7 @@
         </button>
       </div>
 
-      <!-- ==================== NEU: CLEVERE MAHLZEIT-VORSCHLÄGE FÜR REST-KALORIEN ==================== -->
+      <!-- CLEVERE MAHLZEIT-VORSCHLÄGE FÜR REST-KALORIEN -->
       <div class="glass rounded-3xl p-4 border border-teal-500/25 space-y-3">
         <div class="flex items-center justify-between">
           <div>
@@ -353,16 +349,28 @@
         <div id="mealSuggestionsList" class="space-y-2.5"></div>
       </div>
 
-      <!-- Heutiges Tagebuch (mit deutlichem Löschen-Button für Fehleinträge) -->
+      <!-- Heutiges Tagebuch + Schnell-Reset Button -->
       <div class="glass rounded-3xl p-4">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-sm font-bold tracking-tight flex items-center gap-2">
             <i class="fa-solid fa-utensils text-emerald-400"></i>
             <span id="lblTodayEaten">Heute gegessen</span>
           </h2>
-          <button onclick="clearTodayLog()" id="btnClearToday" class="text-[11px] text-slate-500 hover:text-rose-400">Heute komplett leeren</button>
+          <button onclick="clearTodayLog()" class="bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-xl text-[11px] font-semibold flex items-center gap-1.5 active:scale-95 transition">
+            <i class="fa-solid fa-rotate-right text-[10px]"></i>
+            <span id="btnClearToday">Tageszähler auf 0 setzen</span>
+          </button>
         </div>
         <div id="todayLogList" class="space-y-2.5"></div>
+      </div>
+
+      <!-- Rückblick der letzten Tage (automatisches Mitternachts-Archiv) -->
+      <div id="pastDaysCard" class="glass rounded-3xl p-4 hidden">
+        <h3 id="lblPastDays" class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-2">
+          <i class="fa-solid fa-calendar-check text-emerald-400"></i>
+          <span>Vergangene Tage (Automatisch gespeichert)</span>
+        </h3>
+        <div id="pastDaysList" class="space-y-1.5 text-xs"></div>
       </div>
 
     </section>
@@ -395,7 +403,6 @@
           </div>
         </div>
 
-        <!-- Neues Gewicht eintragen -->
         <div class="flex gap-2 mt-3">
           <input
             id="weightInput"
@@ -478,7 +485,7 @@
             </span>
             <h2 id="lblAccessTitle" class="text-base font-bold mt-1">Zugriff & Einladungs-Codes</h2>
             <p id="lblAccessSub" class="text-xs text-slate-400 mt-0.5">
-              Erstelle Codes inklusive App-Link für Familie & Freunde.
+              Erstelle Codes inklusive vollständigem App-Link für Familie & Freunde.
             </p>
           </div>
           <i class="fa-solid fa-user-lock text-2xl text-emerald-400"></i>
@@ -518,7 +525,6 @@
               </button>
             </div>
 
-            <!-- Angezeigter generierter Code + Direkt-WhatsApp-Link -->
             <div id="generatedCodeBox" class="hidden mt-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2.5">
               <div class="flex items-center justify-between">
                 <div>
@@ -545,16 +551,16 @@
       </div>
 
       <!-- Gemini KI-Schlüssel für echte Foto-Analyse -->
-      <div class="glass rounded-3xl p-5 space-y-3">
+      <div class="glass rounded-3xl p-5 space-y-3 border border-emerald-500/30">
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-bold flex items-center gap-2">
             <i class="fa-solid fa-camera-retro text-emerald-400"></i>
             <span>KI-Foto-Turbo (Google Gemini API)</span>
           </h3>
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">Auto-Portionsschätzung</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold">Für echte Foto-Erkennung</span>
         </div>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Mit deinem kostenlosen Google Gemini API-Key erkennt die Kamera automatisch das Gericht auf deinem Teller, schätzt die Portionsgröße in Gramm und berechnet sofort die Kalorien:
+          Hinterlege hier deinen kostenlosen Google Gemini Schlüssel (<a href="https://aistudio.google.com/apikey" target="_blank" class="text-emerald-400 underline">aistudio.google.com/apikey</a>), damit die Kamera deine Teller-Fotos optisch erkennt und automatisch Gramm & Kalorien schätzt:
         </p>
         <div class="flex gap-2">
           <input
@@ -613,7 +619,6 @@
   <script>
     const STORAGE_KEY = 'calsnap_ai_state_v2';
 
-    // --- ZWEISPRACHIGES WÖRTERBUCH (DEUTSCH & POLNISCH) ---
     const i18n = {
       de: {
         langIndicator: '🇩🇪 DE | 🇵🇱 PL',
@@ -634,7 +639,7 @@
         quickAdd: 'Schnell-Log (1 Fingertipp)',
         quickAddHint: 'Antippen zum Hinzufügen',
         scannerTitle: 'KI-Scanner (Auto-Foto & Text)',
-        inputPlaceholder: 'Schreibe z. B.: „Heute habe ich 2 Äpfel gegessen“ oder mache direkt ein Foto...',
+        inputPlaceholder: 'Schreibe z. B.: „1 Portion Lasagne“ oder „2 Äpfel und 1 Käsebrötchen“...',
         btnPhoto: 'Foto machen',
         btnAnalyze: 'Mahlzeit berechnen',
         reviewTitle: 'KI-Schätzung (Portion & Kalorien)',
@@ -644,7 +649,7 @@
         suggestionsTitle: 'Was kann ich heute noch essen?',
         btnMoreIdeas: 'Neue Ideen',
         todayEaten: 'Heute gegessen',
-        btnClearToday: 'Heute komplett leeren',
+        btnClearToday: 'Tageszähler auf 0 setzen',
         emptyLog: 'Noch keine Mahlzeiten für heute eingetragen.<br/>Nutze oben den Schnell-Log, mache ein Foto oder tippe deine Mahlzeit ein.',
         deleteItem: 'Löschen',
         undoAdded: 'Hinzugefügt:',
@@ -680,7 +685,7 @@
         quickAdd: 'Szybkie dodawanie (1 klik)',
         quickAddHint: 'Dotknij, aby dodać',
         scannerTitle: 'Skaner AI (Auto-Zdjęcie i Tekst)',
-        inputPlaceholder: 'Napisz np.: „Dzisiaj zjadłem 2 jabłka i bułkę” lub zrób zdjęcie talerza...',
+        inputPlaceholder: 'Napisz np.: „1 porcja lasagne” lub „2 jabłka i bułka z serem”...',
         btnPhoto: 'Zrób zdjęcie',
         btnAnalyze: 'Oblicz posiłek',
         reviewTitle: 'Ocena AI (Porcja i Kalorie)',
@@ -690,7 +695,7 @@
         suggestionsTitle: 'Co mogę jeszcze dzisiaj zjeść?',
         btnMoreIdeas: 'Inne pomysły',
         todayEaten: 'Dzisiaj zjedzone',
-        btnClearToday: 'Wyczyść dzisiejszy dzień',
+        btnClearToday: 'Wyzeruj licznik dnia',
         emptyLog: 'Brak wpisanych posiłków na dziś.<br/>Użyj szybkiego dodawania powyżej, zrób zdjęcie lub wpisz co zjadłeś.',
         deleteItem: 'Usuń',
         undoAdded: 'Dodano:',
@@ -728,6 +733,11 @@
       ]
     };
 
+    function getTodayDateKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
     const defaultState = {
       lang: 'de',
       unlocked: false,
@@ -744,8 +754,10 @@
         fat: 65,
         targetWeight: 83.0
       },
+      lastActiveDate: getTodayDateKey(),
       waterLiters: 0,
       todayLog: [],
+      pastDaysLog: [],
       weightLog: []
     };
 
@@ -761,7 +773,9 @@
       try {
         const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('calsnap_ai_state_v1');
         if (!raw) return JSON.parse(JSON.stringify(defaultState));
-        return Object.assign(JSON.parse(JSON.stringify(defaultState)), JSON.parse(raw));
+        const loaded = Object.assign(JSON.parse(JSON.stringify(defaultState)), JSON.parse(raw));
+        if (!Array.isArray(loaded.pastDaysLog)) loaded.pastDaysLog = [];
+        return loaded;
       } catch (e) {
         return JSON.parse(JSON.stringify(defaultState));
       }
@@ -769,6 +783,33 @@
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // --- AUTOMATISCHER TAGESWECHSEL UM MITTERNACHT ---
+    function checkAutomaticDailyReset() {
+      const todayKey = getTodayDateKey();
+      if (state.lastActiveDate && state.lastActiveDate !== todayKey) {
+        // Falls am Vortag Mahlzeiten geloggt wurden, im Archiv sichern
+        if (state.todayLog && state.todayLog.length > 0) {
+          const totalKcal = state.todayLog.reduce((sum, item) => sum + item.kcal, 0);
+          const totalP = Math.round(state.todayLog.reduce((sum, item) => sum + item.p, 0));
+          state.pastDaysLog.unshift({
+            date: state.lastActiveDate,
+            kcal: totalKcal,
+            protein: totalP,
+            goal: state.goals.kcal
+          });
+          state.pastDaysLog = state.pastDaysLog.slice(0, 7); // Letzte 7 Tage behalten
+        }
+        // Heutigen Zähler frisch auf 0 setzen
+        state.todayLog = [];
+        state.waterLiters = 0;
+        state.lastActiveDate = todayKey;
+        saveState();
+      } else if (!state.lastActiveDate) {
+        state.lastActiveDate = todayKey;
+        saveState();
+      }
     }
 
     function t(key) {
@@ -828,7 +869,7 @@
       document.getElementById('btnClearWeights').textContent = t('btnClearWeights');
     }
 
-    // --- ZUGANGSSCHUTZ & EINLADUNGSCODES MIT LINK ---
+    // --- ZUGANGSSCHUTZ & EINLADUNGSCODES MIT VOLLSTÄNDIGEM GITHUB-LINK ---
     function generateDeterministicCode(name) {
       const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'GAST';
       let hash = 2026;
@@ -875,6 +916,7 @@
     }
 
     function renderAppVisibility() {
+      checkAutomaticDailyReset();
       applyTranslations();
       const lockScreen = document.getElementById('lockScreen');
       const appContainer = document.getElementById('appContainer');
@@ -918,9 +960,9 @@
     }
 
     function getInviteMessageText(code) {
-      const appUrl = window.location.origin.includes('http')
-        ? window.location.origin
-        : 'https://roaring-baklava-9de8e5.netlify.app';
+      const appUrl = window.location.href.includes('github.io') || window.location.href.includes('http')
+        ? window.location.href.split('#')[0].split('?')[0]
+        : 'https://kadorabomaiz-glitch.github.io/calsnap/';
 
       if (state.lang === 'pl') {
         return `Cześć! Oto dostęp do naszej aplikacji CalSnap AI:\n🔗 Link: ${appUrl}\n🔑 Twój kod dostępu: ${code}\n(Otwórz link w Safari na iPhonie i dodaj do ekranu początkowego)`;
@@ -966,28 +1008,36 @@
       `).join('');
     }
 
-    // --- ZWEISPRACHIGER ESSENS-PARSER (DEUTSCH & POLNISCH) ---
+    // --- PRÄZISER ZWEISPRACHIGER ESSENS-PARSER (OHNE WORTTEIL-VERWECHSLUNG!) ---
     const localFoodDB = [
+      { keys: ['lasagne', 'lasania', 'lasagne bolognese'], nameDe: 'Portion Lasagne (~350g)', namePl: 'Porcja Lasagne (~350g)', kcal: 540, p: 28, c: 44, f: 27, icon: '🍝' },
+      { keys: ['auflauf', 'nudelauflauf', 'kartoffelauflauf', 'zapiekanka'], nameDe: 'Portion Auflauf (~320g)', namePl: 'Porcja zapiekanki (~320g)', kcal: 490, p: 22, c: 46, f: 23, icon: '🥘' },
+      { keys: ['bolognese', 'spaghetti bolognese'], nameDe: 'Spaghetti Bolognese (~350g)', namePl: 'Spaghetti Bolognese (~350g)', kcal: 520, p: 26, c: 64, f: 16, icon: '🍝' },
       { keys: ['apfel', 'äpfel', 'jabłko', 'jabłka', 'jablko', 'jablka'], nameDe: 'Apfel (~150g)', namePl: 'Jabłko (~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, icon: '🍏' },
       { keys: ['banane', 'bananen', 'banan', 'banany'], nameDe: 'Banane (~120g)', namePl: 'Banan (~120g)', kcal: 105, p: 1.3, c: 27, f: 0.4, icon: '🍌' },
       { keys: ['käsebrötchen', 'bułka z serem', 'bulka z serem'], nameDe: 'Käsebrötchen (~110g)', namePl: 'Bułka z serem (~110g)', kcal: 290, p: 12, c: 36, f: 10, icon: '🧀' },
       { keys: ['brötchen', 'semmel', 'bułka', 'bulka', 'bułki'], nameDe: 'Brötchen (~65g)', namePl: 'Bułka (~65g)', kcal: 165, p: 5.5, c: 33, f: 1.2, icon: '🥖' },
+      { keys: ['rührei', 'spiegelei', 'jajecznica'], nameDe: 'Portion Rührei/Spiegelei (~150g)', namePl: 'Jajecznica (~150g)', kcal: 240, p: 18, c: 2, f: 18, icon: '🍳' },
       { keys: ['ei', 'eier', 'jajko', 'jajka', 'jajek'], nameDe: 'Ei gekocht (~55g)', namePl: 'Jajko gotowane (~55g)', kcal: 78, p: 6.5, c: 0.6, f: 5.5, icon: '🥚' },
-      { keys: ['kaffee', 'kawa', 'kawy'], nameDe: 'Kaffee (~200ml)', namePl: 'Kawa (~200ml)', kcal: 25, p: 0.8, c: 2.5, f: 1.0, icon: '☕' },
-      { keys: ['hähnchen', 'huhn', 'putenbrust', 'kurczak', 'pierś z kurczaka'], nameDe: 'Hähnchenbrust (~180g)', namePl: 'Pierś z kurczaka (~180g)', kcal: 220, p: 42, c: 0, f: 5, icon: '🍗' },
+      { keys: ['kaffee', 'kawa', 'kawy', 'cappuccino', 'latte'], nameDe: 'Kaffee (~200ml)', namePl: 'Kawa (~200ml)', kcal: 25, p: 0.8, c: 2.5, f: 1.0, icon: '☕' },
+      { keys: ['hähnchen', 'huhn', 'putenbrust', 'hähnchenbrust', 'kurczak', 'pierś z kurczaka'], nameDe: 'Hähnchenbrust (~180g)', namePl: 'Pierś z kurczaka (~180g)', kcal: 220, p: 42, c: 0, f: 5, icon: '🍗' },
       { keys: ['reis', 'ryż', 'ryz'], nameDe: 'Portion Reis gekocht (~180g)', namePl: 'Porcja ryżu (~180g)', kcal: 240, p: 5, c: 52, f: 0.6, icon: '🍚' },
       { keys: ['nudeln', 'pasta', 'spaghetti', 'makaron'], nameDe: 'Portion Nudeln (~200g)', namePl: 'Porcja makaronu (~200g)', kcal: 310, p: 11, c: 62, f: 2, icon: '🍝' },
-      { keys: ['pizza'], nameDe: 'Pizza (~220g)', namePl: 'Pizza (~220g)', kcal: 480, p: 20, c: 56, f: 18, icon: '🍕' },
+      { keys: ['pizza'], nameDe: 'Pizza (~300g)', namePl: 'Pizza (~300g)', kcal: 680, p: 28, c: 78, f: 26, icon: '🍕' },
       { keys: ['döner', 'kebab'], nameDe: 'Döner Kebab (~350g)', namePl: 'Kebab (~350g)', kcal: 650, p: 38, c: 58, f: 28, icon: '🥙' },
-      { keys: ['schnitzel', 'schabowy', 'kotlet'], nameDe: 'Schnitzel paniert (~180g)', namePl: 'Kotlet schabowy (~180g)', kcal: 380, p: 32, c: 16, f: 21, icon: '🥩' },
+      { keys: ['burger', 'cheeseburger', 'hamburger'], nameDe: 'Burger (~250g)', namePl: 'Burger (~250g)', kcal: 560, p: 30, c: 44, f: 28, icon: '🍔' },
+      { keys: ['schnitzel', 'schabowy', 'kotlet', 'frikadelle', 'mielony'], nameDe: 'Schnitzel / Kotlet (~180g)', namePl: 'Kotlet schabowy / mielony (~180g)', kcal: 380, p: 32, c: 16, f: 21, icon: '🥩' },
+      { keys: ['bratwurst', 'wurst', 'würstchen', 'kiełbasa', 'kielbasa'], nameDe: 'Bratwurst / Wurst (~120g)', namePl: 'Kiełbasa (~120g)', kcal: 340, p: 16, c: 2, f: 30, icon: '🌭' },
+      { keys: ['lachs', 'fisch', 'thunfisch', 'ryba', 'łosoś'], nameDe: 'Portion Fisch / Lachs (~180g)', namePl: 'Porcja ryby / łososia (~180g)', kcal: 320, p: 36, c: 0, f: 18, icon: '🐟' },
+      { keys: ['suppe', 'eintopf', 'gulasch', 'zupa', 'rosół', 'żurek', 'bigos'], nameDe: 'Teller Suppe / Eintopf (~350ml)', namePl: 'Talerz zupy / Bigos (~350ml)', kcal: 290, p: 16, c: 24, f: 14, icon: '🍲' },
       { keys: ['kartoffel', 'kartoffeln', 'ziemniaki', 'ziemniak'], nameDe: 'Portion Kartoffeln (~200g)', namePl: 'Porcja ziemniaków (~200g)', kcal: 160, p: 4, c: 35, f: 0.2, icon: '🥔' },
       { keys: ['pommes', 'frytki'], nameDe: 'Portion Pommes (~150g)', namePl: 'Porcja frytek (~150g)', kcal: 365, p: 4, c: 45, f: 18, icon: '🍟' },
-      { keys: ['salat', 'sałatka', 'salatka'], nameDe: 'Gemischter Salat mit Dressing (~220g)', namePl: 'Sałatka mieszana z sosem (~220g)', kcal: 165, p: 4, c: 10, f: 11, icon: '🥗' },
-      { keys: ['quark', 'magerquark', 'twaróg', 'twarog'], nameDe: 'Magerquark (250g)', namePl: 'Twaróg chudy (250g)', kcal: 170, p: 30, c: 10, f: 0.7, icon: '🥣' },
-      { keys: ['haferflocken', 'müsli', 'owsianka', 'płatki owsiane'], nameDe: 'Haferflocken-Schale (~180g)', namePl: 'Owsianka (~180g)', kcal: 240, p: 9, c: 38, f: 5, icon: '🌾' },
-      { keys: ['schokolade', 'riegel', 'czekolada', 'baton'], nameDe: 'Portion Schokolade (~30g)', namePl: 'Porcja czekolady (~30g)', kcal: 155, p: 2, c: 16, f: 9, icon: '🍫' },
+      { keys: ['salat', 'sałatka', 'salatka', 'mizeria'], nameDe: 'Gemischter Salat (~220g)', namePl: 'Sałatka mieszana (~220g)', kcal: 165, p: 4, c: 10, f: 11, icon: '🥗' },
+      { keys: ['quark', 'magerquark', 'skyr', 'joghurt', 'twaróg', 'twarog', 'jogurt'], nameDe: 'Quark / Skyr / Joghurt (250g)', namePl: 'Twaróg / Skyr / Jogurt (250g)', kcal: 170, p: 28, c: 10, f: 1.5, icon: '🥣' },
+      { keys: ['haferflocken', 'müsli', 'owsianka', 'płatki owsiane'], nameDe: 'Haferflocken / Müsli (~180g)', namePl: 'Owsianka / Musli (~180g)', kcal: 240, p: 9, c: 38, f: 5, icon: '🌾' },
+      { keys: ['schokolade', 'riegel', 'czekolada', 'baton', 'kuchen', 'ciasto'], nameDe: 'Süßigkeit / Kuchen (~60g)', namePl: 'Słodycze / Ciasto (~60g)', kcal: 240, p: 3, c: 32, f: 11, icon: '🍫' },
       { keys: ['pierogi', 'piroggen'], nameDe: 'Portion Pierogi (6 Stück, ~240g)', namePl: 'Porcja pierogów (6 szt., ~240g)', kcal: 420, p: 14, c: 62, f: 12, icon: '🥟' },
-      { keys: ['brot', 'abendbrot', 'chleb', 'kanapka', 'kanapki'], nameDe: 'Belegtes Brot (~95g)', namePl: 'Kanapka (~95g)', kcal: 215, p: 9, c: 25, f: 8, icon: '🍞' }
+      { keys: ['brot', 'abendbrot', 'vollkornbrot', 'toast', 'chleb', 'kanapka', 'kanapki'], nameDe: 'Belegtes Brot (~95g)', namePl: 'Kanapka (~95g)', kcal: 215, p: 9, c: 25, f: 8, icon: '🍞' }
     ];
 
     function parseNumberWord(word) {
@@ -1008,13 +1058,15 @@
 
       localFoodDB.forEach(item => {
         for (const key of item.keys) {
-          const regex = new RegExp(`(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|jeden|jedna|dwa|dwie|trzy|cztery|pół)\\s*(?:g|gramm|stück|szt|tassen|portionen)?\\s*)?${key}`, 'i');
+          // WICHTIG: Strikte Wortgrenzen ((?:^|[^\p{L}])) verhindern, dass "ei" in "eine", "Fleisch" oder "klein" als Ei gezählt wird!
+          const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|halbes|jeden|jedna|dwa|dwie|trzy|cztery|pół)\\s*(?:g|gramm|stück|szt|tassen|portion|portionen|porcja|porcje|teller)?\\s+)?(${escapedKey})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
           const match = lower.match(regex);
           if (match) {
             let count = 1;
             if (match[1]) {
               const rawNum = parseNumberWord(match[1]);
-              count = rawNum > 20 ? +(rawNum / 150).toFixed(1) : rawNum;
+              count = rawNum > 20 ? +(rawNum / 200).toFixed(1) : rawNum;
             }
             const baseName = state.lang === 'pl' ? item.namePl : item.nameDe;
             results.push({
@@ -1031,19 +1083,20 @@
       });
 
       if (results.length === 0 && text.trim().length > 0) {
+        const cleanTitle = text.trim().slice(0, 40);
         results.push({
-          name: `${text.trim().slice(0, 38)} (~250g)`,
-          kcal: 340,
-          p: 16,
-          c: 34,
-          f: 14,
+          name: `${cleanTitle} (~300g)`,
+          kcal: 460,
+          p: 22,
+          c: 45,
+          f: 20,
           icon: '🍽️'
         });
       }
       return results;
     }
 
-    // --- AUTOMATISCHE KI-FOTO-ANALYSE (SCHÄTZT PORTIONSGRÖSSE IN GRAMM & KALORIEN SELBSTSTÄNDIG) ---
+    // --- FOTO-ANALYSE (AUTOMATISCH ODER MIT TEXT KOMBINIERT) ---
     function handlePhotoSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1052,8 +1105,10 @@
         selectedPhotoBase64 = e.target.result;
         document.getElementById('photoPreview').src = selectedPhotoBase64;
         document.getElementById('photoPreviewContainer').classList.remove('hidden');
-        // Automatisch sofort analysieren, sobald das Foto aufgenommen/ausgewählt wurde!
-        analyzeInput();
+        // Wenn der Gemini-Key aktiv ist oder schon Text im Feld steht, direkt losrechnen
+        if ((state.geminiApiKey && state.geminiApiKey.startsWith('AIza')) || document.getElementById('naturalInput').value.trim().length > 0) {
+          analyzeInput();
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -1090,11 +1145,11 @@
               {
                 name: state.lang === 'pl'
                   ? 'Danie z talerza (ocena AI ~340g)'
-                  : 'Teller-Gericht (KI-Portionsschätzung ~340g)',
+                  : 'Teller-Gericht (Portionsschätzung ~340g)',
                 kcal: 510,
-                p: 31,
+                p: 28,
                 c: 48,
-                f: 21,
+                f: 22,
                 icon: '📸'
               }
             ];
@@ -1117,11 +1172,11 @@
           text: `Du bist ein hochpräziser KI-Ernährungsexperte.
 Aufgabe:
 1. Erkenne alle Speisen und Getränke auf dem Foto und/oder im Text.
-2. Schätze anhand der Tellergröße, Besteck oder visuellen Volumen SELBSTSTÄNDIG die genaue Portionsgröße in Gramm oder Milliliter (z. B. "~220g") und schreibe diese Gramm-Angabe direkt in den Namen!
+2. Schätze anhand der Tellergröße, Besteck oder visuellen Volumen SELBSTSTÄNDIG die genaue Portionsgröße in Gramm oder Milliliter (z. B. "~320g") und schreibe diese Gramm-Angabe direkt in den Namen!
 3. Berechne daraus Kalorien (kcal), Eiweiß (p), Kohlenhydrate (c) und Fett (f).
 4. Antworte in der Sprache: ${targetLang}.
 Gib AUSSCHLIESSLICH ein JSON-Array zurück im Format:
-[{"name": "Gegrillte Hähnchenbrust (~180g)", "kcal": 295, "p": 43.0, "c": 1.0, "f": 12.5, "icon": "🍗"}]
+[{"name": "Lasagne Bolognese (~350g)", "kcal": 540, "p": 28.0, "c": 44.0, "f": 27.0, "icon": "🍝"}]
 Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
         }
       ];
@@ -1240,7 +1295,7 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       showUndoToast(addedNames.join(', '));
     }
 
-    // --- QUICK-ADD & SOFORT-RÜCKGÄNGIG (UNDO) BEI FEHLKLICKS ---
+    // --- QUICK-ADD & SOFORT-RÜCKGÄNGIG (UNDO) ---
     function quickAdd(name, kcal, p, c, f, icon) {
       const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
       state.todayLog.unshift({ name, kcal, p, c, f, icon, time: timeStr });
@@ -1285,10 +1340,11 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
     }
 
     function clearTodayLog() {
-      const msg = state.lang === 'pl' ? 'Czy na pewno chcesz wyczyścić dzisiejsze wpisy?' : 'Möchtest du alle heutigen Einträge zurücksetzen?';
+      const msg = state.lang === 'pl' ? 'Czy na pewno chcesz wyzerować dzisiejszy licznik?' : 'Möchtest du den heutigen Tageszähler (Kalorien & Wasser) komplett auf 0 zurücksetzen?';
       if (confirm(msg)) {
         state.todayLog = [];
         state.waterLiters = 0;
+        state.lastActiveDate = getTodayDateKey();
         saveState();
         renderAll();
       }
@@ -1298,7 +1354,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
     function getMealSuggestionsForRemaining(remainingKcal) {
       const isPl = state.lang === 'pl';
 
-      // Falls nur noch wenig Kalorien übrig sind (unter 350 kcal)
       if (remainingKcal <= 350) {
         return isPl ? [
           {
@@ -1330,7 +1385,8 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
             title: 'Eiweiß-Snack am Abend (~210 kcal)',
             combo: '2 gekochte Eier + frische Tomaten & Gurkenscheiben mit Pfeffer.',
             extra: 'Dazu kannst du noch 1 Handvoll Beeren (~50 kcal) essen.',
-            kcal: 210, p: 15, c: 8, f: 11, icon: '🥚' },
+            kcal: 210, p: 15, c: 8, f: 11, icon: '🥚'
+          },
           {
             title: 'Süßer Quark-Apfel-Becher (~250 kcal)',
             combo: '250g Magerquark oder Skyr + 1 gewürfelter Apfel mit Zimt.',
@@ -1340,7 +1396,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
         ];
       }
 
-      // Mittleres Budget (z.B. 350 bis 850 kcal übrig – wie dein Beispiel mit 765 kcal!)
       if (remainingKcal <= 850) {
         const target = Math.min(remainingKcal - 60, 680);
         return isPl ? [
@@ -1396,7 +1451,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
         ];
       }
 
-      // Großes Budget (über 850 kcal übrig – z.B. mittags oder für 2 Mahlzeiten)
       return isPl ? [
         {
           title: 'Pełny obiad + podwieczorek (~780 kcal)',
@@ -1411,8 +1465,8 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
           kcal: 690, p: 45, c: 62, f: 24, icon: '🥗'
         },
         {
-          title: 'Domowe Pierogi lub Makaron + Sałatka (~720 kcal)',
-          combo: 'Porcja pierogów (7-8 szt.) lub makaronu bolognese + świeża sałatka z lekkim dressingiem.',
+          title: 'Domowe Pierogi lub Lasagne + Sałatka (~720 kcal)',
+          combo: 'Porcja pierogów (7-8 szt.) lub lasagne bolognese + świeża sałatka z lekkim dressingiem.',
           extra: 'Wciąż zostaje Ci ' + (remainingKcal - 720) + ' kcal na kolację!',
           kcal: 720, p: 34, c: 86, f: 22, icon: '🥟'
         }
@@ -1430,10 +1484,10 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
           kcal: 690, p: 45, c: 62, f: 24, icon: '🥗'
         },
         {
-          title: 'Sättigende Pasta oder Schnitzel mit Beilagensalat (~720 kcal)',
-          combo: 'Portion Spaghetti Bolognese (oder 1 mageres Putenschnitzel mit Kartoffeln) + gemischter Salat mit Kräuter-Dressing.',
-          extra: 'Danach hast du immer noch ' + (remainingKcal - 720) + ' kcal für den Abend übrig!',
-          kcal: 720, p: 42, c: 78, f: 22, icon: '🍝'
+          title: 'Portion Lasagne oder Pasta mit Beilagensalat (~700 kcal)',
+          combo: 'Portion Lasagne Bolognese (~350g) + gemischter grüner Salat mit Joghurt- oder Balsamico-Dressing.',
+          extra: 'Danach hast du immer noch ' + (remainingKcal - 700) + ' kcal für den restlichen Tag übrig!',
+          kcal: 700, p: 34, c: 56, f: 35, icon: '🍝'
         }
       ];
     }
@@ -1585,7 +1639,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       }
 
       const allSuggestions = getMealSuggestionsForRemaining(Math.max(200, remaining));
-      // Zeige 2 Vorschläge rotierend
       const picked = [];
       for (let i = 0; i < Math.min(2, allSuggestions.length); i++) {
         picked.push(allSuggestions[(suggestionOffset + i) % allSuggestions.length]);
@@ -1612,6 +1665,30 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
           </div>
         </div>
       `).join('');
+    }
+
+    function renderPastDays() {
+      const card = document.getElementById('pastDaysCard');
+      const list = document.getElementById('pastDaysList');
+      if (!state.pastDaysLog || state.pastDaysLog.length === 0) {
+        card.classList.add('hidden');
+        return;
+      }
+      card.classList.remove('hidden');
+      list.innerHTML = state.pastDaysLog.map(d => {
+        const diff = d.goal - d.kcal;
+        const badgeColor = diff >= 0 ? 'text-emerald-400' : 'text-rose-400';
+        const diffText = diff >= 0 ? `-${diff} kcal eingespart` : `+${Math.abs(diff)} kcal drüber`;
+        return `
+          <div class="flex items-center justify-between bg-slate-900/60 px-3 py-2 rounded-xl border border-slate-800/60">
+            <span class="text-slate-400 font-medium">${d.date}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-white font-bold">${d.kcal} / ${d.goal} kcal</span>
+              <span class="${badgeColor} text-[11px] font-semibold">${diffText}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function renderWeightTab() {
@@ -1655,6 +1732,7 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
     }
 
     function renderAll() {
+      checkAutomaticDailyReset();
       applyTranslations();
       renderQuickAddButtons();
 
@@ -1709,10 +1787,9 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       document.getElementById('fatGoalDisplay').textContent = state.goals.fat;
       document.getElementById('fatBar').style.width = Math.min(100, (totals.f / state.goals.fat) * 100) + '%';
 
-      // Clevere Mahlzeit-Vorschläge für die verbleibenden Kalorien rendern
       renderMealSuggestions(remaining);
+      renderPastDays();
 
-      // Heutige Einträge mit großem, klarem Löschen-Button rendern
       const logContainer = document.getElementById('todayLogList');
       if (state.todayLog.length === 0) {
         logContainer.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">${t('emptyLog')}</div>`;
@@ -1743,11 +1820,18 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       document.getElementById('manualProteinGoal').value = state.goals.protein;
       document.getElementById('aiModeStatus').textContent = state.geminiApiKey
         ? 'Gemini Vision KI aktiv'
-        : 'Smart-Auto Modus';
+        : 'Smart-Auto Modus (Key fehlt)';
 
       renderInviteCodes();
       renderWeightTab();
     }
+
+    // Automatischer Tages-Check auch wenn die App aus dem Hintergrund geholt wird
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && state.unlocked) {
+        renderAll();
+      }
+    });
 
     renderAppVisibility();
   </script>
