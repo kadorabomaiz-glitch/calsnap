@@ -128,7 +128,6 @@
   <!-- ==================== HAUPT-APP ==================== -->
   <div id="appContainer" class="max-w-md mx-auto px-4 pt-2 hidden">
     
-    <!-- Top Header mit Sprachumschalter DE / PL -->
     <header class="flex items-center justify-between py-3">
       <div>
         <div class="flex items-center gap-2">
@@ -155,11 +154,9 @@
     <!-- ==================== TAB 1: COCKPIT ==================== -->
     <section id="tab-cockpit" class="space-y-4">
       
-      <!-- Kalorien-Hauptkarte -->
       <div class="glass rounded-3xl p-5 shadow-xl">
         <div class="flex items-center justify-between">
           
-          <!-- Links: Statistik -->
           <div class="space-y-3">
             <div>
               <span id="lblDailyGoal" class="text-xs text-slate-400 uppercase tracking-wider">Tagesziel</span>
@@ -178,7 +175,6 @@
             </div>
           </div>
 
-          <!-- Rechts: Großer Fortschrittsring -->
           <div class="relative w-36 h-36 flex items-center justify-center">
             <svg class="w-full h-full" viewBox="0 0 120 120">
               <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.08)" stroke-width="10" fill="none" />
@@ -201,7 +197,6 @@
           </div>
         </div>
 
-        <!-- Makronährstoffe -->
         <div class="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-800/80">
           <div class="bg-slate-900/60 rounded-2xl p-2.5">
             <div class="flex justify-between text-xs mb-1">
@@ -233,7 +228,6 @@
         </div>
       </div>
 
-      <!-- Schnellwahl-Leiste (Quick-Add) -->
       <div>
         <div class="flex items-center justify-between mb-2 px-1">
           <span id="lblQuickAdd" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Schnell-Log (1 Fingertipp)</span>
@@ -242,19 +236,17 @@
         <div id="quickAddContainer" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
       </div>
 
-      <!-- KI-Eingabebox: Text + Automatische Foto-Portionsschätzung -->
       <div class="glass rounded-3xl p-4 shadow-lg border border-emerald-500/20">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="lblScannerTitle" class="text-xs font-bold uppercase tracking-wider text-emerald-400">KI-Scanner (Auto-Foto & Text)</span>
           </div>
-          <button onclick="switchTab('access')" id="aiModeStatus" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-            Smart-Auto Modus
-          </button>
+          <span id="aiModeStatus" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+            Gemini Vision KI aktiv
+          </span>
         </div>
 
-        <!-- Kamera-Foto Vorschau -->
         <div id="photoPreviewContainer" class="hidden mb-3 relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
           <img id="photoPreview" src="" alt="Essensfoto" class="w-full h-44 object-cover" />
           <button onclick="clearPhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white flex items-center justify-center">
@@ -262,7 +254,7 @@
           </button>
           <div class="p-2.5 bg-slate-900/95 text-xs text-emerald-300 flex items-center gap-2">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span id="photoAutoHint">Foto bereit – klicke auf Berechnen oder ergänze unten das Gericht</span>
+            <span id="photoAutoHint">Foto bereit – KI analysiert Teller automatisch...</span>
           </div>
         </div>
 
@@ -291,7 +283,6 @@
         </div>
       </div>
 
-      <!-- KI-Ergebnis-Vorschau -->
       <div id="reviewCard" class="hidden glass rounded-3xl p-4 border-2 border-emerald-500/40 shadow-2xl space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
@@ -328,7 +319,6 @@
         </button>
       </div>
 
-      <!-- CLEVERE MAHLZEIT-VORSCHLÄGE FÜR REST-KALORIEN -->
       <div class="glass rounded-3xl p-4 border border-teal-500/25 space-y-3">
         <div class="flex items-center justify-between">
           <div>
@@ -349,7 +339,6 @@
         <div id="mealSuggestionsList" class="space-y-2.5"></div>
       </div>
 
-      <!-- Heutiges Tagebuch + Schnell-Reset Button -->
       <div class="glass rounded-3xl p-4">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-sm font-bold tracking-tight flex items-center gap-2">
@@ -364,7 +353,6 @@
         <div id="todayLogList" class="space-y-2.5"></div>
       </div>
 
-      <!-- Rückblick der letzten Tage (automatisches Mitternachts-Archiv) -->
       <div id="pastDaysCard" class="glass rounded-3xl p-4 hidden">
         <h3 id="lblPastDays" class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-2">
           <i class="fa-solid fa-calendar-check text-emerald-400"></i>
@@ -431,7 +419,6 @@
         <div id="weightHistoryList" class="space-y-2 max-h-60 overflow-y-auto"></div>
       </div>
 
-      <!-- Kalorienbedarfs- & Zielrechner -->
       <div class="glass rounded-3xl p-5 space-y-3">
         <h3 class="text-sm font-bold flex items-center gap-2">
           <i class="fa-solid fa-calculator text-emerald-400"></i>
@@ -550,32 +537,6 @@
         </div>
       </div>
 
-      <!-- Gemini KI-Schlüssel für echte Foto-Analyse -->
-      <div class="glass rounded-3xl p-5 space-y-3 border border-emerald-500/30">
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold flex items-center gap-2">
-            <i class="fa-solid fa-camera-retro text-emerald-400"></i>
-            <span>KI-Foto-Turbo (Google Gemini API)</span>
-          </h3>
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold">Für echte Foto-Erkennung</span>
-        </div>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Hinterlege hier deinen kostenlosen Google Gemini Schlüssel (<a href="https://aistudio.google.com/apikey" target="_blank" class="text-emerald-400 underline">aistudio.google.com/apikey</a>), damit die Kamera deine Teller-Fotos optisch erkennt und automatisch Gramm & Kalorien schätzt:
-        </p>
-        <div class="flex gap-2">
-          <input
-            id="geminiKeyInput"
-            type="password"
-            placeholder="AIzaSy..."
-            class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono"
-          />
-          <button onclick="saveGeminiKey()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs">
-            Speichern
-          </button>
-        </div>
-      </div>
-
-      <!-- Manuelles Kalorienziel anpassen -->
       <div class="glass rounded-3xl p-5 space-y-3">
         <h3 class="text-sm font-bold">Tagesziele manuell anpassen</h3>
         <div class="grid grid-cols-2 gap-2.5 text-xs">
@@ -618,6 +579,9 @@
   <!-- ==================== APP LOGIK (JAVASCRIPT) ==================== -->
   <script>
     const STORAGE_KEY = 'calsnap_ai_state_v2';
+
+    // Globaler fester API-Schlüssel für alle Nutzer (Admin + Gäste)
+    const GLOBAL_GEMINI_KEY = 'AQ.Ab8RN6KD3JfyXAwUrne7cTxzVinKjutvyVcjhZbZfH8pxaap-w';
 
     const i18n = {
       de: {
@@ -746,7 +710,6 @@
       inviteCodes: [
         { name: 'Familie', code: 'FIT-FAMILIE-7821' }
       ],
-      geminiApiKey: '',
       goals: {
         kcal: 1900,
         protein: 140,
@@ -785,11 +748,9 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    // --- AUTOMATISCHER TAGESWECHSEL UM MITTERNACHT ---
     function checkAutomaticDailyReset() {
       const todayKey = getTodayDateKey();
       if (state.lastActiveDate && state.lastActiveDate !== todayKey) {
-        // Falls am Vortag Mahlzeiten geloggt wurden, im Archiv sichern
         if (state.todayLog && state.todayLog.length > 0) {
           const totalKcal = state.todayLog.reduce((sum, item) => sum + item.kcal, 0);
           const totalP = Math.round(state.todayLog.reduce((sum, item) => sum + item.p, 0));
@@ -799,9 +760,8 @@
             protein: totalP,
             goal: state.goals.kcal
           });
-          state.pastDaysLog = state.pastDaysLog.slice(0, 7); // Letzte 7 Tage behalten
+          state.pastDaysLog = state.pastDaysLog.slice(0, 7);
         }
-        // Heutigen Zähler frisch auf 0 setzen
         state.todayLog = [];
         state.waterLiters = 0;
         state.lastActiveDate = todayKey;
@@ -869,7 +829,6 @@
       document.getElementById('btnClearWeights').textContent = t('btnClearWeights');
     }
 
-    // --- ZUGANGSSCHUTZ & EINLADUNGSCODES MIT VOLLSTÄNDIGEM GITHUB-LINK ---
     function generateDeterministicCode(name) {
       const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'GAST';
       let hash = 2026;
@@ -1008,7 +967,6 @@
       `).join('');
     }
 
-    // --- PRÄZISER ZWEISPRACHIGER ESSENS-PARSER (OHNE WORTTEIL-VERWECHSLUNG!) ---
     const localFoodDB = [
       { keys: ['lasagne', 'lasania', 'lasagne bolognese'], nameDe: 'Portion Lasagne (~350g)', namePl: 'Porcja Lasagne (~350g)', kcal: 540, p: 28, c: 44, f: 27, icon: '🍝' },
       { keys: ['auflauf', 'nudelauflauf', 'kartoffelauflauf', 'zapiekanka'], nameDe: 'Portion Auflauf (~320g)', namePl: 'Porcja zapiekanki (~320g)', kcal: 490, p: 22, c: 46, f: 23, icon: '🥘' },
@@ -1058,7 +1016,6 @@
 
       localFoodDB.forEach(item => {
         for (const key of item.keys) {
-          // WICHTIG: Strikte Wortgrenzen ((?:^|[^\p{L}])) verhindern, dass "ei" in "eine", "Fleisch" oder "klein" als Ei gezählt wird!
           const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|halbes|jeden|jedna|dwa|dwie|trzy|cztery|pół)\\s*(?:g|gramm|stück|szt|tassen|portion|portionen|porcja|porcje|teller)?\\s+)?(${escapedKey})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
           const match = lower.match(regex);
@@ -1096,7 +1053,6 @@
       return results;
     }
 
-    // --- FOTO-ANALYSE (AUTOMATISCH ODER MIT TEXT KOMBINIERT) ---
     function handlePhotoSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1105,10 +1061,7 @@
         selectedPhotoBase64 = e.target.result;
         document.getElementById('photoPreview').src = selectedPhotoBase64;
         document.getElementById('photoPreviewContainer').classList.remove('hidden');
-        // Wenn der Gemini-Key aktiv ist oder schon Text im Feld steht, direkt losrechnen
-        if ((state.geminiApiKey && state.geminiApiKey.startsWith('AIza')) || document.getElementById('naturalInput').value.trim().length > 0) {
-          analyzeInput();
-        }
+        analyzeInput();
       };
       reader.readAsDataURL(file);
     }
@@ -1132,30 +1085,8 @@
       btn.disabled = true;
 
       try {
-        if (state.geminiApiKey && state.geminiApiKey.startsWith('AIza')) {
-          const items = await callGeminiVisionAPI(text, selectedPhotoBase64);
-          openReviewCard(items);
-        } else {
-          let items = [];
-          if (text) {
-            items = parseNaturalText(text);
-          }
-          if (selectedPhotoBase64 && items.length === 0) {
-            items = [
-              {
-                name: state.lang === 'pl'
-                  ? 'Danie z talerza (ocena AI ~340g)'
-                  : 'Teller-Gericht (Portionsschätzung ~340g)',
-                kcal: 510,
-                p: 28,
-                c: 48,
-                f: 22,
-                icon: '📸'
-              }
-            ];
-          }
-          openReviewCard(items);
-        }
+        const items = await callGeminiVisionAPI(text, selectedPhotoBase64);
+        openReviewCard(items);
       } catch (err) {
         const fallback = parseNaturalText(text || (state.lang === 'pl' ? 'Posiłek ze zdjęcia (~320g)' : 'Foto-Mahlzeit (~320g)'));
         openReviewCard(fallback);
@@ -1193,7 +1124,7 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
         }
       }
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.geminiApiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GLOBAL_GEMINI_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts }] })
@@ -1205,7 +1136,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       return JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
     }
 
-    // --- VORSCHAU-KARTE MIT EINZEL-LÖSCHFUNKTION ---
     function openReviewCard(items) {
       pendingDetectedItems = items;
       currentPortionScale = 1.0;
@@ -1295,7 +1225,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       showUndoToast(addedNames.join(', '));
     }
 
-    // --- QUICK-ADD & SOFORT-RÜCKGÄNGIG (UNDO) ---
     function quickAdd(name, kcal, p, c, f, icon) {
       const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
       state.todayLog.unshift({ name, kcal, p, c, f, icon, time: timeStr });
@@ -1350,7 +1279,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       }
     }
 
-    // --- DYNAMISCHE ESSENS-VORSCHLÄGE BASIEREND AUF REST-KALORIEN ---
     function getMealSuggestionsForRemaining(remainingKcal) {
       const isPl = state.lang === 'pl';
 
@@ -1497,7 +1425,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       renderAll();
     }
 
-    // --- GEWICHT & ZIELE ---
     function addWeightEntry() {
       const val = parseFloat(document.getElementById('weightInput').value);
       if (isNaN(val) || val < 40 || val > 250) return;
@@ -1565,13 +1492,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       alert(`Neues Tagesziel gespeichert: ${recommendedKcal} kcal (${state.goals.protein}g Eiweiß).`);
     }
 
-    function saveGeminiKey() {
-      state.geminiApiKey = document.getElementById('geminiKeyInput').value.trim();
-      saveState();
-      renderAll();
-      alert('Gemini API-Key gespeichert!');
-    }
-
     function saveManualGoals() {
       const kcal = parseInt(document.getElementById('manualKcalGoal').value, 10);
       const prot = parseInt(document.getElementById('manualProteinGoal').value, 10);
@@ -1582,7 +1502,6 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       alert('Gespeichert!');
     }
 
-    // --- UI RENDERING ---
     function switchTab(tabName) {
       ['cockpit', 'weight', 'access'].forEach(tab => {
         document.getElementById('tab-' + tab).classList.toggle('hidden', tab !== tabName);
@@ -1815,18 +1734,13 @@ Zusatz-Notiz vom Nutzer: "${text || 'Automatische Foto-Portionsschätzung'}"`
       }
 
       document.getElementById('masterCodeSetting').value = state.masterCode;
-      document.getElementById('geminiKeyInput').value = state.geminiApiKey;
       document.getElementById('manualKcalGoal').value = state.goals.kcal;
       document.getElementById('manualProteinGoal').value = state.goals.protein;
-      document.getElementById('aiModeStatus').textContent = state.geminiApiKey
-        ? 'Gemini Vision KI aktiv'
-        : 'Smart-Auto Modus (Key fehlt)';
 
       renderInviteCodes();
       renderWeightTab();
     }
 
-    // Automatischer Tages-Check auch wenn die App aus dem Hintergrund geholt wird
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && state.unlocked) {
         renderAll();
