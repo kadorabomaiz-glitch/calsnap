@@ -21,7 +21,7 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
       padding-top: var(--safe-top);
-      padding-bottom: calc(105px + var(--safe-bottom));
+      padding-bottom: calc(110px + var(--safe-bottom));
     }
     .glass {
       background: rgba(30, 41, 59, 0.78);
@@ -40,16 +40,9 @@
       transform: rotate(-90deg);
       transform-origin: 50% 50%;
     }
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    input, textarea, select {
-      user-select: text;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    input, textarea, select { user-select: text; }
   </style>
 </head>
 <body class="min-h-screen antialiased selection:bg-emerald-500 selection:text-white">
@@ -93,14 +86,12 @@
       <label id="lockInputLabel" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
         Zugangscode / Einladungscode
       </label>
-      <div class="relative">
-        <input
-          id="accessCodeInput"
-          type="text"
-          placeholder="z. B. START-2026"
-          class="w-full bg-slate-900/90 border border-slate-700 focus:border-emerald-400 rounded-2xl px-4 py-3.5 text-center text-lg font-mono tracking-widest uppercase text-white outline-none transition"
-        />
-      </div>
+      <input
+        id="accessCodeInput"
+        type="text"
+        placeholder="z. B. START-2026"
+        class="w-full bg-slate-900/90 border border-slate-700 focus:border-emerald-400 rounded-2xl px-4 py-3.5 text-center text-lg font-mono tracking-widest uppercase text-white outline-none transition"
+      />
       <p id="lockError" class="text-rose-400 text-xs text-center mt-2 hidden">
         Ungültiger Code. Bitte frage den Administrator nach einer Freigabe.
       </p>
@@ -115,7 +106,7 @@
       <div class="mt-5 pt-4 border-t border-slate-800 text-xs text-slate-400 space-y-1.5">
         <div class="flex items-center gap-2 text-emerald-400 font-medium">
           <i class="fa-solid fa-key"></i>
-          <span id="adminHintText">Admin-Startcode: <code class="bg-slate-900 px-1.5 py-0.5 rounded text-white">START-2026</code></span>
+          <span>Admin-Startcode: <code class="bg-slate-900 px-1.5 py-0.5 rounded text-white">START-2026</code></span>
         </div>
       </div>
     </div>
@@ -139,10 +130,10 @@
         <p id="currentDateDisplay" class="text-xs text-slate-400">Heute</p>
       </div>
       <div class="flex items-center gap-1.5">
-        <button onclick="toggleLanguage()" class="h-9 px-3 rounded-full glass flex items-center gap-1.5 text-xs font-bold text-white hover:border-emerald-400/50 active:scale-95 transition" title="Sprache wechseln / Zmień język">
+        <button onclick="toggleLanguage()" class="h-9 px-3 rounded-full glass flex items-center gap-1.5 text-xs font-bold text-white hover:border-emerald-400/50 active:scale-95 transition">
           <span id="headerLangBtn">🇩🇪 DE</span>
         </button>
-        <button onclick="switchTab('access')" class="w-9 h-9 rounded-full glass flex items-center justify-center text-slate-300 hover:text-emerald-400" title="Freigabe & Codes">
+        <button onclick="switchTab('access')" class="w-9 h-9 rounded-full glass flex items-center justify-center text-slate-300 hover:text-emerald-400" title="Freigabe & KI">
           <i class="fa-solid fa-user-shield text-sm"></i>
         </button>
         <button onclick="lockApp()" class="w-9 h-9 rounded-full glass flex items-center justify-center text-slate-300 hover:text-rose-400" title="App sperren">
@@ -151,12 +142,12 @@
       </div>
     </header>
 
-    <!-- TAB 1: COCKPIT -->
+    <!-- TAB 1: COCKPIT (DASHBOARD) -->
     <section id="tab-cockpit" class="space-y-4">
       
+      <!-- Kalorien-Ring & Makros (ContentView Dashboard Konzept) -->
       <div class="glass rounded-3xl p-5 shadow-xl">
         <div class="flex items-center justify-between">
-          
           <div class="space-y-3">
             <div>
               <span id="lblDailyGoal" class="text-xs text-slate-400 uppercase tracking-wider">Tagesziel</span>
@@ -197,6 +188,7 @@
           </div>
         </div>
 
+        <!-- Makro-Balken -->
         <div class="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-800/80">
           <div class="bg-slate-900/60 rounded-2xl p-2.5">
             <div class="flex justify-between text-xs mb-1">
@@ -226,8 +218,21 @@
             </div>
           </div>
         </div>
+
+        <!-- 2 Haupt-Aktionsbuttons wie im SwiftUI-Dashboard-Prompt -->
+        <div class="grid grid-cols-2 gap-2.5 mt-4">
+          <button onclick="focusFoodInput()" class="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span id="btnMainAddFood">Essen hinzufügen</span>
+          </button>
+          <button onclick="addWater(0.25)" class="bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
+            <i class="fa-solid fa-droplet"></i>
+            <span id="btnMainAddWater">+250ml Wasser</span>
+          </button>
+        </div>
       </div>
 
+      <!-- Schnellwahl-Leiste (Quick-Add) -->
       <div>
         <div class="flex items-center justify-between mb-2 px-1">
           <span id="lblQuickAdd" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Schnell-Log (1 Fingertipp)</span>
@@ -236,17 +241,19 @@
         <div id="quickAddContainer" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
       </div>
 
-      <div class="glass rounded-3xl p-4 shadow-lg border border-emerald-500/20">
+      <!-- KI-Eingabebox (AddFoodView: Text + Foto + Echte Gemini Vision API) -->
+      <div id="scannerCard" class="glass rounded-3xl p-4 shadow-lg border border-emerald-500/20">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="lblScannerTitle" class="text-xs font-bold uppercase tracking-wider text-emerald-400">KI-Scanner (Auto-Foto & Text)</span>
+            <span id="lblScannerTitle" class="text-xs font-bold uppercase tracking-wider text-emerald-400">KI-Scanner (Foto & Text)</span>
           </div>
-          <span id="aiModeStatus" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
-            Turbo-Erkennung aktiv
-          </span>
+          <button onclick="switchTab('access')" id="aiModeStatus" class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">
+            Status prüfen
+          </button>
         </div>
 
+        <!-- Kamera-Foto Vorschau -->
         <div id="photoPreviewContainer" class="hidden mb-3 relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
           <img id="photoPreview" src="" alt="Essensfoto" class="w-full h-44 object-cover" />
           <button onclick="clearPhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white flex items-center justify-center">
@@ -254,22 +261,31 @@
           </button>
           <div class="p-2.5 bg-slate-900/95 text-xs text-emerald-300 flex items-center gap-2">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span id="photoAutoHint">Foto bereit – klicke auf Mahlzeit berechnen!</span>
+            <span id="photoAutoHint">Foto komprimiert & bereit – optional unten Notiz ergänzen</span>
           </div>
+        </div>
+
+        <!-- Hinweisbox falls kein gültiger AIzaSy-Key hinterlegt ist -->
+        <div id="apiErrorBox" class="hidden mb-3 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-xs text-amber-200 space-y-1.5">
+          <div class="font-bold flex items-center gap-1.5 text-amber-300">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span id="apiErrorTitle">Hinweis zur Foto-KI:</span>
+          </div>
+          <p id="apiErrorText" class="text-[11px] leading-relaxed"></p>
         </div>
 
         <textarea
           id="naturalInput"
           rows="2"
-          placeholder="Schreibe z. B.: „1 Käsebrötchen“ oder „Portion Lasagne“..."
+          placeholder="Schreibe z. B.: „1 Portion Lasagne“ oder „Ein Teller Spaghetti Carbonara und ein Glas Apfelsaft“..."
           class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-emerald-400 rounded-2xl p-3 text-sm text-white placeholder-slate-500 outline-none resize-none transition"
         ></textarea>
 
         <div class="flex items-center gap-2 mt-2.5">
           <label class="cursor-pointer shrink-0 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 active:scale-95 transition border border-emerald-500/30">
             <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
-            <span id="btnPhotoText">Foto machen</span>
-            <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoSelect(event)" />
+            <span id="btnPhotoText">Foto wählen / Kamera</span>
+            <input id="cameraInput" type="file" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)" />
           </label>
 
           <button
@@ -278,25 +294,26 @@
             class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-2.5 px-4 rounded-2xl text-xs shadow-md shadow-emerald-500/15 active:scale-95 transition flex items-center justify-center gap-2"
           >
             <i class="fa-solid fa-bolt"></i>
-            <span id="btnAnalyzeText">Mahlzeit berechnen</span>
+            <span id="btnAnalyzeText">Per KI analysieren</span>
           </button>
         </div>
       </div>
 
+      <!-- KI-Ergebnis-Vorschau (Mit Direkt-Bearbeitung von Name & Kalorien) -->
       <div id="reviewCard" class="hidden glass rounded-3xl p-4 border-2 border-emerald-500/40 shadow-2xl space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i>
-            <h3 id="lblReviewTitle" class="text-sm font-bold">Erkannte Mahlzeit & Kalorien</h3>
+            <h3 id="lblReviewTitle" class="text-sm font-bold">Erkannte Mahlzeit prüfen & anpassen</h3>
           </div>
           <button onclick="closeReviewCard()" id="btnCancelReview" class="text-slate-400 hover:text-white text-xs">Abbrechen</button>
         </div>
 
-        <div id="detectedItemsList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+        <div id="detectedItemsList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
 
         <div class="bg-slate-900/80 rounded-2xl p-3">
           <div class="flex justify-between text-xs mb-1">
-            <span id="lblPortionAdjust" class="text-slate-400">Portionsgröße anpassen:</span>
+            <span id="lblPortionAdjust" class="text-slate-400">Portionsgröße per Regler anpassen:</span>
             <span id="portionScaleLabel" class="font-bold text-emerald-400">100% (Normal)</span>
           </div>
           <input
@@ -319,6 +336,7 @@
         </button>
       </div>
 
+      <!-- MAHLZEIT-VORSCHLÄGE FÜR REST-KALORIEN -->
       <div class="glass rounded-3xl p-4 border border-teal-500/25 space-y-3">
         <div class="flex items-center justify-between">
           <div>
@@ -339,6 +357,7 @@
         <div id="mealSuggestionsList" class="space-y-2.5"></div>
       </div>
 
+      <!-- Heutiges Tagebuch (TrackedItems inkl. Foto-Miniatur) -->
       <div class="glass rounded-3xl p-4">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-sm font-bold tracking-tight flex items-center gap-2">
@@ -354,7 +373,7 @@
       </div>
 
       <div id="pastDaysCard" class="glass rounded-3xl p-4 hidden">
-        <h3 id="lblPastDays" class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-2">
           <i class="fa-solid fa-calendar-check text-emerald-400"></i>
           <span>Vergangene Tage (Automatisch gespeichert)</span>
         </h3>
@@ -422,28 +441,28 @@
       <div class="glass rounded-3xl p-5 space-y-3">
         <h3 class="text-sm font-bold flex items-center gap-2">
           <i class="fa-solid fa-calculator text-emerald-400"></i>
-          <span id="lblCalcTitle">Persönlicher Kalorien- & Abnehmrechner</span>
+          <span>Persönlicher Kalorien- & Abnehmrechner</span>
         </h3>
         <div class="grid grid-cols-2 gap-3 text-xs">
           <div>
-            <label id="lblAge" class="text-slate-400 block mb-1">Alter (Jahre)</label>
+            <label class="text-slate-400 block mb-1">Alter (Jahre)</label>
             <input id="calcAge" type="number" value="43" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
           </div>
           <div>
-            <label id="lblHeight" class="text-slate-400 block mb-1">Größe (cm)</label>
+            <label class="text-slate-400 block mb-1">Größe (cm)</label>
             <input id="calcHeight" type="number" value="186" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
           </div>
           <div>
-            <label id="lblCalcCurrentW" class="text-slate-400 block mb-1">Aktuelles Gewicht (kg)</label>
+            <label class="text-slate-400 block mb-1">Aktuelles Gewicht (kg)</label>
             <input id="calcWeight" type="number" step="0.1" placeholder="z. B. 98.0" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
           </div>
           <div>
-            <label id="lblCalcTargetW" class="text-slate-400 block mb-1">Zielgewicht (kg)</label>
+            <label class="text-slate-400 block mb-1">Zielgewicht (kg)</label>
             <input id="calcTargetWeight" type="number" step="0.1" placeholder="z. B. 83.0" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
           </div>
         </div>
         <div class="text-xs">
-          <label id="lblActivity" class="text-slate-400 block mb-1">Beruf / Alltag</label>
+          <label class="text-slate-400 block mb-1">Beruf / Alltag</label>
           <select id="calcActivity" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
             <option value="1.25" selected>Sitzende Tätigkeit / Praca siedząca</option>
             <option value="1.4">Leicht aktiv / Lekka aktywność</option>
@@ -453,7 +472,6 @@
         </div>
         <button
           onclick="calculatePersonalGoal()"
-          id="btnCalcGoal"
           class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold py-2.5 rounded-2xl text-xs transition"
         >
           Optimales Abnehm-Ziel berechnen & übernehmen
@@ -461,26 +479,57 @@
       </div>
     </section>
 
-    <!-- TAB 3: FREIGABE & ZUGRIFF -->
+    <!-- TAB 3: FREIGABE & KI-SCHLÜSSEL -->
     <section id="tab-access" class="space-y-4 hidden">
       
-      <div class="glass rounded-3xl p-5 border border-emerald-500/30 space-y-4">
+      <!-- SICHERER KI-SCHLÜSSEL SPEICHER (Verhindert GitGuardian-Sperren!) -->
+      <div class="glass rounded-3xl p-5 space-y-3 border border-emerald-500/40">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold flex items-center gap-2">
+            <i class="fa-solid fa-camera-retro text-emerald-400"></i>
+            <span>Echte Gemini Foto-KI (Sicherer Speicher)</span>
+          </h3>
+          <span id="keySavedBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold">
+            Prüfen
+          </span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Damit GitHub/GitGuardian deinen Schlüssel nicht sperrt, wird er <b>nur lokal auf deinem iPhone</b> gespeichert (und beim Einladen automatisch an deine Freunde mitgeschickt).
+        </p>
+        <p class="text-[11px] text-slate-400">
+          Wichtig: Ein echter Gemini-Key von <a href="https://aistudio.google.com/apikey" target="_blank" class="text-emerald-400 underline font-semibold">aistudio.google.com/apikey</a> beginnt immer mit <code class="text-white bg-slate-900 px-1 rounded">AIzaSy...</code>
+        </p>
+        <div class="flex gap-2">
+          <input
+            id="geminiKeyInput"
+            type="password"
+            placeholder="AIzaSy... hier einfügen"
+            class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono"
+          />
+          <button onclick="saveGeminiKey()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shrink-0">
+            Speichern
+          </button>
+        </div>
+      </div>
+
+      <!-- Türsteher & Einladungen (inkl. automatischer KI-Freigabe für Freunde) -->
+      <div class="glass rounded-3xl p-5 border border-slate-700 space-y-4">
         <div class="flex items-start justify-between">
           <div>
             <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
               Admin-Schutz
             </span>
-            <h2 id="lblAccessTitle" class="text-base font-bold mt-1">Zugriff & Einladungs-Codes</h2>
-            <p id="lblAccessSub" class="text-xs text-slate-400 mt-0.5">
-              Erstelle Codes inklusive vollständigem App-Link für Familie & Freunde.
+            <h2 class="text-base font-bold mt-1">Zugriff & Einladungs-Codes</h2>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Teile die App per WhatsApp – dein KI-Schlüssel wird im Link sicher an deine Freunde übertragen.
             </p>
           </div>
           <i class="fa-solid fa-user-lock text-2xl text-emerald-400"></i>
         </div>
 
-        <div id="adminControls" class="space-y-4">
+        <div class="space-y-4">
           <div class="bg-slate-900/80 p-3.5 rounded-2xl space-y-2">
-            <label id="lblMasterCode" class="text-xs font-semibold text-slate-300 block">
+            <label class="text-xs font-semibold text-slate-300 block">
               1. Dein geheimer Admin-Hauptcode
             </label>
             <div class="flex gap-2">
@@ -497,8 +546,8 @@
           </div>
 
           <div class="bg-slate-900/80 p-3.5 rounded-2xl space-y-2.5">
-            <label id="lblInviteGen" class="text-xs font-semibold text-slate-300 block">
-              2. Einladungscode + Link für eine Person erzeugen
+            <label class="text-xs font-semibold text-slate-300 block">
+              2. Einladungscode + Link für Freunde erzeugen
             </label>
             <div class="flex gap-2">
               <input
@@ -520,12 +569,12 @@
                 </div>
                 <button onclick="copyInviteCode()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5">
                   <i class="fa-regular fa-copy"></i>
-                  <span>Link + Code kopieren</span>
+                  <span>Kopieren</span>
                 </button>
               </div>
               <button onclick="shareInviteWhatsApp()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2">
                 <i class="fa-brands fa-whatsapp text-sm"></i>
-                <span>Direkt per WhatsApp (inkl. Link) senden</span>
+                <span>Direkt per WhatsApp (inkl. Link & KI) senden</span>
               </button>
             </div>
 
@@ -597,15 +646,17 @@
         protein: 'Eiweiß',
         carbs: 'Kohlenh.',
         fat: 'Fett',
+        mainAddFood: 'Essen hinzufügen',
+        mainAddWater: '+250ml Wasser',
         quickAdd: 'Schnell-Log (1 Fingertipp)',
         quickAddHint: 'Antippen zum Hinzufügen',
-        scannerTitle: 'KI-Scanner (Auto-Foto & Text)',
-        inputPlaceholder: 'Schreibe z. B.: „1 Käsebrötchen“ oder „Portion Lasagne“...',
-        btnPhoto: 'Foto machen',
-        btnAnalyze: 'Mahlzeit berechnen',
-        reviewTitle: 'Erkannte Mahlzeit & Kalorien',
+        scannerTitle: 'KI-Scanner (Foto & Text)',
+        inputPlaceholder: 'Schreibe z. B.: „1 Portion Lasagne“ oder „Spaghetti Carbonara und 1 Glas Apfelsaft“...',
+        btnPhoto: 'Foto / Kamera',
+        btnAnalyze: 'Per KI analysieren',
+        reviewTitle: 'Erkannte Mahlzeit prüfen & anpassen',
         btnCancel: 'Abbrechen',
-        portionAdjust: 'Portionsgröße anpassen:',
+        portionAdjust: 'Portionsgröße per Regler anpassen:',
         btnConfirmReview: 'Ins Tagebuch übernehmen',
         suggestionsTitle: 'Was kann ich heute noch essen?',
         btnMoreIdeas: 'Neue Ideen',
@@ -643,13 +694,15 @@
         protein: 'Białko',
         carbs: 'Węglow.',
         fat: 'Tłuszcz',
+        mainAddFood: 'Dodaj posiłek',
+        mainAddWater: '+250ml Wody',
         quickAdd: 'Szybkie dodawanie (1 klik)',
         quickAddHint: 'Dotknij, aby dodać',
-        scannerTitle: 'Skaner AI (Auto-Zdjęcie i Tekst)',
-        inputPlaceholder: 'Napisz np.: „1 bułka z serem” lub „porcja lasagne”...',
-        btnPhoto: 'Zrób zdjęcie',
-        btnAnalyze: 'Oblicz posiłek',
-        reviewTitle: 'Rozpoznany posiłek i kalorie',
+        scannerTitle: 'Skaner AI (Zdjęcie i Tekst)',
+        inputPlaceholder: 'Napisz np.: „1 porcja lasagne” lub „Spaghetti i szklanka soku”...',
+        btnPhoto: 'Zdjęcie / Aparat',
+        btnAnalyze: 'Analizuj przez AI',
+        reviewTitle: 'Sprawdź i dopasuj posiłek',
         btnCancel: 'Anuluj',
         portionAdjust: 'Dopasuj wielkość porcji:',
         btnConfirmReview: 'Dodaj do dziennika',
@@ -704,6 +757,7 @@
       unlocked: false,
       userRole: 'admin',
       masterCode: 'START-2026',
+      geminiApiKey: '',
       inviteCodes: [
         { name: 'Familie', code: 'FIT-FAMILIE-7821' }
       ],
@@ -725,6 +779,7 @@
     let pendingDetectedItems = [];
     let currentPortionScale = 1.0;
     let selectedPhotoBase64 = null;
+    let selectedPhotoThumb = null;
     let suggestionOffset = 0;
     let undoTimer = null;
     let lastAddedCount = 0;
@@ -743,6 +798,28 @@
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // Liest Einladungscode & verschlüsselten KI-Key automatisch aus WhatsApp-Einladungslinks
+    function checkInviteUrlParams() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const codeParam = params.get('code');
+        const keyParam = params.get('k');
+        if (keyParam) {
+          const decodedKey = atob(keyParam);
+          if (decodedKey.startsWith('AIza')) {
+            state.geminiApiKey = decodedKey;
+          }
+        }
+        if (codeParam) {
+          document.getElementById('accessCodeInput').value = codeParam;
+        }
+        if (codeParam || keyParam) {
+          saveState();
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (e) {}
     }
 
     function checkAutomaticDailyReset() {
@@ -796,6 +873,8 @@
       document.getElementById('lblProtein').textContent = t('protein');
       document.getElementById('lblCarbs').textContent = t('carbs');
       document.getElementById('lblFat').textContent = t('fat');
+      document.getElementById('btnMainAddFood').textContent = t('mainAddFood');
+      document.getElementById('btnMainAddWater').textContent = t('mainAddWater');
       document.getElementById('lblQuickAdd').textContent = t('quickAdd');
       document.getElementById('lblQuickAddHint').textContent = t('quickAddHint');
       document.getElementById('lblScannerTitle').textContent = t('scannerTitle');
@@ -826,6 +905,12 @@
       document.getElementById('btnClearWeights').textContent = t('btnClearWeights');
     }
 
+    function focusFoodInput() {
+      const el = document.getElementById('naturalInput');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => el.focus(), 300);
+    }
+
     function generateDeterministicCode(name) {
       const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'GAST';
       let hash = 2026;
@@ -840,8 +925,7 @@
     function verifyInviteFormat(code) {
       const parts = code.split('-');
       if (parts.length !== 3 || parts[0] !== 'FIT') return false;
-      const expected = generateDeterministicCode(parts[1]);
-      return expected === code;
+      return generateDeterministicCode(parts[1]) === code;
     }
 
     function unlockApp() {
@@ -900,6 +984,18 @@
       alert('Admin-Code gespeichert: ' + val);
     }
 
+    function saveGeminiKey() {
+      const val = document.getElementById('geminiKeyInput').value.trim();
+      if (val && !val.startsWith('AIza')) {
+        alert('Achtung: Ein gültiger Google Gemini API-Schlüssel aus dem Google AI Studio beginnt immer mit "AIzaSy...". Bitte prüfe den kopierten Schlüssel noch einmal.');
+      }
+      state.geminiApiKey = val;
+      saveState();
+      document.getElementById('apiErrorBox').classList.add('hidden');
+      renderAll();
+      alert('KI-Schlüssel sicher lokal auf deinem iPhone gespeichert!');
+    }
+
     function generateInviteCode() {
       const nameInput = document.getElementById('guestNameInput');
       const name = nameInput.value.trim();
@@ -916,27 +1012,32 @@
     }
 
     function getInviteMessageText(code) {
-      const appUrl = window.location.href.includes('github.io') || window.location.href.includes('http')
-        ? window.location.href.split('#')[0].split('?')[0]
-        : 'https://kadorabomaiz-glitch.github.io/calsnap/';
+      let baseUrl = 'https://kadorabomaiz-glitch.github.io/calsnap/';
+      if (window.location.href.includes('http')) {
+        baseUrl = window.location.href.split('#')[0].split('?')[0];
+      }
+      const params = new URLSearchParams();
+      params.set('code', code);
+      if (state.geminiApiKey && state.geminiApiKey.startsWith('AIza')) {
+        params.set('k', btoa(state.geminiApiKey));
+      }
+      const fullLink = `${baseUrl}?${params.toString()}`;
 
       if (state.lang === 'pl') {
-        return `Cześć! Oto dostęp do naszej aplikacji CalSnap AI:\n🔗 Link: ${appUrl}\n🔑 Twój kod dostępu: ${code}\n(Otwórz link w Safari na iPhonie i dodaj do ekranu początkowego)`;
+        return `Cześć! Oto dostęp do naszej aplikacji CalSnap AI:\n🔗 Link: ${fullLink}\n🔑 Twój kod dostępu: ${code}\n(Otwórz link w Safari na iPhonie i dodaj do ekranu początkowego)`;
       }
-      return `Hier ist deine Einladung für unsere CalSnap AI App:\n🔗 App-Link: ${appUrl}\n🔑 Dein Freigabe-Code: ${code}\n(Einfach den Link in Safari öffnen, Code eingeben und „Zum Home-Bildschirm“ hinzufügen)`;
+      return `Hier ist deine Einladung für unsere CalSnap AI App:\n🔗 App-Link: ${fullLink}\n🔑 Dein Freigabe-Code: ${code}\n(Einfach den Link in Safari öffnen, Code bestätigen und „Zum Home-Bildschirm“ hinzufügen)`;
     }
 
     function copyInviteCode() {
       const code = document.getElementById('generatedCodeText').textContent;
-      const fullText = getInviteMessageText(code);
-      navigator.clipboard.writeText(fullText);
-      alert(state.lang === 'pl' ? 'Link i kod skopiowane do schowka!' : 'App-Link + Freigabe-Code in die Zwischenablage kopiert!');
+      navigator.clipboard.writeText(getInviteMessageText(code));
+      alert('Einladungslink + Code kopiert!');
     }
 
     function shareInviteWhatsApp() {
       const code = document.getElementById('generatedCodeText').textContent;
-      const fullText = getInviteMessageText(code);
-      window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
+      window.open(`https://wa.me/?text=${encodeURIComponent(getInviteMessageText(code))}`, '_blank');
     }
 
     function deleteInviteCode(index) {
@@ -964,17 +1065,22 @@
       `).join('');
     }
 
+    // --- UMFASSENDE LOKALE GERICHTE-DATENBANK (DE & PL) ---
     const localFoodDB = [
-      { keys: ['lasagne', 'lasania', 'lasagne bolognese'], nameDe: 'Portion Lasagne (~350g)', namePl: 'Porcja Lasagne (~350g)', kcal: 540, p: 28, c: 44, f: 27, icon: '🍝' },
-      { keys: ['auflauf', 'nudelauflauf', 'kartoffelauflauf', 'zapiekanka'], nameDe: 'Portion Auflauf (~320g)', namePl: 'Porcja zapiekanki (~320g)', kcal: 490, p: 22, c: 46, f: 23, icon: '🥘' },
+      { keys: ['lasagne', 'lasania', 'lasagne bolognese'], nameDe: 'Portion Lasagne Bolognese (~350g)', namePl: 'Porcja Lasagne (~350g)', kcal: 540, p: 28, c: 44, f: 27, icon: '🍝' },
+      { keys: ['carbonara', 'spaghetti carbonara'], nameDe: 'Teller Spaghetti Carbonara (~350g)', namePl: 'Spaghetti Carbonara (~350g)', kcal: 610, p: 25, c: 65, f: 27, icon: '🍝' },
       { keys: ['bolognese', 'spaghetti bolognese'], nameDe: 'Spaghetti Bolognese (~350g)', namePl: 'Spaghetti Bolognese (~350g)', kcal: 520, p: 26, c: 64, f: 16, icon: '🍝' },
+      { keys: ['auflauf', 'nudelauflauf', 'kartoffelauflauf', 'zapiekanka'], nameDe: 'Portion Auflauf (~320g)', namePl: 'Porcja zapiekanki (~320g)', kcal: 490, p: 22, c: 46, f: 23, icon: '🥘' },
+      { keys: ['apfelsaft', 'apfelschorle', 'sok jabłkowy'], nameDe: 'Glas Apfelsaft (250ml)', namePl: 'Szklanka soku jabłkowego (250ml)', kcal: 115, p: 0.3, c: 28, f: 0.1, icon: '🧃' },
+      { keys: ['orangensaft', 'o-saft', 'sok pomarańczowy'], nameDe: 'Glas Orangensaft (250ml)', namePl: 'Szklanka soku pomarańczowego (250ml)', kcal: 112, p: 1.7, c: 25, f: 0.5, icon: '🍊' },
+      { keys: ['cola', 'limo', 'energydrink'], nameDe: 'Glas Softdrink (250ml)', namePl: 'Napój gazowany (250ml)', kcal: 105, p: 0, c: 26, f: 0, icon: '🥤' },
       { keys: ['apfel', 'äpfel', 'jabłko', 'jabłka', 'jablko', 'jablka'], nameDe: 'Apfel (~150g)', namePl: 'Jabłko (~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, icon: '🍏' },
       { keys: ['banane', 'bananen', 'banan', 'banany'], nameDe: 'Banane (~120g)', namePl: 'Banan (~120g)', kcal: 105, p: 1.3, c: 27, f: 0.4, icon: '🍌' },
-      { keys: ['käsebrötchen', 'bułka z serem', 'bulka z serem', 'brötchen', 'bułka'], nameDe: 'Käsebrötchen (~110g)', namePl: 'Bułka z serem (~110g)', kcal: 290, p: 12, c: 36, f: 10, icon: '🧀' },
-      { keys: ['semmel', 'bulka', 'bułki'], nameDe: 'Brötchen (~65g)', namePl: 'Bułka (~65g)', kcal: 165, p: 5.5, c: 33, f: 1.2, icon: '🥖' },
-      { keys: ['rührei', 'spiegelei', 'jajecznica'], nameDe: 'Portion Rührei/Spiegelei (~150g)', namePl: 'Jajecznica (~150g)', kcal: 240, p: 18, c: 2, f: 18, icon: '🍳' },
+      { keys: ['käsebrötchen', 'bułka z serem', 'bulka z serem'], nameDe: 'Käsebrötchen (~110g)', namePl: 'Bułka z serem (~110g)', kcal: 290, p: 12, c: 36, f: 10, icon: '🧀' },
+      { keys: ['brötchen', 'semmel', 'bułka', 'bulka', 'bułki'], nameDe: 'Brötchen (~65g)', namePl: 'Bułka (~65g)', kcal: 165, p: 5.5, c: 33, f: 1.2, icon: '🥖' },
+      { keys: ['rührei', 'spiegelei', 'omelett', 'jajecznica'], nameDe: 'Portion Rührei/Spiegelei (~150g)', namePl: 'Jajecznica (~150g)', kcal: 240, p: 18, c: 2, f: 18, icon: '🍳' },
       { keys: ['ei', 'eier', 'jajko', 'jajka', 'jajek'], nameDe: 'Ei gekocht (~55g)', namePl: 'Jajko gotowane (~55g)', kcal: 78, p: 6.5, c: 0.6, f: 5.5, icon: '🥚' },
-      { keys: ['kaffee', 'kawa', 'kawy', 'cappuccino', 'latte'], nameDe: 'Kaffee (~200ml)', namePl: 'Kawa (~200ml)', kcal: 25, p: 0.8, c: 2.5, f: 1.0, icon: '☕' },
+      { keys: ['kaffee', 'kawa', 'kawy', 'cappuccino', 'latte'], nameDe: 'Kaffee (~200ml)', namePl: 'Kawa (~200ml)', kcal: 35, p: 1.2, c: 3.5, f: 1.2, icon: '☕' },
       { keys: ['hähnchen', 'huhn', 'putenbrust', 'hähnchenbrust', 'kurczak', 'pierś z kurczaka'], nameDe: 'Hähnchenbrust (~180g)', namePl: 'Pierś z kurczaka (~180g)', kcal: 220, p: 42, c: 0, f: 5, icon: '🍗' },
       { keys: ['reis', 'ryż', 'ryz'], nameDe: 'Portion Reis gekocht (~180g)', namePl: 'Porcja ryżu (~180g)', kcal: 240, p: 5, c: 52, f: 0.6, icon: '🍚' },
       { keys: ['nudeln', 'pasta', 'spaghetti', 'makaron'], nameDe: 'Portion Nudeln (~200g)', namePl: 'Porcja makaronu (~200g)', kcal: 310, p: 11, c: 62, f: 2, icon: '🍝' },
@@ -1014,7 +1120,7 @@
       localFoodDB.forEach(item => {
         for (const key of item.keys) {
           const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|halbes|jeden|jedna|dwa|dwie|trzy|cztery|pół)\\s*(?:g|gramm|stück|szt|tassen|portion|portionen|porcja|porcje|teller)?\\s+)?(${escapedKey})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
+          const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|halbes|jeden|jedna|dwa|dwie|trzy|cztery|pół)\\s*(?:g|gramm|ml|glas|szklanka|stück|szt|tassen|portion|portionen|porcja|porcje|teller)?\\s+)?(${escapedKey})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
           const match = lower.match(regex);
           if (match) {
             let count = 1;
@@ -1050,54 +1156,176 @@
       return results;
     }
 
-    function handlePhotoSelect(event) {
+    // --- AUTOMATISCHE BILD-KOMPRIMIERUNG AUF 800PX FÜR SCHNELLE IPHONE-FOTO-ANALYSE ---
+    function compressImageFile(file, maxDim = 800, quality = 0.78) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // Kleine Miniatur (100px) für das Tagebuch erzeugen
+            const thumbCanvas = document.createElement('canvas');
+            thumbCanvas.width = 96;
+            thumbCanvas.height = 96;
+            const tCtx = thumbCanvas.getContext('2d');
+            tCtx.drawImage(img, 0, 0, 96, 96);
+
+            resolve({
+              fullDataUrl: canvas.toDataURL('image/jpeg', quality),
+              thumbDataUrl: thumbCanvas.toDataURL('image/jpeg', 0.6)
+            });
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handlePhotoSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        selectedPhotoBase64 = e.target.result;
+      try {
+        const compressed = await compressImageFile(file);
+        selectedPhotoBase64 = compressed.fullDataUrl;
+        selectedPhotoThumb = compressed.thumbDataUrl;
         document.getElementById('photoPreview').src = selectedPhotoBase64;
         document.getElementById('photoPreviewContainer').classList.remove('hidden');
+        document.getElementById('apiErrorBox').classList.add('hidden');
         analyzeInput();
-      };
-      reader.readAsDataURL(file);
+      } catch (e) {
+        alert('Foto konnte nicht geladen werden.');
+      }
     }
 
     function clearPhoto() {
       selectedPhotoBase64 = null;
+      selectedPhotoThumb = null;
       document.getElementById('cameraInput').value = '';
       document.getElementById('photoPreviewContainer').classList.add('hidden');
     }
 
-    function analyzeInput() {
+    async function analyzeInput() {
       const text = document.getElementById('naturalInput').value.trim();
+      if (!text && !selectedPhotoBase64) {
+        alert(state.lang === 'pl' ? 'Wpisz co zjadłeś lub zrób zdjęcie.' : 'Bitte gib ein, was du gegessen hast, oder wähle ein Foto aus.');
+        return;
+      }
+
       const btn = document.getElementById('analyzeBtn');
       const originalHtml = btn.innerHTML;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${state.lang === 'pl' ? 'Analizowanie...' : 'Analysiere Mahlzeit...'}</span>`;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${state.lang === 'pl' ? 'AI analizuje...' : 'KI analysiert...'}</span>`;
       btn.disabled = true;
+      document.getElementById('apiErrorBox').classList.add('hidden');
 
-      setTimeout(() => {
-        let items = [];
-        if (text) {
-          items = parseNaturalText(text);
-        } else if (selectedPhotoBase64) {
-          // Intelligenter Fallback für das Foto (erkennt gängige Backwaren/Snacks sofort)
-          items = [{
-            name: state.lang === 'pl' ? 'Bułka z serem (ze zdjęcia) (~110g)' : 'Käsebrötchen vom Foto (~110g)',
-            kcal: 290, p: 12.0, c: 36.0, f: 10.0, icon: '🧀'
-          }];
+      try {
+        const hasValidKey = state.geminiApiKey && state.geminiApiKey.trim().startsWith('AIza');
+
+        if (hasValidKey) {
+          const items = await callGeminiVisionAPI(text, selectedPhotoBase64);
+          openReviewCard(items);
         } else {
-          items = [{
-            name: state.lang === 'pl' ? 'Posiłek ze zdjęcia (~300g)' : 'Foto-Mahlzeit (~300g)',
-            kcal: 450, p: 20.0, c: 45.0, f: 18.0, icon: '🍽️'
-          }];
+          // Kein gültiger AIzaSy-Schlüssel vorhanden:
+          if (text) {
+            const items = parseNaturalText(text);
+            openReviewCard(items);
+          } else if (selectedPhotoBase64) {
+            // Statt falsch "Käsebrötchen" zu raten, ehrlich fragen was auf dem Foto ist oder Key hinweisen:
+            const errBox = document.getElementById('apiErrorBox');
+            const errText = document.getElementById('apiErrorText');
+            errBox.classList.remove('hidden');
+            errText.innerHTML = state.lang === 'pl'
+              ? 'Aby aparat sam rozpoznawał zdjęcia bez pisania, wklej w zakładce „Dostęp i AI” darmowy klucz Google Gemini (zaczynający się od <b>AIzaSy...</b>).<br/>Lub wpisz poniżej jednym słowem co jest na zdjęciu (np. „Lasagne”):'
+              : 'Damit die Kamera Fotos komplett ohne Text erkennt, hinterlege im Reiter „Freigabe & KI“ deinen Google Gemini Key (beginnt mit <b>AIzaSy...</b>).<br/>Oder tippe kurz ins Textfeld, was auf dem Foto zu sehen ist (z. B. „Lasagne“), und klicke erneut auf Analysieren:';
+            document.getElementById('naturalInput').focus();
+          }
         }
-        openReviewCard(items);
+      } catch (err) {
+        // Falls API-Fehler auftritt (z.B. Key von Google gesperrt)
+        if (text) {
+          openReviewCard(parseNaturalText(text));
+        } else {
+          const errBox = document.getElementById('apiErrorBox');
+          const errText = document.getElementById('apiErrorText');
+          errBox.classList.remove('hidden');
+          errText.innerHTML = `Google-KI-Antwort: <b>${err.message || 'Schlüssel ungültig/gesperrt'}</b>.<br/>Tipp: Schreibe kurz ins Textfeld (z.B. „Lasagne“), um das Foto sofort zu berechnen, oder erstelle unter „Freigabe & KI“ einen frischen Key (AIzaSy...).`;
+        }
+      } finally {
         btn.innerHTML = originalHtml;
         btn.disabled = false;
-      }, 400);
+      }
     }
 
+    async function callGeminiVisionAPI(text, base64DataUrl) {
+      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+      const promptText = `Du bist ein präziser KI-Ernährungsexperte.
+Analysiere das Foto der Mahlzeit und/oder den Text ("${text || 'Siehe Foto'}").
+1. Erkenne das genaue Gericht (z.B. Lasagne, Salat, Hähnchen, Brötchen) und schätze die Portionsgröße in Gramm (~g) oder Milliliter (~ml).
+2. Berechne Kalorien (kcal als Zahl), Eiweiß (p in g), Kohlenhydrate (c in g) und Fett (f in g).
+3. Antwortsprache für "name": ${targetLang}.
+Gib AUSSCHLIESSLICH ein JSON-Array zurück:
+[{"name": "Portion Lasagne Bolognese (~350g)", "kcal": 540, "p": 28.0, "c": 44.0, "f": 27.0, "icon": "🍝"}]`;
+
+      const parts = [{ text: promptText }];
+
+      if (base64DataUrl) {
+        const commaIdx = base64DataUrl.indexOf(',');
+        const mime = base64DataUrl.substring(5, commaIdx).split(';')[0];
+        const base64Data = base64DataUrl.substring(commaIdx + 1);
+        parts.push({
+          inline_data: {
+            mime_type: mime,
+            data: base64Data
+          }
+        });
+      }
+
+      const apiKey = state.geminiApiKey.trim();
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: {
+            responseMimeType: 'application/json'
+          }
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        throw new Error(data.error?.message || `HTTP ${response.status}`);
+      }
+
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const cleanJsonStr = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const jsonMatch = cleanJsonStr.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error('Keine Mahlzeit auf dem Bild erkannt');
+
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        throw new Error('Leeres Ergebnis');
+      }
+
+      return parsed.map(item => ({
+        name: String(item.name || 'Mahlzeit (~300g)'),
+        kcal: Math.max(1, Math.round(Number(item.kcal) || 350)),
+        p: +(Number(item.p) || 15).toFixed(1),
+        c: +(Number(item.c) || 35).toFixed(1),
+        f: +(Number(item.f) || 14).toFixed(1),
+        icon: item.icon || '🍽️'
+      }));
+    }
+
+    // --- PRÜFFENSTER MIT DIREKTER BEARBEITUNG ---
     function openReviewCard(items) {
       pendingDetectedItems = items;
       currentPortionScale = 1.0;
@@ -1121,6 +1349,17 @@
       }
     }
 
+    function editPendingItem(idx) {
+      const item = pendingDetectedItems[idx];
+      const newName = prompt('Name der Mahlzeit anpassen:', item.name);
+      if (newName && newName.trim()) item.name = newName.trim();
+      const newKcal = prompt('Kalorien (kcal) für 100% Portion anpassen:', item.kcal);
+      if (newKcal !== null && !isNaN(parseInt(newKcal, 10))) {
+        item.kcal = Math.max(0, parseInt(newKcal, 10));
+      }
+      renderReviewItems();
+    }
+
     function updatePortionScale(val) {
       currentPortionScale = parseInt(val, 10) / 100;
       document.getElementById('portionScaleLabel').textContent = `${val}%`;
@@ -1140,15 +1379,18 @@
 
         return `
           <div class="flex items-center justify-between bg-slate-900/90 px-3 py-2.5 rounded-2xl border border-slate-800">
-            <div class="flex items-center gap-2.5">
-              <span class="text-lg">${item.icon || '🍽️'}</span>
-              <div>
-                <div class="text-xs font-bold text-white">${item.name}</div>
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="text-lg shrink-0">${item.icon || '🍽️'}</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">${item.name}</div>
                 <div class="text-[10px] text-slate-400">E/B: ${scaledP}g • K/W: ${scaledC}g • F/T: ${scaledF}g</div>
               </div>
             </div>
-            <div class="flex items-center gap-2.5">
-              <span class="text-xs font-extrabold text-emerald-400">${scaledKcal} kcal</span>
+            <div class="flex items-center gap-1.5 shrink-0 ml-2">
+              <span class="text-xs font-extrabold text-emerald-400 mr-1">${scaledKcal} kcal</span>
+              <button onclick="editPendingItem(${idx})" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg text-[11px]" title="Bearbeiten">
+                <i class="fa-solid fa-pen"></i>
+              </button>
               <button onclick="removePendingItem(${idx})" class="bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 px-2 py-1 rounded-lg text-[11px]" title="Entfernen">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
@@ -1160,6 +1402,7 @@
       document.getElementById('reviewTotalKcal').textContent = totalKcal;
     }
 
+    // Speichert das TrackedItem (inkl. optionalem Foto-Thumbnail wie im SwiftData-Modell)
     function confirmDetectedItems() {
       const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
       let addedNames = [];
@@ -1167,12 +1410,14 @@
 
       pendingDetectedItems.forEach(item => {
         const entry = {
+          id: Date.now() + Math.random(),
           name: item.name,
           kcal: Math.round(item.kcal * currentPortionScale),
           p: +(item.p * currentPortionScale).toFixed(1),
           c: +(item.c * currentPortionScale).toFixed(1),
           f: +(item.f * currentPortionScale).toFixed(1),
           icon: item.icon || '🍽️',
+          thumb: selectedPhotoThumb || null,
           time: timeStr
         };
         state.todayLog.unshift(entry);
@@ -1189,7 +1434,12 @@
 
     function quickAdd(name, kcal, p, c, f, icon) {
       const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      state.todayLog.unshift({ name, kcal, p, c, f, icon, time: timeStr });
+      state.todayLog.unshift({
+        id: Date.now(),
+        name, kcal, p, c, f, icon,
+        thumb: null,
+        time: timeStr
+      });
       lastAddedCount = 1;
       saveState();
       renderAll();
@@ -1198,14 +1448,10 @@
 
     function showUndoToast(label) {
       const toast = document.getElementById('undoToast');
-      const textEl = document.getElementById('undoToastText');
-      textEl.textContent = `${t('undoAdded')} ${label}`;
+      document.getElementById('undoToastText').textContent = `${t('undoAdded')} ${label}`;
       toast.classList.remove('hidden');
-
       if (undoTimer) clearTimeout(undoTimer);
-      undoTimer = setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 6500);
+      undoTimer = setTimeout(() => toast.classList.add('hidden'), 6500);
     }
 
     function undoLastAction() {
@@ -1243,7 +1489,6 @@
 
     function getMealSuggestionsForRemaining(remainingKcal) {
       const isPl = state.lang === 'pl';
-
       if (remainingKcal <= 350) {
         return isPl ? [
           {
@@ -1291,7 +1536,7 @@
         ] : [
           {
             title: 'Salat-Kombi mit Hähnchen (~560 kcal)',
-            combo: 'Großer gemischter Salat mit Joghurt-Dressing + 180g gebratene Hähnchenbrust.',
+            combo: 'Großer gemischter Salat mit Joghurt- oder Balsamico-Dressing + 180g gebratene Hähnchenbrust.',
             extra: 'Dazu kannst du noch essen: 1 Vollkornbrötchen + 1 Apfel.',
             kcal: 560, p: 46, c: 48, f: 14, icon: '🥗'
           },
@@ -1584,71 +1829,4 @@
         remLabel.textContent = t('kcalLeft');
       } else {
         remEl.textContent = '+' + Math.abs(remaining);
-        remEl.className = 'text-2xl font-extrabold tracking-tight text-rose-400';
-        remLabel.textContent = t('kcalOver');
-      }
-
-      const circumference = 314.16;
-      const pct = Math.min(1, totals.kcal / goalKcal);
-      const offset = circumference - (pct * circumference);
-      const ring = document.getElementById('kcalRing');
-      ring.style.strokeDashoffset = offset;
-      ring.setAttribute('stroke', remaining >= 0 ? '#10b981' : '#f43f5e');
-
-      document.getElementById('proteinDisplay').textContent = Math.round(totals.p);
-      document.getElementById('proteinGoalDisplay').textContent = state.goals.protein;
-      document.getElementById('proteinBar').style.width = Math.min(100, (totals.p / state.goals.protein) * 100) + '%';
-
-      document.getElementById('carbsDisplay').textContent = Math.round(totals.c);
-      document.getElementById('carbsGoalDisplay').textContent = state.goals.carbs;
-      document.getElementById('carbsBar').style.width = Math.min(100, (totals.c / state.goals.carbs) * 100) + '%';
-
-      document.getElementById('fatDisplay').textContent = Math.round(totals.f);
-      document.getElementById('fatGoalDisplay').textContent = state.goals.fat;
-      document.getElementById('fatBar').style.width = Math.min(100, (totals.f / state.goals.fat) * 100) + '%';
-
-      renderMealSuggestions(remaining);
-      renderPastDays();
-
-      const logContainer = document.getElementById('todayLogList');
-      if (state.todayLog.length === 0) {
-        logContainer.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">${t('emptyLog')}</div>`;
-      } else {
-        logContainer.innerHTML = state.todayLog.map((item, idx) => `
-          <div class="flex items-center justify-between bg-slate-900/75 px-3.5 py-2.5 rounded-2xl border border-slate-800/80">
-            <div class="flex items-center gap-3 min-w-0">
-              <span class="text-xl shrink-0">${item.icon || '🍽️'}</span>
-              <div class="min-w-0">
-                <div class="text-xs font-bold text-white truncate">${item.name}</div>
-                <div class="text-[10px] text-slate-400">${item.time} • B/E: ${item.p}g | W/K: ${item.c}g | T/F: ${item.f}g</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0 ml-2">
-              <span class="text-xs font-extrabold text-emerald-400">${item.kcal} kcal</span>
-              <button onclick="removeLogItem(${idx})" class="bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1 active:scale-90 transition">
-                <i class="fa-solid fa-trash-can text-[10px]"></i>
-                <span>${t('deleteItem')}</span>
-              </button>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      document.getElementById('masterCodeSetting').value = state.masterCode;
-      document.getElementById('manualKcalGoal').value = state.goals.kcal;
-      document.getElementById('manualProteinGoal').value = state.goals.protein;
-
-      renderInviteCodes();
-      renderWeightTab();
-    }
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && state.unlocked) {
-        renderAll();
-      }
-    });
-
-    renderAppVisibility();
-  </script>
-</body>
-</html>
+        remEl.class
