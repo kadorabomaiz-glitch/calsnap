@@ -197,16 +197,23 @@
         </button>
       </div>
 
-      <!-- VORSCHLÄGE -->
+      <!-- VORSCHLÄGE (MIT GROSSER AUSWAHL + LIVE KI-KOCH) -->
       <div class="glass rounded-3xl p-4 border border-teal-500/25 space-y-3">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <div>
             <div class="flex items-center gap-2"><i class="fa-solid fa-lightbulb text-amber-400"></i><h2 id="lblSuggestionsTitle" class="text-sm font-bold tracking-tight">Was kann ich heute noch essen?</h2></div>
             <p id="suggestionsSubtitle" class="text-[11px] text-slate-400 mt-0.5">Passende Kombis für deine verbleibenden Kalorien:</p>
           </div>
-          <button onclick="nextSuggestionSet()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition"><i class="fa-solid fa-arrows-rotate text-[11px]"></i><span id="btnMoreIdeas">Neue Ideen</span></button>
+          <button onclick="nextSuggestionSet()" class="shrink-0 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-90 transition">
+            <i id="spinIdeaIcon" class="fa-solid fa-arrows-rotate text-xs transition-transform duration-300"></i>
+            <span id="btnMoreIdeas">Neue Ideen</span>
+          </button>
         </div>
         <div id="mealSuggestionsList" class="space-y-2.5"></div>
+        <button id="aiCustomIdeaBtn" onclick="generateAIMealIdeas()" class="w-full bg-slate-800/90 hover:bg-slate-700 border border-emerald-500/30 text-emerald-300 font-semibold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span id="lblAiIdeaBtn">✨ Frische KI-Ideen live für meinen Rest berechnen</span>
+        </button>
       </div>
 
       <!-- HEUTE GEGESSEN -->
@@ -383,8 +390,9 @@
         inputPlaceholder: 'Schreibe z. B.: „1 Portion Lasagne“ oder „1 Birne“...',
         btnPhoto: 'Foto / Kamera', btnAnalyze: 'Per KI analysieren', reviewTitle: 'Erkannte Mahlzeit prüfen & anpassen',
         btnCancel: 'Abbrechen', portionAdjust: 'Portionsgröße per Regler anpassen:', btnConfirmReview: 'Ins Tagebuch übernehmen',
-        suggestionsTitle: 'Was kann ich heute noch essen?', btnMoreIdeas: 'Neue Ideen', todayEaten: 'Heute gegessen',
-        btnClearToday: 'Tageszähler auf 0 setzen',
+        suggestionsTitle: 'Was kann ich heute noch essen?', btnMoreIdeas: 'Neue Ideen',
+        aiIdeaBtn: '✨ Frische KI-Ideen live für meinen Rest berechnen',
+        todayEaten: 'Heute gegessen', btnClearToday: 'Tageszähler auf 0 setzen',
         emptyLog: 'Noch keine Mahlzeiten für heute eingetragen.<br/>Nutze oben den Schnell-Log, mache ein Foto oder tippe deine Mahlzeit ein.',
         deleteItem: 'Löschen', undoAdded: 'Hinzugefügt:', undoBtn: 'Rückgängig',
         navCockpit: 'Tages-Cockpit', navWeight: 'Gewicht & Trend', navAccess: 'Freigabe & KI',
@@ -404,8 +412,9 @@
         inputPlaceholder: 'Napisz np.: „1 porcja lasagne” lub „1 gruszka”...',
         btnPhoto: 'Zdjęcie / Aparat', btnAnalyze: 'Analizuj przez AI', reviewTitle: 'Sprawdź i dopasuj posiłek',
         btnCancel: 'Anuluj', portionAdjust: 'Dopasuj wielkość porcji:', btnConfirmReview: 'Dodaj do dziennika',
-        suggestionsTitle: 'Co mogę jeszcze dzisiaj zjeść?', btnMoreIdeas: 'Inne pomysły', todayEaten: 'Dzisiaj zjedzone',
-        btnClearToday: 'Wyzeruj licznik dnia',
+        suggestionsTitle: 'Co mogę jeszcze dzisiaj zjeść?', btnMoreIdeas: 'Inne pomysły',
+        aiIdeaBtn: '✨ Generuj nowe pomysły AI dla pozostałych kalorii',
+        todayEaten: 'Dzisiaj zjedzone', btnClearToday: 'Wyzeruj licznik dnia',
         emptyLog: 'Brak wpisanych posiłków na dziś.<br/>Użyj szybkiego dodawania powyżej, zrób zdjęcie lub wpisz co zjadłeś.',
         deleteItem: 'Usuń', undoAdded: 'Dodano:', undoBtn: 'Cofnij',
         navCockpit: 'Panel dnia', navWeight: 'Waga i trend', navAccess: 'Dostęp i AI',
@@ -452,6 +461,7 @@
     let selectedPhotoBase64 = null;
     let selectedPhotoThumb = null;
     let suggestionOffset = 0;
+    let customAiSuggestions = null;
     let undoTimer = null;
     let lastAddedCount = 0;
 
@@ -506,7 +516,11 @@
 
     function t(key) { const lang = state.lang || 'de'; return (i18n[lang] && i18n[lang][key]) || i18n.de[key] || key; }
 
-    function toggleLanguage() { state.lang = state.lang === 'de' ? 'pl' : 'de'; saveState(); applyTranslations(); renderAll(); }
+    function toggleLanguage() {
+      state.lang = state.lang === 'de' ? 'pl' : 'de';
+      customAiSuggestions = null;
+      saveState(); applyTranslations(); renderAll();
+    }
 
     function applyTranslations() {
       const map = {
@@ -518,7 +532,7 @@
         lblScannerTitle: 'scannerTitle', btnPhotoText: 'btnPhoto', btnAnalyzeText: 'btnAnalyze',
         lblReviewTitle: 'reviewTitle', btnCancelReview: 'btnCancel', lblPortionAdjust: 'portionAdjust',
         btnConfirmReview: 'btnConfirmReview', lblSuggestionsTitle: 'suggestionsTitle', btnMoreIdeas: 'btnMoreIdeas',
-        lblTodayEaten: 'todayEaten', btnClearToday: 'btnClearToday', undoBtnLabel: 'undoBtn',
+        lblAiIdeaBtn: 'aiIdeaBtn', lblTodayEaten: 'todayEaten', btnClearToday: 'btnClearToday', undoBtnLabel: 'undoBtn',
         navLblCockpit: 'navCockpit', navLblWeight: 'navWeight', navLblAccess: 'navAccess',
         lblWeightTitle: 'weightTitle', lblWeightSub: 'weightSub', lblCurrentWeight: 'currentWeight',
         lblTrendWeight: 'trendWeight', lblTargetWeight: 'targetWeight', btnSaveWeight: 'btnSaveWeight',
@@ -795,50 +809,26 @@
       }
     }
 
-    // Unterstützt die neuesten Gemini-3-Flash Modelle + automatische Modell-Erkennung aus Google-Hinweisen!
-    async function callGeminiVisionAPI(text, base64DataUrl) {
-      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
-      const promptText = `Du bist ein präziser KI-Ernährungsexperte. Analysiere das Foto und/oder den Text ("${text || 'Siehe Foto'}"). Erkenne das genaue Lebensmittel oder Gericht (z.B. Birne, Apfel, Lasagne, Salat, Brötchen), schätze das Gewicht in Gramm (~g) und berechne Kalorien (kcal), Eiweiß (p), Kohlenhydrate (c) und Fett (f). Antwortsprache: ${targetLang}. Gib AUSSCHLIESSLICH ein JSON-Array zurück: [{"name": "1x Birne (~160g)", "kcal": 92, "p": 0.6, "c": 22.0, "f": 0.3, "icon": "🍐"}]`;
-      const parts = [{ text: promptText }];
-      if (base64DataUrl) {
-        const commaIdx = base64DataUrl.indexOf(',');
-        const mime = base64DataUrl.substring(5, commaIdx).split(';')[0];
-        const base64Data = base64DataUrl.substring(commaIdx + 1);
-        parts.push({ inlineData: { mimeType: mime, data: base64Data } });
-      }
+    async function callGeminiRequest(parts) {
       const apiKey = state.geminiApiKey.trim();
       const payload = { contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json' } };
-
-      const modelsToTry = [
-        'gemini-3.0-flash',
-        'gemini-3-flash-preview',
-        'gemini-3.8-flash',
-        'gemini-flash-latest',
-        'gemini-2.5-flash',
-        'gemini-2.0-flash'
-      ];
-
+      const modelsToTry = ['gemini-3.0-flash', 'gemini-3-flash-preview', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
       const buildUrl = (model, useVertex) => useVertex
         ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`
         : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
       const isAq = apiKey.startsWith('AQ.');
       const queue = [];
-      modelsToTry.forEach(m => {
-        queue.push(buildUrl(m, isAq));
-        queue.push(buildUrl(m, !isAq));
-      });
+      modelsToTry.forEach(m => { queue.push(buildUrl(m, isAq)); queue.push(buildUrl(m, !isAq)); });
 
       let lastErr = null;
       for (let i = 0; i < queue.length; i++) {
-        const url = queue[i];
         try {
-          const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          const response = await fetch(queue[i], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
           const data = await response.json();
           if (!response.ok || data.error) {
             const msg = data.error?.message || `HTTP ${response.status}`;
             lastErr = new Error(msg);
-            // Falls Google in der Fehlermeldung ein konkretes neues Modell nennt ("use models/xyz"), sofort dieses Modell ganz vorne einreihen!
             const suggested = msg.match(/models\/([a-zA-Z0-9._-]+)/);
             if (suggested && suggested[1] && !modelsToTry.includes(suggested[1])) {
               modelsToTry.push(suggested[1]);
@@ -850,17 +840,29 @@
           const jsonMatch = rawText.replace(/```json/g, '').replace(/```/g, '').trim().match(/\[[\s\S]*\]/);
           if (!jsonMatch) continue;
           const parsed = JSON.parse(jsonMatch[0]);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed.map(item => ({
-              name: String(item.name || 'Mahlzeit (~250g)'),
-              kcal: Math.max(1, Math.round(Number(item.kcal) || 250)),
-              p: +(Number(item.p) || 10).toFixed(1), c: +(Number(item.c) || 25).toFixed(1), f: +(Number(item.f) || 8).toFixed(1),
-              icon: item.icon || '🍽️'
-            }));
-          }
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         } catch (e) { lastErr = e; }
       }
       throw lastErr || new Error('KI-Verbindung fehlgeschlagen');
+    }
+
+    async function callGeminiVisionAPI(text, base64DataUrl) {
+      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+      const promptText = `Du bist ein präziser KI-Ernährungsexperte. Analysiere das Foto und/oder den Text ("${text || 'Siehe Foto'}"). Erkenne das genaue Lebensmittel oder Gericht, schätze das Gewicht in Gramm (~g) und berechne Kalorien (kcal), Eiweiß (p), Kohlenhydrate (c) und Fett (f). Antwortsprache: ${targetLang}. Gib AUSSCHLIESSLICH ein JSON-Array zurück: [{"name": "1x Birne (~160g)", "kcal": 92, "p": 0.6, "c": 22.0, "f": 0.3, "icon": "🍐"}]`;
+      const parts = [{ text: promptText }];
+      if (base64DataUrl) {
+        const commaIdx = base64DataUrl.indexOf(',');
+        const mime = base64DataUrl.substring(5, commaIdx).split(';')[0];
+        const base64Data = base64DataUrl.substring(commaIdx + 1);
+        parts.push({ inlineData: { mimeType: mime, data: base64Data } });
+      }
+      const parsed = await callGeminiRequest(parts);
+      return parsed.map(item => ({
+        name: String(item.name || 'Mahlzeit (~250g)'),
+        kcal: Math.max(1, Math.round(Number(item.kcal) || 250)),
+        p: +(Number(item.p) || 10).toFixed(1), c: +(Number(item.c) || 25).toFixed(1), f: +(Number(item.f) || 8).toFixed(1),
+        icon: item.icon || '🍽️'
+      }));
     }
 
     function openReviewCard(items) {
@@ -969,34 +971,94 @@
       }
     }
 
+    // UMFANGREICHE VORSCHLAGS-LISTE (JEDES MAL NEUE IDEEN BEIM KLICKEN!)
     function getMealSuggestionsForRemaining(rem) {
       const isPl = state.lang === 'pl';
-      if (rem <= 350) {
+      if (rem <= 380) {
         return isPl ? [
           { title: 'Lekka kolacja białkowa (~240 kcal)', combo: 'Sałatka mieszana z sosem jogurtowym + 150g chudego twarogu.', extra: 'Zostaje miejsce na 1 małe jabłko.', kcal: 240, p: 28, c: 16, f: 6, icon: '🥗' },
-          { title: 'Szybki zestaw wieczorny (~210 kcal)', combo: '2 jajka na twardo + pomidor i ogórek.', extra: 'Zostaje miejsce na garść jagód (~50 kcal).', kcal: 210, p: 15, c: 8, f: 11, icon: '🥚' }
+          { title: 'Szybki zestaw wieczorny (~210 kcal)', combo: '2 jajka na twardo + pomidor i ogórek z pieprzem.', extra: 'Zostaje miejsce na garść jagód (~50 kcal).', kcal: 210, p: 15, c: 8, f: 11, icon: '🥚' },
+          { title: 'Słodki twaróg z owocami (~250 kcal)', combo: '200g Skyru lub twarogu + 1 pokrojone jabłko z cynamonem.', extra: 'Syci na długo i chroni mięśnie.', kcal: 250, p: 25, c: 28, f: 1, icon: '🥣' },
+          { title: 'Sałatka z tuńczykiem (~260 kcal)', combo: 'Mieszanka sałat, pomidor, ogórek + puszka tuńczyka w sosie własnym.', extra: 'Dużo białka (32g), minimum kalorii!', kcal: 260, p: 32, c: 9, f: 8, icon: '🐟' },
+          { title: 'Talerz zupy domowej (~280 kcal)', combo: 'Talerz ciepłej zupy jarzynowej lub rosołu z kurczakiem (350ml).', extra: 'Idealna lekka kolacja.', kcal: 280, p: 18, c: 24, f: 11, icon: '🍲' },
+          { title: 'Kanapka Fitness (~230 kcal)', combo: '1 kromka chleba pełnoziarnistego z chudą szynką drobiową, twarożkiem i ogórkiem.', extra: 'Szybka przekąska w limicie.', kcal: 230, p: 16, c: 24, f: 6, icon: '🍞' }
         ] : [
-          { title: 'Leichter Sattmacher-Abendteller (~240 kcal)', combo: 'Großer gemischter Salat mit Joghurt-Dressing + 150g Magerquark.', extra: 'Dazu passt noch 1 kleiner Apfel.', kcal: 240, p: 28, c: 16, f: 6, icon: '🥗' },
-          { title: 'Eiweiß-Snack am Abend (~210 kcal)', combo: '2 gekochte Eier + frische Tomaten & Gurkenscheiben.', extra: 'Dazu kannst du noch 1 Handvoll Beeren essen.', kcal: 210, p: 15, c: 8, f: 11, icon: '🥚' }
+          { title: 'Leichter Sattmacher-Abendteller (~240 kcal)', combo: 'Großer gemischter Salat mit Joghurt- oder Balsamico-Dressing + 150g Kräuter-Magerquark.', extra: 'Dazu passt noch 1 kleiner Apfel.', kcal: 240, p: 28, c: 16, f: 6, icon: '🥗' },
+          { title: 'Eiweiß-Snack am Abend (~210 kcal)', combo: '2 gekochte Eier + frische Tomaten & Gurkenscheiben mit Pfeffer.', extra: 'Dazu kannst du noch 1 Handvoll Beeren essen.', kcal: 210, p: 15, c: 8, f: 11, icon: '🥚' },
+          { title: 'Süßer Quark-Apfel-Becher (~250 kcal)', combo: '250g Magerquark oder Skyr + 1 gewürfelter Apfel (oder Birne) mit Zimt.', extra: 'Hält über Nacht optimal satt.', kcal: 250, p: 28, c: 28, f: 1, icon: '🥣' },
+          { title: 'Thunfisch-Salat-Bowl (~260 kcal)', combo: 'Blattsalat mit Tomaten, Gurke, 1 Dose Thunfisch & Zitronen-Kräuter-Dressing.', extra: '32g Eiweiß bei minimalen Kalorien!', kcal: 260, p: 32, c: 9, f: 8, icon: '🐟' },
+          { title: 'Wärmende Hühner- oder Gemüsesuppe (~280 kcal)', combo: '1 großer Teller (350ml) Hühner- oder Gemüsesuppe mit Einlage.', extra: 'Dazu passt noch 1 Knäckebrot.', kcal: 280, p: 18, c: 24, f: 11, icon: '🍲' },
+          { title: 'Fitness-Abendbrot (~230 kcal)', combo: '1 Scheibe Vollkornbrot mit Frischkäse, Putenbrust und Gurkenscheiben.', extra: 'Schnell gemacht & perfekt im Ziel.', kcal: 230, p: 16, c: 24, f: 6, icon: '🍞' }
         ];
       }
       if (rem <= 850) {
         return isPl ? [
           { title: 'Zestaw Sałatka + Kurczak (~560 kcal)', combo: 'Duża sałatka mieszana z sosem jogurtowym + 180g piersi z kurczaka.', extra: 'Do tego 1 bułka pełnoziarnista i 1 jabłko.', kcal: 560, p: 46, c: 48, f: 14, icon: '🥗' },
-          { title: 'Obiad: Kurczak i ziemniaki (~590 kcal)', combo: '180g piersi z kurczaka + 200g ziemniaków + mizeria.', extra: 'Zostaje zapas na mały deser.', kcal: 590, p: 44, c: 52, f: 15, icon: '🍗' }
+          { title: 'Obiad: Kurczak i ziemniaki (~590 kcal)', combo: '180g piersi z kurczaka + 200g ziemniaków + mizeria na jogurcie.', extra: 'Do tego 1 gruszka lub jabłko.', kcal: 590, p: 44, c: 52, f: 15, icon: '🍗' },
+          { title: 'Jajecznica z szynką i chlebem (~520 kcal)', combo: 'Jajecznica z 3 jajek z szynką + sałatka z pomidora z winegretem.', extra: 'Do tego 2 kromki chleba żytniego.', kcal: 520, p: 32, c: 38, f: 24, icon: '🍳' },
+          { title: 'Łosoś z ryżem i sałatką (~610 kcal)', combo: '160g pieczonego łososia + 150g ryżu + sałatka z sosem cytrynowym.', extra: 'Zdrowe kwasy Omega-3 i dużo białka.', kcal: 610, p: 40, c: 54, f: 22, icon: '🐟' },
+          { title: 'Porcja Lasagne + Sałatka (~640 kcal)', combo: 'Porcja Lasagne (~350g) + świeża sałatka z lekkim winegretem.', extra: 'Mieści się w dzisiejszym limicie!', kcal: 640, p: 31, c: 52, f: 32, icon: '🍝' },
+          { title: '2x Wrapy z kurczakiem (~540 kcal)', combo: '2 tortille pełnoziarniste z kurczakiem, sałatą i sosem jogurtowym.', extra: 'Zostaje miejsce na owoc na deser!', kcal: 540, p: 42, c: 55, f: 14, icon: '🌯' }
         ] : [
           { title: 'Salat-Kombi mit Hähnchen (~560 kcal)', combo: 'Großer gemischter Salat mit Joghurt- oder Balsamico-Dressing + 180g Hähnchenbrust.', extra: 'Dazu kannst du noch essen: 1 Vollkornbrötchen + 1 Apfel.', kcal: 560, p: 46, c: 48, f: 14, icon: '🥗' },
-          { title: 'Hähnchen & Kartoffeln (~590 kcal)', combo: '180g Hähnchenbrust + 200g Salzkartoffeln + Gurkensalat.', extra: 'Dazu passt noch 1 Becher Quark oder Obst.', kcal: 590, p: 44, c: 52, f: 15, icon: '🍗' }
+          { title: 'Hähnchen & Kartoffeln (~590 kcal)', combo: '180g Hähnchenbrust + 200g Salzkartoffeln + Gurkensalat mit Joghurt-Dressing.', extra: 'Dazu passt noch 1 Becher Quark oder 1 Birne.', kcal: 590, p: 44, c: 52, f: 15, icon: '🍗' },
+          { title: 'Rührei-Abendbrot-Kombi (~520 kcal)', combo: 'Rührei aus 3 Eiern mit Schinken + Tomaten-Gurkensalat mit Essig-Öl-Dressing.', extra: 'Dazu kannst du noch 2 Scheiben Vollkornbrot essen.', kcal: 520, p: 32, c: 38, f: 24, icon: '🍳' },
+          { title: 'Lachsfilet mit Reis & Salat (~610 kcal)', combo: '160g gebratenes Lachsfilet + 150g Reis + Beilagensalat mit Honig-Senf-Dressing.', extra: 'Perfektes Eiweiß und gesunde Fette.', kcal: 610, p: 40, c: 54, f: 22, icon: '🐟' },
+          { title: 'Portion Lasagne + Beilagensalat (~640 kcal)', combo: 'Portion Lasagne Bolognese (~350g) + gemischter Salat mit Balsamico-Dressing.', extra: 'Passt komplett in dein heutiges Kalorien-Budget!', kcal: 640, p: 31, c: 52, f: 32, icon: '🍝' },
+          { title: '2x Hähnchen-Fitness-Wraps (~540 kcal)', combo: '2 Tortilla-Wraps mit 160g Hähnchenstreifen, Salat, Tomate & Knoblauch-Joghurt-Dip.', extra: 'Dazu kannst du noch 1 Apfel oder 1 Birne essen.', kcal: 540, p: 42, c: 55, f: 14, icon: '🌯' }
         ];
       }
       return isPl ? [
-        { title: 'Pełny obiad + podwieczorek (~780 kcal)', combo: '200g grillowanego kurczaka + 200g ziemniaków + duża sałatka.', extra: 'Do tego możesz jeszcze zjeść 250g twarogu z owocami!', kcal: 780, p: 58, c: 74, f: 22, icon: '🍽️' }
+        { title: 'Kurczak, ziemniaki + deser (~780 kcal)', combo: '200g grillowanego kurczaka + 200g ziemniaków + duża sałatka z sosem winegret.', extra: `Do tego 250g twarogu z owocami – i zostaje Ci jeszcze ${rem - 780} kcal!`, kcal: 780, p: 58, c: 74, f: 22, icon: '🍽️' },
+        { title: 'Sałatka Cezar / Grecka + Bułka (~690 kcal)', combo: 'Duża sałatka z kurczakiem, serem feta, oliwkami i sosem jogurtowym + 1 bułka.', extra: `Do tego 1 gruszka lub jabłko (zostaje ${rem - 690} kcal na kolację)!`, kcal: 690, p: 45, c: 62, f: 24, icon: '🥗' },
+        { title: 'Lasagne Bolognese + Sałatka (~700 kcal)', combo: 'Porcja Lasagne (~350g) + świeża sałatka mieszana z sosem balsamicznym.', extra: `Po tym obiedzie masz jeszcze ${rem - 700} kcal na wieczór!`, kcal: 700, p: 34, c: 56, f: 35, icon: '🍝' },
+        { title: 'Łosoś z ryżem i warzywami (~740 kcal)', combo: '180g pieczonego łososia + 180g ryżu + sałatka z sosem cytrynowym.', extra: `Do tego deser białkowy, a w puli zostaje ${rem - 740} kcal!`, kcal: 740, p: 46, c: 68, f: 26, icon: '🐟' },
+        { title: 'Stek wołowy / Schabowy + Ziemniaki (~760 kcal)', combo: '200g steku lub kotleta + 220g ziemniaków + duża mizeria na jogurcie.', extra: `Syty obiad i jeszcze ${rem - 760} kcal wolnego budżetu!`, kcal: 760, p: 54, c: 64, f: 28, icon: '🥩' },
+        { title: 'Domowe Pierogi + Surówka (~680 kcal)', combo: 'Porcja pierogów (7-8 szt.) + duża surówka lub sałatka.', extra: `Zostaje Ci jeszcze ${rem - 680} kcal na kolację!`, kcal: 680, p: 28, c: 84, f: 22, icon: '🥟' },
+        { title: 'Spaghetti Bolognese + Sałatka (~690 kcal)', combo: 'Talerz Spaghetti Bolognese (~350g) + sałatka z pomidorów i rukoli.', extra: `Do tego owoc i zostaje ${rem - 690} kcal!`, kcal: 690, p: 36, c: 76, f: 20, icon: '🍝' },
+        { title: 'Burger Fitness + Frytki z piekarnika (~750 kcal)', combo: 'Burger wołowy lub drobiowy z warzywami + frytki z piekarnika.', extra: `Pyszny zestaw (zostaje jeszcze ${rem - 750} kcal)!`, kcal: 750, p: 44, c: 72, f: 28, icon: '🍔' }
       ] : [
-        { title: 'Großes Hauptgericht + Nachtisch (~780 kcal)', combo: '200g Hähnchenbrust + 200g Ofenkartoffeln + gemischter Salat mit Dressing.', extra: 'Dazu kannst du heute noch 1 Portion Magerquark mit Obst essen!', kcal: 780, p: 58, c: 74, f: 22, icon: '🍽️' }
+        { title: 'Hähnchen, Ofenkartoffeln + Nachtisch (~780 kcal)', combo: '200g Hähnchenbrust + 200g Ofenkartoffeln + gemischter Salat mit Joghurt-Dressing.', extra: `Dazu 1 Portion Magerquark mit Obst – und du hast noch ${rem - 780} kcal übrig!`, kcal: 780, p: 58, c: 74, f: 22, icon: '🍽️' },
+        { title: 'Große Salat-Bowl (Hähnchen & Feta) + Brötchen (~690 kcal)', combo: 'Großer gemischter Salat mit Hähnchenstreifen, Hirtenkäse & Balsamico- oder Honig-Senf-Dressing + 1 Brötchen.', extra: `Dazu passt 1 Birne oder 1 Apfel – und dir bleiben ${rem - 690} kcal für den Abend!`, kcal: 690, p: 45, c: 62, f: 24, icon: '🥗' },
+        { title: 'Portion Lasagne + Beilagensalat (~700 kcal)', combo: 'Portion Lasagne Bolognese (~350g) + grüner Salat mit Joghurt- oder Balsamico-Dressing.', extra: `Danach hast du heute noch ${rem - 700} kcal für das Abendbrot frei!`, kcal: 700, p: 34, c: 56, f: 35, icon: '🍝' },
+        { title: 'Lachsfilet mit Reis & Gartensalat (~740 kcal)', combo: '180g gebratenes Lachsfilet + 180g Reis + gemischter Salat mit Zitronen-Olivenöl-Dressing.', extra: `Dazu kannst du noch 1 Quark-Dessert essen (noch ${rem - 740} kcal Puffer)!`, kcal: 740, p: 46, c: 68, f: 26, icon: '🐟' },
+        { title: 'Rindersteak / Schnitzel mit Kartoffeln (~760 kcal)', combo: '200g Rindersteak (oder Putenschnitzel) + 220g Salzkartoffeln + Gurkensalat mit Joghurt-Dressing.', extra: `Macht richtig satt und lässt dir noch ${rem - 760} kcal für später übrig!`, kcal: 760, p: 54, c: 64, f: 28, icon: '🥩' },
+        { title: 'Spaghetti Bolognese + Tomatensalat (~690 kcal)', combo: 'Großer Teller Spaghetti Bolognese (~350g) + Tomaten-Rucola-Salat mit Balsamico.', extra: `Dazu passt noch 1 Obst nach Wahl (weiterhin ${rem - 690} kcal übrig)!`, kcal: 690, p: 36, c: 76, f: 20, icon: '🍝' },
+        { title: '2x Hähnchen-Wraps + Salat & Obst (~660 kcal)', combo: '2 Vollkorn-Wraps mit gegrillter Hähnchenbrust, Salat, Mais, Paprika & Joghurt-Knoblauch-Soße.', extra: `Dazu kannst du 1 Apfel essen und behältst ${rem - 660} kcal für den Abend!`, kcal: 660, p: 48, c: 68, f: 18, icon: '🌯' },
+        { title: 'Fitness-Burger + Ofen-Pommes & Salat (~750 kcal)', combo: 'Saftiger Rind- oder Chicken-Burger mit Salat & Tomate + Portion Ofen-Pommes + Beilagensalat.', extra: `Voller Genuss und trotzdem noch ${rem - 750} kcal im Tagesbudget frei!`, kcal: 750, p: 44, c: 72, f: 28, icon: '🍔' }
       ];
     }
 
-    function nextSuggestionSet() { suggestionOffset++; renderAll(); }
+    function nextSuggestionSet() {
+      customAiSuggestions = null;
+      suggestionOffset += 2;
+      const icon = document.getElementById('spinIdeaIcon');
+      if (icon) icon.style.transform = `rotate(${suggestionOffset * 90}deg)`;
+      renderAll();
+    }
+
+    async function generateAIMealIdeas() {
+      if (!isValidApiKey(state.geminiApiKey)) { nextSuggestionSet(); return; }
+      const totals = state.todayLog.reduce((acc, i) => acc + i.kcal, 0);
+      const remaining = Math.max(200, state.goals.kcal - totals);
+      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+
+      const btn = document.getElementById('aiCustomIdeaBtn');
+      const origHtml = btn.innerHTML;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${state.lang === 'pl' ? 'AI tworzy nowe zestawy...' : 'KI kocht 2 frische Ideen für dich...'}</span>`;
+      btn.disabled = true;
+
+      try {
+        const prompt = `Du bist ein motivierender Abnehm-Coach. Der Nutzer hat heute noch ${remaining} kcal übrig. Erfinde 2 abwechslungsreiche, leckere Mahlzeit-Kombinationen (Hauptgericht + Salat mit Dressing + was man dazu noch essen kann), die in dieses Budget passen. Antwortsprache: ${targetLang}. Gib AUSSCHLIESSLICH ein JSON-Array mit 2 Objekten zurück: [{"title": "Name (~620 kcal)", "combo": "Genaue Beschreibung mit Gramm und Dressing", "extra": "Dazu kannst du noch ... essen", "kcal": 620, "p": 45, "c": 55, "f": 18, "icon": "🥗"}]`;
+        const parsed = await callGeminiRequest([{ text: prompt }]);
+        customAiSuggestions = parsed.map(s => ({
+          title: String(s.title || 'KI-Wunschgericht'), combo: String(s.combo || ''), extra: String(s.extra || 'Perfekt für dein Tagesziel!'),
+          kcal: Math.max(100, Math.round(Number(s.kcal) || 500)), p: Math.round(Number(s.p) || 35), c: Math.round(Number(s.c) || 45), f: Math.round(Number(s.f) || 15),
+          icon: s.icon || '✨'
+        }));
+        renderAll();
+      } catch (e) { nextSuggestionSet(); } finally { btn.innerHTML = origHtml; btn.disabled = false; }
+    }
 
     function addWeightEntry() {
       const val = parseFloat(document.getElementById('weightInput').value);
@@ -1076,8 +1138,15 @@
       sub.textContent = remaining <= 50
         ? (state.lang === 'pl' ? 'Cel osiągnięty! Lekkie propozycje:' : 'Tagesziel fast erreicht! Leichte Ideen:')
         : (state.lang === 'pl' ? `Masz jeszcze ${remaining} kcal:` : `Du hast noch ${remaining} kcal übrig – passende Kombis:`);
-      const all = getMealSuggestionsForRemaining(Math.max(200, remaining));
-      const picked = [all[suggestionOffset % all.length], all[(suggestionOffset + 1) % all.length]].slice(0, all.length);
+
+      let picked = [];
+      if (customAiSuggestions && customAiSuggestions.length > 0) {
+        picked = customAiSuggestions;
+      } else {
+        const all = getMealSuggestionsForRemaining(Math.max(200, remaining));
+        picked = [all[suggestionOffset % all.length], all[(suggestionOffset + 1) % all.length]];
+      }
+
       document.getElementById('mealSuggestionsList').innerHTML = picked.map(s => `
         <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 space-y-2">
           <div class="flex items-start justify-between gap-2">
