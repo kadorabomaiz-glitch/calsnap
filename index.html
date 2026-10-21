@@ -145,7 +145,6 @@
     <!-- TAB 1: COCKPIT (DASHBOARD) -->
     <section id="tab-cockpit" class="space-y-4">
       
-      <!-- Kalorien-Ring & Makros (ContentView Dashboard Konzept) -->
       <div class="glass rounded-3xl p-5 shadow-xl">
         <div class="flex items-center justify-between">
           <div class="space-y-3">
@@ -188,7 +187,6 @@
           </div>
         </div>
 
-        <!-- Makro-Balken -->
         <div class="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-800/80">
           <div class="bg-slate-900/60 rounded-2xl p-2.5">
             <div class="flex justify-between text-xs mb-1">
@@ -219,7 +217,6 @@
           </div>
         </div>
 
-        <!-- 2 Haupt-Aktionsbuttons wie im SwiftUI-Dashboard-Prompt -->
         <div class="grid grid-cols-2 gap-2.5 mt-4">
           <button onclick="focusFoodInput()" class="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
             <i class="fa-solid fa-plus-circle"></i>
@@ -232,7 +229,7 @@
         </div>
       </div>
 
-      <!-- Schnellwahl-Leiste (Quick-Add) -->
+      <!-- Schnellwahl-Leiste -->
       <div>
         <div class="flex items-center justify-between mb-2 px-1">
           <span id="lblQuickAdd" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Schnell-Log (1 Fingertipp)</span>
@@ -241,7 +238,7 @@
         <div id="quickAddContainer" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
       </div>
 
-      <!-- KI-Eingabebox (AddFoodView: Text + Foto + Echte Gemini Vision API) -->
+      <!-- KI-Eingabebox -->
       <div id="scannerCard" class="glass rounded-3xl p-4 shadow-lg border border-emerald-500/20">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
@@ -253,7 +250,6 @@
           </button>
         </div>
 
-        <!-- Kamera-Foto Vorschau -->
         <div id="photoPreviewContainer" class="hidden mb-3 relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
           <img id="photoPreview" src="" alt="Essensfoto" class="w-full h-44 object-cover" />
           <button onclick="clearPhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white flex items-center justify-center">
@@ -265,11 +261,10 @@
           </div>
         </div>
 
-        <!-- Hinweisbox falls kein gültiger AIzaSy-Key hinterlegt ist -->
         <div id="apiErrorBox" class="hidden mb-3 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-xs text-amber-200 space-y-1.5">
           <div class="font-bold flex items-center gap-1.5 text-amber-300">
             <i class="fa-solid fa-triangle-exclamation"></i>
-            <span id="apiErrorTitle">Hinweis zur Foto-KI:</span>
+            <span>Hinweis zur Foto-KI:</span>
           </div>
           <p id="apiErrorText" class="text-[11px] leading-relaxed"></p>
         </div>
@@ -277,14 +272,14 @@
         <textarea
           id="naturalInput"
           rows="2"
-          placeholder="Schreibe z. B.: „1 Portion Lasagne“ oder „Ein Teller Spaghetti Carbonara und ein Glas Apfelsaft“..."
+          placeholder="Schreibe z. B.: „1 Portion Lasagne“ oder „Spaghetti Carbonara und 1 Glas Apfelsaft“..."
           class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-emerald-400 rounded-2xl p-3 text-sm text-white placeholder-slate-500 outline-none resize-none transition"
         ></textarea>
 
         <div class="flex items-center gap-2 mt-2.5">
           <label class="cursor-pointer shrink-0 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 active:scale-95 transition border border-emerald-500/30">
             <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
-            <span id="btnPhotoText">Foto wählen / Kamera</span>
+            <span id="btnPhotoText">Foto / Kamera</span>
             <input id="cameraInput" type="file" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)" />
           </label>
 
@@ -299,7 +294,7 @@
         </div>
       </div>
 
-      <!-- KI-Ergebnis-Vorschau (Mit Direkt-Bearbeitung von Name & Kalorien) -->
+      <!-- KI-Ergebnis-Vorschau -->
       <div id="reviewCard" class="hidden glass rounded-3xl p-4 border-2 border-emerald-500/40 shadow-2xl space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
@@ -336,7 +331,7 @@
         </button>
       </div>
 
-      <!-- MAHLZEIT-VORSCHLÄGE FÜR REST-KALORIEN -->
+      <!-- MAHLZEIT-VORSCHLÄGE -->
       <div class="glass rounded-3xl p-4 border border-teal-500/25 space-y-3">
         <div class="flex items-center justify-between">
           <div>
@@ -357,7 +352,7 @@
         <div id="mealSuggestionsList" class="space-y-2.5"></div>
       </div>
 
-      <!-- Heutiges Tagebuch (TrackedItems inkl. Foto-Miniatur) -->
+      <!-- Heutiges Tagebuch -->
       <div class="glass rounded-3xl p-4">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-sm font-bold tracking-tight flex items-center gap-2">
@@ -482,7 +477,6 @@
     <!-- TAB 3: FREIGABE & KI-SCHLÜSSEL -->
     <section id="tab-access" class="space-y-4 hidden">
       
-      <!-- SICHERER KI-SCHLÜSSEL SPEICHER (Verhindert GitGuardian-Sperren!) -->
       <div class="glass rounded-3xl p-5 space-y-3 border border-emerald-500/40">
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-bold flex items-center gap-2">
@@ -494,7 +488,7 @@
           </span>
         </div>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Damit GitHub/GitGuardian deinen Schlüssel nicht sperrt, wird er <b>nur lokal auf deinem iPhone</b> gespeichert (und beim Einladen automatisch an deine Freunde mitgeschickt).
+          Damit GitHub/GitGuardian deinen Schlüssel nicht sperrt, wird er <b>nur lokal auf deinem iPhone</b> gespeichert (und beim Einladen per WhatsApp automatisch an deine Freunde mitgeschickt).
         </p>
         <p class="text-[11px] text-slate-400">
           Wichtig: Ein echter Gemini-Key von <a href="https://aistudio.google.com/apikey" target="_blank" class="text-emerald-400 underline font-semibold">aistudio.google.com/apikey</a> beginnt immer mit <code class="text-white bg-slate-900 px-1 rounded">AIzaSy...</code>
@@ -512,7 +506,6 @@
         </div>
       </div>
 
-      <!-- Türsteher & Einladungen (inkl. automatischer KI-Freigabe für Freunde) -->
       <div class="glass rounded-3xl p-5 border border-slate-700 space-y-4">
         <div class="flex items-start justify-between">
           <div>
@@ -800,7 +793,6 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    // Liest Einladungscode & verschlüsselten KI-Key automatisch aus WhatsApp-Einladungslinks
     function checkInviteUrlParams() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -956,6 +948,7 @@
     }
 
     function renderAppVisibility() {
+      checkInviteUrlParams();
       checkAutomaticDailyReset();
       applyTranslations();
       const lockScreen = document.getElementById('lockScreen');
@@ -987,7 +980,7 @@
     function saveGeminiKey() {
       const val = document.getElementById('geminiKeyInput').value.trim();
       if (val && !val.startsWith('AIza')) {
-        alert('Achtung: Ein gültiger Google Gemini API-Schlüssel aus dem Google AI Studio beginnt immer mit "AIzaSy...". Bitte prüfe den kopierten Schlüssel noch einmal.');
+        alert('Hinweis: Ein gültiger Google Gemini API-Key aus dem Google AI Studio beginnt immer mit "AIzaSy...".');
       }
       state.geminiApiKey = val;
       saveState();
@@ -1065,7 +1058,6 @@
       `).join('');
     }
 
-    // --- UMFASSENDE LOKALE GERICHTE-DATENBANK (DE & PL) ---
     const localFoodDB = [
       { keys: ['lasagne', 'lasania', 'lasagne bolognese'], nameDe: 'Portion Lasagne Bolognese (~350g)', namePl: 'Porcja Lasagne (~350g)', kcal: 540, p: 28, c: 44, f: 27, icon: '🍝' },
       { keys: ['carbonara', 'spaghetti carbonara'], nameDe: 'Teller Spaghetti Carbonara (~350g)', namePl: 'Spaghetti Carbonara (~350g)', kcal: 610, p: 25, c: 65, f: 27, icon: '🍝' },
@@ -1156,7 +1148,6 @@
       return results;
     }
 
-    // --- AUTOMATISCHE BILD-KOMPRIMIERUNG AUF 800PX FÜR SCHNELLE IPHONE-FOTO-ANALYSE ---
     function compressImageFile(file, maxDim = 800, quality = 0.78) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1170,7 +1161,6 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            // Kleine Miniatur (100px) für das Tagebuch erzeugen
             const thumbCanvas = document.createElement('canvas');
             thumbCanvas.width = 96;
             thumbCanvas.height = 96;
@@ -1233,30 +1223,26 @@
           const items = await callGeminiVisionAPI(text, selectedPhotoBase64);
           openReviewCard(items);
         } else {
-          // Kein gültiger AIzaSy-Schlüssel vorhanden:
           if (text) {
-            const items = parseNaturalText(text);
-            openReviewCard(items);
+            openReviewCard(parseNaturalText(text));
           } else if (selectedPhotoBase64) {
-            // Statt falsch "Käsebrötchen" zu raten, ehrlich fragen was auf dem Foto ist oder Key hinweisen:
             const errBox = document.getElementById('apiErrorBox');
             const errText = document.getElementById('apiErrorText');
             errBox.classList.remove('hidden');
             errText.innerHTML = state.lang === 'pl'
-              ? 'Aby aparat sam rozpoznawał zdjęcia bez pisania, wklej w zakładce „Dostęp i AI” darmowy klucz Google Gemini (zaczynający się od <b>AIzaSy...</b>).<br/>Lub wpisz poniżej jednym słowem co jest na zdjęciu (np. „Lasagne”):'
+              ? 'Aby aparat sam rozpoznawał zdjęcia bez pisania, wklej w zakładce „Dostęp i AI” darmowy klucz Google Gemini (zaczynający się od <b>AIzaSy...</b>).<br/>Lub wpisz poniżej jednym słowem co jest na zdjęciu (np. „Lasagne”) i kliknij Analizuj:'
               : 'Damit die Kamera Fotos komplett ohne Text erkennt, hinterlege im Reiter „Freigabe & KI“ deinen Google Gemini Key (beginnt mit <b>AIzaSy...</b>).<br/>Oder tippe kurz ins Textfeld, was auf dem Foto zu sehen ist (z. B. „Lasagne“), und klicke erneut auf Analysieren:';
             document.getElementById('naturalInput').focus();
           }
         }
       } catch (err) {
-        // Falls API-Fehler auftritt (z.B. Key von Google gesperrt)
         if (text) {
           openReviewCard(parseNaturalText(text));
         } else {
           const errBox = document.getElementById('apiErrorBox');
           const errText = document.getElementById('apiErrorText');
           errBox.classList.remove('hidden');
-          errText.innerHTML = `Google-KI-Antwort: <b>${err.message || 'Schlüssel ungültig/gesperrt'}</b>.<br/>Tipp: Schreibe kurz ins Textfeld (z.B. „Lasagne“), um das Foto sofort zu berechnen, oder erstelle unter „Freigabe & KI“ einen frischen Key (AIzaSy...).`;
+          errText.innerHTML = `Google-KI-Antwort: <b>${err.message || 'Schlüssel ungültig'}</b>.<br/>Tipp: Schreibe kurz ins Textfeld (z.B. „Lasagne“), um das Foto sofort zu berechnen, oder speichere unter „Freigabe & KI“ einen frischen Key (AIzaSy...).`;
         }
       } finally {
         btn.innerHTML = originalHtml;
@@ -1325,7 +1311,6 @@ Gib AUSSCHLIESSLICH ein JSON-Array zurück:
       }));
     }
 
-    // --- PRÜFFENSTER MIT DIREKTER BEARBEITUNG ---
     function openReviewCard(items) {
       pendingDetectedItems = items;
       currentPortionScale = 1.0;
@@ -1402,7 +1387,6 @@ Gib AUSSCHLIESSLICH ein JSON-Array zurück:
       document.getElementById('reviewTotalKcal').textContent = totalKcal;
     }
 
-    // Speichert das TrackedItem (inkl. optionalem Foto-Thumbnail wie im SwiftData-Modell)
     function confirmDetectedItems() {
       const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
       let addedNames = [];
@@ -1829,4 +1813,90 @@ Gib AUSSCHLIESSLICH ein JSON-Array zurück:
         remLabel.textContent = t('kcalLeft');
       } else {
         remEl.textContent = '+' + Math.abs(remaining);
-        remEl.class
+        remEl.className = 'text-2xl font-extrabold tracking-tight text-rose-400';
+        remLabel.textContent = t('kcalOver');
+      }
+
+      const circumference = 314.16;
+      const pct = Math.min(1, totals.kcal / goalKcal);
+      const offset = circumference - (pct * circumference);
+      const ring = document.getElementById('kcalRing');
+      ring.style.strokeDashoffset = offset;
+      ring.setAttribute('stroke', remaining >= 0 ? '#10b981' : '#f43f5e');
+
+      document.getElementById('proteinDisplay').textContent = Math.round(totals.p);
+      document.getElementById('proteinGoalDisplay').textContent = state.goals.protein;
+      document.getElementById('proteinBar').style.width = Math.min(100, (totals.p / state.goals.protein) * 100) + '%';
+
+      document.getElementById('carbsDisplay').textContent = Math.round(totals.c);
+      document.getElementById('carbsGoalDisplay').textContent = state.goals.carbs;
+      document.getElementById('carbsBar').style.width = Math.min(100, (totals.c / state.goals.carbs) * 100) + '%';
+
+      document.getElementById('fatDisplay').textContent = Math.round(totals.f);
+      document.getElementById('fatGoalDisplay').textContent = state.goals.fat;
+      document.getElementById('fatBar').style.width = Math.min(100, (totals.f / state.goals.fat) * 100) + '%';
+
+      renderMealSuggestions(remaining);
+      renderPastDays();
+
+      const logContainer = document.getElementById('todayLogList');
+      if (state.todayLog.length === 0) {
+        logContainer.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">${t('emptyLog')}</div>`;
+      } else {
+        logContainer.innerHTML = state.todayLog.map((item, idx) => `
+          <div class="flex items-center justify-between bg-slate-900/75 px-3.5 py-2.5 rounded-2xl border border-slate-800/80">
+            <div class="flex items-center gap-3 min-w-0">
+              ${item.thumb
+                ? `<img src="${item.thumb}" class="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-700" alt="Foto" />`
+                : `<span class="text-xl shrink-0">${item.icon || '🍽️'}</span>`
+              }
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">${item.name}</div>
+                <div class="text-[10px] text-slate-400">${item.time} • B/E: ${item.p}g | W/K: ${item.c}g | T/F: ${item.f}g</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 ml-2">
+              <span class="text-xs font-extrabold text-emerald-400">${item.kcal} kcal</span>
+              <button onclick="removeLogItem(${idx})" class="bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1 active:scale-90 transition">
+                <i class="fa-solid fa-trash-can text-[10px]"></i>
+                <span>${t('deleteItem')}</span>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('masterCodeSetting').value = state.masterCode;
+      document.getElementById('geminiKeyInput').value = state.geminiApiKey || '';
+      document.getElementById('manualKcalGoal').value = state.goals.kcal;
+      document.getElementById('manualProteinGoal').value = state.goals.protein;
+
+      const hasKey = state.geminiApiKey && state.geminiApiKey.trim().startsWith('AIza');
+      const statusBtn = document.getElementById('aiModeStatus');
+      const keyBadge = document.getElementById('keySavedBadge');
+      if (hasKey) {
+        statusBtn.textContent = 'Gemini Vision KI aktiv';
+        statusBtn.className = 'text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold';
+        keyBadge.textContent = 'Aktiv (Lokal geschützt)';
+        keyBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold';
+      } else {
+        statusBtn.textContent = 'Smart-Modus (Key fehlt ⚙)';
+        statusBtn.className = 'text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold';
+        keyBadge.textContent = 'Key eintragen';
+        keyBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold';
+      }
+
+      renderInviteCodes();
+      renderWeightTab();
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && state.unlocked) {
+        renderAll();
+      }
+    });
+
+    renderAppVisibility();
+  </script>
+</body>
+</html>
