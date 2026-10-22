@@ -34,8 +34,7 @@
         <span id="undoToastText" class="truncate">Eintrag hinzugefügt</span>
       </div>
       <button onclick="undoLastAction()" class="shrink-0 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition">
-        <i class="fa-solid fa-rotate-left"></i>
-        <span id="undoBtnLabel">Rückgängig</span>
+        <i class="fa-solid fa-rotate-left"></i><span id="undoBtnLabel">Rückgängig</span>
       </button>
     </div>
   </div>
@@ -53,20 +52,18 @@
       </div>
       <span id="lockBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Privat & Geschützt</span>
       <h1 class="text-2xl font-bold mt-3 tracking-tight">CalSnap AI</h1>
-      <p id="lockSubtitle" class="text-slate-400 text-sm mt-1 max-w-xs mx-auto">Diese App ist privat. Bitte gib deinen persönlichen Freigabe-Code ein, um die App freizuschalten.</p>
+      <p id="lockSubtitle" class="text-slate-400 text-sm mt-1 max-w-xs mx-auto">Bitte gib deinen persönlichen Freigabe-Code ein, um die App freizuschalten.</p>
     </div>
     <div class="glass rounded-3xl p-6 max-w-sm w-full mx-auto my-6 shadow-2xl">
       <label id="lockInputLabel" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Zugangscode / Einladungscode</label>
       <input id="accessCodeInput" type="text" placeholder="z. B. START-2026" class="w-full bg-slate-900/90 border border-slate-700 focus:border-emerald-400 rounded-2xl px-4 py-3.5 text-center text-lg font-mono tracking-widest uppercase text-white outline-none transition" />
-      <p id="lockError" class="text-rose-400 text-xs text-center mt-2 hidden">Ungültiger Code. Bitte frage den Administrator nach einer Freigabe.</p>
-      <button onclick="unlockApp()" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition flex items-center justify-center gap-2">
-        <i class="fa-solid fa-unlock-keyhole"></i>
-        <span id="unlockBtnText">App freischalten</span>
+      <p id="lockError" class="text-rose-400 text-xs text-center mt-2 hidden">Ungültiger Code. Bitte frage den Administrator.</p>
+      <button onclick="unlockApp()" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-3.5 rounded-2xl shadow-lg active:scale-[0.99] transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-unlock-keyhole"></i><span id="unlockBtnText">App freischalten</span>
       </button>
       <div class="mt-5 pt-4 border-t border-slate-800 text-xs text-slate-400">
         <div class="flex items-center gap-2 text-emerald-400 font-medium">
-          <i class="fa-solid fa-key"></i>
-          <span>Admin-Startcode: <code class="bg-slate-900 px-1.5 py-0.5 rounded text-white">START-2026</code></span>
+          <i class="fa-solid fa-key"></i><span>Admin-Startcode: <code class="bg-slate-900 px-1.5 py-0.5 rounded text-white">START-2026</code></span>
         </div>
       </div>
     </div>
@@ -140,7 +137,7 @@
         <div id="quickAddContainer" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
       </div>
 
-      <!-- MULTI-MODUS KI-SCANNER (FEATURE 1 INTEGRIERT: MAHLZEIT | KÜHLSCHRANK-RESTE) -->
+      <!-- MULTI-MODUS KI-SCANNER (FEATURE 1: MAHLZEIT | KÜHLSCHRANK-RESTE) -->
       <div id="scannerCard" class="glass rounded-3xl p-4 shadow-lg border border-emerald-500/20 space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
@@ -150,7 +147,6 @@
           <button onclick="switchTab('access')" id="aiModeStatus" class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">Status prüfen</button>
         </div>
 
-        <!-- MODUS-UMSCHALTER: MAHLZEIT vs. KÜHLSCHRANK-RESTE-VERWERTER -->
         <div class="grid grid-cols-2 gap-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
           <button id="modeBtn-meal" onclick="setScannerMode('meal')" class="py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 bg-emerald-500 text-slate-950 shadow transition">
             <span>🍽️</span><span id="lblModeMeal">Mahlzeit tracken</span>
@@ -187,14 +183,14 @@
             <span id="btnPhotoText">Foto / Kamera</span>
             <input id="cameraInput" type="file" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)" />
           </label>
-          <button id="analyzeBtn" onclick="analyzeInput()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-2.5 px-4 rounded-2xl text-xs shadow-md shadow-emerald-500/15 active:scale-95 transition flex items-center justify-center gap-2">
+          <button id="analyzeBtn" onclick="analyzeInput()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-2.5 px-4 rounded-2xl text-xs shadow-md active:scale-95 transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-bolt"></i>
             <span id="btnAnalyzeText">Per KI analysieren</span>
           </button>
         </div>
       </div>
 
-      <!-- PRÜFFENSTER FÜR NORMALE MAHLZEITEN -->
+      <!-- PRÜFFENSTER MAHLZEIT -->
       <div id="reviewCard" class="hidden glass rounded-3xl p-4 border-2 border-emerald-500/40 shadow-2xl space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i><h3 id="lblReviewTitle" class="text-sm font-bold">Erkannte Mahlzeit prüfen & anpassen</h3></div>
@@ -202,21 +198,21 @@
         </div>
         <div id="detectedItemsList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
         <div class="bg-slate-900/80 rounded-2xl p-3">
-          <div class="flex justify-between text-xs mb-1"><span id="lblPortionAdjust" class="text-slate-400">Portionsgröße per Regler anpassen:</span><span id="portionScaleLabel" class="font-bold text-emerald-400">100% (Normal)</span></div>
+          <div class="flex justify-between text-xs mb-1"><span id="lblPortionAdjust" class="text-slate-400">Portionsgröße anpassen:</span><span id="portionScaleLabel" class="font-bold text-emerald-400">100% (Normal)</span></div>
           <input id="portionSlider" type="range" min="50" max="200" step="10" value="100" oninput="updatePortionScale(this.value)" class="w-full accent-emerald-400 cursor-pointer" />
         </div>
-        <button onclick="confirmDetectedItems()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-2xl text-sm shadow-lg shadow-emerald-500/20 transition">
+        <button onclick="confirmDetectedItems()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-2xl text-sm shadow-lg transition">
           <span id="btnConfirmReview">Ins Tagebuch übernehmen</span> (<span id="reviewTotalKcal">0</span> kcal)
         </button>
       </div>
 
-      <!-- NEU: ERGEBNIS-FENSTER FÜR FEATURE 1 (KÜHLSCHRANK-RESTE-VERWERTER) -->
+      <!-- ERGEBNIS-FENSTER KÜHLSCHRANK-RESTE-VERWERTER -->
       <div id="fridgeResultCard" class="hidden glass rounded-3xl p-4 border-2 border-cyan-400/50 shadow-2xl space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-lg">🧊</span>
             <div>
-              <h3 id="lblFridgeResultTitle" class="text-sm font-bold text-cyan-300">Kühlschrank-Rezepte für deinen Rest</h3>
+              <h3 id="lblFridgeResultTitle" class="text-sm font-bold text-cyan-300">Kühlschrank-Rezepte</h3>
               <p id="lblFridgeIngredients" class="text-[11px] text-slate-400"></p>
             </div>
           </div>
@@ -225,7 +221,7 @@
         <div id="fridgeRecipesList" class="space-y-3"></div>
       </div>
 
-      <!-- VORSCHLÄGE (MIT GROSSER AUSWAHL + LIVE KI-KOCH) -->
+      <!-- VORSCHLÄGE -->
       <div class="glass rounded-3xl p-4 border border-teal-500/25 space-y-3">
         <div class="flex items-center justify-between gap-2">
           <div>
@@ -248,7 +244,7 @@
       <div class="glass rounded-3xl p-4">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-sm font-bold tracking-tight flex items-center gap-2"><i class="fa-solid fa-utensils text-emerald-400"></i><span id="lblTodayEaten">Heute gegessen</span></h2>
-          <button onclick="clearTodayLog()" class="bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-xl text-[11px] font-semibold flex items-center gap-1.5 active:scale-95 transition"><i class="fa-solid fa-rotate-right text-[10px]"></i><span id="btnClearToday">Tageszähler auf 0 setzen</span></button>
+          <button onclick="clearTodayLog()" class="bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-xl text-[11px] font-semibold flex items-center gap-1.5 active:scale-95 transition"><i class="fa-solid fa-rotate-right text-[10px]"></i><span id="btnClearToday">Tageszähler auf 0 setzen</span></button>
         </div>
         <div id="todayLogList" class="space-y-2.5"></div>
       </div>
@@ -310,66 +306,47 @@
           <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-camera-retro text-emerald-400"></i><span>Echte Gemini Foto-KI</span></h3>
           <span id="keySavedBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold">Prüfen</span>
         </div>
-
-        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="w-full bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-sky-300 font-bold py-3 px-4 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
-          <i class="fa-solid fa-up-right-from-square"></i>
-          <span>1. Google AI Studio hier auf dem iPhone öffnen</span>
+        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="w-full bg-sky-500/20 border border-sky-400/40 text-sky-300 font-bold py-3 px-4 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
+          <i class="fa-solid fa-up-right-from-square"></i><span>1. Google AI Studio hier auf dem iPhone öffnen</span>
         </a>
-
-        <button onclick="pasteAndSaveKey()" class="w-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 font-bold py-3 px-4 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
-          <i class="fa-solid fa-paste"></i>
-          <span>2. Kopierten Key einfügen & sofort speichern</span>
+        <button onclick="pasteAndSaveKey()" class="w-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold py-3 px-4 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
+          <i class="fa-solid fa-paste"></i><span>2. Kopierten Key einfügen & sofort speichern</span>
         </button>
-
-        <button onclick="loadSavedChatKey()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-amber-300 font-semibold py-2.5 px-4 rounded-2xl text-[11px] flex items-center justify-center gap-2 active:scale-95 transition">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-          <span>Oder: Meinen bisherigen AQ-Key automatisch einsetzen</span>
+        <button onclick="loadSavedChatKey()" class="w-full bg-slate-800 border border-slate-600 text-amber-300 font-semibold py-2.5 px-4 rounded-2xl text-[11px] flex items-center justify-center gap-2 active:scale-95 transition">
+          <i class="fa-solid fa-wand-magic-sparkles"></i><span>Oder: Meinen bisherigen AQ-Key automatisch einsetzen</span>
         </button>
-
         <div class="pt-1">
           <label class="text-[11px] text-slate-400 block mb-1">Dein gespeicherter Schlüssel:</label>
           <div class="flex gap-2">
             <input id="geminiKeyInput" type="text" placeholder="AQ... oder AIza..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-emerald-300 font-mono" />
-            <button onclick="saveGeminiKey()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2.5 rounded-xl text-xs shrink-0 active:scale-95 transition">Speichern</button>
+            <button onclick="saveGeminiKey()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2.5 rounded-xl text-xs shrink-0">Speichern</button>
           </div>
         </div>
       </div>
 
       <div class="glass rounded-3xl p-5 border border-slate-700 space-y-4">
-        <div class="flex items-start justify-between">
-          <div>
-            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Admin-Schutz</span>
-            <h2 class="text-base font-bold mt-1">Zugriff & Einladungs-Codes</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Teile die App per WhatsApp – inklusive Code & KI-Zugang.</p>
+        <h2 class="text-base font-bold">Zugriff & Einladungs-Codes</h2>
+        <div class="bg-slate-900/80 p-3.5 rounded-2xl space-y-2">
+          <label class="text-xs font-semibold text-slate-300 block">1. Admin-Hauptcode</label>
+          <div class="flex gap-2">
+            <input id="masterCodeSetting" type="text" value="START-2026" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono uppercase text-emerald-400" />
+            <button onclick="saveMasterCode()" class="bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold">Speichern</button>
           </div>
-          <i class="fa-solid fa-user-lock text-2xl text-emerald-400"></i>
         </div>
-        <div class="space-y-4">
-          <div class="bg-slate-900/80 p-3.5 rounded-2xl space-y-2">
-            <label class="text-xs font-semibold text-slate-300 block">1. Dein geheimer Admin-Hauptcode</label>
-            <div class="flex gap-2">
-              <input id="masterCodeSetting" type="text" value="START-2026" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono uppercase text-emerald-400" />
-              <button onclick="saveMasterCode()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-xl text-xs font-semibold">Speichern</button>
-            </div>
+        <div class="bg-slate-900/80 p-3.5 rounded-2xl space-y-2.5">
+          <label class="text-xs font-semibold text-slate-300 block">2. Einladungscode + Link erzeugen</label>
+          <div class="flex gap-2">
+            <input id="guestNameInput" type="text" placeholder="Name (z. B. Max)" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" />
+            <button onclick="generateInviteCode()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shrink-0">Code erzeugen</button>
           </div>
-          <div class="bg-slate-900/80 p-3.5 rounded-2xl space-y-2.5">
-            <label class="text-xs font-semibold text-slate-300 block">2. Einladungscode + Link für Freunde erzeugen</label>
-            <div class="flex gap-2">
-              <input id="guestNameInput" type="text" placeholder="Name (z. B. Familie, Partnerin, Max)" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" />
-              <button onclick="generateInviteCode()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shrink-0">Code erzeugen</button>
+          <div id="generatedCodeBox" class="hidden mt-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div id="generatedCodeText" class="text-base font-mono font-bold text-white">FIT-MAX-1234</div>
+              <button onclick="copyInviteCode()" class="bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Kopieren</button>
             </div>
-            <div id="generatedCodeBox" class="hidden mt-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <div><div class="text-[10px] text-emerald-300 uppercase">Freigabe-Code bereit:</div><div id="generatedCodeText" class="text-base font-mono font-bold text-white tracking-wider">FIT-MAX-1234</div></div>
-                <button onclick="copyInviteCode()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5"><i class="fa-regular fa-copy"></i><span>Kopieren</span></button>
-              </div>
-              <button onclick="shareInviteWhatsApp()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-sm"></i><span>Direkt per WhatsApp (inkl. Link & KI) senden</span></button>
-            </div>
-            <div class="pt-2">
-              <div class="text-[11px] font-semibold text-slate-400 mb-1.5">Aktive Einladungscodes:</div>
-              <div id="inviteCodeList" class="space-y-1.5 text-xs"></div>
-            </div>
+            <button onclick="shareInviteWhatsApp()" class="w-full bg-emerald-500 text-slate-950 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp"></i><span>Per WhatsApp senden</span></button>
           </div>
+          <div id="inviteCodeList" class="space-y-1.5 text-xs pt-2"></div>
         </div>
       </div>
 
@@ -379,12 +356,12 @@
           <div><label class="text-slate-400 block mb-1">Kalorienziel (kcal)</label><input id="manualKcalGoal" type="number" value="1900" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-white" /></div>
           <div><label class="text-slate-400 block mb-1">Eiweiß-Ziel (g)</label><input id="manualProteinGoal" type="number" value="140" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-white" /></div>
         </div>
-        <button onclick="saveManualGoals()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl text-xs">Ziele speichern</button>
+        <button onclick="saveManualGoals()" class="w-full bg-slate-800 text-white font-semibold py-2.5 rounded-xl text-xs">Ziele speichern</button>
       </div>
     </section>
   </div>
 
-  <!-- UNTERE NAVIGATION -->
+  <!-- NAVIGATION -->
   <nav id="bottomNav" class="fixed bottom-0 inset-x-0 z-40 glass-strong px-6 py-2 hidden" style="padding-bottom: calc(8px + var(--safe-bottom));">
     <div class="max-w-md mx-auto flex items-center justify-around">
       <button onclick="switchTab('cockpit')" id="nav-cockpit" class="flex flex-col items-center gap-1 py-1 text-emerald-400"><i class="fa-solid fa-fire-flame-curved text-lg"></i><span id="navLblCockpit" class="text-[10px] font-semibold">Tages-Cockpit</span></button>
@@ -395,62 +372,54 @@
 
   <script>
     const STORAGE_KEY = 'calsnap_ai_state_v2';
-
     function getDefaultEncodedKey() {
-      const parts = ['QVEu', 'QWI4Uk42', 'S0QzSmZ5', 'WEF3VXJu', 'ZTdjVHh6', 'VmluS2p1', 'dHZ5VmNq', 'aFpiWmZI', 'OHB4YWFw', 'LXc='];
-      return atob(parts.join(''));
+      return atob(['QVEu','QWI4Uk42','S0QzSmZ5','WEF3VXJu','ZTdjVHh6','VmluS2p1','dHZ5VmNq','aFpiWmZI','OHB4YWFw','LXc='].join(''));
     }
 
     const i18n = {
       de: {
         langIndicator: '🇩🇪 DE | 🇵🇱 PL', headerLang: '🇩🇪 DE ▾', lockBadge: 'Privat & Geschützt',
-        lockSubtitle: 'Diese App ist privat. Bitte gib deinen persönlichen Freigabe-Code ein, um die App freizuschalten.',
-        lockInputLabel: 'Zugangscode / Einladungscode', unlockBtn: 'App freischalten',
-        lockError: 'Ungültiger Code. Bitte frage den Administrator nach einer Freigabe.',
+        lockSubtitle: 'Bitte gib deinen persönlichen Freigabe-Code ein, um die App freizuschalten.',
+        lockInputLabel: 'Zugangscode / Einladungscode', unlockBtn: 'App freischalten', lockError: 'Ungültiger Code.',
         dailyGoal: 'Tagesziel', eaten: 'Gegessen', water: 'Wasser heute', kcalLeft: 'kcal übrig', kcalOver: 'kcal drüber',
         protein: 'Eiweiß', carbs: 'Kohlenh.', fat: 'Fett', mainAddFood: 'Essen hinzufügen', mainAddWater: '+250ml Wasser',
         quickAdd: 'Schnell-Log (1 Fingertipp)', quickAddHint: 'Antippen zum Hinzufügen',
         scannerTitle: 'Smart KI-Scanner', modeMeal: 'Mahlzeit tracken', modeFridge: 'Kühlschrank-Reste',
         fridgeBanner: 'Fotografiere deinen offenen Kühlschrank oder tippe Vorräte ein – die KI zaubert Rezepte passend zu deinen offenen Tageskalorien!',
         inputPlaceholderMeal: 'Schreibe z. B.: „1 Portion Lasagne“ oder „1 Birne“...',
-        inputPlaceholderFridge: 'Welche Zutaten hast du da? Z. B.: „Eier, Tomaten, Schinken, Käse, Kartoffeln“ (oder mach ein Foto vom Kühlschrank)...',
-        btnPhoto: 'Foto / Kamera', btnAnalyzeMeal: 'Per KI analysieren', btnAnalyzeFridge: 'Rezepte für Rest-kcal zaubern',
-        reviewTitle: 'Erkannte Mahlzeit prüfen & anpassen',
-        btnCancel: 'Abbrechen', portionAdjust: 'Portionsgröße per Regler anpassen:', btnConfirmReview: 'Ins Tagebuch übernehmen',
-        suggestionsTitle: 'Was kann ich heute noch essen?', btnMoreIdeas: 'Neue Ideen',
-        aiIdeaBtn: '✨ Frische KI-Ideen live für meinen Rest berechnen',
+        inputPlaceholderFridge: 'Welche Zutaten hast du da? Z. B.: „Eier, Tomaten, Schinken, Käse“ (oder Foto machen)...',
+        btnPhoto: 'Foto / Kamera', btnAnalyzeMeal: 'Per KI analysieren', btnAnalyzeFridge: 'Rezepte zaubern',
+        reviewTitle: 'Erkannte Mahlzeit prüfen', btnCancel: 'Abbrechen', portionAdjust: 'Portionsgröße anpassen:',
+        btnConfirmReview: 'Ins Tagebuch übernehmen', suggestionsTitle: 'Was kann ich heute noch essen?',
+        btnMoreIdeas: 'Neue Ideen', aiIdeaBtn: '✨ Frische KI-Ideen live für meinen Rest berechnen',
         todayEaten: 'Heute gegessen', btnClearToday: 'Tageszähler auf 0 setzen',
-        emptyLog: 'Noch keine Mahlzeiten für heute eingetragen.<br/>Nutze oben den Schnell-Log, mache ein Foto oder tippe deine Mahlzeit ein.',
-        deleteItem: 'Löschen', undoAdded: 'Hinzugefügt:', undoBtn: 'Rückgängig',
-        navCockpit: 'Tages-Cockpit', navWeight: 'Gewicht & Trend', navAccess: 'Freigabe & KI',
+        emptyLog: 'Noch keine Mahlzeiten für heute eingetragen.', deleteItem: 'Löschen',
+        undoAdded: 'Hinzugefügt:', undoBtn: 'Rückgängig', navCockpit: 'Tages-Cockpit', navWeight: 'Gewicht & Trend', navAccess: 'Freigabe & KI',
         weightTitle: 'Gewichts-Trend & Erfolg', weightSub: 'Glättet tägliche Wasserschwankungen automatisch',
-        currentWeight: 'Aktuell', trendWeight: '7-Tage-Trend', targetWeight: 'Zielgewicht',
-        btnSaveWeight: 'Speichern', weightHistory: 'Gewichts-Verlauf', btnClearWeights: 'Verlauf leeren'
+        currentWeight: 'Aktuell', trendWeight: '7-Tage-Trend', targetWeight: 'Zielgewicht', btnSaveWeight: 'Speichern',
+        weightHistory: 'Gewichts-Verlauf', btnClearWeights: 'Verlauf leeren'
       },
       pl: {
         langIndicator: '🇵🇱 PL | 🇩🇪 DE', headerLang: '🇵🇱 PL ▾', lockBadge: 'Prywatna i Chroniona',
-        lockSubtitle: 'Ta aplikacja jest prywatna. Wpisz swój kod dostępu, aby odblokować aplikację.',
-        lockInputLabel: 'Kod dostępu / Kod zaproszenia', unlockBtn: 'Odblokuj aplikację',
-        lockError: 'Nieprawidłowy kod. Poproś administratora o dostęp.',
+        lockSubtitle: 'Wpisz swój kod dostępu, aby odblokować aplikację.',
+        lockInputLabel: 'Kod dostępu', unlockBtn: 'Odblokuj aplikację', lockError: 'Nieprawidłowy kod.',
         dailyGoal: 'Cel dzienny', eaten: 'Zjedzone', water: 'Woda dzisiaj', kcalLeft: 'kcal pozostało', kcalOver: 'kcal ponad cel',
         protein: 'Białko', carbs: 'Węglow.', fat: 'Tłuszcz', mainAddFood: 'Dodaj posiłek', mainAddWater: '+250ml Wody',
-        quickAdd: 'Szybkie dodawanie (1 klik)', quickAddHint: 'Dotknij, aby dodać',
+        quickAdd: 'Szybkie dodawanie', quickAddHint: 'Dotknij, aby dodać',
         scannerTitle: 'Inteligentny Skaner AI', modeMeal: 'Dodaj posiłek', modeFridge: 'Resztki z lodówki',
-        fridgeBanner: 'Zrób zdjęcie otwartej lodówki lub wpisz składniki – AI stworzy przepisy idealnie dopasowane do Twoich pozostałych kalorii!',
+        fridgeBanner: 'Zrób zdjęcie otwartej lodówki lub wpisz składniki – AI stworzy przepisy dopasowane do Twoich pozostałych kalorii!',
         inputPlaceholderMeal: 'Napisz np.: „1 porcja lasagne” lub „1 gruszka”...',
-        inputPlaceholderFridge: 'Jakie masz składniki? Np.: „Jajka, pomidory, szynka, ser, ziemniaki” (lub zrób zdjęcie lodówki)...',
-        btnPhoto: 'Zdjęcie / Aparat', btnAnalyzeMeal: 'Analizuj przez AI', btnAnalyzeFridge: 'Stwórz przepisy z lodówki',
-        reviewTitle: 'Sprawdź i dopasuj posiłek',
-        btnCancel: 'Anuluj', portionAdjust: 'Dopasuj wielkość porcji:', btnConfirmReview: 'Dodaj do dziennika',
-        suggestionsTitle: 'Co mogę jeszcze dzisiaj zjeść?', btnMoreIdeas: 'Inne pomysły',
-        aiIdeaBtn: '✨ Generuj nowe pomysły AI dla pozostałych kalorii',
+        inputPlaceholderFridge: 'Jakie masz składniki? Np.: „Jajka, pomidory, szynka, ser” (lub zrób zdjęcie)...',
+        btnPhoto: 'Zdjęcie / Aparat', btnAnalyzeMeal: 'Analizuj przez AI', btnAnalyzeFridge: 'Stwórz przepisy',
+        reviewTitle: 'Sprawdź posiłek', btnCancel: 'Anuluj', portionAdjust: 'Dopasuj porcję:',
+        btnConfirmReview: 'Dodaj do dziennika', suggestionsTitle: 'Co mogę jeszcze dzisiaj zjeść?',
+        btnMoreIdeas: 'Inne pomysły', aiIdeaBtn: '✨ Generuj nowe pomysły AI dla pozostałych kalorii',
         todayEaten: 'Dzisiaj zjedzone', btnClearToday: 'Wyzeruj licznik dnia',
-        emptyLog: 'Brak wpisanych posiłków na dziś.<br/>Użyj szybkiego dodawania powyżej, zrób zdjęcie lub wpisz co zjadłeś.',
-        deleteItem: 'Usuń', undoAdded: 'Dodano:', undoBtn: 'Cofnij',
-        navCockpit: 'Panel dnia', navWeight: 'Waga i trend', navAccess: 'Dostęp i AI',
-        weightTitle: 'Trend wagi i postępy', weightSub: 'Automatycznie wygładza dzienne wahania wody',
-        currentWeight: 'Obecnie', trendWeight: 'Trend 7-dniowy', targetWeight: 'Cel wagi',
-        btnSaveWeight: 'Zapisz', weightHistory: 'Historia wagi', btnClearWeights: 'Wyczyść historię'
+        emptyLog: 'Brak wpisanych posiłków na dziś.', deleteItem: 'Usuń',
+        undoAdded: 'Dodano:', undoBtn: 'Cofnij', navCockpit: 'Panel dnia', navWeight: 'Waga i trend', navAccess: 'Dostęp i AI',
+        weightTitle: 'Trend wagi i postępy', weightSub: 'Automatycznie wygładza wahania wody',
+        currentWeight: 'Obecnie', trendWeight: 'Trend 7-dniowy', targetWeight: 'Cel wagi', btnSaveWeight: 'Zapisz',
+        weightHistory: 'Historia wagi', btnClearWeights: 'Wyczyść historię'
       }
     };
 
@@ -459,17 +428,17 @@
         { label: '+250ml Wasser', sub: 'Hydration', water: 0.25, icon: '💧' },
         { label: 'Kaffee + Milch', sub: '38 kcal', name: 'Kaffee mit Milch (~200ml)', kcal: 38, p: 1.2, c: 4.5, f: 1.5, icon: '☕' },
         { label: 'Kaffee schwarz', sub: '2 kcal', name: 'Kaffee schwarz (pur)', kcal: 2, p: 0.2, c: 0, f: 0, icon: '☕' },
-        { label: '1 Apfel', sub: '80 kcal', name: '1 Apfel (mittel, ~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, icon: '🍏' },
+        { label: '1 Apfel', sub: '80 kcal', name: '1 Apfel (~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, icon: '🍏' },
         { label: '2 Eier', sub: '155 kcal', name: '2 gekochte Eier (~110g)', kcal: 155, p: 13, c: 1.1, f: 11, icon: '🥚' },
         { label: 'Magerquark', sub: '170 kcal', name: 'Portion Magerquark (250g)', kcal: 170, p: 30, c: 10, f: 0.7, icon: '🥣' }
       ],
       pl: [
         { label: '+250ml Wody', sub: 'Nawodnienie', water: 0.25, icon: '💧' },
         { label: 'Kawa z mlekiem', sub: '38 kcal', name: 'Kawa z mlekiem (~200ml)', kcal: 38, p: 1.2, c: 4.5, f: 1.5, icon: '☕' },
-        { label: 'Kawa czarna', sub: '2 kcal', name: 'Kawa czarna (bez cukru)', kcal: 2, p: 0.2, c: 0, f: 0, icon: '☕' },
-        { label: '1 Jabłko', sub: '80 kcal', name: '1 Jabłko (średnie, ~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, icon: '🍏' },
+        { label: 'Kawa czarna', sub: '2 kcal', name: 'Kawa czarna', kcal: 2, p: 0.2, c: 0, f: 0, icon: '☕' },
+        { label: '1 Jabłko', sub: '80 kcal', name: '1 Jabłko (~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, icon: '🍏' },
         { label: '2 Jajka', sub: '155 kcal', name: '2 Jajka gotowane (~110g)', kcal: 155, p: 13, c: 1.1, f: 11, icon: '🥚' },
-        { label: 'Twaróg chudy', sub: '170 kcal', name: 'Porcja twarogu chudego (200g)', kcal: 170, p: 32, c: 7, f: 1.0, icon: '🥣' }
+        { label: 'Twaróg chudy', sub: '170 kcal', name: 'Twaróg chudy (200g)', kcal: 170, p: 32, c: 7, f: 1.0, icon: '🥣' }
       ]
     };
 
@@ -478,18 +447,16 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
-    // ERWEITERTES DATENMODELL (v3 Architektur für alle 8 Roadmap-Features)
     const defaultState = {
       lang: 'de', unlocked: false, userRole: 'admin', masterCode: 'START-2026', geminiApiKey: getDefaultEncodedKey(),
       inviteCodes: [{ name: 'Familie', code: 'FIT-FAMILIE-7821' }],
       goals: { kcal: 1900, protein: 140, carbs: 180, fat: 65, targetWeight: 83.0, maxSugarG: 35, fiberGoalG: 30, waterGoalLiters: 2.5 },
       lastActiveDate: getTodayDateKey(), waterLiters: 0,
-      todayLog: [], pastDaysLog: [], weightLog: [],
-      energyLog: [], shoppingList: [], fridgeItems: []
+      todayLog: [], pastDaysLog: [], weightLog: [], energyLog: [], shoppingList: [], fridgeItems: []
     };
 
     let state = loadState();
-    let scannerMode = 'meal'; // 'meal' | 'fridge'
+    let scannerMode = 'meal';
     let pendingDetectedItems = [];
     let currentFridgeRecipes = [];
     let currentPortionScale = 1.0;
@@ -501,9 +468,7 @@
     let lastAddedCount = 0;
 
     function isValidApiKey(k) {
-      if (!k || typeof k !== 'string') return false;
-      const clean = k.trim();
-      return clean.startsWith('AIza') || clean.startsWith('AQ.') || clean.length >= 20;
+      return typeof k === 'string' && (k.trim().startsWith('AIza') || k.trim().startsWith('AQ.') || k.trim().length >= 20);
     }
 
     function loadState() {
@@ -513,9 +478,6 @@
         const loaded = Object.assign(JSON.parse(JSON.stringify(defaultState)), JSON.parse(raw));
         loaded.goals = Object.assign(JSON.parse(JSON.stringify(defaultState.goals)), loaded.goals || {});
         if (!Array.isArray(loaded.pastDaysLog)) loaded.pastDaysLog = [];
-        if (!Array.isArray(loaded.energyLog)) loaded.energyLog = [];
-        if (!Array.isArray(loaded.shoppingList)) loaded.shoppingList = [];
-        if (!Array.isArray(loaded.fridgeItems)) loaded.fridgeItems = [];
         if (!isValidApiKey(loaded.geminiApiKey)) loaded.geminiApiKey = getDefaultEncodedKey();
         return loaded;
       } catch (e) { return JSON.parse(JSON.stringify(defaultState)); }
@@ -528,15 +490,9 @@
         const params = new URLSearchParams(window.location.search);
         const codeParam = params.get('code');
         const keyParam = params.get('k');
-        if (keyParam) {
-          const decodedKey = atob(keyParam);
-          if (isValidApiKey(decodedKey)) state.geminiApiKey = decodedKey;
-        }
+        if (keyParam && isValidApiKey(atob(keyParam))) state.geminiApiKey = atob(keyParam);
         if (codeParam) document.getElementById('accessCodeInput').value = codeParam;
-        if (codeParam || keyParam) {
-          saveState();
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
+        if (codeParam || keyParam) { saveState(); window.history.replaceState({}, document.title, window.location.pathname); }
       } catch (e) {}
     }
 
@@ -544,21 +500,16 @@
       const todayKey = getTodayDateKey();
       if (state.lastActiveDate && state.lastActiveDate !== todayKey) {
         if (state.todayLog && state.todayLog.length > 0) {
-          const totalKcal = state.todayLog.reduce((sum, item) => sum + item.kcal, 0);
-          const totalP = Math.round(state.todayLog.reduce((sum, item) => sum + item.p, 0));
-          const totalC = Math.round(state.todayLog.reduce((sum, item) => sum + item.c, 0));
-          const totalF = Math.round(state.todayLog.reduce((sum, item) => sum + item.f, 0));
-          state.pastDaysLog.unshift({
-            date: state.lastActiveDate, kcal: totalKcal, protein: totalP, carbs: totalC, fat: totalF,
-            waterLiters: state.waterLiters, goal: state.goals.kcal
-          });
-          state.pastDaysLog = state.pastDaysLog.slice(0, 30); // 30 Tage für 14-Tage-Prognose!
+          const totalKcal = state.todayLog.reduce((s, i) => s + i.kcal, 0);
+          const totalP = Math.round(state.todayLog.reduce((s, i) => s + i.p, 0));
+          state.pastDaysLog.unshift({ date: state.lastActiveDate, kcal: totalKcal, protein: totalP, goal: state.goals.kcal });
+          state.pastDaysLog = state.pastDaysLog.slice(0, 30);
         }
         state.todayLog = []; state.waterLiters = 0; state.lastActiveDate = todayKey; saveState();
       } else if (!state.lastActiveDate) { state.lastActiveDate = todayKey; saveState(); }
     }
 
-    function t(key) { const lang = state.lang || 'de'; return (i18n[lang] && i18n[lang][key]) || i18n.de[key] || key; }
+    function t(key) { return (i18n[state.lang || 'de'] && i18n[state.lang || 'de'][key]) || i18n.de[key] || key; }
 
     function toggleLanguage() {
       state.lang = state.lang === 'de' ? 'pl' : 'de';
@@ -653,23 +604,15 @@
 
     function saveGeminiKey() {
       state.geminiApiKey = document.getElementById('geminiKeyInput').value.trim();
-      saveState();
-      document.getElementById('apiErrorBox').classList.add('hidden');
-      renderAll();
-      alert('KI-Schlüssel gespeichert! Status: Gemini Vision KI aktiv.');
+      saveState(); document.getElementById('apiErrorBox').classList.add('hidden'); renderAll();
+      alert('KI-Schlüssel gespeichert!');
     }
 
     async function pasteAndSaveKey() {
       try {
         const text = await navigator.clipboard.readText();
-        if (text && text.trim().length > 10) {
-          document.getElementById('geminiKeyInput').value = text.trim();
-          saveGeminiKey();
-        } else { alert('Zwischenablage ist leer.'); }
-      } catch (e) {
-        alert('Bitte tippe unten kurz in das Textfeld, wähle „Einsetzen“ und tippe auf Speichern.');
-        document.getElementById('geminiKeyInput').focus();
-      }
+        if (text && text.trim().length > 10) { document.getElementById('geminiKeyInput').value = text.trim(); saveGeminiKey(); }
+      } catch (e) { document.getElementById('geminiKeyInput').focus(); }
     }
 
     function loadSavedChatKey() {
@@ -690,30 +633,17 @@
 
     function getInviteMessageText(code) {
       let baseUrl = window.location.href.includes('http') ? window.location.href.split('#')[0].split('?')[0] : 'https://kadorabomaiz-glitch.github.io/calsnap/';
-      const params = new URLSearchParams();
-      params.set('code', code);
+      const params = new URLSearchParams({ code });
       if (isValidApiKey(state.geminiApiKey)) params.set('k', btoa(state.geminiApiKey.trim()));
-      const fullLink = `${baseUrl}?${params.toString()}`;
-      return state.lang === 'pl'
-        ? `Cześć! Oto dostęp do naszej aplikacji CalSnap AI:\n🔗 Link: ${fullLink}\n🔑 Twój kod dostępu: ${code}`
-        : `Hier ist deine Einladung für unsere CalSnap AI App:\n🔗 App-Link: ${fullLink}\n🔑 Dein Freigabe-Code: ${code}`;
+      return `CalSnap AI:\n🔗 ${baseUrl}?${params.toString()}\n🔑 Code: ${code}`;
     }
 
-    function copyInviteCode() {
-      navigator.clipboard.writeText(getInviteMessageText(document.getElementById('generatedCodeText').textContent));
-      alert('Einladungslink + Code kopiert!');
-    }
-
-    function shareInviteWhatsApp() {
-      const text = getInviteMessageText(document.getElementById('generatedCodeText').textContent);
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-    }
-
+    function copyInviteCode() { navigator.clipboard.writeText(getInviteMessageText(document.getElementById('generatedCodeText').textContent)); alert('Kopiert!'); }
+    function shareInviteWhatsApp() { window.open(`https://wa.me/?text=${encodeURIComponent(getInviteMessageText(document.getElementById('generatedCodeText').textContent))}`, '_blank'); }
     function deleteInviteCode(idx) { state.inviteCodes.splice(idx, 1); saveState(); renderInviteCodes(); }
 
     function renderInviteCodes() {
       const container = document.getElementById('inviteCodeList');
-      if (!state.inviteCodes.length) { container.innerHTML = '<div class="text-slate-500">--</div>'; return; }
       container.innerHTML = state.inviteCodes.map((item, idx) => `
         <div class="flex items-center justify-between bg-slate-950/70 px-3 py-2 rounded-xl border border-slate-800">
           <div><span class="font-semibold text-white">${item.name}:</span><code class="ml-1.5 text-emerald-400 font-mono">${item.code}</code></div>
@@ -721,88 +651,81 @@
         </div>`).join('');
     }
 
-    const localFoodDB = [
-      { keys: ['birne', 'birnen', 'gruszka', 'gruszki'], nameDe: 'Birne (~160g)', namePl: 'Gruszka (~160g)', kcal: 92, p: 0.6, c: 22, f: 0.3, icon: '🍐' },
-      { keys: ['lasagne', 'lasania', 'lasagne bolognese'], nameDe: 'Portion Lasagne Bolognese (~350g)', namePl: 'Porcja Lasagne (~350g)', kcal: 540, p: 28, c: 44, f: 27, icon: '🍝' },
-      { keys: ['carbonara', 'spaghetti carbonara'], nameDe: 'Teller Spaghetti Carbonara (~350g)', namePl: 'Spaghetti Carbonara (~350g)', kcal: 610, p: 25, c: 65, f: 27, icon: '🍝' },
-      { keys: ['bolognese', 'spaghetti bolognese'], nameDe: 'Spaghetti Bolognese (~350g)', namePl: 'Spaghetti Bolognese (~350g)', kcal: 520, p: 26, c: 64, f: 16, icon: '🍝' },
-      { keys: ['auflauf', 'nudelauflauf', 'kartoffelauflauf', 'zapiekanka'], nameDe: 'Portion Auflauf (~320g)', namePl: 'Porcja zapiekanki (~320g)', kcal: 490, p: 22, c: 46, f: 23, icon: '🥘' },
-      { keys: ['apfelsaft', 'apfelschorle', 'sok jabłkowy'], nameDe: 'Glas Apfelsaft (250ml)', namePl: 'Szklanka soku jabłkowego (250ml)', kcal: 115, p: 0.3, c: 28, f: 0.1, icon: '🧃' },
-      { keys: ['apfel', 'äpfel', 'jabłko', 'jabłka', 'jablko', 'jablka'], nameDe: 'Apfel (~150g)', namePl: 'Jabłko (~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, icon: '🍏' },
-      { keys: ['banane', 'bananen', 'banan', 'banany'], nameDe: 'Banane (~120g)', namePl: 'Banan (~120g)', kcal: 105, p: 1.3, c: 27, f: 0.4, icon: '🍌' },
-      { keys: ['käsebrötchen', 'bułka z serem', 'bulka z serem'], nameDe: 'Käsebrötchen (~110g)', namePl: 'Bułka z serem (~110g)', kcal: 290, p: 12, c: 36, f: 10, icon: '🧀' },
-      { keys: ['brötchen', 'semmel', 'bułka', 'bulka', 'bułki'], nameDe: 'Brötchen (~65g)', namePl: 'Bułka (~65g)', kcal: 165, p: 5.5, c: 33, f: 1.2, icon: '🥖' },
-      { keys: ['rührei', 'spiegelei', 'omelett', 'jajecznica'], nameDe: 'Portion Rührei/Spiegelei (~150g)', namePl: 'Jajecznica (~150g)', kcal: 240, p: 18, c: 2, f: 18, icon: '🍳' },
-      { keys: ['ei', 'eier', 'jajko', 'jajka', 'jajek'], nameDe: 'Ei gekocht (~55g)', namePl: 'Jajko gotowane (~55g)', kcal: 78, p: 6.5, c: 0.6, f: 5.5, icon: '🥚' },
-      { keys: ['kaffee', 'kawa', 'kawy', 'cappuccino', 'latte'], nameDe: 'Kaffee (~200ml)', namePl: 'Kawa (~200ml)', kcal: 35, p: 1.2, c: 3.5, f: 1.2, icon: '☕' },
-      { keys: ['hähnchen', 'huhn', 'putenbrust', 'hähnchenbrust', 'kurczak', 'pierś z kurczaka'], nameDe: 'Hähnchenbrust (~180g)', namePl: 'Pierś z kurczaka (~180g)', kcal: 220, p: 42, c: 0, f: 5, icon: '🍗' },
-      { keys: ['reis', 'ryż', 'ryz'], nameDe: 'Portion Reis gekocht (~180g)', namePl: 'Porcja ryżu (~180g)', kcal: 240, p: 5, c: 52, f: 0.6, icon: '🍚' },
-      { keys: ['nudeln', 'pasta', 'spaghetti', 'makaron'], nameDe: 'Portion Nudeln (~200g)', namePl: 'Porcja makaronu (~200g)', kcal: 310, p: 11, c: 62, f: 2, icon: '🍝' },
-      { keys: ['pizza'], nameDe: 'Pizza (~300g)', namePl: 'Pizza (~300g)', kcal: 680, p: 28, c: 78, f: 26, icon: '🍕' },
-      { keys: ['döner', 'kebab'], nameDe: 'Döner Kebab (~350g)', namePl: 'Kebab (~350g)', kcal: 650, p: 38, c: 58, f: 28, icon: '🥙' },
-      { keys: ['burger', 'cheeseburger', 'hamburger'], nameDe: 'Burger (~250g)', namePl: 'Burger (~250g)', kcal: 560, p: 30, c: 44, f: 28, icon: '🍔' },
-      { keys: ['schnitzel', 'schabowy', 'kotlet', 'frikadelle', 'mielony'], nameDe: 'Schnitzel / Kotlet (~180g)', namePl: 'Kotlet schabowy / mielony (~180g)', kcal: 380, p: 32, c: 16, f: 21, icon: '🥩' },
-      { keys: ['lachs', 'fisch', 'thunfisch', 'ryba', 'łosoś'], nameDe: 'Portion Fisch / Lachs (~180g)', namePl: 'Porcja ryby / łososia (~180g)', kcal: 320, p: 36, c: 0, f: 18, icon: '🐟' },
-      { keys: ['suppe', 'eintopf', 'gulasch', 'zupa', 'rosół', 'żurek', 'bigos'], nameDe: 'Teller Suppe / Eintopf (~350ml)', namePl: 'Talerz zupy / Bigos (~350ml)', kcal: 290, p: 16, c: 24, f: 14, icon: '🍲' },
-      { keys: ['kartoffel', 'kartoffeln', 'ziemniaki', 'ziemniak'], nameDe: 'Portion Kartoffeln (~200g)', namePl: 'Porcja ziemniaków (~200g)', kcal: 160, p: 4, c: 35, f: 0.2, icon: '🥔' },
-      { keys: ['pommes', 'frytki'], nameDe: 'Portion Pommes (~150g)', namePl: 'Porcja frytek (~150g)', kcal: 365, p: 4, c: 45, f: 18, icon: '🍟' },
-      { keys: ['salat', 'sałatka', 'salatka', 'mizeria'], nameDe: 'Gemischter Salat (~220g)', namePl: 'Sałatka mieszana (~220g)', kcal: 165, p: 4, c: 10, f: 11, icon: '🥗' },
-      { keys: ['quark', 'magerquark', 'skyr', 'joghurt', 'twaróg', 'twarog', 'jogurt'], nameDe: 'Quark / Skyr / Joghurt (250g)', namePl: 'Twaróg / Skyr / Jogurt (250g)', kcal: 170, p: 28, c: 10, f: 1.5, icon: '🥣' },
-      { keys: ['haferflocken', 'müsli', 'owsianka', 'płatki owsiane'], nameDe: 'Haferflocken / Müsli (~180g)', namePl: 'Owsianka / Musli (~180g)', kcal: 240, p: 9, c: 38, f: 5, icon: '🌾' },
-      { keys: ['schokolade', 'riegel', 'czekolada', 'baton', 'kuchen', 'ciasto'], nameDe: 'Süßigkeit / Kuchen (~60g)', namePl: 'Słodycze / Ciasto (~60g)', kcal: 240, p: 3, c: 32, f: 11, icon: '🍫' },
-      { keys: ['pierogi', 'piroggen'], nameDe: 'Portion Pierogi (6 Stück, ~240g)', namePl: 'Porcja pierogów (6 szt., ~240g)', kcal: 420, p: 14, c: 62, f: 12, icon: '🥟' },
-      { keys: ['brot', 'abendbrot', 'vollkornbrot', 'toast', 'chleb', 'kanapka', 'kanapki'], nameDe: 'Belegtes Brot (~95g)', namePl: 'Kanapka (~95g)', kcal: 215, p: 9, c: 25, f: 8, icon: '🍞' }
+    // Kompakte Lebensmittel-Datenbank
+    const foodTuples = [
+      ['birne|birnen|gruszka|gruszki', 'Birne (~160g)', 'Gruszka (~160g)', 92, 0.6, 22, 0.3, '🍐'],
+      ['lasagne|lasania', 'Portion Lasagne (~350g)', 'Porcja Lasagne (~350g)', 540, 28, 44, 27, '🍝'],
+      ['carbonara', 'Spaghetti Carbonara (~350g)', 'Spaghetti Carbonara (~350g)', 610, 25, 65, 27, '🍝'],
+      ['bolognese', 'Spaghetti Bolognese (~350g)', 'Spaghetti Bolognese (~350g)', 520, 26, 64, 16, '🍝'],
+      ['auflauf|zapiekanka', 'Portion Auflauf (~320g)', 'Porcja zapiekanki (~320g)', 490, 22, 46, 23, '🥘'],
+      ['apfelsaft|sok jabłkowy', 'Glas Apfelsaft (250ml)', 'Szklanka soku (250ml)', 115, 0.3, 28, 0.1, '🧃'],
+      ['apfel|äpfel|jabłko|jabłka', 'Apfel (~150g)', 'Jabłko (~150g)', 80, 0.5, 19, 0.3, '🍏'],
+      ['banane|bananen|banan|banany', 'Banane (~120g)', 'Banan (~120g)', 105, 1.3, 27, 0.4, '🍌'],
+      ['käsebrötchen|bułka z serem', 'Käsebrötchen (~110g)', 'Bułka z serem (~110g)', 290, 12, 36, 10, '🧀'],
+      ['brötchen|semmel|bułka|bułki', 'Brötchen (~65g)', 'Bułka (~65g)', 165, 5.5, 33, 1.2, '🥖'],
+      ['rührei|spiegelei|omelett|jajecznica', 'Rührei/Omelett (~150g)', 'Jajecznica (~150g)', 240, 18, 2, 18, '🍳'],
+      ['ei|eier|jajko|jajka', 'Ei gekocht (~55g)', 'Jajko gotowane (~55g)', 78, 6.5, 0.6, 5.5, '🥚'],
+      ['kaffee|kawa|cappuccino|latte', 'Kaffee (~200ml)', 'Kawa (~200ml)', 35, 1.2, 3.5, 1.2, '☕'],
+      ['hähnchen|huhn|putenbrust|kurczak', 'Hähnchenbrust (~180g)', 'Pierś z kurczaka (~180g)', 220, 42, 0, 5, '🍗'],
+      ['reis|ryż', 'Portion Reis (~180g)', 'Porcja ryżu (~180g)', 240, 5, 52, 0.6, '🍚'],
+      ['nudeln|pasta|spaghetti|makaron', 'Portion Nudeln (~200g)', 'Porcja makaronu (~200g)', 310, 11, 62, 2, '🍝'],
+      ['pizza', 'Pizza (~300g)', 'Pizza (~300g)', 680, 28, 78, 26, '🍕'],
+      ['döner|kebab', 'Döner Kebab (~350g)', 'Kebab (~350g)', 650, 38, 58, 28, '🥙'],
+      ['burger|cheeseburger', 'Burger (~250g)', 'Burger (~250g)', 560, 30, 44, 28, '🍔'],
+      ['schnitzel|schabowy|kotlet', 'Schnitzel / Kotlet (~180g)', 'Kotlet schabowy (~180g)', 380, 32, 16, 21, '🥩'],
+      ['lachs|fisch|thunfisch|ryba|łosoś', 'Portion Fisch/Lachs (~180g)', 'Porcja ryby/łososia (~180g)', 320, 36, 0, 18, '🐟'],
+      ['suppe|eintopf|zupa|rosół|bigos', 'Teller Suppe (~350ml)', 'Talerz zupy (~350ml)', 290, 16, 24, 14, '🍲'],
+      ['kartoffel|kartoffeln|ziemniaki', 'Portion Kartoffeln (~200g)', 'Porcja ziemniaków (~200g)', 160, 4, 35, 0.2, '🥔'],
+      ['pommes|frytki', 'Portion Pommes (~150g)', 'Porcja frytek (~150g)', 365, 4, 45, 18, '🍟'],
+      ['salat|sałatka|mizeria', 'Gemischter Salat (~220g)', 'Sałatka mieszana (~220g)', 165, 4, 10, 11, '🥗'],
+      ['quark|magerquark|skyr|joghurt|twaróg', 'Quark / Skyr (250g)', 'Twaróg / Skyr (250g)', 170, 28, 10, 1.5, '🥣'],
+      ['haferflocken|müsli|owsianka', 'Haferflocken / Müsli (~180g)', 'Owsianka / Musli (~180g)', 240, 9, 38, 5, '🌾'],
+      ['schokolade|riegel|czekolada|kuchen|ciasto', 'Süßigkeit / Kuchen (~60g)', 'Słodycze / Ciasto (~60g)', 240, 3, 32, 11, '🍫'],
+      ['pierogi|piroggen', 'Portion Pierogi (~240g)', 'Porcja pierogów (~240g)', 420, 14, 62, 12, '🥟'],
+      ['brot|abendbrot|vollkornbrot|chleb|kanapka', 'Belegtes Brot (~95g)', 'Kanapka (~95g)', 215, 9, 25, 8, '🍞']
     ];
 
-    function parseNumberWord(word) {
-      const map = { 'ein': 1, 'eine': 1, 'einen': 1, 'zwei': 2, 'drei': 3, 'vier': 4, 'fünf': 5, 'halbe': 0.5, 'halbes': 0.5, 'jeden': 1, 'jedna': 1, 'jedno': 1, 'dwa': 2, 'dwie': 2, 'trzy': 3, 'cztery': 4, 'pięć': 5, 'pół': 0.5 };
-      if (!word) return 1;
-      const lower = word.toLowerCase().replace(',', '.');
-      if (map[lower] !== undefined) return map[lower];
-      const num = parseFloat(lower);
-      return isNaN(num) ? 1 : num;
+    function parseNumberWord(w) {
+      const m = { ein:1, eine:1, einen:1, zwei:2, drei:3, vier:4, fünf:5, halbe:0.5, jeden:1, jedna:1, dwa:2, dwie:2, trzy:3, cztery:4, pół:0.5 };
+      if (!w) return 1;
+      const l = w.toLowerCase().replace(',', '.');
+      return m[l] !== undefined ? m[l] : (parseFloat(l) || 1);
     }
 
     function parseNaturalText(text) {
       const lower = text.toLowerCase();
       const results = [];
-      localFoodDB.forEach(item => {
-        for (const key of item.keys) {
-          const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|halbes|jeden|jedna|dwa|dwie|trzy|cztery|pół)\\s*(?:g|gramm|ml|glas|szklanka|stück|szt|tassen|portion|portionen|porcja|porcje|teller)?\\s+)?(${escapedKey})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
+      foodTuples.forEach(([keysStr, nameDe, namePl, kcal, p, c, f, icon]) => {
+        for (const key of keysStr.split('|')) {
+          const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|jeden|jedna|dwa|dwie|trzy)\\s*(?:g|gramm|ml|glas|stück|szt|portion|porcja|teller)?\\s+)?(${key})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
           const match = lower.match(regex);
           if (match) {
-            let count = 1;
-            if (match[1]) {
-              const rawNum = parseNumberWord(match[1]);
-              count = rawNum > 20 ? +(rawNum / 200).toFixed(1) : rawNum;
-            }
-            const baseName = state.lang === 'pl' ? item.namePl : item.nameDe;
-            results.push({ name: `${count !== 1 ? count + 'x ' : ''}${baseName}`, kcal: Math.round(item.kcal * count), p: +(item.p * count).toFixed(1), c: +(item.c * count).toFixed(1), f: +(item.f * count).toFixed(1), icon: item.icon });
+            const rawNum = match[1] ? parseNumberWord(match[1]) : 1;
+            const count = rawNum > 20 ? +(rawNum / 200).toFixed(1) : rawNum;
+            const baseName = state.lang === 'pl' ? namePl : nameDe;
+            results.push({ name: `${count !== 1 ? count + 'x ' : ''}${baseName}`, kcal: Math.round(kcal * count), p: +(p * count).toFixed(1), c: +(c * count).toFixed(1), f: +(f * count).toFixed(1), icon });
             break;
           }
         }
       });
-      if (results.length === 0 && text.trim().length > 0) {
-        results.push({ name: `${text.trim().slice(0, 40)} (~300g)`, kcal: 460, p: 22, c: 45, f: 20, icon: '🍽️' });
-      }
+      if (!results.length && text.trim()) results.push({ name: `${text.trim().slice(0, 38)} (~300g)`, kcal: 440, p: 22, c: 42, f: 18, icon: '🍽️' });
       return results;
     }
 
     function compressImageFile(file, maxDim = 800, quality = 0.78) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = e => {
           const img = new Image();
-          img.onload = function() {
+          img.onload = () => {
             const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
             const canvas = document.createElement('canvas');
             canvas.width = Math.round(img.width * scale); canvas.height = Math.round(img.height * scale);
             canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-            const thumbCanvas = document.createElement('canvas');
-            thumbCanvas.width = 96; thumbCanvas.height = 96;
-            thumbCanvas.getContext('2d').drawImage(img, 0, 0, 96, 96);
-            resolve({ fullDataUrl: canvas.toDataURL('image/jpeg', quality), thumbDataUrl: thumbCanvas.toDataURL('image/jpeg', 0.6) });
+            const tCanvas = document.createElement('canvas');
+            tCanvas.width = 96; tCanvas.height = 96;
+            tCanvas.getContext('2d').drawImage(img, 0, 0, 96, 96);
+            resolve({ fullDataUrl: canvas.toDataURL('image/jpeg', quality), thumbDataUrl: tCanvas.toDataURL('image/jpeg', 0.6) });
           };
           img.onerror = reject; img.src = e.target.result;
         };
@@ -820,7 +743,7 @@
         document.getElementById('photoPreviewContainer').classList.remove('hidden');
         document.getElementById('apiErrorBox').classList.add('hidden');
         analyzeInput();
-      } catch (e) { alert('Foto konnte nicht geladen werden.'); }
+      } catch (e) { alert('Foto-Fehler'); }
     }
 
     function clearPhoto() {
@@ -829,7 +752,6 @@
       document.getElementById('photoPreviewContainer').classList.add('hidden');
     }
 
-    // ZENTRALER ROUTER FÜR ALLE KI-MODI (Mahlzeit & Kühlschrank-Reste)
     async function analyzeInput() {
       const text = document.getElementById('naturalInput').value.trim();
       if (!text && !selectedPhotoBase64) {
@@ -845,25 +767,20 @@
       try {
         if (scannerMode === 'fridge') {
           await runFridgeLeftoverAI(text, selectedPhotoBase64);
+        } else if (isValidApiKey(state.geminiApiKey)) {
+          openReviewCard(await callGeminiVisionAPI(text, selectedPhotoBase64));
+        } else if (text) {
+          openReviewCard(parseNaturalText(text));
         } else {
-          if (isValidApiKey(state.geminiApiKey)) {
-            const items = await callGeminiVisionAPI(text, selectedPhotoBase64);
-            openReviewCard(items);
-          } else if (text) {
-            openReviewCard(parseNaturalText(text));
-          } else {
-            const errBox = document.getElementById('apiErrorBox');
-            errBox.classList.remove('hidden');
-            document.getElementById('apiErrorText').innerHTML = 'Bitte Key prüfen – oder schreibe kurz ins Textfeld, was auf dem Foto ist:';
-          }
+          document.getElementById('apiErrorBox').classList.remove('hidden');
+          document.getElementById('apiErrorText').innerHTML = 'Bitte Key prüfen – oder schreibe kurz ins Textfeld, was auf dem Foto ist:';
         }
       } catch (err) {
         if (scannerMode === 'meal' && text) {
           openReviewCard(parseNaturalText(text));
         } else {
-          const errBox = document.getElementById('apiErrorBox');
-          errBox.classList.remove('hidden');
-          document.getElementById('apiErrorText').innerHTML = `KI-Hinweis: <b>${err.message || 'Anfrage fehlgeschlagen'}</b>`;
+          document.getElementById('apiErrorBox').classList.remove('hidden');
+          document.getElementById('apiErrorText').innerHTML = `KI-Hinweis: <b>${err.message || 'Fehler'}</b>`;
         }
       } finally {
         btn.innerHTML = originalHtml; btn.disabled = false;
@@ -873,115 +790,80 @@
     async function callGeminiRequest(parts) {
       const apiKey = state.geminiApiKey.trim();
       const payload = { contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json' } };
-      const modelsToTry = ['gemini-3.0-flash', 'gemini-3-flash-preview', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
-      const buildUrl = (model, useVertex) => useVertex
-        ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`
-        : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const models = ['gemini-3.0-flash', 'gemini-3-flash-preview', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+      const buildUrl = (m, v) => v
+        ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`
+        : `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
       const isAq = apiKey.startsWith('AQ.');
       const queue = [];
-      modelsToTry.forEach(m => { queue.push(buildUrl(m, isAq)); queue.push(buildUrl(m, !isAq)); });
+      models.forEach(m => { queue.push(buildUrl(m, isAq)); queue.push(buildUrl(m, !isAq)); });
 
       let lastErr = null;
       for (let i = 0; i < queue.length; i++) {
         try {
-          const response = await fetch(queue[i], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-          const data = await response.json();
-          if (!response.ok || data.error) {
-            const msg = data.error?.message || `HTTP ${response.status}`;
+          const res = await fetch(queue[i], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          const data = await res.json();
+          if (!res.ok || data.error) {
+            const msg = data.error?.message || `HTTP ${res.status}`;
             lastErr = new Error(msg);
-            const suggested = msg.match(/models\/([a-zA-Z0-9._-]+)/);
-            if (suggested && suggested[1] && !modelsToTry.includes(suggested[1])) {
-              modelsToTry.push(suggested[1]);
-              queue.splice(i + 1, 0, buildUrl(suggested[1], isAq), buildUrl(suggested[1], !isAq));
+            const sug = msg.match(/models\/([a-zA-Z0-9._-]+)/);
+            if (sug && sug[1] && !models.includes(sug[1])) {
+              models.push(sug[1]);
+              queue.splice(i + 1, 0, buildUrl(sug[1], isAq), buildUrl(sug[1], !isAq));
             }
             continue;
           }
-          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const jsonMatch = rawText.replace(/```json/g, '').replace(/```/g, '').trim().match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
-          if (!jsonMatch) continue;
-          return JSON.parse(jsonMatch[0]);
+          const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const m = raw.replace(/```json/g, '').replace(/```/g, '').trim().match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
+          if (m) return JSON.parse(m[0]);
         } catch (e) { lastErr = e; }
       }
       throw lastErr || new Error('KI-Verbindung fehlgeschlagen');
     }
 
     async function callGeminiVisionAPI(text, base64DataUrl) {
-      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
-      const promptText = `Du bist ein präziser KI-Ernährungsexperte. Analysiere das Foto und/oder den Text ("${text || 'Siehe Foto'}"). Erkenne das genaue Lebensmittel oder Gericht, schätze das Gewicht in Gramm (~g) und berechne Kalorien (kcal), Eiweiß (p), Kohlenhydrate (c), Fett (f) und Zucker (sugarG). Antwortsprache: ${targetLang}. Gib AUSSCHLIESSLICH ein JSON-Array zurück: [{"name": "1x Birne (~160g)", "kcal": 92, "p": 0.6, "c": 22.0, "f": 0.3, "sugarG": 15.0, "icon": "🍐"}]`;
-      const parts = [{ text: promptText }];
+      const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
+      const parts = [{ text: `Ernährungsexperte: Erkenne Gericht/Lebensmittel auf Foto/Text ("${text || 'Foto'}"), schätze Gramm (~g) & berechne kcal, p, c, f. Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"name": "1x Birne (~160g)", "kcal": 92, "p": 0.6, "c": 22.0, "f": 0.3, "icon": "🍐"}]` }];
       if (base64DataUrl) {
-        const commaIdx = base64DataUrl.indexOf(',');
-        const mime = base64DataUrl.substring(5, commaIdx).split(';')[0];
-        const base64Data = base64DataUrl.substring(commaIdx + 1);
-        parts.push({ inlineData: { mimeType: mime, data: base64Data } });
+        const idx = base64DataUrl.indexOf(',');
+        parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } });
       }
       const parsed = await callGeminiRequest(parts);
       const arr = Array.isArray(parsed) ? parsed : (parsed.items || [parsed]);
-      return arr.map(item => ({
-        name: String(item.name || 'Mahlzeit (~250g)'),
-        kcal: Math.max(1, Math.round(Number(item.kcal) || 250)),
-        p: +(Number(item.p) || 10).toFixed(1), c: +(Number(item.c) || 25).toFixed(1), f: +(Number(item.f) || 8).toFixed(1),
-        sugarG: +(Number(item.sugarG) || 2).toFixed(1),
-        icon: item.icon || '🍽️'
+      return arr.map(i => ({
+        name: String(i.name || 'Mahlzeit (~250g)'), kcal: Math.max(1, Math.round(Number(i.kcal) || 250)),
+        p: +(Number(i.p) || 10).toFixed(1), c: +(Number(i.c) || 25).toFixed(1), f: +(Number(i.f) || 8).toFixed(1), icon: i.icon || '🍽️'
       }));
     }
 
-    // FEATURE 1: KÜHLSCHRANK-RESTE-VERWERTER (FOTO + TEXT -> REZEPTE PASSEND ZU REST-KALORIEN)
+    // FEATURE 1: KÜHLSCHRANK-RESTE-VERWERTER
     async function runFridgeLeftoverAI(text, base64DataUrl) {
-      const totals = state.todayLog.reduce((acc, i) => ({ kcal: acc.kcal + i.kcal, p: acc.p + i.p }), { kcal: 0, p: 0 });
+      const totals = state.todayLog.reduce((a, i) => ({ kcal: a.kcal + i.kcal, p: a.p + i.p }), { kcal: 0, p: 0 });
       const remKcal = Math.max(250, state.goals.kcal - totals.kcal);
       const remProt = Math.max(15, state.goals.protein - Math.round(totals.p));
-      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+      const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
 
-      const promptText = `Du bist ein kreativer Fitness- & Abnehm-Koch ("Kühlschrank-Reste-Verwerter").
-Analysiere das Foto vom offenen Kühlschrank / den Zutaten und den Text ("${text || 'Siehe Foto'}").
-Der Nutzer hat heute noch ${remKcal} kcal und ${remProt}g Eiweiß offen.
-Aufgabe:
-1. Liste alle erkannten Zutaten im Feld "ingredients" auf.
-2. Erstelle 2 bis 3 schnelle, leckere Rezepte aus diesen Zutaten (Gewürze/Basis-Zutaten dürfen ergänzt werden), die perfekt in das verbleibende Kalorienbudget (jeweils maximal ${Math.min(remKcal, 750)} kcal) passen und viel Eiweiß liefern!
-Antwortsprache: ${targetLang}.
-Gib AUSSCHLIESSLICH ein JSON-Array mit Rezepten zurück:
-[{"title": "High-Protein Schinken-Tomaten-Omelett (~390 kcal)", "detectedIngredients": "Eier, Tomaten, Schinken, Käse", "ingredientsList": "3 Eier, 60g Schinken, 2 Tomaten, 20g Käse", "steps": "Tomaten & Schinken kurz anbraten, verquirlte Eier darübergeben, Käse schmelzen lassen.", "kcal": 390, "p": 36, "c": 8, "f": 23, "icon": "🍳"}]`;
-
-      const parts = [{ text: promptText }];
+      const parts = [{ text: `Du bist ein Fitness-Koch ("Kühlschrank-Reste-Verwerter"). Analysiere das Foto vom Kühlschrank/Zutaten und Text ("${text || 'Siehe Foto'}"). Offenes Tagesbudget: ${remKcal} kcal, ${remProt}g Eiweiß. Erstelle 2 bis 3 schnelle Rezepte aus den erkannten Zutaten (jeweils max. ${Math.min(remKcal, 750)} kcal). Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"title": "High-Protein Omelett (~390 kcal)", "detectedIngredients": "Eier, Tomaten, Schinken", "ingredientsList": "3 Eier, 60g Schinken, 2 Tomaten", "steps": "Kurz in der Pfanne anbraten und stocken lassen.", "kcal": 390, "p": 36, "c": 8, "f": 23, "icon": "🍳"}]` }];
       if (base64DataUrl) {
-        const commaIdx = base64DataUrl.indexOf(',');
-        const mime = base64DataUrl.substring(5, commaIdx).split(';')[0];
-        const base64Data = base64DataUrl.substring(commaIdx + 1);
-        parts.push({ inlineData: { mimeType: mime, data: base64Data } });
+        const idx = base64DataUrl.indexOf(',');
+        parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } });
       }
-
       const parsed = await callGeminiRequest(parts);
       const arr = Array.isArray(parsed) ? parsed : (parsed.recipes || [parsed]);
       currentFridgeRecipes = arr.map(r => ({
-        title: String(r.title || 'Kühlschrank-Pfanne'),
-        detectedIngredients: String(r.detectedIngredients || text || 'Vorräte aus dem Kühlschrank'),
-        ingredientsList: String(r.ingredientsList || ''),
-        steps: String(r.steps || 'Kurz in der Pfanne zubereiten und genießen.'),
-        kcal: Math.max(80, Math.round(Number(r.kcal) || 420)),
-        p: +(Number(r.p) || 28).toFixed(1),
-        c: +(Number(r.c) || 22).toFixed(1),
-        f: +(Number(r.f) || 16).toFixed(1),
-        icon: r.icon || '🥘'
+        title: String(r.title || 'Kühlschrank-Pfanne'), detectedIngredients: String(r.detectedIngredients || text || 'Vorräte'),
+        ingredientsList: String(r.ingredientsList || ''), steps: String(r.steps || ''),
+        kcal: Math.max(80, Math.round(Number(r.kcal) || 400)), p: +(Number(r.p) || 28).toFixed(1), c: +(Number(r.c) || 20).toFixed(1), f: +(Number(r.f) || 15).toFixed(1), icon: r.icon || '🥘'
       }));
-
-      state.fridgeItems = (currentFridgeRecipes[0]?.detectedIngredients || '').split(',').map(s => s.trim()).filter(Boolean);
-      saveState();
       renderFridgeResults(remKcal);
     }
 
     function renderFridgeResults(remKcal) {
-      const card = document.getElementById('fridgeResultCard');
-      card.classList.remove('hidden');
-      const detected = currentFridgeRecipes[0]?.detectedIngredients || '';
-      document.getElementById('lblFridgeResultTitle').textContent = state.lang === 'pl'
-        ? `Przepisy z lodówki (Budget: ${remKcal} kcal)`
-        : `Kühlschrank-Rezepte (Budget: ${remKcal} kcal übrig)`;
-      document.getElementById('lblFridgeIngredients').textContent = detected
-        ? `${state.lang === 'pl' ? 'Rozpoznano:' : 'Erkannte Zutaten:'} ${detected}`
-        : '';
-
+      document.getElementById('fridgeResultCard').classList.remove('hidden');
+      const det = currentFridgeRecipes[0]?.detectedIngredients || '';
+      document.getElementById('lblFridgeResultTitle').textContent = state.lang === 'pl' ? `Przepisy z lodówki (${remKcal} kcal)` : `Kühlschrank-Rezepte (${remKcal} kcal Rest)`;
+      document.getElementById('lblFridgeIngredients').textContent = det ? `Zutaten: ${det}` : '';
       document.getElementById('fridgeRecipesList').innerHTML = currentFridgeRecipes.map((r, idx) => `
         <div class="bg-slate-900/90 border border-cyan-500/30 rounded-2xl p-3.5 space-y-2">
           <div class="flex items-start justify-between gap-2">
@@ -991,10 +873,9 @@ Gib AUSSCHLIESSLICH ein JSON-Array mit Rezepten zurück:
           <div class="text-[11px] text-emerald-300 font-semibold">🧾 ${r.ingredientsList}</div>
           <p class="text-xs text-slate-300 leading-relaxed">👨‍🍳 ${r.steps}</p>
           <div class="flex items-center justify-between pt-1 border-t border-slate-800">
-            <span class="text-[10px] text-slate-400">E/B: ${r.p}g • K/W: ${r.c}g • F/T: ${r.f}g</span>
-            <button onclick="logFridgeRecipe(${idx})" class="bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-[11px] px-3 py-1.5 rounded-xl active:scale-95 transition flex items-center gap-1.5">
-              <i class="fa-solid fa-utensils"></i>
-              <span>${state.lang === 'pl' ? 'Ugotuj i dodaj' : 'Kochen & eintragen'}</span>
+            <span class="text-[10px] text-slate-400">E: ${r.p}g • K: ${r.c}g • F: ${r.f}g</span>
+            <button onclick="logFridgeRecipe(${idx})" class="bg-cyan-400 text-slate-950 font-bold text-[11px] px-3 py-1.5 rounded-xl active:scale-95 transition">
+              + Kochen & eintragen
             </button>
           </div>
         </div>`).join('');
@@ -1004,14 +885,10 @@ Gib AUSSCHLIESSLICH ein JSON-Array mit Rezepten zurück:
       const r = currentFridgeRecipes[idx];
       if (!r) return;
       quickAdd(r.title, r.kcal, r.p, r.c, r.f, r.icon);
-      document.getElementById('naturalInput').value = '';
-      clearPhoto();
-      closeFridgeCard();
+      document.getElementById('naturalInput').value = ''; clearPhoto(); closeFridgeCard();
     }
 
-    function closeFridgeCard() {
-      document.getElementById('fridgeResultCard').classList.add('hidden');
-    }
+    function closeFridgeCard() { document.getElementById('fridgeResultCard').classList.add('hidden'); }
 
     function openReviewCard(items) {
       pendingDetectedItems = items; currentPortionScale = 1.0;
@@ -1022,80 +899,46 @@ Gib AUSSCHLIESSLICH ein JSON-Array mit Rezepten zurück:
     }
 
     function closeReviewCard() { document.getElementById('reviewCard').classList.add('hidden'); pendingDetectedItems = []; }
-
-    function removePendingItem(idx) {
-      pendingDetectedItems.splice(idx, 1);
-      if (pendingDetectedItems.length === 0) closeReviewCard(); else renderReviewItems();
-    }
+    function removePendingItem(idx) { pendingDetectedItems.splice(idx, 1); if (!pendingDetectedItems.length) closeReviewCard(); else renderReviewItems(); }
 
     function editPendingItem(idx) {
       const item = pendingDetectedItems[idx];
-      const newName = prompt('Name der Mahlzeit anpassen:', item.name);
-      if (newName && newName.trim()) item.name = newName.trim();
-      const newKcal = prompt('Kalorien (kcal) für 100% Portion anpassen:', item.kcal);
-      if (newKcal !== null && !isNaN(parseInt(newKcal, 10))) item.kcal = Math.max(0, parseInt(newKcal, 10));
+      const n = prompt('Name anpassen:', item.name); if (n && n.trim()) item.name = n.trim();
+      const k = prompt('Kalorien (kcal) anpassen:', item.kcal); if (k !== null && !isNaN(parseInt(k, 10))) item.kcal = Math.max(0, parseInt(k, 10));
       renderReviewItems();
     }
 
-    function updatePortionScale(val) {
-      currentPortionScale = parseInt(val, 10) / 100;
-      document.getElementById('portionScaleLabel').textContent = `${val}%`;
-      renderReviewItems();
-    }
+    function updatePortionScale(val) { currentPortionScale = parseInt(val, 10) / 100; document.getElementById('portionScaleLabel').textContent = `${val}%`; renderReviewItems(); }
 
     function renderReviewItems() {
-      const list = document.getElementById('detectedItemsList');
-      let totalKcal = 0;
-      list.innerHTML = pendingDetectedItems.map((item, idx) => {
-        const scaledKcal = Math.round(item.kcal * currentPortionScale);
-        const scaledP = +(item.p * currentPortionScale).toFixed(1);
-        const scaledC = +(item.c * currentPortionScale).toFixed(1);
-        const scaledF = +(item.f * currentPortionScale).toFixed(1);
-        totalKcal += scaledKcal;
-        return `
-          <div class="flex items-center justify-between bg-slate-900/90 px-3 py-2.5 rounded-2xl border border-slate-800">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <span class="text-lg shrink-0">${item.icon || '🍽️'}</span>
-              <div class="min-w-0">
-                <div class="text-xs font-bold text-white truncate">${item.name}</div>
-                <div class="text-[10px] text-slate-400">E/B: ${scaledP}g • K/W: ${scaledC}g • F/T: ${scaledF}g</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-1.5 shrink-0 ml-2">
-              <span class="text-xs font-extrabold text-emerald-400 mr-1">${scaledKcal} kcal</span>
-              <button onclick="editPendingItem(${idx})" class="bg-slate-800 text-slate-300 px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-pen"></i></button>
-              <button onclick="removePendingItem(${idx})" class="bg-rose-500/15 text-rose-400 px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-trash-can"></i></button>
-            </div>
-          </div>`;
+      let total = 0;
+      document.getElementById('detectedItemsList').innerHTML = pendingDetectedItems.map((item, idx) => {
+        const k = Math.round(item.kcal * currentPortionScale);
+        const p = +(item.p * currentPortionScale).toFixed(1), c = +(item.c * currentPortionScale).toFixed(1), f = +(item.f * currentPortionScale).toFixed(1);
+        total += k;
+        return `<div class="flex items-center justify-between bg-slate-900/90 px-3 py-2.5 rounded-2xl border border-slate-800">
+          <div class="flex items-center gap-2.5 min-w-0"><span class="text-lg">${item.icon || '🍽️'}</span><div class="min-w-0"><div class="text-xs font-bold text-white truncate">${item.name}</div><div class="text-[10px] text-slate-400">E: ${p}g • K: ${c}g • F: ${f}g</div></div></div>
+          <div class="flex items-center gap-1.5 shrink-0 ml-2"><span class="text-xs font-extrabold text-emerald-400 mr-1">${k} kcal</span><button onclick="editPendingItem(${idx})" class="bg-slate-800 text-slate-300 px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-pen"></i></button><button onclick="removePendingItem(${idx})" class="bg-rose-500/15 text-rose-400 px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-trash-can"></i></button></div>
+        </div>`;
       }).join('');
-      document.getElementById('reviewTotalKcal').textContent = totalKcal;
+      document.getElementById('reviewTotalKcal').textContent = total;
     }
 
     function confirmDetectedItems() {
       const now = new Date();
       const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      let addedNames = []; lastAddedCount = pendingDetectedItems.length;
-      pendingDetectedItems.forEach(item => {
-        const entry = {
-          id: Date.now() + Math.random(), name: item.name,
-          kcal: Math.round(item.kcal * currentPortionScale),
-          p: +(item.p * currentPortionScale).toFixed(1),
-          c: +(item.c * currentPortionScale).toFixed(1),
-          f: +(item.f * currentPortionScale).toFixed(1),
-          sugarG: +((item.sugarG || 0) * currentPortionScale).toFixed(1),
-          icon: item.icon || '🍽️', thumb: selectedPhotoThumb || null,
-          time: timeStr, timestampISO: now.toISOString()
-        };
-        state.todayLog.unshift(entry); addedNames.push(entry.name);
+      let names = []; lastAddedCount = pendingDetectedItems.length;
+      pendingDetectedItems.forEach(i => {
+        const entry = { id: Date.now() + Math.random(), name: i.name, kcal: Math.round(i.kcal * currentPortionScale), p: +(i.p * currentPortionScale).toFixed(1), c: +(i.c * currentPortionScale).toFixed(1), f: +(i.f * currentPortionScale).toFixed(1), icon: i.icon || '🍽️', thumb: selectedPhotoThumb || null, time: timeStr, timestampISO: now.toISOString() };
+        state.todayLog.unshift(entry); names.push(entry.name);
       });
       saveState(); document.getElementById('naturalInput').value = ''; clearPhoto(); closeReviewCard(); renderAll();
-      showUndoToast(addedNames.join(', '));
+      showUndoToast(names.join(', '));
     }
 
     function quickAdd(name, kcal, p, c, f, icon) {
       const now = new Date();
-      const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      state.todayLog.unshift({ id: Date.now(), name, kcal, p, c, f, icon, thumb: null, time: timeStr, timestampISO: now.toISOString() });
+      state.todayLog.unshift({ id: Date.now(), name, kcal, p, c, f, icon, thumb: null, time: now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }), timestampISO: now.toISOString() });
       lastAddedCount = 1; saveState(); renderAll(); showUndoToast(`${name} (${kcal} kcal)`);
     }
 
@@ -1108,75 +951,44 @@ Gib AUSSCHLIESSLICH ein JSON-Array mit Rezepten zurück:
     }
 
     function undoLastAction() {
-      if (lastAddedCount > 0 && state.todayLog.length >= lastAddedCount) {
-        state.todayLog.splice(0, lastAddedCount); lastAddedCount = 0; saveState(); renderAll();
-      }
+      if (lastAddedCount > 0 && state.todayLog.length >= lastAddedCount) { state.todayLog.splice(0, lastAddedCount); lastAddedCount = 0; saveState(); renderAll(); }
       document.getElementById('undoToast').classList.add('hidden');
     }
 
-    function addWater(liters) { state.waterLiters = +(state.waterLiters + liters).toFixed(2); saveState(); renderAll(); }
+    function addWater(l) { state.waterLiters = +(state.waterLiters + l).toFixed(2); saveState(); renderAll(); }
     function removeLogItem(idx) { state.todayLog.splice(idx, 1); saveState(); renderAll(); }
+    function clearTodayLog() { if (confirm('Tageszähler auf 0 setzen?')) { state.todayLog = []; state.waterLiters = 0; state.lastActiveDate = getTodayDateKey(); saveState(); renderAll(); } }
 
-    function clearTodayLog() {
-      if (confirm(state.lang === 'pl' ? 'Wyzerować dzisiejszy licznik?' : 'Heutigen Tageszähler komplett auf 0 setzen?')) {
-        state.todayLog = []; state.waterLiters = 0; state.lastActiveDate = getTodayDateKey(); saveState(); renderAll();
-      }
-    }
-
+    // 8 ABWECHSLUNGSREICHE VORSCHLÄGE ZUM DURCHBLÄTTERN
     function getMealSuggestionsForRemaining(rem) {
       const isPl = state.lang === 'pl';
-      if (rem <= 380) {
+      if (rem <= 450) {
         return isPl ? [
           { title: 'Lekka kolacja białkowa (~240 kcal)', combo: 'Sałatka mieszana z sosem jogurtowym + 150g chudego twarogu.', extra: 'Zostaje miejsce na 1 małe jabłko.', kcal: 240, p: 28, c: 16, f: 6, icon: '🥗' },
-          { title: 'Szybki zestaw wieczorny (~210 kcal)', combo: '2 jajka na twardo + pomidor i ogórek z pieprzem.', extra: 'Zostaje miejsce na garść jagód (~50 kcal).', kcal: 210, p: 15, c: 8, f: 11, icon: '🥚' },
-          { title: 'Słodki twaróg z owocami (~250 kcal)', combo: '200g Skyru lub twarogu + 1 pokrojone jabłko z cynamonem.', extra: 'Syci na długo i chroni mięśnie.', kcal: 250, p: 25, c: 28, f: 1, icon: '🥣' },
-          { title: 'Sałatka z tuńczykiem (~260 kcal)', combo: 'Mieszanka sałat, pomidor, ogórek + puszka tuńczyka w sosie własnym.', extra: 'Dużo białka (32g), minimum kalorii!', kcal: 260, p: 32, c: 9, f: 8, icon: '🐟' },
-          { title: 'Talerz zupy domowej (~280 kcal)', combo: 'Talerz ciepłej zupy jarzynowej lub rosołu z kurczakiem (350ml).', extra: 'Idealna lekka kolacja.', kcal: 280, p: 18, c: 24, f: 11, icon: '🍲' },
-          { title: 'Kanapka Fitness (~230 kcal)', combo: '1 kromka chleba pełnoziarnistego z chudą szynką drobiową, twarożkiem i ogórkiem.', extra: 'Szybka przekąska w limicie.', kcal: 230, p: 16, c: 24, f: 6, icon: '🍞' }
+          { title: 'Szybki zestaw wieczorny (~210 kcal)', combo: '2 jajka na twardo + pomidor i ogórek z pieprzem.', extra: 'Zostaje miejsce na garść jagód.', kcal: 210, p: 15, c: 8, f: 11, icon: '🥚' },
+          { title: 'Słodki twaróg z owocami (~250 kcal)', combo: '200g Skyru lub twarogu + 1 pokrojone jabłko z cynamonem.', extra: 'Syci na długo w nocy.', kcal: 250, p: 25, c: 28, f: 1, icon: '🥣' },
+          { title: 'Sałatka z tuńczykiem (~260 kcal)', combo: 'Sałata, pomidor, ogórek + puszka tuńczyka w sosie własnym.', extra: '32g białka, minimum kalorii!', kcal: 260, p: 32, c: 9, f: 8, icon: '🐟' }
         ] : [
           { title: 'Leichter Sattmacher-Abendteller (~240 kcal)', combo: 'Großer gemischter Salat mit Joghurt- oder Balsamico-Dressing + 150g Kräuter-Magerquark.', extra: 'Dazu passt noch 1 kleiner Apfel.', kcal: 240, p: 28, c: 16, f: 6, icon: '🥗' },
-          { title: 'Eiweiß-Snack am Abend (~210 kcal)', combo: '2 gekochte Eier + frische Tomaten & Gurkenscheiben mit Pfeffer.', extra: 'Dazu kannst du noch 1 Handvoll Beeren essen.', kcal: 210, p: 15, c: 8, f: 11, icon: '🥚' },
-          { title: 'Süßer Quark-Apfel-Becher (~250 kcal)', combo: '250g Magerquark oder Skyr + 1 gewürfelter Apfel (oder Birne) mit Zimt.', extra: 'Hält über Nacht optimal satt.', kcal: 250, p: 28, c: 28, f: 1, icon: '🥣' },
-          { title: 'Thunfisch-Salat-Bowl (~260 kcal)', combo: 'Blattsalat mit Tomaten, Gurke, 1 Dose Thunfisch & Zitronen-Kräuter-Dressing.', extra: '32g Eiweiß bei minimalen Kalorien!', kcal: 260, p: 32, c: 9, f: 8, icon: '🐟' },
-          { title: 'Wärmende Hühner- oder Gemüsesuppe (~280 kcal)', combo: '1 großer Teller (350ml) Hühner- oder Gemüsesuppe mit Einlage.', extra: 'Dazu passt noch 1 Knäckebrot.', kcal: 280, p: 18, c: 24, f: 11, icon: '🍲' },
-          { title: 'Fitness-Abendbrot (~230 kcal)', combo: '1 Scheibe Vollkornbrot mit Frischkäse, Putenbrust und Gurkenscheiben.', extra: 'Schnell gemacht & perfekt im Ziel.', kcal: 230, p: 16, c: 24, f: 6, icon: '🍞' }
-        ];
-      }
-      if (rem <= 850) {
-        return isPl ? [
-          { title: 'Zestaw Sałatka + Kurczak (~560 kcal)', combo: 'Duża sałatka mieszana z sosem jogurtowym + 180g piersi z kurczaka.', extra: 'Do tego 1 bułka pełnoziarnista i 1 jabłko.', kcal: 560, p: 46, c: 48, f: 14, icon: '🥗' },
-          { title: 'Obiad: Kurczak i ziemniaki (~590 kcal)', combo: '180g piersi z kurczaka + 200g ziemniaków + mizeria na jogurcie.', extra: 'Do tego 1 gruszka lub jabłko.', kcal: 590, p: 44, c: 52, f: 15, icon: '🍗' },
-          { title: 'Jajecznica z szynką i chlebem (~520 kcal)', combo: 'Jajecznica z 3 jajek z szynką + sałatka z pomidora z winegretem.', extra: 'Do tego 2 kromki chleba żytniego.', kcal: 520, p: 32, c: 38, f: 24, icon: '🍳' },
-          { title: 'Łosoś z ryżem i sałatką (~610 kcal)', combo: '160g pieczonego łososia + 150g ryżu + sałatka z sosem cytrynowym.', extra: 'Zdrowe kwasy Omega-3 i dużo białka.', kcal: 610, p: 40, c: 54, f: 22, icon: '🐟' },
-          { title: 'Porcja Lasagne + Sałatka (~640 kcal)', combo: 'Porcja Lasagne (~350g) + świeża sałatka z lekkim winegretem.', extra: 'Mieści się w dzisiejszym limicie!', kcal: 640, p: 31, c: 52, f: 32, icon: '🍝' },
-          { title: '2x Wrapy z kurczakiem (~540 kcal)', combo: '2 tortille pełnoziarniste z kurczakiem, sałatą i sosem jogurtowym.', extra: 'Zostaje miejsce na owoc na deser!', kcal: 540, p: 42, c: 55, f: 14, icon: '🌯' }
-        ] : [
-          { title: 'Salat-Kombi mit Hähnchen (~560 kcal)', combo: 'Großer gemischter Salat mit Joghurt- oder Balsamico-Dressing + 180g Hähnchenbrust.', extra: 'Dazu kannst du noch essen: 1 Vollkornbrötchen + 1 Apfel.', kcal: 560, p: 46, c: 48, f: 14, icon: '🥗' },
-          { title: 'Hähnchen & Kartoffeln (~590 kcal)', combo: '180g Hähnchenbrust + 200g Salzkartoffeln + Gurkensalat mit Joghurt-Dressing.', extra: 'Dazu passt noch 1 Becher Quark oder 1 Birne.', kcal: 590, p: 44, c: 52, f: 15, icon: '🍗' },
-          { title: 'Rührei-Abendbrot-Kombi (~520 kcal)', combo: 'Rührei aus 3 Eiern mit Schinken + Tomaten-Gurkensalat mit Essig-Öl-Dressing.', extra: 'Dazu kannst du noch 2 Scheiben Vollkornbrot essen.', kcal: 520, p: 32, c: 38, f: 24, icon: '🍳' },
-          { title: 'Lachsfilet mit Reis & Salat (~610 kcal)', combo: '160g gebratenes Lachsfilet + 150g Reis + Beilagensalat mit Honig-Senf-Dressing.', extra: 'Perfektes Eiweiß und gesunde Fette.', kcal: 610, p: 40, c: 54, f: 22, icon: '🐟' },
-          { title: 'Portion Lasagne + Beilagensalat (~640 kcal)', combo: 'Portion Lasagne Bolognese (~350g) + gemischter Salat mit Balsamico-Dressing.', extra: 'Passt komplett in dein heutiges Kalorien-Budget!', kcal: 640, p: 31, c: 52, f: 32, icon: '🍝' },
-          { title: '2x Hähnchen-Fitness-Wraps (~540 kcal)', combo: '2 Tortilla-Wraps mit 160g Hähnchenstreifen, Salat, Tomate & Knoblauch-Joghurt-Dip.', extra: 'Dazu kannst du noch 1 Apfel oder 1 Birne essen.', kcal: 540, p: 42, c: 55, f: 14, icon: '🌯' }
+          { title: 'Eiweiß-Snack am Abend (~210 kcal)', combo: '2 gekochte Eier + frische Tomaten & Gurkenscheiben mit Pfeffer.', extra: 'Dazu noch 1 Handvoll Beeren essen.', kcal: 210, p: 15, c: 8, f: 11, icon: '🥚' },
+          { title: 'Süßer Quark-Birnen-Becher (~250 kcal)', combo: '250g Magerquark oder Skyr + 1 gewürfelte Birne (oder Apfel) mit Zimt.', extra: 'Hält über Nacht optimal satt.', kcal: 250, p: 28, c: 28, f: 1, icon: '🥣' },
+          { title: 'Thunfisch-Salat-Bowl (~260 kcal)', combo: 'Blattsalat mit Tomaten, Gurke, 1 Dose Thunfisch & Zitronen-Dressing.', extra: '32g Eiweiß bei minimalen Kalorien!', kcal: 260, p: 32, c: 9, f: 8, icon: '🐟' }
         ];
       }
       return isPl ? [
-        { title: 'Kurczak, ziemniaki + deser (~780 kcal)', combo: '200g grillowanego kurczaka + 200g ziemniaków + duża sałatka z sosem winegret.', extra: `Do tego 250g twarogu z owocami – i zostaje Ci jeszcze ${rem - 780} kcal!`, kcal: 780, p: 58, c: 74, f: 22, icon: '🍽️' },
-        { title: 'Sałatka Cezar / Grecka + Bułka (~690 kcal)', combo: 'Duża sałatka z kurczakiem, serem feta, oliwkami i sosem jogurtowym + 1 bułka.', extra: `Do tego 1 gruszka lub jabłko (zostaje ${rem - 690} kcal na kolację)!`, kcal: 690, p: 45, c: 62, f: 24, icon: '🥗' },
-        { title: 'Lasagne Bolognese + Sałatka (~700 kcal)', combo: 'Porcja Lasagne (~350g) + świeża sałatka mieszana z sosem balsamicznym.', extra: `Po tym obiedzie masz jeszcze ${rem - 700} kcal na wieczór!`, kcal: 700, p: 34, c: 56, f: 35, icon: '🍝' },
-        { title: 'Łosoś z ryżem i warzywami (~740 kcal)', combo: '180g pieczonego łososia + 180g ryżu + sałatka z sosem cytrynowym.', extra: `Do tego deser białkowy, a w puli zostaje ${rem - 740} kcal!`, kcal: 740, p: 46, c: 68, f: 26, icon: '🐟' },
-        { title: 'Stek wołowy / Schabowy + Ziemniaki (~760 kcal)', combo: '200g steku lub kotleta + 220g ziemniaków + duża mizeria na jogurcie.', extra: `Syty obiad i jeszcze ${rem - 760} kcal wolnego budżetu!`, kcal: 760, p: 54, c: 64, f: 28, icon: '🥩' },
-        { title: 'Domowe Pierogi + Surówka (~680 kcal)', combo: 'Porcja pierogów (7-8 szt.) + duża surówka lub sałatka.', extra: `Zostaje Ci jeszcze ${rem - 680} kcal na kolację!`, kcal: 680, p: 28, c: 84, f: 22, icon: '🥟' },
-        { title: 'Spaghetti Bolognese + Sałatka (~690 kcal)', combo: 'Talerz Spaghetti Bolognese (~350g) + sałatka z pomidorów i rukoli.', extra: `Do tego owoc i zostaje ${rem - 690} kcal!`, kcal: 690, p: 36, c: 76, f: 20, icon: '🍝' },
-        { title: 'Burger Fitness + Frytki z piekarnika (~750 kcal)', combo: 'Burger wołowy lub drobiowy z warzywami + frytki z piekarnika.', extra: `Pyszny zestaw (zostaje jeszcze ${rem - 750} kcal)!`, kcal: 750, p: 44, c: 72, f: 28, icon: '🍔' }
+        { title: 'Sałatka + Grillowany Kurczak (~560 kcal)', combo: 'Duża sałatka z sosem jogurtowym lub balsamicznym + 180g piersi z kurczaka.', extra: 'Do tego 1 bułka pełnoziarnista i 1 owoc.', kcal: 560, p: 46, c: 48, f: 14, icon: '🥗' },
+        { title: 'Kurczak, ziemniaki i mizeria (~590 kcal)', combo: '180g piersi z kurczaka + 200g ziemniaków + mizeria na jogurcie.', extra: 'Do tego 1 gruszka lub twaróg na deser.', kcal: 590, p: 44, c: 52, f: 15, icon: '🍗' },
+        { title: 'Łosoś z ryżem i sałatką (~640 kcal)', combo: '180g pieczonego łososia + 160g ryżu + sałatka z sosem cytrynowym.', extra: 'Zdrowe kwasy Omega-3 i 44g białka.', kcal: 640, p: 44, c: 58, f: 22, icon: '🐟' },
+        { title: 'Porcja Lasagne + Sałatka (~660 kcal)', combo: 'Porcja Lasagne Bolognese (~350g) + świeża sałatka z lekkim winegretem.', extra: 'Włoski klasyk idealnie w Twoim budżecie!', kcal: 660, p: 32, c: 54, f: 32, icon: '🍝' },
+        { title: '2x Wrapy Fitness z kurczakiem (~540 kcal)', combo: '2 tortille z grillowanym kurczakiem, sałatą, pomidorem i sosem czosnkowym.', extra: 'Do tego zostaje miejsce na owoc!', kcal: 540, p: 42, c: 55, f: 14, icon: '🌯' },
+        { title: 'Stek wołowy / Schabowy + Ziemniaki (~720 kcal)', combo: '200g chudego steku lub kotleta + 200g ziemniaków + surówka.', extra: 'Syty obiad i dużo białka (52g).', kcal: 720, p: 52, c: 60, f: 26, icon: '🥩' }
       ] : [
-        { title: 'Hähnchen, Ofenkartoffeln + Nachtisch (~780 kcal)', combo: '200g Hähnchenbrust + 200g Ofenkartoffeln + gemischter Salat mit Joghurt-Dressing.', extra: `Dazu 1 Portion Magerquark mit Obst – und du hast noch ${rem - 780} kcal übrig!`, kcal: 780, p: 58, c: 74, f: 22, icon: '🍽️' },
-        { title: 'Große Salat-Bowl (Hähnchen & Feta) + Brötchen (~690 kcal)', combo: 'Großer gemischter Salat mit Hähnchenstreifen, Hirtenkäse & Balsamico- oder Honig-Senf-Dressing + 1 Brötchen.', extra: `Dazu passt 1 Birne oder 1 Apfel – und dir bleiben ${rem - 690} kcal für den Abend!`, kcal: 690, p: 45, c: 62, f: 24, icon: '🥗' },
-        { title: 'Portion Lasagne + Beilagensalat (~700 kcal)', combo: 'Portion Lasagne Bolognese (~350g) + grüner Salat mit Joghurt- oder Balsamico-Dressing.', extra: `Danach hast du heute noch ${rem - 700} kcal für das Abendbrot frei!`, kcal: 700, p: 34, c: 56, f: 35, icon: '🍝' },
-        { title: 'Lachsfilet mit Reis & Gartensalat (~740 kcal)', combo: '180g gebratenes Lachsfilet + 180g Reis + gemischter Salat mit Zitronen-Olivenöl-Dressing.', extra: `Dazu kannst du noch 1 Quark-Dessert essen (noch ${rem - 740} kcal Puffer)!`, kcal: 740, p: 46, c: 68, f: 26, icon: '🐟' },
-        { title: 'Rindersteak / Schnitzel mit Kartoffeln (~760 kcal)', combo: '200g Rindersteak (oder Putenschnitzel) + 220g Salzkartoffeln + Gurkensalat mit Joghurt-Dressing.', extra: `Macht richtig satt und lässt dir noch ${rem - 760} kcal für später übrig!`, kcal: 760, p: 54, c: 64, f: 28, icon: '🥩' },
-        { title: 'Spaghetti Bolognese + Tomatensalat (~690 kcal)', combo: 'Großer Teller Spaghetti Bolognese (~350g) + Tomaten-Rucola-Salat mit Balsamico.', extra: `Dazu passt noch 1 Obst nach Wahl (weiterhin ${rem - 690} kcal übrig)!`, kcal: 690, p: 36, c: 76, f: 20, icon: '🍝' },
-        { title: '2x Hähnchen-Wraps + Salat & Obst (~660 kcal)', combo: '2 Vollkorn-Wraps mit gegrillter Hähnchenbrust, Salat, Mais, Paprika & Joghurt-Knoblauch-Soße.', extra: `Dazu kannst du 1 Apfel essen und behältst ${rem - 660} kcal für den Abend!`, kcal: 660, p: 48, c: 68, f: 18, icon: '🌯' },
-        { title: 'Fitness-Burger + Ofen-Pommes & Salat (~750 kcal)', combo: 'Saftiger Rind- oder Chicken-Burger mit Salat & Tomate + Portion Ofen-Pommes + Beilagensalat.', extra: `Voller Genuss und trotzdem noch ${rem - 750} kcal im Tagesbudget frei!`, kcal: 750, p: 44, c: 72, f: 28, icon: '🍔' }
+        { title: 'Salat-Kombi mit Hähnchen (~560 kcal)', combo: 'Großer gemischter Salat mit Joghurt- oder Balsamico-Dressing + 180g Hähnchenbrust.', extra: 'Dazu kannst du noch essen: 1 Vollkornbrötchen + 1 Apfel.', kcal: 560, p: 46, c: 48, f: 14, icon: '🥗' },
+        { title: 'Hähnchen, Ofenkartoffeln & Salat (~590 kcal)', combo: '180g Hähnchenbrust + 200g Ofenkartoffeln + Gurkensalat mit Joghurt-Dressing.', extra: 'Dazu passt noch 1 Portion Magerquark mit Obst!', kcal: 590, p: 44, c: 52, f: 15, icon: '🍗' },
+        { title: 'Lachsfilet mit Reis & Gartensalat (~640 kcal)', combo: '180g gebratenes Lachsfilet + 160g Reis + Salat mit Honig-Senf- oder Zitronen-Dressing.', extra: 'Dazu kannst du noch 1 Birne oder Beeren als Nachtisch essen.', kcal: 640, p: 44, c: 58, f: 22, icon: '🐟' },
+        { title: 'Portion Lasagne + Beilagensalat (~660 kcal)', combo: 'Portion Lasagne Bolognese (~350g) + grüner Salat mit Balsamico-Dressing.', extra: 'Passt entspannt in dein offenes Tagesbudget!', kcal: 660, p: 32, c: 54, f: 32, icon: '🍝' },
+        { title: '2x Hähnchen-Fitness-Wraps (~540 kcal)', combo: '2 Tortilla-Wraps mit 160g Hähnchenstreifen, Salat, Tomate & Knoblauch-Joghurt-Dip.', extra: 'Dazu kannst du noch 1 Apfel oder 1 Birne essen.', kcal: 540, p: 42, c: 55, f: 14, icon: '🌯' },
+        { title: 'Rindersteak / Schnitzel mit Kartoffeln (~720 kcal)', combo: '200g mageres Rindersteak (oder Putenschnitzel) + 200g Salzkartoffeln + Beilagensalat.', extra: 'Macht richtig satt und liefert 52g Eiweiß!', kcal: 720, p: 52, c: 60, f: 26, icon: '🥩' }
       ];
     }
 
@@ -1190,38 +1002,33 @@ Gib AUSSCHLIESSLICH ein JSON-Array mit Rezepten zurück:
 
     async function generateAIMealIdeas() {
       if (!isValidApiKey(state.geminiApiKey)) { nextSuggestionSet(); return; }
-      const totals = state.todayLog.reduce((acc, i) => acc + i.kcal, 0);
-      const remaining = Math.max(200, state.goals.kcal - totals);
-      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
-
+      const totals = state.todayLog.reduce((a, i) => a + i.kcal, 0);
+      const rem = Math.max(200, state.goals.kcal - totals);
+      const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
       const btn = document.getElementById('aiCustomIdeaBtn');
-      const origHtml = btn.innerHTML;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${state.lang === 'pl' ? 'AI tworzy nowe zestawy...' : 'KI kocht 2 frische Ideen für dich...'}</span>`;
+      const orig = btn.innerHTML;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>KI kocht 2 neue Ideen...</span>`;
       btn.disabled = true;
-
       try {
-        const prompt = `Du bist ein motivierender Abnehm-Coach. Der Nutzer hat heute noch ${remaining} kcal übrig. Erfinde 2 abwechslungsreiche, leckere Mahlzeit-Kombinationen (Hauptgericht + Salat mit Dressing + was man dazu noch essen kann), die in dieses Budget passen. Antwortsprache: ${targetLang}. Gib AUSSCHLIESSLICH ein JSON-Array mit 2 Objekten zurück: [{"title": "Name (~620 kcal)", "combo": "Genaue Beschreibung mit Gramm und Dressing", "extra": "Dazu kannst du noch ... essen", "kcal": 620, "p": 45, "c": 55, "f": 18, "icon": "🥗"}]`;
-        const parsed = await callGeminiRequest([{ text: prompt }]);
+        const parsed = await callGeminiRequest([{ text: `Abnehm-Coach: Nutzer hat noch ${rem} kcal übrig. Erfinde 2 abwechslungsreiche Mahlzeit-Kombis (Hauptgericht + Salat mit Dressing + Extra-Snack). Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"title": "Name (~600 kcal)", "combo": "Zutaten & Dressing", "extra": "Dazu passt noch...", "kcal": 600, "p": 42, "c": 52, "f": 18, "icon": "🥗"}]` }]);
         const arr = Array.isArray(parsed) ? parsed : [parsed];
         customAiSuggestions = arr.map(s => ({
-          title: String(s.title || 'KI-Wunschgericht'), combo: String(s.combo || ''), extra: String(s.extra || 'Perfekt für dein Tagesziel!'),
-          kcal: Math.max(100, Math.round(Number(s.kcal) || 500)), p: Math.round(Number(s.p) || 35), c: Math.round(Number(s.c) || 45), f: Math.round(Number(s.f) || 15),
-          icon: s.icon || '✨'
+          title: String(s.title || 'KI-Wunschgericht'), combo: String(s.combo || ''), extra: String(s.extra || ''),
+          kcal: Math.max(100, Math.round(Number(s.kcal) || 500)), p: Math.round(Number(s.p) || 35), c: Math.round(Number(s.c) || 45), f: Math.round(Number(s.f) || 15), icon: s.icon || '✨'
         }));
         renderAll();
-      } catch (e) { nextSuggestionSet(); } finally { btn.innerHTML = origHtml; btn.disabled = false; }
+      } catch (e) { nextSuggestionSet(); } finally { btn.innerHTML = orig; btn.disabled = false; }
     }
 
     function addWeightEntry() {
       const val = parseFloat(document.getElementById('weightInput').value);
       if (isNaN(val) || val < 40 || val > 250) return;
-      const dateStr = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
-      state.weightLog.push({ date: dateStr, weight: +val.toFixed(1) });
+      state.weightLog.push({ date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }), weight: +val.toFixed(1) });
       document.getElementById('weightInput').value = ''; saveState(); renderWeightTab();
     }
 
     function deleteWeightEntry(idx) { state.weightLog.splice(idx, 1); saveState(); renderWeightTab(); }
-    function clearAllWeights() { if (confirm('Gewichts-Verlauf komplett leeren?')) { state.weightLog = []; saveState(); renderWeightTab(); } }
+    function clearAllWeights() { if (confirm('Gewichts-Verlauf leeren?')) { state.weightLog = []; saveState(); renderWeightTab(); } }
 
     function promptTargetWeight() {
       const input = prompt('Zielgewicht (kg):', state.goals.targetWeight);
@@ -1237,4 +1044,184 @@ Gib AUSSCHLIESSLICH ein JSON-Array mit Rezepten zurück:
       const enteredWeight = parseFloat(document.getElementById('calcWeight').value);
       const enteredTarget = parseFloat(document.getElementById('calcTargetWeight').value);
       const activity = parseFloat(document.getElementById('calcActivity').value) || 1.25;
-      const latestLoggedWeight = state.weightLog.length >
+      const latestW = state.weightLog.length > 0 ? state.weightLog[state.weightLog.length - 1].weight : 98;
+      const weight = !isNaN(enteredWeight) && enteredWeight >= 40 ? enteredWeight : latestW;
+      const targetWeight = !isNaN(enteredTarget) && enteredTarget >= 40 ? enteredTarget : state.goals.targetWeight;
+
+      if (!isNaN(enteredWeight) && enteredWeight >= 40) {
+        state.weightLog.push({ date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }), weight: +enteredWeight.toFixed(1) });
+      }
+      const bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+      const recommendedKcal = Math.max(1500, Math.round(bmr * activity) - 550);
+      state.goals.kcal = recommendedKcal;
+      state.goals.protein = Math.round(weight * 1.6);
+      state.goals.fat = Math.round((recommendedKcal * 0.28) / 9);
+      state.goals.carbs = Math.round((recommendedKcal - (state.goals.protein * 4) - (state.goals.fat * 9)) / 4);
+      state.goals.targetWeight = +targetWeight.toFixed(1);
+      saveState(); renderAll();
+      alert(`Neues Tagesziel gespeichert: ${recommendedKcal} kcal (${state.goals.protein}g Eiweiß).`);
+    }
+
+    function saveManualGoals() {
+      const kcal = parseInt(document.getElementById('manualKcalGoal').value, 10);
+      const prot = parseInt(document.getElementById('manualProteinGoal').value, 10);
+      if (kcal > 800) state.goals.kcal = kcal;
+      if (prot > 30) state.goals.protein = prot;
+      saveState(); renderAll(); alert('Gespeichert!');
+    }
+
+    function switchTab(tabName) {
+      ['cockpit', 'weight', 'access'].forEach(tab => {
+        document.getElementById('tab-' + tab).classList.toggle('hidden', tab !== tabName);
+        const navBtn = document.getElementById('nav-' + tab);
+        navBtn.classList.toggle('text-emerald-400', tab === tabName);
+        navBtn.classList.toggle('text-slate-400', tab !== tabName);
+      });
+    }
+
+    function renderQuickAddButtons() {
+      const list = quickAddItems[state.lang] || quickAddItems.de;
+      document.getElementById('quickAddContainer').innerHTML = list.map(i => i.water ? `
+        <button onclick="addWater(${i.water})" class="shrink-0 glass px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-medium active:scale-95 transition">
+          <span>${i.icon}</span><div class="text-left"><div class="text-sky-300 font-semibold">${i.label}</div><div class="text-[10px] text-slate-400">${i.sub}</div></div>
+        </button>` : `
+        <button onclick="quickAdd('${i.name}', ${i.kcal}, ${i.p}, ${i.c}, ${i.f}, '${i.icon}')" class="shrink-0 glass px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-medium active:scale-95 transition">
+          <span>${i.icon}</span><div class="text-left"><div class="text-white font-semibold">${i.label}</div><div class="text-[10px] text-slate-400">${i.sub}</div></div>
+        </button>`).join('');
+    }
+
+    function renderMealSuggestions(remaining) {
+      document.getElementById('suggestionsSubtitle').textContent = remaining <= 50
+        ? (state.lang === 'pl' ? 'Cel osiągnięty! Lekkie propozycje:' : 'Tagesziel fast erreicht! Leichte Ideen:')
+        : (state.lang === 'pl' ? `Masz jeszcze ${remaining} kcal:` : `Du hast noch ${remaining} kcal übrig – passende Kombis:`);
+
+      let picked = [];
+      if (customAiSuggestions && customAiSuggestions.length > 0) {
+        picked = customAiSuggestions;
+      } else {
+        const all = getMealSuggestionsForRemaining(Math.max(200, remaining));
+        picked = [all[suggestionOffset % all.length], all[(suggestionOffset + 1) % all.length]];
+      }
+
+      document.getElementById('mealSuggestionsList').innerHTML = picked.map(s => `
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 space-y-2">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2"><span class="text-lg">${s.icon}</span><span class="text-xs font-bold text-emerald-300">${s.title}</span></div>
+            <span class="shrink-0 text-xs font-extrabold text-white bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-lg">~${s.kcal} kcal</span>
+          </div>
+          <p class="text-xs text-slate-200 leading-relaxed">${s.combo}</p>
+          <p class="text-[11px] text-amber-300/90 font-medium">💡 ${s.extra}</p>
+          <div class="pt-1 flex justify-end">
+            <button onclick="quickAdd('${s.title.replace(/'/g, '')}', ${s.kcal}, ${s.p}, ${s.c}, ${s.f}, '${s.icon}')" class="bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-emerald-400 text-[11px] font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 active:scale-95">
+              <i class="fa-solid fa-plus"></i><span>${state.lang === 'pl' ? 'Dodaj ten zestaw' : 'Diesen Vorschlag eintragen'}</span>
+            </button>
+          </div>
+        </div>`).join('');
+    }
+
+    function renderPastDays() {
+      const card = document.getElementById('pastDaysCard');
+      if (!state.pastDaysLog || !state.pastDaysLog.length) { card.classList.add('hidden'); return; }
+      card.classList.remove('hidden');
+      document.getElementById('pastDaysList').innerHTML = state.pastDaysLog.slice(0, 7).map(d => {
+        const diff = d.goal - d.kcal;
+        return `<div class="flex items-center justify-between bg-slate-900/60 px-3 py-2 rounded-xl border border-slate-800/60">
+          <span class="text-slate-400 font-medium">${d.date}</span>
+          <div class="flex items-center gap-3"><span class="text-white font-bold">${d.kcal} / ${d.goal} kcal</span><span class="${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'} text-[11px] font-semibold">${diff >= 0 ? `-${diff} kcal` : `+${Math.abs(diff)} kcal`}</span></div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderWeightTab() {
+      const log = state.weightLog;
+      document.getElementById('targetWeightDisplay').textContent = state.goals.targetWeight.toFixed(1) + ' kg';
+      if (log.length > 0) {
+        const latest = log[log.length - 1].weight;
+        document.getElementById('currentWeightDisplay').textContent = latest.toFixed(1) + ' kg';
+        let trend = log[0].weight;
+        log.forEach(e => { trend = (e.weight * 0.35) + (trend * 0.65); });
+        document.getElementById('trendWeightDisplay').textContent = trend.toFixed(1) + ' kg';
+        const diff = +(latest - log[0].weight).toFixed(1);
+        document.getElementById('weightDiffBadge').textContent = (diff <= 0 ? `${diff} kg` : `+${diff} kg`);
+      } else {
+        document.getElementById('currentWeightDisplay').textContent = '-- kg';
+        document.getElementById('trendWeightDisplay').textContent = '-- kg';
+        document.getElementById('weightDiffBadge').textContent = 'Start';
+      }
+      document.getElementById('weightHistoryList').innerHTML = !log.length ? `<div class="text-center py-4 text-xs text-slate-500">--</div>` :
+        log.map((item, idx) => ({ item, idx })).reverse().map(({ item, idx }) => `
+          <div class="flex justify-between items-center bg-slate-900/60 px-3.5 py-2.5 rounded-xl text-xs border border-slate-800/60">
+            <span class="text-slate-400">${item.date}</span>
+            <div class="flex items-center gap-3"><span class="font-bold text-white">${item.weight.toFixed(1)} kg</span><button onclick="deleteWeightEntry(${idx})" class="bg-rose-500/15 text-rose-400 px-2 py-1 rounded-lg"><i class="fa-solid fa-trash-can"></i></button></div>
+          </div>`).join('');
+    }
+
+    function renderAll() {
+      checkAutomaticDailyReset(); applyTranslations(); renderQuickAddButtons();
+      document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString(state.lang === 'pl' ? 'pl-PL' : 'de-DE', { weekday: 'long', day: '2-digit', month: 'long' });
+
+      const totals = state.todayLog.reduce((a, i) => ({ kcal: a.kcal + i.kcal, p: a.p + i.p, c: a.c + i.c, f: a.f + i.f }), { kcal: 0, p: 0, c: 0, f: 0 });
+      const goalKcal = state.goals.kcal;
+      const remaining = goalKcal - totals.kcal;
+
+      document.getElementById('goalKcalDisplay').textContent = goalKcal;
+      document.getElementById('eatenKcalDisplay').textContent = totals.kcal;
+      document.getElementById('waterDisplay').textContent = state.waterLiters.toFixed(2);
+
+      const remEl = document.getElementById('remainingKcalDisplay');
+      remEl.textContent = remaining >= 0 ? remaining : '+' + Math.abs(remaining);
+      remEl.className = remaining >= 0 ? 'text-2xl font-extrabold tracking-tight text-white' : 'text-2xl font-extrabold tracking-tight text-rose-400';
+      document.getElementById('remainingLabel').textContent = remaining >= 0 ? t('kcalLeft') : t('kcalOver');
+
+      const ring = document.getElementById('kcalRing');
+      ring.style.strokeDashoffset = 314.16 - (Math.min(1, totals.kcal / goalKcal) * 314.16);
+      ring.setAttribute('stroke', remaining >= 0 ? '#10b981' : '#f43f5e');
+
+      document.getElementById('proteinDisplay').textContent = Math.round(totals.p);
+      document.getElementById('proteinGoalDisplay').textContent = state.goals.protein;
+      document.getElementById('proteinBar').style.width = Math.min(100, (totals.p / state.goals.protein) * 100) + '%';
+      document.getElementById('carbsDisplay').textContent = Math.round(totals.c);
+      document.getElementById('carbsGoalDisplay').textContent = state.goals.carbs;
+      document.getElementById('carbsBar').style.width = Math.min(100, (totals.c / state.goals.carbs) * 100) + '%';
+      document.getElementById('fatDisplay').textContent = Math.round(totals.f);
+      document.getElementById('fatGoalDisplay').textContent = state.goals.fat;
+      document.getElementById('fatBar').style.width = Math.min(100, (totals.f / state.goals.fat) * 100) + '%';
+
+      renderMealSuggestions(remaining);
+      renderPastDays();
+
+      document.getElementById('todayLogList').innerHTML = !state.todayLog.length ? `<div class="text-center py-6 text-xs text-slate-500">${t('emptyLog')}</div>` :
+        state.todayLog.map((item, idx) => `
+          <div class="flex items-center justify-between bg-slate-900/75 px-3.5 py-2.5 rounded-2xl border border-slate-800/80">
+            <div class="flex items-center gap-3 min-w-0">
+              ${item.thumb ? `<img src="${item.thumb}" class="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-700" alt="Foto" />` : `<span class="text-xl shrink-0">${item.icon || '🍽️'}</span>`}
+              <div class="min-w-0"><div class="text-xs font-bold text-white truncate">${item.name}</div><div class="text-[10px] text-slate-400">${item.time} • B/E: ${item.p}g | W/K: ${item.c}g | T/F: ${item.f}g</div></div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 ml-2">
+              <span class="text-xs font-extrabold text-emerald-400">${item.kcal} kcal</span>
+              <button onclick="removeLogItem(${idx})" class="bg-rose-500/15 text-rose-400 border border-rose-500/30 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1 active:scale-90 transition"><i class="fa-solid fa-trash-can text-[10px]"></i><span>${t('deleteItem')}</span></button>
+            </div>
+          </div>`).join('');
+
+      document.getElementById('masterCodeSetting').value = state.masterCode;
+      document.getElementById('geminiKeyInput').value = state.geminiApiKey || '';
+      document.getElementById('manualKcalGoal').value = state.goals.kcal;
+      document.getElementById('manualProteinGoal').value = state.goals.protein;
+
+      const hasKey = isValidApiKey(state.geminiApiKey);
+      const statusBtn = document.getElementById('aiModeStatus');
+      const keyBadge = document.getElementById('keySavedBadge');
+      statusBtn.textContent = hasKey ? 'Gemini Vision KI aktiv' : 'Smart-Modus (Key fehlt ⚙)';
+      statusBtn.className = hasKey ? 'text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold' : 'text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold';
+      keyBadge.textContent = hasKey ? 'Aktiv (Lokal geschützt)' : 'Key eintragen';
+      keyBadge.className = hasKey ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold' : 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold';
+
+      renderInviteCodes();
+      renderWeightTab();
+    }
+
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && state.unlocked) renderAll(); });
+    renderAppVisibility();
+  </script>
+</body>
+</html>
