@@ -1,1344 +1,930 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="CalSnap AI" />
-  <title>CalSnap AI – Kalorien & Abnehm-Coach (DE / PL)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <style>
-    :root { --safe-top: env(safe-area-inset-top, 20px); --safe-bottom: env(safe-area-inset-bottom, 20px); }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-      background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent;
-      user-select: none; padding-top: var(--safe-top); padding-bottom: calc(110px + var(--safe-bottom));
-    }
-    .glass { background: rgba(30, 41, 59, 0.78); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .glass-strong { background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
-    .ring-progress { transition: stroke-dashoffset 0.7s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg); transform-origin: 50% 50%; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .inp { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 0.75rem; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #fff; outline: none; }
-    .badge-ok { font-size: 10px; padding: 2px 10px; border-radius: 9999px; background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); font-weight: 600; }
-    .badge-warn { font-size: 10px; padding: 2px 10px; border-radius: 9999px; background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); font-weight: 600; }
-    input, textarea, select { user-select: text; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="CalSnap AI" />
+<title>CalSnap AI – Coach</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<style>
+:root { --safe-top: env(safe-area-inset-top, 20px); --safe-bottom: env(safe-area-inset-bottom, 20px); }
+body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; background: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; user-select: none; padding-top: var(--safe-top); padding-bottom: calc(110px + var(--safe-bottom)); }
+.glass { background: rgba(30, 41, 59, 0.78); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.5rem; }
+.glass-strong { background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
+.ring-progress { transition: stroke-dashoffset 0.7s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg); transform-origin: 50% 50%; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.inp { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 0.75rem; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #fff; outline: none; }
+.badge-ok { font-size: 10px; padding: 2px 10px; border-radius: 9999px; background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); font-weight: 600; }
+.badge-warn { font-size: 10px; padding: 2px 10px; border-radius: 9999px; background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); font-weight: 600; }
+.subcard { background: rgba(15, 23, 42, 0.8); border: 1px solid #1e293b; border-radius: 1rem; padding: 0.75rem; }
+input, textarea, select { user-select: text; }
+</style>
 </head>
-<body class="min-h-screen antialiased selection:bg-emerald-500 selection:text-white">
+<body class="min-h-screen antialiased">
 
-  <!-- UNDO BANNER -->
-  <div id="undoToast" class="fixed top-4 inset-x-4 z-50 max-w-md mx-auto hidden">
-    <div class="bg-slate-900/95 border border-emerald-500/50 rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-between gap-3">
-      <div class="flex items-center gap-2.5 text-xs text-slate-200 truncate">
-        <i class="fa-solid fa-circle-check text-emerald-400"></i>
-        <span id="undoToastText" class="truncate">Eintrag hinzugefügt</span>
-      </div>
-      <button onclick="undoLastAction()" class="shrink-0 bg-rose-500/20 text-rose-300 border border-rose-500/40 px-3 py-1.5 rounded-xl text-xs font-bold active:scale-95 transition">
-        <i class="fa-solid fa-rotate-left"></i> <span>Rückgängig</span>
-      </button>
-    </div>
+<!-- UNDO BANNER -->
+<div id="undoToast" class="fixed top-4 inset-x-4 z-50 max-w-md mx-auto hidden">
+  <div class="bg-slate-900/95 border border-emerald-500/50 rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2 text-xs text-slate-200 truncate"><i class="fa-solid fa-circle-check text-emerald-400"></i><span id="undoToastText" class="truncate">Eintrag hinzugefügt</span></div>
+    <button onclick="undoLastAction()" class="shrink-0 bg-rose-500/20 text-rose-300 border border-rose-500/40 px-3 py-1 rounded-xl text-xs font-bold"><i class="fa-solid fa-rotate-left"></i> Rückgängig</button>
   </div>
+</div>
 
-  <!-- LOCK SCREEN -->
-  <div id="lockScreen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col justify-between p-6 overflow-y-auto">
-    <div class="flex justify-end">
-      <button onclick="toggleLanguage()" class="glass px-3 py-1.5 rounded-full text-xs font-bold text-slate-200">
-        <span id="lockLangIndicator">🇩🇪 DE | 🇵🇱 PL</span>
-      </button>
-    </div>
-    <div class="mt-2 text-center">
-      <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 mx-auto flex items-center justify-center shadow-lg mb-5">
-        <i class="fa-solid fa-shield-halved text-3xl text-slate-950"></i>
-      </div>
-      <span class="badge-ok">Privat & Geschützt</span>
-      <h1 class="text-2xl font-bold mt-3 tracking-tight">CalSnap AI</h1>
-      <p class="text-slate-400 text-sm mt-1 max-w-xs mx-auto">Bitte gib deinen persönlichen Freigabe-Code ein.</p>
-    </div>
-    <div class="glass rounded-3xl p-6 max-w-sm w-full mx-auto my-6 shadow-2xl">
-      <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Zugangscode / Einladungscode</label>
-      <input id="accessCodeInput" type="text" placeholder="z. B. START-2026" class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 rounded-2xl px-4 py-3.5 text-center text-lg font-mono uppercase text-white outline-none" />
-      <p id="lockError" class="text-rose-400 text-xs text-center mt-2 hidden">Ungültiger Code.</p>
-      <button onclick="unlockApp()" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-3.5 rounded-2xl shadow-lg active:scale-[0.99] transition flex items-center justify-center gap-2">
-        <i class="fa-solid fa-unlock-keyhole"></i> <span>App freischalten</span>
-      </button>
-      <div class="mt-5 pt-4 border-t border-slate-800 text-xs text-emerald-400 font-medium">
-        <i class="fa-solid fa-key"></i> Admin-Startcode: <code class="bg-slate-900 px-1.5 py-0.5 rounded text-white">START-2026</code>
-      </div>
-    </div>
-    <div class="text-center text-xs text-slate-600 pb-4">CalSnap AI • Deutsch 🇩🇪 & Polski 🇵🇱</div>
+<!-- LOCK SCREEN -->
+<div id="lockScreen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col justify-between p-6 overflow-y-auto">
+  <div class="flex justify-end"><button onclick="toggleLanguage()" class="glass px-3 py-1.5 text-xs font-bold text-slate-200"><span id="lockLangIndicator">🇩🇪 DE | 🇵🇱 PL</span></button></div>
+  <div class="mt-2 text-center">
+    <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 mx-auto flex items-center justify-center shadow-lg mb-4"><i class="fa-solid fa-shield-halved text-3xl text-slate-950"></i></div>
+    <span class="badge-ok">Privat & Geschützt</span>
+    <h1 class="text-2xl font-bold mt-3">CalSnap AI</h1>
+    <p class="text-slate-400 text-sm mt-1 max-w-xs mx-auto">Bitte gib deinen persönlichen Freigabe-Code ein.</p>
   </div>
+  <div class="glass p-6 max-w-sm w-full mx-auto my-6 shadow-2xl">
+    <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Zugangscode / Einladungscode</label>
+    <input id="accessCodeInput" type="text" placeholder="z. B. START-2026" class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3.5 text-center text-lg font-mono uppercase text-white outline-none" />
+    <p id="lockError" class="text-rose-400 text-xs text-center mt-2 hidden">Ungültiger Code.</p>
+    <button onclick="unlockApp()" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-3.5 rounded-2xl shadow-lg flex items-center justify-center gap-2"><i class="fa-solid fa-unlock-keyhole"></i><span>App freischalten</span></button>
+    <div class="mt-4 pt-3 border-t border-slate-800 text-xs text-emerald-400 font-medium"><i class="fa-solid fa-key"></i> Admin-Startcode: <code class="bg-slate-900 px-1.5 py-0.5 rounded text-white">START-2026</code></div>
+  </div>
+  <div class="text-center text-xs text-slate-600 pb-4">CalSnap AI • Deutsch 🇩🇪 & Polski 🇵🇱</div>
+</div>
 
-  <!-- HAUPT-APP -->
-  <div id="appContainer" class="max-w-md mx-auto px-4 pt-2 hidden">
-    <header class="flex items-center justify-between py-3">
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-xl font-bold tracking-tight">CalSnap <span class="text-emerald-400">AI</span></h1>
-          <span id="roleBadge" class="badge-ok">Admin</span>
-        </div>
-        <p id="currentDateDisplay" class="text-xs text-slate-400">Heute</p>
-      </div>
-      <div class="flex items-center gap-1.5">
-        <button onclick="toggleLanguage()" class="h-9 px-3 rounded-full glass text-xs font-bold text-white active:scale-95 transition"><span id="headerLangBtn">🇩🇪 DE</span></button>
-        <button onclick="switchTab('access')" class="w-9 h-9 rounded-full glass flex items-center justify-center text-slate-300 hover:text-emerald-400"><i class="fa-solid fa-user-shield text-sm"></i></button>
-        <button onclick="lockApp()" class="w-9 h-9 rounded-full glass flex items-center justify-center text-slate-300 hover:text-rose-400"><i class="fa-solid fa-lock text-sm"></i></button>
-      </div>
-    </header>
+<!-- HAUPT-APP -->
+<div id="appContainer" class="max-w-md mx-auto px-4 pt-2 hidden">
+  <header class="flex items-center justify-between py-3">
+    <div>
+      <div class="flex items-center gap-2"><h1 class="text-xl font-bold">CalSnap <span class="text-emerald-400">AI</span></h1><span id="roleBadge" class="badge-ok">Admin</span></div>
+      <p id="currentDateDisplay" class="text-xs text-slate-400">Heute</p>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <button onclick="toggleLanguage()" class="h-9 px-3 glass text-xs font-bold text-white"><span id="headerLangBtn">🇩🇪 DE</span></button>
+      <button onclick="switchTab('access')" class="w-9 h-9 glass flex items-center justify-center text-slate-300"><i class="fa-solid fa-user-shield text-sm"></i></button>
+      <button onclick="lockApp()" class="w-9 h-9 glass flex items-center justify-center text-slate-300"><i class="fa-solid fa-lock text-sm"></i></button>
+    </div>
+  </header>
 
-    <!-- TAB 1: COCKPIT -->
-    <section id="tab-cockpit" class="space-y-4">
-      <div class="glass rounded-3xl p-5 shadow-xl">
-        <div class="flex items-center justify-between">
-          <div class="space-y-3">
-            <div><span class="text-xs text-slate-400 uppercase">Tagesziel</span><div class="text-lg font-bold text-slate-200"><span id="goalKcalDisplay">1900</span> kcal</div></div>
-            <div><span class="text-xs text-slate-400 uppercase">Gegessen</span><div class="text-lg font-bold text-emerald-400"><span id="eatenKcalDisplay">0</span> kcal</div></div>
-            <div><span class="text-xs text-slate-400 uppercase">Wasser heute</span><div class="text-sm font-semibold text-sky-400 flex items-center gap-1.5"><i class="fa-solid fa-glass-water"></i><span id="waterDisplay">0.0</span> / 2.5 L</div></div>
-          </div>
-          <div class="relative w-36 h-36 flex items-center justify-center">
-            <svg class="w-full h-full" viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.08)" stroke-width="10" fill="none" />
-              <circle id="kcalRing" class="ring-progress" cx="60" cy="60" r="50" stroke="#10b981" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="314.16" stroke-dashoffset="314.16" />
-            </svg>
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span id="remainingKcalDisplay" class="text-2xl font-extrabold tracking-tight text-white">1900</span>
-              <span id="remainingLabel" class="text-[11px] text-slate-400 font-medium">kcal übrig</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-800/80">
-          <div class="bg-slate-900/60 rounded-2xl p-2.5">
-            <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Eiweiß</span><span class="text-emerald-400 font-bold"><span id="proteinDisplay">0</span>/<span id="proteinGoalDisplay">140</span>g</span></div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="proteinBar" class="bg-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div></div>
-          </div>
-          <div class="bg-slate-900/60 rounded-2xl p-2.5">
-            <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Kohlenh.</span><span class="text-amber-400 font-bold"><span id="carbsDisplay">0</span>/<span id="carbsGoalDisplay">180</span>g</span></div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="carbsBar" class="bg-amber-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div></div>
-          </div>
-          <div class="bg-slate-900/60 rounded-2xl p-2.5">
-            <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Fett</span><span class="text-rose-400 font-bold"><span id="fatDisplay">0</span>/<span id="fatGoalDisplay">65</span>g</span></div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="fatBar" class="bg-rose-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div></div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2.5 mt-4">
-          <button onclick="focusFoodInput('meal')" class="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition"><i class="fa-solid fa-plus-circle"></i> Essen hinzufügen</button>
-          <button onclick="addWater(0.25)" class="bg-sky-500/20 border border-sky-500/40 text-sky-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition"><i class="fa-solid fa-droplet"></i> +250ml Wasser</button>
-        </div>
-      </div>
-
-      <!-- SCHNELL-LOG -->
-      <div>
-        <div class="flex items-center justify-between mb-2 px-1">
-          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Schnell-Log (1 Fingertipp)</span>
-          <span class="text-[11px] text-slate-500">Antippen zum Hinzufügen</span>
-        </div>
-        <div id="quickAddContainer" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
-      </div>
-
-      <!-- SMART KI-SCANNER (MAHLZEIT | KÜHLSCHRANK | SPEISEKARTE) -->
-      <div id="scannerCard" class="glass rounded-3xl p-4 shadow-lg border border-emerald-500/20 space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Smart KI-Scanner</span>
-          </div>
-          <button onclick="switchTab('access')" id="aiModeStatus" class="badge-ok">Status prüfen</button>
-        </div>
-
-        <div class="grid grid-cols-3 gap-1 bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
-          <button id="modeBtn-meal" onclick="setScannerMode('meal')" class="py-2 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 bg-emerald-500 text-slate-950 shadow transition">
-            <span>🍽️</span><span>Mahlzeit</span>
-          </button>
-          <button id="modeBtn-fridge" onclick="setScannerMode('fridge')" class="py-2 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 text-slate-300 hover:text-white transition">
-            <span>🧊</span><span>Kühlschrank</span>
-          </button>
-          <button id="modeBtn-menu" onclick="setScannerMode('menu')" class="py-2 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 text-slate-300 hover:text-white transition">
-            <span>📖</span><span>Speisekarte</span>
-          </button>
-        </div>
-
-        <div id="fridgeModeBanner" class="hidden bg-cyan-500/10 border border-cyan-500/30 rounded-2xl p-2.5 text-[11px] text-cyan-200 flex items-center gap-2">
-          <i class="fa-solid fa-snowflake text-cyan-400 text-sm shrink-0"></i>
-          <span>Fotografiere deinen Kühlschrank oder tippe Vorräte ein – die KI zaubert Rezepte für deine Restkalorien!</span>
-        </div>
-
-        <div id="menuModeBanner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-2.5 text-[11px] text-amber-200 flex items-center gap-2">
-          <i class="fa-solid fa-traffic-light text-amber-400 text-sm shrink-0"></i>
-          <span>Fotografiere die komplette Speisekarte – die KI liest ALLE Gerichte und bewertet sie per Ampel 🟢🟡🔴!</span>
-        </div>
-
-        <div id="photoPreviewContainer" class="hidden relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
-          <img id="photoPreview" src="" alt="Foto" class="w-full h-44 object-cover" />
-          <button onclick="clearPhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div id="apiErrorBox" class="hidden p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-xs text-amber-200 space-y-2">
-          <div class="font-bold flex items-center gap-1.5 text-amber-300"><i class="fa-solid fa-triangle-exclamation"></i><span>Hinweis zur Foto-KI:</span></div>
-          <p id="apiErrorText" class="text-[11px] leading-relaxed"></p>
-        </div>
-
-        <textarea id="naturalInput" rows="2" placeholder="Schreibe z. B.: „1 Portion Lasagne“ oder „1 Birne“..." class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-emerald-400 rounded-2xl p-3 text-sm text-white placeholder-slate-500 outline-none resize-none transition"></textarea>
-
-        <div class="flex items-center gap-2">
-          <label class="cursor-pointer shrink-0 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 active:scale-95 transition border border-emerald-500/30">
-            <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
-            <span>Foto / Kamera</span>
-            <input id="cameraInput" type="file" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)" />
-          </label>
-          <button id="analyzeBtn" onclick="analyzeInput()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-2.5 px-4 rounded-2xl text-xs shadow-md active:scale-95 transition flex items-center justify-center gap-2">
-            <i class="fa-solid fa-bolt"></i>
-            <span id="btnAnalyzeText">Per KI analysieren</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- PRÜFFENSTER MAHLZEIT -->
-      <div id="reviewCard" class="hidden glass rounded-3xl p-4 border-2 border-emerald-500/40 shadow-2xl space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i><h3 class="text-sm font-bold">Mahlzeit prüfen & anpassen</h3></div>
-          <button onclick="closeReviewCard()" class="text-slate-400 hover:text-white text-xs">Abbrechen</button>
-        </div>
-        <div id="detectedItemsList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
-        <div class="bg-slate-900/80 rounded-2xl p-3">
-          <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Portionsgröße:</span><span id="portionScaleLabel" class="font-bold text-emerald-400">100% (Normal)</span></div>
-          <input id="portionSlider" type="range" min="50" max="200" step="10" value="100" oninput="updatePortionScale(this.value)" class="w-full accent-emerald-400 cursor-pointer" />
-        </div>
-        <button onclick="confirmDetectedItems()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-2xl text-sm shadow-lg transition">
-          Ins Tagebuch übernehmen (<span id="reviewTotalKcal">0</span> kcal)
-        </button>
-      </div>
-
-      <!-- ERGEBNIS-FENSTER KÜHLSCHRANK-RESTE -->
-      <div id="fridgeResultCard" class="hidden glass rounded-3xl p-4 border-2 border-cyan-400/50 shadow-2xl space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🧊</span>
-            <div><h3 id="lblFridgeResultTitle" class="text-sm font-bold text-cyan-300">Kühlschrank-Rezepte</h3><p id="lblFridgeIngredients" class="text-[11px] text-slate-400"></p></div>
-          </div>
-          <button onclick="closeFridgeCard()" class="text-slate-400 hover:text-white text-xs">Schließen</button>
-        </div>
-        <div id="fridgeRecipesList" class="space-y-3"></div>
-      </div>
-
-      <!-- ERGEBNIS-FENSTER SPEISEKARTEN-AMPEL (ALLE GERICHTE + FILTER) -->
-      <div id="menuResultCard" class="hidden glass rounded-3xl p-4 border-2 border-amber-400/50 shadow-2xl space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">📖</span>
-            <div>
-              <h3 id="lblMenuResultTitle" class="text-sm font-bold text-amber-300">Speisekarten-Ampel Check</h3>
-              <p id="lblMenuCountSub" class="text-[11px] text-slate-400">Alle erkannten Gerichte nach Ampel-Bewertung</p>
-            </div>
-          </div>
-          <button onclick="closeMenuCard()" class="text-slate-400 hover:text-white text-xs">Schließen</button>
-        </div>
-
-        <div class="grid grid-cols-4 gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-[11px] font-bold">
-          <button id="menuFilter-all" onclick="setMenuFilter('all')" class="py-1.5 rounded-lg bg-slate-700 text-white">Alle</button>
-          <button id="menuFilter-green" onclick="setMenuFilter('green')" class="py-1.5 rounded-lg text-emerald-400">🟢 Grün</button>
-          <button id="menuFilter-yellow" onclick="setMenuFilter('yellow')" class="py-1.5 rounded-lg text-amber-400">🟡 Gelb</button>
-          <button id="menuFilter-red" onclick="setMenuFilter('red')" class="py-1.5 rounded-lg text-rose-400">🔴 Rot</button>
-        </div>
-
-        <div id="menuItemsList" class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1"></div>
-      </div>
-
-      <!-- VORSCHLÄGE (INKL. 1-KLICK EINKAUFSLISTEN-BUTTON) -->
-      <div class="glass rounded-3xl p-4 border border-teal-500/25 space-y-3">
-        <div class="flex items-center justify-between gap-2">
+  <!-- TAB 1: COCKPIT -->
+  <section id="tab-cockpit" class="space-y-4">
+    <div class="glass p-5 shadow-xl">
+      <div class="flex items-center justify-between">
+        <div class="space-y-2.5">
+          <div><span class="text-xs text-slate-400 uppercase">Tagesziel</span><div class="text-lg font-bold text-slate-200"><span id="goalKcalDisplay">1900</span> kcal</div></div>
+          <div><span class="text-xs text-slate-400 uppercase">Gegessen</span><div class="text-lg font-bold text-emerald-400"><span id="eatenKcalDisplay">0</span> kcal</div></div>
           <div>
-            <div class="flex items-center gap-2"><i class="fa-solid fa-lightbulb text-amber-400"></i><h2 class="text-sm font-bold tracking-tight">Was kann ich heute noch essen?</h2></div>
-            <p id="suggestionsSubtitle" class="text-[11px] text-slate-400 mt-0.5">Passende Kombis für deine verbleibenden Kalorien:</p>
-          </div>
-          <button onclick="nextSuggestionSet()" class="shrink-0 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-90 transition">
-            <i id="spinIdeaIcon" class="fa-solid fa-arrows-rotate text-xs transition-transform duration-300"></i>
-            <span>Neue Ideen</span>
-          </button>
-        </div>
-        <div id="mealSuggestionsList" class="space-y-2.5"></div>
-        <button id="aiCustomIdeaBtn" onclick="generateAIMealIdeas()" class="w-full bg-slate-800/90 hover:bg-slate-700 border border-emerald-500/30 text-emerald-300 font-semibold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-          <span>✨ Frische KI-Ideen live für meinen Rest berechnen</span>
-        </button>
-      </div>
-
-      <!-- FEATURE 3 – SMARTE EINKAUFSLISTE -->
-      <div class="glass rounded-3xl p-4 border border-sky-500/25 space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-cart-shopping text-sky-400"></i>
-            <div>
-              <h2 class="text-sm font-bold tracking-tight">Smarte Einkaufsliste</h2>
-              <p class="text-[10px] text-slate-400">Aus deinen Essens-Empfehlungen oder per Wunsch</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button onclick="shareShoppingListWhatsApp()" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-xl text-[11px] font-semibold flex items-center gap-1 active:scale-95 transition">
-              <i class="fa-brands fa-whatsapp"></i><span>Teilen</span>
-            </button>
-            <button onclick="clearShoppingList()" class="bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2 py-1 rounded-xl text-[11px] active:scale-95 transition">
-              <i class="fa-solid fa-trash-can text-[10px]"></i>
-            </button>
+            <span class="text-xs text-slate-400 uppercase">Hydration</span>
+            <div class="text-sm font-semibold text-sky-400 flex items-center gap-1.5"><i class="fa-solid fa-glass-water"></i><span id="waterDisplay">0.0</span> / 2.5 L</div>
+            <span id="waterStatusBadge" class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-300 font-medium">💧 Startbereit</span>
           </div>
         </div>
-
-        <div class="flex gap-2">
-          <input id="shopItemInput" type="text" placeholder="Zutat ergänzen (z. B. 200g Hähnchenbrust)..." class="inp" />
-          <button onclick="addManualShopItem()" class="bg-sky-400 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs shrink-0 active:scale-95 transition">+ Hinzufügen</button>
-        </div>
-
-        <div id="shoppingListContainer" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
-      </div>
-
-      <!-- HEUTE GEGESSEN -->
-      <div class="glass rounded-3xl p-4">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-bold tracking-tight flex items-center gap-2"><i class="fa-solid fa-utensils text-emerald-400"></i><span>Heute gegessen</span></h2>
-          <button onclick="clearTodayLog()" class="bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-xl text-[11px] font-semibold flex items-center gap-1.5 active:scale-95 transition"><i class="fa-solid fa-rotate-right text-[10px]"></i><span>Tageszähler auf 0 setzen</span></button>
-        </div>
-        <div id="todayLogList" class="space-y-2.5"></div>
-      </div>
-
-      <div id="pastDaysCard" class="glass rounded-3xl p-4 hidden">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-2"><i class="fa-solid fa-calendar-check text-emerald-400"></i><span>Vergangene Tage</span></h3>
-        <div id="pastDaysList" class="space-y-1.5 text-xs"></div>
-      </div>
-    </section>
-
-    <!-- TAB 2: GEWICHT -->
-    <section id="tab-weight" class="space-y-4 hidden">
-      <div class="glass rounded-3xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div><h2 class="text-base font-bold">Gewichts-Trend & Erfolg</h2><p class="text-xs text-slate-400">Glättet tägliche Wasserschwankungen automatisch</p></div>
-          <span class="badge-ok" id="weightDiffBadge">Bereit</span>
-        </div>
-        <div class="grid grid-cols-3 gap-2.5 my-4">
-          <div class="bg-slate-900/70 p-3 rounded-2xl text-center"><span class="text-[11px] text-slate-400 block">Aktuell</span><span id="currentWeightDisplay" class="text-lg font-extrabold text-white">-- kg</span></div>
-          <div class="bg-slate-900/70 p-3 rounded-2xl text-center border border-emerald-500/30"><span class="text-[11px] text-emerald-400 block">7-Tage-Trend</span><span id="trendWeightDisplay" class="text-lg font-extrabold text-emerald-400">-- kg</span></div>
-          <div onclick="promptTargetWeight()" class="bg-slate-900/70 p-3 rounded-2xl text-center cursor-pointer active:scale-95 transition"><span class="text-[11px] text-slate-400 block">Zielgewicht <i class="fa-solid fa-pen text-[9px] ml-0.5 text-teal-400"></i></span><span id="targetWeightDisplay" class="text-lg font-extrabold text-teal-300">83.0 kg</span></div>
-        </div>
-        <div class="flex gap-2 mt-3">
-          <input id="weightInput" type="number" step="0.1" placeholder="Heutiges Gewicht in kg" class="inp" />
-          <button onclick="addWeightEntry()" class="bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs shrink-0 active:scale-95 transition">Speichern</button>
-        </div>
-        <div class="flex items-center justify-between mt-4 mb-1.5 px-1">
-          <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Gewichts-Verlauf</span>
-          <button onclick="clearAllWeights()" class="text-[11px] text-slate-500 hover:text-rose-400 flex items-center gap-1"><i class="fa-solid fa-trash-can text-[10px]"></i><span>Verlauf leeren</span></button>
-        </div>
-        <div id="weightHistoryList" class="space-y-2 max-h-60 overflow-y-auto"></div>
-      </div>
-
-      <div class="glass rounded-3xl p-5 space-y-3">
-        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-calculator text-emerald-400"></i><span>Persönlicher Kalorien- & Abnehmrechner</span></h3>
-        <div class="grid grid-cols-2 gap-3 text-xs">
-          <div><label class="text-slate-400 block mb-1">Alter</label><input id="calcAge" type="number" value="43" class="inp" /></div>
-          <div><label class="text-slate-400 block mb-1">Größe (cm)</label><input id="calcHeight" type="number" value="186" class="inp" /></div>
-          <div><label class="text-slate-400 block mb-1">Gewicht (kg)</label><input id="calcWeight" type="number" step="0.1" placeholder="98.0" class="inp" /></div>
-          <div><label class="text-slate-400 block mb-1">Ziel (kg)</label><input id="calcTargetWeight" type="number" step="0.1" placeholder="83.0" class="inp" /></div>
-        </div>
-        <div class="text-xs">
-          <label class="text-slate-400 block mb-1">Aktivität</label>
-          <select id="calcActivity" class="inp">
-            <option value="1.25" selected>Sitzende Tätigkeit</option>
-            <option value="1.4">Leicht aktiv</option>
-            <option value="1.6">Mäßig aktiv</option>
-            <option value="1.8">Sehr aktiv</option>
-          </select>
-        </div>
-        <button onclick="calculatePersonalGoal()" class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold py-2.5 rounded-2xl text-xs transition">Optimales Abnehm-Ziel berechnen & übernehmen</button>
-      </div>
-    </section>
-
-    <!-- TAB 3: FREIGABE & KI -->
-    <section id="tab-access" class="space-y-4 hidden">
-      <div class="glass rounded-3xl p-5 space-y-3.5 border border-emerald-500/40">
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-camera-retro text-emerald-400"></i><span>Echte Gemini Foto-KI</span></h3>
-          <span id="keySavedBadge" class="badge-ok">Prüfen</span>
-        </div>
-        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="w-full bg-sky-500/20 border border-sky-400/40 text-sky-300 font-bold py-3 px-4 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
-          <i class="fa-solid fa-up-right-from-square"></i><span>1. Google AI Studio auf dem iPhone öffnen</span>
-        </a>
-        <button onclick="pasteAndSaveKey()" class="w-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold py-3 px-4 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
-          <i class="fa-solid fa-paste"></i><span>2. Kopierten Key einfügen & speichern</span>
-        </button>
-        <button onclick="loadSavedChatKey()" class="w-full bg-slate-800 border border-slate-600 text-amber-300 font-semibold py-2.5 px-4 rounded-2xl text-[11px] flex items-center justify-center gap-2 active:scale-95 transition">
-          <i class="fa-solid fa-wand-magic-sparkles"></i><span>Oder: Meinen bisherigen AQ-Key automatisch einsetzen</span>
-        </button>
-        <div class="pt-1">
-          <label class="text-[11px] text-slate-400 block mb-1">Dein gespeicherter Schlüssel:</label>
-          <div class="flex gap-2">
-            <input id="geminiKeyInput" type="text" placeholder="AQ... oder AIza..." class="inp font-mono text-emerald-300" />
-            <button onclick="saveGeminiKey()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shrink-0">Speichern</button>
+        <div class="relative w-36 h-36 flex items-center justify-center">
+          <svg class="w-full h-full" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.08)" stroke-width="10" fill="none" />
+            <circle id="kcalRing" class="ring-progress" cx="60" cy="60" r="50" stroke="#10b981" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="314.16" stroke-dashoffset="314.16" />
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <span id="remainingKcalDisplay" class="text-2xl font-extrabold text-white">1900</span>
+            <span id="remainingLabel" class="text-[11px] text-slate-400 font-medium">kcal übrig</span>
           </div>
         </div>
       </div>
 
-      <div class="glass rounded-3xl p-5 border border-slate-700 space-y-4">
-        <h2 class="text-base font-bold">Zugriff & Einladungs-Codes</h2>
-        <div class="bg-slate-900/80 p-3.5 rounded-2xl space-y-2">
-          <label class="text-xs font-semibold text-slate-300 block">1. Admin-Hauptcode</label>
-          <div class="flex gap-2">
-            <input id="masterCodeSetting" type="text" value="START-2026" class="inp font-mono uppercase text-emerald-400" />
-            <button onclick="saveMasterCode()" class="bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold">Speichern</button>
-          </div>
+      <!-- MAKROS -->
+      <div class="grid grid-cols-3 gap-2.5 mt-4 pt-3.5 border-t border-slate-800/80">
+        <div class="bg-slate-900/60 rounded-2xl p-2.5">
+          <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Eiweiß</span><span class="text-emerald-400 font-bold"><span id="proteinDisplay">0</span>/<span id="proteinGoalDisplay">140</span>g</span></div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="proteinBar" class="bg-emerald-400 h-full rounded-full transition-all" style="width:0%"></div></div>
         </div>
-        <div class="bg-slate-900/80 p-3.5 rounded-2xl space-y-2.5">
-          <label class="text-xs font-semibold text-slate-300 block">2. Einladungscode + Link erzeugen</label>
-          <div class="flex gap-2">
-            <input id="guestNameInput" type="text" placeholder="Name (z. B. Max)" class="inp" />
-            <button onclick="generateInviteCode()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shrink-0">Code erzeugen</button>
-          </div>
-          <div id="generatedCodeBox" class="hidden mt-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <div id="generatedCodeText" class="text-base font-mono font-bold text-white">FIT-MAX-1234</div>
-              <button onclick="copyInviteCode()" class="bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Kopieren</button>
-            </div>
-            <button onclick="shareInviteWhatsApp()" class="w-full bg-emerald-500 text-slate-950 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp"></i><span>Per WhatsApp senden</span></button>
-          </div>
-          <div id="inviteCodeList" class="space-y-1.5 text-xs pt-2"></div>
+        <div class="bg-slate-900/60 rounded-2xl p-2.5">
+          <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Kohlenh.</span><span class="text-amber-400 font-bold"><span id="carbsDisplay">0</span>/<span id="carbsGoalDisplay">180</span>g</span></div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="carbsBar" class="bg-amber-400 h-full rounded-full transition-all" style="width:0%"></div></div>
+        </div>
+        <div class="bg-slate-900/60 rounded-2xl p-2.5">
+          <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Fett</span><span class="text-rose-400 font-bold"><span id="fatDisplay">0</span>/<span id="fatGoalDisplay">65</span>g</span></div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="fatBar" class="bg-rose-400 h-full rounded-full transition-all" style="width:0%"></div></div>
         </div>
       </div>
 
-      <div class="glass rounded-3xl p-5 space-y-3">
-        <h3 class="text-sm font-bold">Tagesziele manuell anpassen</h3>
-        <div class="grid grid-cols-2 gap-2.5 text-xs">
-          <div><label class="text-slate-400 block mb-1">Kalorienziel (kcal)</label><input id="manualKcalGoal" type="number" value="1900" class="inp" /></div>
-          <div><label class="text-slate-400 block mb-1">Eiweiß-Ziel (g)</label><input id="manualProteinGoal" type="number" value="140" class="inp" /></div>
-        </div>
-        <button onclick="saveManualGoals()" class="w-full bg-slate-800 text-white font-semibold py-2.5 rounded-xl text-xs">Ziele speichern</button>
+      <!-- FEATURE 5 & 6: MIKRONÄHRSTOFFE & ZUCKER-WÄCHTER -->
+      <div class="grid grid-cols-4 gap-1.5 mt-2.5 text-center">
+        <div class="bg-slate-900/50 border border-slate-800 rounded-xl py-1.5 px-1"><div class="text-[10px] text-slate-400">🌾 Ballastst.</div><div class="text-xs font-bold text-teal-300"><span id="fiberDisplay">0</span>/30g</div></div>
+        <div class="bg-slate-900/50 border border-slate-800 rounded-xl py-1.5 px-1"><div class="text-[10px] text-slate-400">🍊 Vit. C</div><div class="text-xs font-bold text-amber-300"><span id="vitCDisplay">0</span>%</div></div>
+        <div class="bg-slate-900/50 border border-slate-800 rounded-xl py-1.5 px-1"><div class="text-[10px] text-slate-400">⚡ Mg/Eisen</div><div class="text-xs font-bold text-sky-300"><span id="magDisplay">0</span>%</div></div>
+        <div class="bg-slate-900/50 border border-slate-800 rounded-xl py-1.5 px-1"><div class="text-[10px] text-slate-400">🍬 Zucker</div><div class="text-xs font-bold text-emerald-300"><span id="sugarDisplay">0</span>/35g</div></div>
       </div>
-    </section>
-  </div>
 
-  <!-- NAVIGATION -->
-  <nav id="bottomNav" class="fixed bottom-0 inset-x-0 z-40 glass-strong px-6 py-2 hidden" style="padding-bottom: calc(8px + var(--safe-bottom));">
-    <div class="max-w-md mx-auto flex items-center justify-around">
-      <button onclick="switchTab('cockpit')" id="nav-cockpit" class="flex flex-col items-center gap-1 py-1 text-emerald-400"><i class="fa-solid fa-fire-flame-curved text-lg"></i><span class="text-[10px] font-semibold">Tages-Cockpit</span></button>
-      <button onclick="switchTab('weight')" id="nav-weight" class="flex flex-col items-center gap-1 py-1 text-slate-400"><i class="fa-solid fa-chart-line text-lg"></i><span class="text-[10px] font-semibold">Gewicht & Trend</span></button>
-      <button onclick="switchTab('access')" id="nav-access" class="flex flex-col items-center gap-1 py-1 text-slate-400"><i class="fa-solid fa-key text-lg"></i><span class="text-[10px] font-semibold">Freigabe & KI</span></button>
+      <div id="sugarWarnBanner" class="hidden mt-2.5 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-[11px] text-rose-200 flex items-start gap-2">
+        <i class="fa-solid fa-heart-pulse text-rose-400 mt-0.5"></i>
+        <span id="sugarWarnText">Hohe Zucker-/Entzündungs-Last heute. Trinke +500ml Wasser und setze beim nächsten Essen auf Eiweiß & Gemüse!</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5 mt-3.5">
+        <button onclick="focusFoodInput('meal')" class="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-plus-circle"></i> Essen hinzufügen</button>
+        <button onclick="addWater(0.25)" class="bg-sky-500/20 border border-sky-500/40 text-sky-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-droplet"></i> +250ml Wasser</button>
+      </div>
     </div>
-  </nav>
 
-  <script>
-    const STORAGE_KEY = 'calsnap_ai_state_v2';
-    const $ = id => document.getElementById(id);
-    const getDefaultEncodedKey = () => atob(['QVEu','QWI4Uk42','S0QzSmZ5','WEF3VXJu','ZTdjVHh6','VmluS2p1','dHZ5VmNq','aFpiWmZI','OHB4YWFw','LXc='].join(''));
+    <!-- SCHNELL-LOG -->
+    <div>
+      <div class="flex justify-between mb-1.5 px-1"><span class="text-xs font-semibold uppercase text-slate-400">Schnell-Log (1 Fingertipp)</span><span class="text-[11px] text-slate-500">Sofort eintragen</span></div>
+      <div id="quickAddContainer" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+    </div>
 
-    const quickAddItems = {
-      de: [
-        { label: '+250ml Wasser', sub: 'Hydration', water: 0.25, icon: '💧' },
-        { label: 'Kaffee + Milch', sub: '38 kcal', name: 'Kaffee mit Milch (~200ml)', kcal: 38, p: 1.2, c: 4.5, f: 1.5, icon: '☕' },
-        { label: 'Kaffee schwarz', sub: '2 kcal', name: 'Kaffee schwarz (pur)', kcal: 2, p: 0.2, c: 0, f: 0, icon: '☕' },
-        { label: '1 Apfel', sub: '80 kcal', name: '1 Apfel (~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, icon: '🍏' },
-        { label: '2 Eier', sub: '155 kcal', name: '2 gekochte Eier (~110g)', kcal: 155, p: 13, c: 1.1, f: 11, icon: '🥚' },
-        { label: 'Magerquark', sub: '170 kcal', name: 'Portion Magerquark (250g)', kcal: 170, p: 30, c: 10, f: 0.7, icon: '🥣' }
-      ],
-      pl: [
-        { label: '+250ml Wody', sub: 'Nawodnienie', water: 0.25, icon: '💧' },
-        { label: 'Kawa z mlekiem', sub: '38 kcal', name: 'Kawa z mlekiem (~200ml)', kcal: 38, p: 1.2, c: 4.5, f: 1.5, icon: '☕' },
-        { label: 'Kawa czarna', sub: '2 kcal', name: 'Kawa czarna', kcal: 2, p: 0.2, c: 0, f: 0, icon: '☕' },
-        { label: '1 Jabłko', sub: '80 kcal', name: '1 Jabłko (~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, icon: '🍏' },
-        { label: '2 Jajka', sub: '155 kcal', name: '2 Jajka gotowane (~110g)', kcal: 155, p: 13, c: 1.1, f: 11, icon: '🥚' },
-        { label: 'Twaróg chudy', sub: '170 kcal', name: 'Twaróg chudy (200g)', kcal: 170, p: 32, c: 7, f: 1.0, icon: '🥣' }
-      ]
-    };
+    <!-- SMART KI-SCANNER -->
+    <div id="scannerCard" class="glass p-4 shadow-lg border border-emerald-500/20 space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="text-xs font-bold uppercase text-emerald-400">Smart KI-Scanner</span></div>
+        <button onclick="switchTab('access')" id="aiModeStatus" class="badge-ok">Status prüfen</button>
+      </div>
 
-    const getTodayDateKey = () => {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    };
+      <div class="grid grid-cols-3 gap-1 bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
+        <button id="modeBtn-meal" onclick="setScannerMode('meal')" class="py-2 px-2 rounded-xl text-[11px] font-bold bg-emerald-500 text-slate-950 shadow">🍽️ Mahlzeit</button>
+        <button id="modeBtn-fridge" onclick="setScannerMode('fridge')" class="py-2 px-2 rounded-xl text-[11px] font-bold text-slate-300">🧊 Kühlschrank</button>
+        <button id="modeBtn-menu" onclick="setScannerMode('menu')" class="py-2 px-2 rounded-xl text-[11px] font-bold text-slate-300">📖 Speisekarte</button>
+      </div>
 
-    const defaultState = {
-      lang: 'de', unlocked: false, userRole: 'admin', masterCode: 'START-2026', geminiApiKey: getDefaultEncodedKey(),
-      inviteCodes: [{ name: 'Familie', code: 'FIT-FAMILIE-7821' }],
-      goals: { kcal: 1900, protein: 140, carbs: 180, fat: 65, targetWeight: 83.0 },
-      lastActiveDate: getTodayDateKey(), waterLiters: 0,
-      todayLog: [], pastDaysLog: [], weightLog: [], energyLog: [], shoppingList: [], fridgeItems: []
-    };
+      <div id="fridgeModeBanner" class="hidden bg-cyan-500/10 border border-cyan-500/30 rounded-2xl p-2.5 text-[11px] text-cyan-200">🧊 Fotografiere deinen Kühlschrank oder tippe Vorräte ein – die KI zaubert Rezepte für deine Restkalorien!</div>
+      <div id="menuModeBanner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-2.5 text-[11px] text-amber-200">📖 Fotografiere die komplette Speisekarte – die KI liest ALLE Gerichte und bewertet sie per Ampel 🟢🟡🔴!</div>
 
-    let state = loadState();
-    let scannerMode = 'meal';
-    let activeMenuFilter = 'all';
-    let pendingDetectedItems = [];
-    let currentFridgeRecipes = [];
-    let currentMenuDishes = [];
-    let currentPortionScale = 1.0;
-    let selectedPhotoBase64 = null;
-    let selectedPhotoThumb = null;
-    let suggestionOffset = 0;
-    let customAiSuggestions = null;
-    let undoTimer = null;
-    let lastAddedCount = 0;
+      <div id="photoPreviewContainer" class="hidden relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
+        <img id="photoPreview" src="" alt="Foto" class="w-full h-44 object-cover" />
+        <button onclick="clearPhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+      </div>
 
-    function isValidApiKey(k) {
-      return typeof k === 'string' && (k.trim().startsWith('AIza') || k.trim().startsWith('AQ.') || k.trim().length >= 20);
+      <div id="apiErrorBox" class="hidden p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-xs text-amber-200"><p id="apiErrorText" class="text-[11px]"></p></div>
+
+      <textarea id="naturalInput" rows="2" placeholder="Schreibe z. B.: „1 Portion Lasagne“ oder „1 Birne“..." class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-emerald-400 rounded-2xl p-3 text-sm text-white placeholder-slate-500 outline-none resize-none"></textarea>
+
+      <div class="flex items-center gap-2">
+        <label class="cursor-pointer shrink-0 bg-slate-800 text-slate-200 px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 border border-emerald-500/30">
+          <i class="fa-solid fa-camera text-emerald-400 text-sm"></i><span>Foto / Kamera</span>
+          <input id="cameraInput" type="file" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)" />
+        </label>
+        <button id="analyzeBtn" onclick="analyzeInput()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-2.5 px-4 rounded-2xl text-xs shadow-md flex items-center justify-center gap-2">
+          <i class="fa-solid fa-bolt"></i><span id="btnAnalyzeText">Per KI analysieren</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PRÜFFENSTER MAHLZEIT -->
+    <div id="reviewCard" class="hidden glass p-4 border-2 border-emerald-500/40 shadow-2xl space-y-3">
+      <div class="flex justify-between items-center"><h3 class="text-sm font-bold text-emerald-300">✨ Mahlzeit & Gesundheitscheck</h3><button onclick="closeReviewCard()" class="text-slate-400 text-xs">Abbrechen</button></div>
+      <div id="detectedItemsList" class="space-y-2 max-h-60 overflow-y-auto"></div>
+      <div class="subcard">
+        <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Portionsgröße:</span><span id="portionScaleLabel" class="font-bold text-emerald-400">100%</span></div>
+        <input id="portionSlider" type="range" min="50" max="200" step="10" value="100" oninput="updatePortionScale(this.value)" class="w-full accent-emerald-400" />
+      </div>
+      <button onclick="confirmDetectedItems()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-2xl text-sm shadow-lg">Ins Tagebuch übernehmen (<span id="reviewTotalKcal">0</span> kcal)</button>
+    </div>
+
+    <!-- ERGEBNIS KÜHLSCHRANK -->
+    <div id="fridgeResultCard" class="hidden glass p-4 border-2 border-cyan-400/50 shadow-2xl space-y-3">
+      <div class="flex justify-between items-center"><div><h3 id="lblFridgeResultTitle" class="text-sm font-bold text-cyan-300">🧊 Kühlschrank-Rezepte</h3><p id="lblFridgeIngredients" class="text-[11px] text-slate-400"></p></div><button onclick="closeFridgeCard()" class="text-slate-400 text-xs">Schließen</button></div>
+      <div id="fridgeRecipesList" class="space-y-3"></div>
+    </div>
+
+    <!-- ERGEBNIS SPEISEKARTE -->
+    <div id="menuResultCard" class="hidden glass p-4 border-2 border-amber-400/50 shadow-2xl space-y-3">
+      <div class="flex justify-between items-center"><div><h3 id="lblMenuResultTitle" class="text-sm font-bold text-amber-300">📖 Speisekarten-Ampel</h3><p id="lblMenuCountSub" class="text-[11px] text-slate-400"></p></div><button onclick="closeMenuCard()" class="text-slate-400 text-xs">Schließen</button></div>
+      <div class="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-[11px] font-bold">
+        <button id="menuFilter-all" onclick="setMenuFilter('all')" class="py-1.5 rounded-lg bg-slate-700 text-white">Alle</button>
+        <button id="menuFilter-green" onclick="setMenuFilter('green')" class="py-1.5 rounded-lg text-emerald-400">🟢 Grün</button>
+        <button id="menuFilter-yellow" onclick="setMenuFilter('yellow')" class="py-1.5 rounded-lg text-amber-400">🟡 Gelb</button>
+        <button id="menuFilter-red" onclick="setMenuFilter('red')" class="py-1.5 rounded-lg text-rose-400">🔴 Rot</button>
+      </div>
+      <div id="menuItemsList" class="space-y-2.5 max-h-[420px] overflow-y-auto"></div>
+    </div>
+
+    <!-- FEATURE 4: ENERGIE- & PERFORMANCE-TRACKER -->
+    <div class="glass p-4 border border-violet-500/30 space-y-3">
+      <div class="flex items-center justify-between">
+        <div><h2 class="text-sm font-bold">⚡ Energie- & Performance-Tracker</h2><p class="text-[10px] text-slate-400">Wie fühlst du dich? (Erkennt Muster zu deinen Mahlzeiten)</p></div>
+        <button onclick="analyzeEnergyPatternsAI()" class="bg-violet-500/20 text-violet-300 border border-violet-500/30 px-2.5 py-1 rounded-xl text-[11px] font-semibold">🔍 KI-Muster</button>
+      </div>
+      <div class="grid grid-cols-4 gap-1.5 text-center">
+        <button onclick="logEnergy(5, 'Volle Energie', '🔋')" class="subcard hover:border-emerald-500/50 py-2 px-1"><div class="text-base">🔋</div><div class="text-[10px] font-bold text-emerald-300 mt-0.5">Fit & Aktiv</div></button>
+        <button onclick="logEnergy(4, 'Top Fokus', '🧠')" class="subcard hover:border-sky-500/50 py-2 px-1"><div class="text-base">🧠</div><div class="text-[10px] font-bold text-sky-300 mt-0.5">Top Fokus</div></button>
+        <button onclick="logEnergy(2, 'Nachmittagstief', '🥱')" class="subcard hover:border-amber-500/50 py-2 px-1"><div class="text-base">🥱</div><div class="text-[10px] font-bold text-amber-300 mt-0.5">Müde / Tief</div></button>
+        <button onclick="logEnergy(1, 'Heißhunger', '🍫')" class="subcard hover:border-rose-500/50 py-2 px-1"><div class="text-base">🍫</div><div class="text-[10px] font-bold text-rose-300 mt-0.5">Heißhunger</div></button>
+      </div>
+      <div id="energyPatternBox" class="hidden p-3 rounded-2xl bg-violet-500/15 border border-violet-500/30 text-xs text-violet-200 leading-relaxed"></div>
+      <div id="energyLogList" class="space-y-1.5 max-h-28 overflow-y-auto text-[11px]"></div>
+    </div>
+
+    <!-- VORSCHLÄGE -->
+    <div class="glass p-4 border border-teal-500/25 space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <div><h2 class="text-sm font-bold">💡 Was kann ich heute noch essen?</h2><p id="suggestionsSubtitle" class="text-[11px] text-slate-400">Passende Kombis für deine Restkalorien:</p></div>
+        <button onclick="nextSuggestionSet()" class="shrink-0 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5"><i id="spinIdeaIcon" class="fa-solid fa-arrows-rotate text-xs transition-transform duration-300"></i><span>Neue Ideen</span></button>
+      </div>
+      <div id="mealSuggestionsList" class="space-y-2.5"></div>
+      <button id="aiCustomIdeaBtn" onclick="generateAIMealIdeas()" class="w-full bg-slate-800 border border-emerald-500/30 text-emerald-300 font-semibold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i><span>✨ Frische KI-Ideen live für meinen Rest berechnen</span></button>
+    </div>
+
+    <!-- FEATURE 3: SMARTE EINKAUFSLISTE -->
+    <div class="glass p-4 border border-sky-500/25 space-y-3">
+      <div class="flex items-center justify-between">
+        <div><h2 class="text-sm font-bold">🛒 Smarte Einkaufsliste</h2><p class="text-[10px] text-slate-400">Aus deinen Empfehlungen oder manuell</p></div>
+        <div class="flex gap-1.5">
+          <button onclick="shareShoppingListWhatsApp()" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-xl text-[11px] font-semibold"><i class="fa-brands fa-whatsapp"></i> Teilen</button>
+          <button onclick="clearShoppingList()" class="bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2 py-1 rounded-xl text-[11px]"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <input id="shopItemInput" type="text" placeholder="Zutat ergänzen (z. B. 200g Hähnchen)..." class="inp" />
+        <button onclick="addManualShopItem()" class="bg-sky-400 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs shrink-0">+ Hinzufügen</button>
+      </div>
+      <div id="shoppingListContainer" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
+    </div>
+
+    <!-- HEUTE GEGESSEN -->
+    <div class="glass p-4">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-utensils text-emerald-400"></i><span>Heute gegessen</span></h2>
+        <button onclick="clearTodayLog()" class="bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-xl text-[11px] font-semibold">Tageszähler auf 0</button>
+      </div>
+      <div id="todayLogList" class="space-y-2.5"></div>
+    </div>
+
+    <div id="pastDaysCard" class="glass p-4 hidden">
+      <h3 class="text-xs font-bold uppercase text-slate-400 mb-2">Vergangene Tage</h3>
+      <div id="pastDaysList" class="space-y-1.5 text-xs"></div>
+    </div>
+  </section>
+
+  <!-- TAB 2: GEWICHT -->
+  <section id="tab-weight" class="space-y-4 hidden">
+    <div class="glass p-5">
+      <div class="flex justify-between items-center mb-3"><div><h2 class="text-base font-bold">Gewichts-Trend & Erfolg</h2><p class="text-xs text-slate-400">7-Tage-Glättung</p></div><span class="badge-ok" id="weightDiffBadge">Bereit</span></div>
+      <div class="grid grid-cols-3 gap-2.5 my-4">
+        <div class="subcard text-center"><span class="text-[11px] text-slate-400 block">Aktuell</span><span id="currentWeightDisplay" class="text-lg font-extrabold text-white">-- kg</span></div>
+        <div class="subcard text-center border-emerald-500/30"><span class="text-[11px] text-emerald-400 block">7-Tage-Trend</span><span id="trendWeightDisplay" class="text-lg font-extrabold text-emerald-400">-- kg</span></div>
+        <div onclick="promptTargetWeight()" class="subcard text-center cursor-pointer"><span class="text-[11px] text-slate-400 block">Zielgewicht ✏️</span><span id="targetWeightDisplay" class="text-lg font-extrabold text-teal-300">83.0 kg</span></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <input id="weightInput" type="number" step="0.1" placeholder="Heutiges Gewicht in kg" class="inp" />
+        <button onclick="addWeightEntry()" class="bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs shrink-0">Speichern</button>
+      </div>
+      <div class="flex justify-between items-center mt-4 mb-1.5 px-1"><span class="text-[11px] font-semibold uppercase text-slate-400">Gewichts-Verlauf</span><button onclick="clearAllWeights()" class="text-[11px] text-slate-500 hover:text-rose-400">Verlauf leeren</button></div>
+      <div id="weightHistoryList" class="space-y-2 max-h-60 overflow-y-auto"></div>
+    </div>
+
+    <div class="glass p-5 space-y-3">
+      <h3 class="text-sm font-bold">🧮 Persönlicher Kalorien- & Abnehmrechner</h3>
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div><label class="text-slate-400 block mb-1">Alter</label><input id="calcAge" type="number" value="43" class="inp" /></div>
+        <div><label class="text-slate-400 block mb-1">Größe (cm)</label><input id="calcHeight" type="number" value="186" class="inp" /></div>
+        <div><label class="text-slate-400 block mb-1">Gewicht (kg)</label><input id="calcWeight" type="number" step="0.1" placeholder="98.0" class="inp" /></div>
+        <div><label class="text-slate-400 block mb-1">Ziel (kg)</label><input id="calcTargetWeight" type="number" step="0.1" placeholder="83.0" class="inp" /></div>
+      </div>
+      <select id="calcActivity" class="inp">
+        <option value="1.25" selected>Sitzende Tätigkeit</option>
+        <option value="1.4">Leicht aktiv</option>
+        <option value="1.6">Mäßig aktiv</option>
+        <option value="1.8">Sehr aktiv</option>
+      </select>
+      <button onclick="calculatePersonalGoal()" class="w-full bg-slate-800 text-emerald-400 border border-emerald-500/30 font-bold py-2.5 rounded-2xl text-xs">Optimales Abnehm-Ziel berechnen & übernehmen</button>
+    </div>
+  </section>
+
+  <!-- TAB 3: FREIGABE & KI -->
+  <section id="tab-access" class="space-y-4 hidden">
+    <div class="glass p-5 space-y-3 border border-emerald-500/40">
+      <div class="flex justify-between items-center"><h3 class="text-sm font-bold">📸 Echte Gemini Foto-KI</h3><span id="keySavedBadge" class="badge-ok">Prüfen</span></div>
+      <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="w-full bg-sky-500/20 border border-sky-400/40 text-sky-300 font-bold py-2.5 px-4 rounded-2xl text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-up-right-from-square"></i><span>1. Google AI Studio auf dem iPhone öffnen</span></a>
+      <button onclick="pasteAndSaveKey()" class="w-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold py-2.5 px-4 rounded-2xl text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-paste"></i><span>2. Kopierten Key einfügen & speichern</span></button>
+      <button onclick="loadSavedChatKey()" class="w-full bg-slate-800 border border-slate-600 text-amber-300 font-semibold py-2 px-4 rounded-2xl text-[11px]">✨ Meinen bisherigen AQ-Key automatisch einsetzen</button>
+      <div class="flex gap-2 pt-1">
+        <input id="geminiKeyInput" type="text" placeholder="AQ... oder AIza..." class="inp font-mono text-emerald-300" />
+        <button onclick="saveGeminiKey()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shrink-0">Speichern</button>
+      </div>
+    </div>
+
+    <div class="glass p-5 space-y-4">
+      <h2 class="text-base font-bold">🔐 Zugriff & Einladungs-Codes</h2>
+      <div class="subcard space-y-2">
+        <label class="text-xs font-semibold text-slate-300 block">1. Admin-Hauptcode</label>
+        <div class="flex gap-2"><input id="masterCodeSetting" type="text" value="START-2026" class="inp font-mono uppercase text-emerald-400" /><button onclick="saveMasterCode()" class="bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold">Speichern</button></div>
+      </div>
+      <div class="subcard space-y-2">
+        <label class="text-xs font-semibold text-slate-300 block">2. Einladungscode + Link erzeugen</label>
+        <div class="flex gap-2"><input id="guestNameInput" type="text" placeholder="Name (z. B. Max)" class="inp" /><button onclick="generateInviteCode()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shrink-0">Code erzeugen</button></div>
+        <div id="generatedCodeBox" class="hidden mt-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
+          <div class="flex justify-between items-center"><div id="generatedCodeText" class="text-base font-mono font-bold text-white">FIT-MAX-1234</div><button onclick="copyInviteCode()" class="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-lg text-xs font-semibold">Kopieren</button></div>
+          <button onclick="shareInviteWhatsApp()" class="w-full bg-emerald-500 text-slate-950 font-bold py-2 rounded-xl text-xs"><i class="fa-brands fa-whatsapp"></i> Per WhatsApp senden</button>
+        </div>
+        <div id="inviteCodeList" class="space-y-1.5 text-xs pt-2"></div>
+      </div>
+    </div>
+
+    <div class="glass p-5 space-y-3">
+      <h3 class="text-sm font-bold">Tagesziele manuell anpassen</h3>
+      <div class="grid grid-cols-2 gap-2.5 text-xs">
+        <div><label class="text-slate-400 block mb-1">Kalorienziel (kcal)</label><input id="manualKcalGoal" type="number" value="1900" class="inp" /></div>
+        <div><label class="text-slate-400 block mb-1">Eiweiß-Ziel (g)</label><input id="manualProteinGoal" type="number" value="140" class="inp" /></div>
+      </div>
+      <button onclick="saveManualGoals()" class="w-full bg-slate-800 text-white font-semibold py-2.5 rounded-xl text-xs">Ziele speichern</button>
+    </div>
+  </section>
+</div>
+
+<!-- NAVIGATION -->
+<nav id="bottomNav" class="fixed bottom-0 inset-x-0 z-40 glass-strong px-6 py-2 hidden" style="padding-bottom: calc(8px + var(--safe-bottom));">
+  <div class="max-w-md mx-auto flex items-center justify-around">
+    <button onclick="switchTab('cockpit')" id="nav-cockpit" class="flex flex-col items-center gap-1 py-1 text-emerald-400"><i class="fa-solid fa-fire-flame-curved text-lg"></i><span class="text-[10px] font-semibold">Tages-Cockpit</span></button>
+    <button onclick="switchTab('weight')" id="nav-weight" class="flex flex-col items-center gap-1 py-1 text-slate-400"><i class="fa-solid fa-chart-line text-lg"></i><span class="text-[10px] font-semibold">Gewicht & Trend</span></button>
+    <button onclick="switchTab('access')" id="nav-access" class="flex flex-col items-center gap-1 py-1 text-slate-400"><i class="fa-solid fa-key text-lg"></i><span class="text-[10px] font-semibold">Freigabe & KI</span></button>
+  </div>
+</nav>
+
+<script>
+const STORAGE_KEY = 'calsnap_ai_state_v2';
+const $ = id => document.getElementById(id);
+const getDefaultEncodedKey = () => atob(['QVEu','QWI4Uk42','S0QzSmZ5','WEF3VXJu','ZTdjVHh6','VmluS2p1','dHZ5VmNq','aFpiWmZI','OHB4YWFw','LXc='].join(''));
+
+const quickAddList = [
+  { label: '+250ml Wasser', sub: 'Hydration', water: 0.25, icon: '💧' },
+  { label: 'Kaffee + Milch', sub: '38 kcal', name: 'Kaffee mit Milch (~200ml)', kcal: 38, p: 1.2, c: 4.5, f: 1.5, sugar: 4, fiber: 0, vitC: 0, mag: 2, icon: '☕' },
+  { label: 'Kaffee schwarz', sub: '2 kcal', name: 'Kaffee schwarz (pur)', kcal: 2, p: 0.2, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 2, icon: '☕' },
+  { label: '1 Apfel', sub: '80 kcal', name: '1 Apfel (~150g)', kcal: 80, p: 0.5, c: 19, f: 0.3, sugar: 14, fiber: 3.5, vitC: 18, mag: 4, icon: '🍏' },
+  { label: '2 Eier', sub: '155 kcal', name: '2 gekochte Eier (~110g)', kcal: 155, p: 13, c: 1.1, f: 11, sugar: 0.5, fiber: 0, vitC: 0, mag: 12, icon: '🥚' },
+  { label: 'Magerquark', sub: '170 kcal', name: 'Portion Magerquark (250g)', kcal: 170, p: 30, c: 10, f: 0.7, sugar: 9, fiber: 0, vitC: 2, mag: 10, icon: '🥣' }
+];
+
+const getTodayDateKey = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const defaultState = {
+  lang: 'de', unlocked: false, userRole: 'admin', masterCode: 'START-2026', geminiApiKey: getDefaultEncodedKey(),
+  inviteCodes: [{ name: 'Familie', code: 'FIT-FAMILIE-7821' }],
+  goals: { kcal: 1900, protein: 140, carbs: 180, fat: 65, targetWeight: 83.0 },
+  lastActiveDate: getTodayDateKey(), waterLiters: 0,
+  todayLog: [], pastDaysLog: [], weightLog: [], energyLog: [], shoppingList: [], fridgeItems: []
+};
+
+let state = loadState(), scannerMode = 'meal', activeMenuFilter = 'all', pendingDetectedItems = [], currentFridgeRecipes = [], currentMenuDishes = [], currentPortionScale = 1.0, selectedPhotoBase64 = null, selectedPhotoThumb = null, suggestionOffset = 0, customAiSuggestions = null, undoTimer = null, lastAddedCount = 0;
+
+function isValidApiKey(k) { return typeof k === 'string' && (k.trim().startsWith('AIza') || k.trim().startsWith('AQ.') || k.trim().length >= 20); }
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('calsnap_ai_state_v1');
+    if (!raw) return JSON.parse(JSON.stringify(defaultState));
+    const loaded = Object.assign(JSON.parse(JSON.stringify(defaultState)), JSON.parse(raw));
+    loaded.goals = Object.assign(JSON.parse(JSON.stringify(defaultState.goals)), loaded.goals || {});
+    if (!Array.isArray(loaded.pastDaysLog)) loaded.pastDaysLog = [];
+    if (!Array.isArray(loaded.shoppingList)) loaded.shoppingList = [];
+    if (!Array.isArray(loaded.energyLog)) loaded.energyLog = [];
+    if (!isValidApiKey(loaded.geminiApiKey)) loaded.geminiApiKey = getDefaultEncodedKey();
+    return loaded;
+  } catch (e) { return JSON.parse(JSON.stringify(defaultState)); }
+}
+
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function checkInviteUrlParams() {
+  try {
+    const p = new URLSearchParams(window.location.search), c = p.get('code'), k = p.get('k');
+    if (k && isValidApiKey(atob(k))) state.geminiApiKey = atob(k);
+    if (c) $('accessCodeInput').value = c;
+    if (c || k) { saveState(); window.history.replaceState({}, document.title, window.location.pathname); }
+  } catch (e) {}
+}
+
+function checkAutomaticDailyReset() {
+  const todayKey = getTodayDateKey();
+  if (state.lastActiveDate && state.lastActiveDate !== todayKey) {
+    if (state.todayLog && state.todayLog.length > 0) {
+      const totalKcal = state.todayLog.reduce((s, i) => s + i.kcal, 0);
+      const totalP = Math.round(state.todayLog.reduce((s, i) => s + i.p, 0));
+      state.pastDaysLog.unshift({ date: state.lastActiveDate, kcal: totalKcal, protein: totalP, goal: state.goals.kcal });
+      state.pastDaysLog = state.pastDaysLog.slice(0, 30);
     }
+    state.todayLog = []; state.waterLiters = 0; state.lastActiveDate = todayKey; saveState();
+  } else if (!state.lastActiveDate) { state.lastActiveDate = todayKey; saveState(); }
+}
 
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('calsnap_ai_state_v1');
-        if (!raw) return JSON.parse(JSON.stringify(defaultState));
-        const loaded = Object.assign(JSON.parse(JSON.stringify(defaultState)), JSON.parse(raw));
-        loaded.goals = Object.assign(JSON.parse(JSON.stringify(defaultState.goals)), loaded.goals || {});
-        if (!Array.isArray(loaded.pastDaysLog)) loaded.pastDaysLog = [];
-        if (!Array.isArray(loaded.shoppingList)) loaded.shoppingList = [];
-        if (!isValidApiKey(loaded.geminiApiKey)) loaded.geminiApiKey = getDefaultEncodedKey();
-        return loaded;
-      } catch (e) { return JSON.parse(JSON.stringify(defaultState)); }
-    }
+function toggleLanguage() { state.lang = state.lang === 'de' ? 'pl' : 'de'; customAiSuggestions = null; saveState(); renderAll(); }
 
-    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function setScannerMode(mode) {
+  scannerMode = mode;
+  const b = 'py-2 px-2 rounded-xl text-[11px] font-bold text-slate-300';
+  $('modeBtn-meal').className = mode === 'meal' ? 'py-2 px-2 rounded-xl text-[11px] font-bold bg-emerald-500 text-slate-950 shadow' : b;
+  $('modeBtn-fridge').className = mode === 'fridge' ? 'py-2 px-2 rounded-xl text-[11px] font-bold bg-cyan-400 text-slate-950 shadow' : b;
+  $('modeBtn-menu').className = mode === 'menu' ? 'py-2 px-2 rounded-xl text-[11px] font-bold bg-amber-400 text-slate-950 shadow' : b;
+  $('fridgeModeBanner').classList.toggle('hidden', mode !== 'fridge');
+  $('menuModeBanner').classList.toggle('hidden', mode !== 'menu');
+  $('naturalInput').placeholder = mode === 'fridge' ? 'Welche Zutaten hast du da? Z. B. Eier, Tomaten, Schinken...' : (mode === 'menu' ? 'Fotografiere die Speisekarte oder tippe Gerichte ein...' : 'Schreibe z. B.: „1 Portion Lasagne“ oder „1 Birne“...');
+  $('btnAnalyzeText').textContent = mode === 'fridge' ? 'Rezepte zaubern' : (mode === 'menu' ? 'Komplette Speisekarte prüfen' : 'Per KI analysieren');
+}
 
-    function checkInviteUrlParams() {
-      try {
-        const p = new URLSearchParams(window.location.search);
-        const c = p.get('code'), k = p.get('k');
-        if (k && isValidApiKey(atob(k))) state.geminiApiKey = atob(k);
-        if (c) $('accessCodeInput').value = c;
-        if (c || k) { saveState(); window.history.replaceState({}, document.title, window.location.pathname); }
-      } catch (e) {}
-    }
+function focusFoodInput(mode) { if (mode) setScannerMode(mode); $('naturalInput').scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => $('naturalInput').focus(), 300); }
 
-    function checkAutomaticDailyReset() {
-      const todayKey = getTodayDateKey();
-      if (state.lastActiveDate && state.lastActiveDate !== todayKey) {
-        if (state.todayLog && state.todayLog.length > 0) {
-          const totalKcal = state.todayLog.reduce((s, i) => s + i.kcal, 0);
-          const totalP = Math.round(state.todayLog.reduce((s, i) => s + i.p, 0));
-          state.pastDaysLog.unshift({ date: state.lastActiveDate, kcal: totalKcal, protein: totalP, goal: state.goals.kcal });
-          state.pastDaysLog = state.pastDaysLog.slice(0, 30);
-        }
-        state.todayLog = []; state.waterLiters = 0; state.lastActiveDate = todayKey; saveState();
-      } else if (!state.lastActiveDate) { state.lastActiveDate = todayKey; saveState(); }
-    }
+function generateDeterministicCode(name) {
+  const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'GAST';
+  let hash = 2026;
+  for (let i = 0; i < clean.length; i++) { hash = ((hash << 5) - hash) + clean.charCodeAt(i); hash |= 0; }
+  return `FIT-${clean}-${Math.abs(hash % 9000) + 1000}`;
+}
 
-    function toggleLanguage() {
-      state.lang = state.lang === 'de' ? 'pl' : 'de';
-      customAiSuggestions = null;
-      saveState(); applyTranslations(); renderAll();
-    }
+function verifyInviteFormat(code) { const p = code.split('-'); return p.length === 3 && p[0] === 'FIT' && generateDeterministicCode(p[1]) === code; }
 
-    function setScannerMode(mode) {
-      scannerMode = mode;
-      const baseClass = 'py-2 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 text-slate-300 hover:text-white transition';
-      $('modeBtn-meal').className = mode === 'meal' ? 'py-2 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 bg-emerald-500 text-slate-950 shadow transition' : baseClass;
-      $('modeBtn-fridge').className = mode === 'fridge' ? 'py-2 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 bg-cyan-400 text-slate-950 shadow transition' : baseClass;
-      $('modeBtn-menu').className = mode === 'menu' ? 'py-2 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 bg-amber-400 text-slate-950 shadow transition' : baseClass;
-      $('fridgeModeBanner').classList.toggle('hidden', mode !== 'fridge');
-      $('menuModeBanner').classList.toggle('hidden', mode !== 'menu');
+function unlockApp() {
+  const input = $('accessCodeInput').value.trim().toUpperCase();
+  const isMaster = (input === state.masterCode.toUpperCase());
+  const isListed = state.inviteCodes.some(c => c.code.toUpperCase() === input);
+  if (isMaster || isListed || verifyInviteFormat(input)) {
+    state.unlocked = true; state.userRole = isMaster ? 'admin' : 'guest';
+    saveState(); $('lockError').classList.add('hidden'); renderAppVisibility();
+  } else { $('lockError').classList.remove('hidden'); }
+}
 
-      if (mode === 'fridge') {
-        $('naturalInput').placeholder = 'Welche Zutaten hast du da? Z. B. Eier, Tomaten, Schinken, Käse...';
-        $('btnAnalyzeText').textContent = 'Rezepte zaubern';
-      } else if (mode === 'menu') {
-        $('naturalInput').placeholder = 'Fotografiere die Speisekarte oder tippe Gerichte zur Auswahl ein...';
-        $('btnAnalyzeText').textContent = 'Komplette Speisekarte prüfen';
-      } else {
-        $('naturalInput').placeholder = 'Schreibe z. B.: „1 Portion Lasagne“ oder „1 Birne“...';
-        $('btnAnalyzeText').textContent = 'Per KI analysieren';
+function lockApp() { state.unlocked = false; saveState(); $('accessCodeInput').value = ''; renderAppVisibility(); }
+
+function renderAppVisibility() {
+  checkInviteUrlParams(); checkAutomaticDailyReset();
+  $('lockScreen').classList.toggle('hidden', state.unlocked);
+  $('appContainer').classList.toggle('hidden', !state.unlocked);
+  $('bottomNav').classList.toggle('hidden', !state.unlocked);
+  if (state.unlocked) { $('roleBadge').textContent = state.userRole === 'admin' ? 'Admin' : 'Gast'; renderAll(); }
+}
+
+function saveMasterCode() { const v = $('masterCodeSetting').value.trim().toUpperCase(); if (v.length >= 4) { state.masterCode = v; saveState(); alert('Gespeichert: ' + v); } }
+function saveGeminiKey() { state.geminiApiKey = $('geminiKeyInput').value.trim(); saveState(); $('apiErrorBox').classList.add('hidden'); renderAll(); alert('KI-Schlüssel gespeichert!'); }
+async function pasteAndSaveKey() { try { const t = await navigator.clipboard.readText(); if (t && t.trim().length > 10) { $('geminiKeyInput').value = t.trim(); saveGeminiKey(); } } catch (e) { $('geminiKeyInput').focus(); } }
+function loadSavedChatKey() { $('geminiKeyInput').value = getDefaultEncodedKey(); saveGeminiKey(); }
+
+function generateInviteCode() {
+  const name = $('guestNameInput').value.trim();
+  if (!name) return;
+  const code = generateDeterministicCode(name);
+  if (!state.inviteCodes.some(c => c.code === code)) { state.inviteCodes.push({ name, code }); saveState(); }
+  $('generatedCodeText').textContent = code; $('generatedCodeBox').classList.remove('hidden'); $('guestNameInput').value = ''; renderInviteCodes();
+}
+
+function getInviteMessageText(code) {
+  let baseUrl = window.location.href.includes('http') ? window.location.href.split('#')[0].split('?')[0] : 'https://kadorabomaiz-glitch.github.io/calsnap/';
+  const params = new URLSearchParams({ code });
+  if (isValidApiKey(state.geminiApiKey)) params.set('k', btoa(state.geminiApiKey.trim()));
+  return `CalSnap AI:\n🔗 ${baseUrl}?${params.toString()}\n🔑 Code: ${code}`;
+}
+
+function copyInviteCode() { navigator.clipboard.writeText(getInviteMessageText($('generatedCodeText').textContent)); alert('Kopiert!'); }
+function shareInviteWhatsApp() { window.open(`https://wa.me/?text=${encodeURIComponent(getInviteMessageText($('generatedCodeText').textContent))}`, '_blank'); }
+function deleteInviteCode(idx) { state.inviteCodes.splice(idx, 1); saveState(); renderInviteCodes(); }
+
+function renderInviteCodes() {
+  $('inviteCodeList').innerHTML = state.inviteCodes.map((item, idx) => `<div class="flex justify-between bg-slate-950/70 px-3 py-2 rounded-xl border border-slate-800"><div><span class="font-semibold text-white">${item.name}:</span><code class="ml-1.5 text-emerald-400 font-mono">${item.code}</code></div><button onclick="deleteInviteCode(${idx})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button></div>`).join('');
+}
+
+const foodTuples = [
+  ['birne|birnen|gruszka', 'Birne (~160g)', 92, 0.6, 22, 0.3, '🍐', 15, 5, 12, 6, ''],
+  ['lasagne|lasania', 'Portion Lasagne (~350g)', 540, 28, 44, 27, '🍝', 7, 3, 10, 18, ''],
+  ['carbonara', 'Spaghetti Carbonara (~350g)', 610, 25, 65, 27, '🍝', 4, 2.5, 2, 12, '⚠️ Viel gesättigtes Fett & Weißmehl – ideal mit Salat kombinieren.'],
+  ['bolognese', 'Spaghetti Bolognese (~350g)', 520, 26, 64, 16, '🍝', 8, 4, 15, 16, ''],
+  ['auflauf|zapiekanka', 'Portion Auflauf (~320g)', 490, 22, 46, 23, '🥘', 6, 3.5, 12, 15, ''],
+  ['apfelsaft|sok', 'Glas Apfelsaft (250ml)', 115, 0.3, 28, 0.1, '🧃', 24, 0, 15, 3, '⚠️ Flüssige Zuckerfalle (24g Zucker) – lässt Blutzucker schnell steigen!'],
+  ['cola|limo|energydrink', 'Softdrink (330ml)', 140, 0, 35, 0, '🥤', 35, 0, 0, 0, '⚠️ Zuckerbombe (35g Zucker) – fördert Heißhunger & Müdigkeit!'],
+  ['apfel|äpfel|jabłko', 'Apfel (~150g)', 80, 0.5, 19, 0.3, '🍏', 14, 3.5, 18, 4, ''],
+  ['banane|bananen|banan', 'Banane (~120g)', 105, 1.3, 27, 0.4, '🍌', 14, 3, 15, 12, ''],
+  ['käsebrötchen|bułka z serem', 'Käsebrötchen (~110g)', 290, 12, 36, 10, '🧀', 3, 2, 0, 8, ''],
+  ['brötchen|semmel|bułka', 'Brötchen (~65g)', 165, 5.5, 33, 1.2, '🥖', 2, 1.5, 0, 5, ''],
+  ['rührei|spiegelei|omelett|jajecznica', 'Rührei/Omelett (~150g)', 240, 18, 2, 18, '🍳', 1, 0, 0, 16, ''],
+  ['ei|eier|jajko|jajka', 'Ei gekocht (~55g)', 78, 6.5, 0.6, 5.5, '🥚', 0.3, 0, 0, 6, ''],
+  ['kaffee|kawa|cappuccino', 'Kaffee (~200ml)', 35, 1.2, 3.5, 1.2, '☕', 3.5, 0, 0, 2, ''],
+  ['hähnchen|huhn|putenbrust|kurczak', 'Hähnchenbrust (~180g)', 220, 42, 0, 5, '🍗', 0, 0, 0, 18, ''],
+  ['reis|ryż', 'Portion Reis (~180g)', 240, 5, 52, 0.6, '🍚', 0.5, 1.5, 0, 8, ''],
+  ['nudeln|pasta|spaghetti|makaron', 'Portion Nudeln (~200g)', 310, 11, 62, 2, '🍝', 2, 3, 0, 10, ''],
+  ['pizza', 'Pizza (~300g)', 680, 28, 78, 26, '🍕', 9, 4, 8, 15, '⚠️ Weißmehl + viel Fett (Entzündungs-Trigger) – trinke +500ml Wasser dazu!'],
+  ['döner|kebab', 'Döner Kebab (~350g)', 650, 38, 58, 28, '🥙', 8, 4.5, 15, 20, ''],
+  ['burger|cheeseburger', 'Burger (~250g)', 560, 30, 44, 28, '🍔', 11, 2, 5, 16, '⚠️ Hochverarbeitet (NOVA-4) – schnelle Kohlenhydrate & gesättigte Fette.'],
+  ['schnitzel|schabowy|kotlet', 'Schnitzel / Kotlet (~180g)', 380, 32, 16, 21, '🥩', 1, 1, 2, 16, ''],
+  ['lachs|fisch|thunfisch|ryba', 'Portion Fisch/Lachs (~180g)', 320, 36, 0, 18, '🐟', 0, 0, 4, 22, ''],
+  ['suppe|eintopf|zupa|rosół', 'Teller Suppe (~350ml)', 290, 16, 24, 14, '🍲', 4, 4, 20, 14, ''],
+  ['kartoffel|kartoffeln|ziemniaki', 'Portion Kartoffeln (~200g)', 160, 4, 35, 0.2, '🥔', 2, 4, 25, 14, ''],
+  ['pommes|frytki', 'Portion Pommes (~150g)', 365, 4, 45, 18, '🍟', 1, 4, 8, 10, '⚠️ Frittiert (Entzündungs-Trigger) – Ofenkartoffeln sparen 50% Kalorien!'],
+  ['salat|sałatka|mizeria', 'Gemischter Salat (~220g)', 165, 4, 10, 11, '🥗', 4, 5, 45, 16, ''],
+  ['quark|magerquark|skyr|joghurt|twaróg', 'Quark / Skyr (250g)', 170, 28, 10, 1.5, '🥣', 9, 0, 2, 12, ''],
+  ['haferflocken|müsli|owsianka', 'Haferflocken / Müsli (~180g)', 240, 9, 38, 5, '🌾', 4, 6, 0, 25, ''],
+  ['schokolade|riegel|czekolada|kuchen', 'Süßigkeit / Kuchen (~60g)', 240, 3, 32, 11, '🍫', 26, 1, 0, 6, '⚠️ Hoher Zuckeranteil (26g) – kann nach 60 Min. zu Heißhunger führen!'],
+  ['pierogi|piroggen', 'Portion Pierogi (~240g)', 420, 14, 62, 12, '🥟', 3, 3, 4, 12, ''],
+  ['brot|abendbrot|vollkornbrot|chleb', 'Belegtes Brot (~95g)', 215, 9, 25, 8, '🍞', 2, 4.5, 2, 12, '']
+];
+
+function parseNumberWord(w) {
+  const m = { ein:1, eine:1, einen:1, zwei:2, drei:3, vier:4, fünf:5, halbe:0.5, jeden:1, jedna:1, dwa:2, dwie:2, trzy:3 };
+  if (!w) return 1;
+  const l = w.toLowerCase().replace(',', '.');
+  return m[l] !== undefined ? m[l] : (parseFloat(l) || 1);
+}
+
+function parseNaturalText(text) {
+  const lower = text.toLowerCase(), results = [];
+  foodTuples.forEach(([keysStr, nameDe, kcal, p, c, f, icon, sugar, fiber, vitC, mag, warn]) => {
+    for (const key of keysStr.split('|')) {
+      const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|jeden|jedna|dwa|dwie|trzy)\\s*(?:g|gramm|ml|glas|stück|szt|portion|porcja|teller)?\\s+)?(${key})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
+      const match = lower.match(regex);
+      if (match) {
+        const rawNum = match[1] ? parseNumberWord(match[1]) : 1;
+        const count = rawNum > 20 ? +(rawNum / 200).toFixed(1) : rawNum;
+        results.push({ name: `${count !== 1 ? count + 'x ' : ''}${nameDe}`, kcal: Math.round(kcal * count), p: +(p * count).toFixed(1), c: +(c * count).toFixed(1), f: +(f * count).toFixed(1), sugar: +(sugar * count).toFixed(1), fiber: +(fiber * count).toFixed(1), vitC: Math.round(vitC * count), mag: Math.round(mag * count), warn: warn || '', icon });
+        break;
       }
     }
+  });
+  if (!results.length && text.trim()) results.push({ name: `${text.trim().slice(0, 38)} (~300g)`, kcal: 440, p: 22, c: 42, f: 18, sugar: 5, fiber: 3, vitC: 10, mag: 12, warn: '', icon: '🍽️' });
+  return results;
+}
 
-    function applyTranslations() {
-      $('lockLangIndicator').textContent = state.lang === 'de' ? '🇩🇪 DE | 🇵🇱 PL' : '🇵🇱 PL | 🇩🇪 DE';
-      $('headerLangBtn').textContent = state.lang === 'de' ? '🇩🇪 DE' : '🇵🇱 PL';
-      setScannerMode(scannerMode);
-    }
-
-    function focusFoodInput(mode) {
-      if (mode) setScannerMode(mode);
-      const el = $('naturalInput');
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => el.focus(), 300);
-    }
-
-    function generateDeterministicCode(name) {
-      const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'GAST';
-      let hash = 2026;
-      for (let i = 0; i < clean.length; i++) { hash = ((hash << 5) - hash) + clean.charCodeAt(i); hash |= 0; }
-      return `FIT-${clean}-${Math.abs(hash % 9000) + 1000}`;
-    }
-
-    function verifyInviteFormat(code) {
-      const parts = code.split('-');
-      return parts.length === 3 && parts[0] === 'FIT' && generateDeterministicCode(parts[1]) === code;
-    }
-
-    function unlockApp() {
-      const input = $('accessCodeInput').value.trim().toUpperCase();
-      const isMaster = (input === state.masterCode.toUpperCase());
-      const isListedInvite = state.inviteCodes.some(c => c.code.toUpperCase() === input);
-      if (isMaster || isListedInvite || verifyInviteFormat(input)) {
-        state.unlocked = true; state.userRole = isMaster ? 'admin' : 'guest';
-        saveState(); $('lockError').classList.add('hidden'); renderAppVisibility();
-      } else { $('lockError').classList.remove('hidden'); }
-    }
-
-    function lockApp() { state.unlocked = false; saveState(); $('accessCodeInput').value = ''; renderAppVisibility(); }
-
-    function renderAppVisibility() {
-      checkInviteUrlParams(); checkAutomaticDailyReset(); applyTranslations();
-      $('lockScreen').classList.toggle('hidden', state.unlocked);
-      $('appContainer').classList.toggle('hidden', !state.unlocked);
-      $('bottomNav').classList.toggle('hidden', !state.unlocked);
-      if (state.unlocked) {
-        $('roleBadge').textContent = state.userRole === 'admin' ? 'Admin' : 'Gast';
-        renderAll();
-      }
-    }
-
-    function saveMasterCode() {
-      const val = $('masterCodeSetting').value.trim().toUpperCase();
-      if (val.length < 4) return;
-      state.masterCode = val; saveState(); alert('Admin-Code gespeichert: ' + val);
-    }
-
-    function saveGeminiKey() {
-      state.geminiApiKey = $('geminiKeyInput').value.trim();
-      saveState(); $('apiErrorBox').classList.add('hidden'); renderAll();
-      alert('KI-Schlüssel gespeichert!');
-    }
-
-    async function pasteAndSaveKey() {
-      try {
-        const text = await navigator.clipboard.readText();
-        if (text && text.trim().length > 10) { $('geminiKeyInput').value = text.trim(); saveGeminiKey(); }
-      } catch (e) { $('geminiKeyInput').focus(); }
-    }
-
-    function loadSavedChatKey() { $('geminiKeyInput').value = getDefaultEncodedKey(); saveGeminiKey(); }
-
-    function generateInviteCode() {
-      const name = $('guestNameInput').value.trim();
-      if (!name) return;
-      const code = generateDeterministicCode(name);
-      if (!state.inviteCodes.some(c => c.code === code)) { state.inviteCodes.push({ name, code }); saveState(); }
-      $('generatedCodeText').textContent = code;
-      $('generatedCodeBox').classList.remove('hidden');
-      $('guestNameInput').value = ''; renderInviteCodes();
-    }
-
-    function getInviteMessageText(code) {
-      let baseUrl = window.location.href.includes('http') ? window.location.href.split('#')[0].split('?')[0] : 'https://kadorabomaiz-glitch.github.io/calsnap/';
-      const params = new URLSearchParams({ code });
-      if (isValidApiKey(state.geminiApiKey)) params.set('k', btoa(state.geminiApiKey.trim()));
-      return `CalSnap AI:\n🔗 ${baseUrl}?${params.toString()}\n🔑 Code: ${code}`;
-    }
-
-    function copyInviteCode() { navigator.clipboard.writeText(getInviteMessageText($('generatedCodeText').textContent)); alert('Kopiert!'); }
-    function shareInviteWhatsApp() { window.open(`https://wa.me/?text=${encodeURIComponent(getInviteMessageText($('generatedCodeText').textContent))}`, '_blank'); }
-    function deleteInviteCode(idx) { state.inviteCodes.splice(idx, 1); saveState(); renderInviteCodes(); }
-
-    function renderInviteCodes() {
-      $('inviteCodeList').innerHTML = state.inviteCodes.map((item, idx) => `
-        <div class="flex items-center justify-between bg-slate-950/70 px-3 py-2 rounded-xl border border-slate-800">
-          <div><span class="font-semibold text-white">${item.name}:</span><code class="ml-1.5 text-emerald-400 font-mono">${item.code}</code></div>
-          <button onclick="deleteInviteCode(${idx})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button>
-        </div>`).join('');
-    }
-
-    const foodTuples = [
-      ['birne|birnen|gruszka|gruszki', 'Birne (~160g)', 'Gruszka (~160g)', 92, 0.6, 22, 0.3, '🍐'],
-      ['lasagne|lasania', 'Portion Lasagne (~350g)', 'Porcja Lasagne (~350g)', 540, 28, 44, 27, '🍝'],
-      ['carbonara', 'Spaghetti Carbonara (~350g)', 'Spaghetti Carbonara (~350g)', 610, 25, 65, 27, '🍝'],
-      ['bolognese', 'Spaghetti Bolognese (~350g)', 'Spaghetti Bolognese (~350g)', 520, 26, 64, 16, '🍝'],
-      ['auflauf|zapiekanka', 'Portion Auflauf (~320g)', 'Porcja zapiekanki (~320g)', 490, 22, 46, 23, '🥘'],
-      ['apfelsaft|sok jabłkowy', 'Glas Apfelsaft (250ml)', 'Szklanka soku (250ml)', 115, 0.3, 28, 0.1, '🧃'],
-      ['apfel|äpfel|jabłko|jabłka', 'Apfel (~150g)', 'Jabłko (~150g)', 80, 0.5, 19, 0.3, '🍏'],
-      ['banane|bananen|banan|banany', 'Banane (~120g)', 'Banan (~120g)', 105, 1.3, 27, 0.4, '🍌'],
-      ['käsebrötchen|bułka z serem', 'Käsebrötchen (~110g)', 'Bułka z serem (~110g)', 290, 12, 36, 10, '🧀'],
-      ['brötchen|semmel|bułka|bułki', 'Brötchen (~65g)', 'Bułka (~65g)', 165, 5.5, 33, 1.2, '🥖'],
-      ['rührei|spiegelei|omelett|jajecznica', 'Rührei/Omelett (~150g)', 'Jajecznica (~150g)', 240, 18, 2, 18, '🍳'],
-      ['ei|eier|jajko|jajka', 'Ei gekocht (~55g)', 'Jajko gotowane (~55g)', 78, 6.5, 0.6, 5.5, '🥚'],
-      ['kaffee|kawa|cappuccino|latte', 'Kaffee (~200ml)', 'Kawa (~200ml)', 35, 1.2, 3.5, 1.2, '☕'],
-      ['hähnchen|huhn|putenbrust|kurczak', 'Hähnchenbrust (~180g)', 'Pierś z kurczaka (~180g)', 220, 42, 0, 5, '🍗'],
-      ['reis|ryż', 'Portion Reis (~180g)', 'Porcja ryżu (~180g)', 240, 5, 52, 0.6, '🍚'],
-      ['nudeln|pasta|spaghetti|makaron', 'Portion Nudeln (~200g)', 'Porcja makaronu (~200g)', 310, 11, 62, 2, '🍝'],
-      ['pizza', 'Pizza (~300g)', 'Pizza (~300g)', 680, 28, 78, 26, '🍕'],
-      ['döner|kebab', 'Döner Kebab (~350g)', 'Kebab (~350g)', 650, 38, 58, 28, '🥙'],
-      ['burger|cheeseburger', 'Burger (~250g)', 'Burger (~250g)', 560, 30, 44, 28, '🍔'],
-      ['schnitzel|schabowy|kotlet', 'Schnitzel / Kotlet (~180g)', 'Kotlet schabowy (~180g)', 380, 32, 16, 21, '🥩'],
-      ['lachs|fisch|thunfisch|ryba|łosoś', 'Portion Fisch/Lachs (~180g)', 'Porcja ryby/łososia (~180g)', 320, 36, 0, 18, '🐟'],
-      ['suppe|eintopf|zupa|rosół|bigos', 'Teller Suppe (~350ml)', 'Talerz zupy (~350ml)', 290, 16, 24, 14, '🍲'],
-      ['kartoffel|kartoffeln|ziemniaki', 'Portion Kartoffeln (~200g)', 'Porcja ziemniaków (~200g)', 160, 4, 35, 0.2, '🥔'],
-      ['pommes|frytki', 'Portion Pommes (~150g)', 'Porcja frytek (~150g)', 365, 4, 45, 18, '🍟'],
-      ['salat|sałatka|mizeria', 'Gemischter Salat (~220g)', 'Sałatka mieszana (~220g)', 165, 4, 10, 11, '🥗'],
-      ['quark|magerquark|skyr|joghurt|twaróg', 'Quark / Skyr (250g)', 'Twaróg / Skyr (250g)', 170, 28, 10, 1.5, '🥣'],
-      ['haferflocken|müsli|owsianka', 'Haferflocken / Müsli (~180g)', 'Owsianka / Musli (~180g)', 240, 9, 38, 5, '🌾'],
-      ['schokolade|riegel|czekolada|kuchen|ciasto', 'Süßigkeit / Kuchen (~60g)', 'Słodycze / Ciasto (~60g)', 240, 3, 32, 11, '🍫'],
-      ['pierogi|piroggen', 'Portion Pierogi (~240g)', 'Porcja pierogów (~240g)', 420, 14, 62, 12, '🥟'],
-      ['brot|abendbrot|vollkornbrot|chleb|kanapka', 'Belegtes Brot (~95g)', 'Kanapka (~95g)', 215, 9, 25, 8, '🍞']
-    ];
-
-    function parseNumberWord(w) {
-      const m = { ein:1, eine:1, einen:1, zwei:2, drei:3, vier:4, fünf:5, halbe:0.5, jeden:1, jedna:1, dwa:2, dwie:2, trzy:3, cztery:4, pół:0.5 };
-      if (!w) return 1;
-      const l = w.toLowerCase().replace(',', '.');
-      return m[l] !== undefined ? m[l] : (parseFloat(l) || 1);
-    }
-
-    function parseNaturalText(text) {
-      const lower = text.toLowerCase();
-      const results = [];
-      foodTuples.forEach(([keysStr, nameDe, namePl, kcal, p, c, f, icon]) => {
-        for (const key of keysStr.split('|')) {
-          const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|jeden|jedna|dwa|dwie|trzy)\\s*(?:g|gramm|ml|glas|stück|szt|portion|porcja|teller)?\\s+)?(${key})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
-          const match = lower.match(regex);
-          if (match) {
-            const rawNum = match[1] ? parseNumberWord(match[1]) : 1;
-            const count = rawNum > 20 ? +(rawNum / 200).toFixed(1) : rawNum;
-            const baseName = state.lang === 'pl' ? namePl : nameDe;
-            results.push({ name: `${count !== 1 ? count + 'x ' : ''}${baseName}`, kcal: Math.round(kcal * count), p: +(p * count).toFixed(1), c: +(c * count).toFixed(1), f: +(f * count).toFixed(1), icon });
-            break;
-          }
-        }
-      });
-      if (!results.length && text.trim()) results.push({ name: `${text.trim().slice(0, 38)} (~300g)`, kcal: 440, p: 22, c: 42, f: 18, icon: '🍽️' });
-      return results;
-    }
-
-    function compressImageFile(file) {
-      const maxDim = scannerMode === 'menu' ? 1400 : 850;
-      const quality = scannerMode === 'menu' ? 0.85 : 0.78;
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image();
-          img.onload = () => {
-            const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-            const canvas = document.createElement('canvas');
-            canvas.width = Math.round(img.width * scale); canvas.height = Math.round(img.height * scale);
-            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-            const tCanvas = document.createElement('canvas');
-            tCanvas.width = 96; tCanvas.height = 96;
-            tCanvas.getContext('2d').drawImage(img, 0, 0, 96, 96);
-            resolve({ fullDataUrl: canvas.toDataURL('image/jpeg', quality), thumbDataUrl: tCanvas.toDataURL('image/jpeg', 0.6) });
-          };
-          img.onerror = reject; img.src = e.target.result;
-        };
-        reader.onerror = reject; reader.readAsDataURL(file);
-      });
-    }
-
-    async function handlePhotoSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      try {
-        const compressed = await compressImageFile(file);
-        selectedPhotoBase64 = compressed.fullDataUrl; selectedPhotoThumb = compressed.thumbDataUrl;
-        $('photoPreview').src = selectedPhotoBase64;
-        $('photoPreviewContainer').classList.remove('hidden');
-        $('apiErrorBox').classList.add('hidden');
-        analyzeInput();
-      } catch (e) { alert('Foto-Fehler'); }
-    }
-
-    function clearPhoto() {
-      selectedPhotoBase64 = null; selectedPhotoThumb = null;
-      $('cameraInput').value = '';
-      $('photoPreviewContainer').classList.add('hidden');
-    }
-
-    async function analyzeInput() {
-      const text = $('naturalInput').value.trim();
-      if (!text && !selectedPhotoBase64) { alert('Bitte gib etwas ein oder wähle ein Foto aus.'); return; }
-      const btn = $('analyzeBtn');
-      const origHtml = btn.innerHTML;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>KI analysiert...</span>`;
-      btn.disabled = true;
-      $('apiErrorBox').classList.add('hidden');
-
-      try {
-        if (scannerMode === 'fridge') {
-          await runFridgeLeftoverAI(text, selectedPhotoBase64);
-        } else if (scannerMode === 'menu') {
-          await runMenuScannerAI(text, selectedPhotoBase64);
-        } else if (isValidApiKey(state.geminiApiKey)) {
-          openReviewCard(await callGeminiVisionAPI(text, selectedPhotoBase64));
-        } else if (text) {
-          openReviewCard(parseNaturalText(text));
-        } else {
-          $('apiErrorBox').classList.remove('hidden');
-          $('apiErrorText').innerHTML = 'Bitte Key prüfen – oder schreibe kurz ins Textfeld, was auf dem Foto ist:';
-        }
-      } catch (err) {
-        if (scannerMode === 'meal' && text) {
-          openReviewCard(parseNaturalText(text));
-        } else {
-          $('apiErrorBox').classList.remove('hidden');
-          $('apiErrorText').innerHTML = `KI-Hinweis: <b>${err.message || 'Fehler'}</b>`;
-        }
-      } finally {
-        btn.innerHTML = origHtml; btn.disabled = false;
-      }
-    }
-
-    async function callGeminiRequest(parts) {
-      const apiKey = state.geminiApiKey.trim();
-      const payload = { contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json' } };
-      const models = ['gemini-3.0-flash', 'gemini-3-flash-preview', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
-      const buildUrl = (m, v) => v
-        ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`
-        : `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-      const isAq = apiKey.startsWith('AQ.');
-      const queue = [];
-      models.forEach(m => { queue.push(buildUrl(m, isAq)); queue.push(buildUrl(m, !isAq)); });
-
-      let lastErr = null;
-      for (let i = 0; i < queue.length; i++) {
-        try {
-          const res = await fetch(queue[i], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-          const data = await res.json();
-          if (!res.ok || data.error) {
-            const msg = data.error?.message || `HTTP ${res.status}`;
-            lastErr = new Error(msg);
-            const sug = msg.match(/models\/([a-zA-Z0-9._-]+)/);
-            if (sug && sug[1] && !models.includes(sug[1])) {
-              models.push(sug[1]);
-              queue.splice(i + 1, 0, buildUrl(sug[1], isAq), buildUrl(sug[1], !isAq));
-            }
-            continue;
-          }
-          const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const m = raw.replace(/```json/g, '').replace(/```/g, '').trim().match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
-          if (m) return JSON.parse(m[0]);
-        } catch (e) { lastErr = e; }
-      }
-      throw lastErr || new Error('KI-Verbindung fehlgeschlagen');
-    }
-
-    async function callGeminiVisionAPI(text, base64DataUrl) {
-      const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
-      const parts = [{ text: `Ernährungsexperte: Erkenne Gericht/Lebensmittel auf Foto/Text ("${text || 'Foto'}"), schätze Gramm (~g) & berechne kcal, p, c, f. Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"name": "1x Birne (~160g)", "kcal": 92, "p": 0.6, "c": 22.0, "f": 0.3, "icon": "🍐"}]` }];
-      if (base64DataUrl) {
-        const idx = base64DataUrl.indexOf(',');
-        parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } });
-      }
-      const parsed = await callGeminiRequest(parts);
-      const arr = Array.isArray(parsed) ? parsed : (parsed.items || [parsed]);
-      return arr.map(i => ({
-        name: String(i.name || 'Mahlzeit (~250g)'), kcal: Math.max(1, Math.round(Number(i.kcal) || 250)),
-        p: +(Number(i.p) || 10).toFixed(1), c: +(Number(i.c) || 25).toFixed(1), f: +(Number(i.f) || 8).toFixed(1), icon: i.icon || '🍽️'
-      }));
-    }
-
-    // FEATURE 1: KÜHLSCHRANK-RESTE-VERWERTER
-    async function runFridgeLeftoverAI(text, base64DataUrl) {
-      const totals = state.todayLog.reduce((a, i) => ({ kcal: a.kcal + i.kcal, p: a.p + i.p }), { kcal: 0, p: 0 });
-      const remKcal = Math.max(250, state.goals.kcal - totals.kcal);
-      const remProt = Math.max(15, state.goals.protein - Math.round(totals.p));
-      const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
-
-      const parts = [{ text: `Fitness-Koch ("Kühlschrank-Reste-Verwerter"): Analysiere das Foto vom Kühlschrank/Zutaten und Text ("${text || 'Siehe Foto'}"). Offenes Tagesbudget: ${remKcal} kcal, ${remProt}g Eiweiß. Erstelle 3 schnelle Rezepte aus den Zutaten (jeweils max. ${Math.min(remKcal, 750)} kcal). Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"title": "High-Protein Omelett (~390 kcal)", "detectedIngredients": "Eier, Tomaten, Schinken", "ingredientsList": "3 Eier, 60g Schinken, 2 Tomaten", "steps": "Kurz in der Pfanne anbraten und stocken lassen.", "kcal": 390, "p": 36, "c": 8, "f": 23, "icon": "🍳"}]` }];
-      if (base64DataUrl) {
-        const idx = base64DataUrl.indexOf(',');
-        parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } });
-      }
-      const parsed = await callGeminiRequest(parts);
-      const arr = Array.isArray(parsed) ? parsed : (parsed.recipes || [parsed]);
-      currentFridgeRecipes = arr.map(r => ({
-        title: String(r.title || 'Kühlschrank-Pfanne'), detectedIngredients: String(r.detectedIngredients || text || 'Vorräte'),
-        ingredientsList: String(r.ingredientsList || ''), steps: String(r.steps || ''),
-        kcal: Math.max(80, Math.round(Number(r.kcal) || 400)), p: +(Number(r.p) || 28).toFixed(1), c: +(Number(r.c) || 20).toFixed(1), f: +(Number(r.f) || 15).toFixed(1), icon: r.icon || '🥘'
-      }));
-      renderFridgeResults(remKcal);
-    }
-
-    function renderFridgeResults(remKcal) {
-      $('fridgeResultCard').classList.remove('hidden');
-      const det = currentFridgeRecipes[0]?.detectedIngredients || '';
-      $('lblFridgeResultTitle').textContent = `Kühlschrank-Rezepte (${remKcal} kcal Rest)`;
-      $('lblFridgeIngredients').textContent = det ? `Zutaten: ${det}` : '';
-      $('fridgeRecipesList').innerHTML = currentFridgeRecipes.map((r, idx) => `
-        <div class="bg-slate-900/90 border border-cyan-500/30 rounded-2xl p-3.5 space-y-2">
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2"><span class="text-lg">${r.icon}</span><span class="text-xs font-bold text-cyan-300">${r.title}</span></div>
-            <span class="shrink-0 text-xs font-extrabold text-white bg-cyan-500/20 border border-cyan-500/40 px-2 py-0.5 rounded-lg">${r.kcal} kcal</span>
-          </div>
-          <div class="text-[11px] text-emerald-300 font-semibold">🧾 ${r.ingredientsList}</div>
-          <p class="text-xs text-slate-300 leading-relaxed">👨‍🍳 ${r.steps}</p>
-          <div class="flex items-center justify-between pt-1 border-t border-slate-800 gap-2">
-            <span class="text-[10px] text-slate-400">E: ${r.p}g • K: ${r.c}g • F: ${r.f}g</span>
-            <div class="flex gap-1.5">
-              <button onclick="addIngredientsToShop('${r.ingredientsList.replace(/'/g, '')}', '${r.title.replace(/'/g, '')}')" class="bg-slate-800 text-sky-300 text-[11px] font-bold px-2.5 py-1.5 rounded-xl active:scale-95 transition">🛒 Einkauf</button>
-              <button onclick="logFridgeRecipe(${idx})" class="bg-cyan-400 text-slate-950 font-bold text-[11px] px-3 py-1.5 rounded-xl active:scale-95 transition">+ Eintragen</button>
-            </div>
-          </div>
-        </div>`).join('');
-    }
-
-    function logFridgeRecipe(idx) {
-      const r = currentFridgeRecipes[idx];
-      if (!r) return;
-      quickAdd(r.title, r.kcal, r.p, r.c, r.f, r.icon);
-      $('naturalInput').value = ''; clearPhoto(); closeFridgeCard();
-    }
-
-    function closeFridgeCard() { $('fridgeResultCard').classList.add('hidden'); }
-
-    // FEATURE 2: SPEISEKARTEN-AMPEL-SCANNER (LIEST ALLE 20+ GERICHTE AUF DER KARTE!)
-    async function runMenuScannerAI(text, base64DataUrl) {
-      const totals = state.todayLog.reduce((a, i) => ({ kcal: a.kcal + i.kcal, p: a.p + i.p }), { kcal: 0, p: 0 });
-      const remKcal = Math.max(200, state.goals.kcal - totals.kcal);
-      const remProt = Math.max(15, state.goals.protein - Math.round(totals.p));
-      const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
-
-      const parts = [{ text: `Restaurant-Berater ("Speisekarten-Ampel"): Analysiere das Speisekarten-Foto und/oder den Text ("${text || 'Foto'}").
-WICHTIG: Erkenne und bewerte ALLE lesbaren Speisen/Gerichte auf der Speisekarte vollständig (auch wenn es 15, 20 oder 30 Gerichte sind – lasse keines weg!).
-Offenes Tagesbudget des Nutzers: ${remKcal} kcal, ${remProt}g Eiweiß.
-Ordne jedes Gericht in das Ampelsystem ein:
-- "green": Passt super ins Budget (bis ca. ${remKcal} kcal) & gutes Eiweiß.
-- "yellow": Okay mit Bestell-Trick im Feld "tip" (z.B. Dressing separat, Reis statt Pommes).
-- "red": Kalorien-/Fettfalle (sprengt das Budget), kurzer Grund im Feld "tip".
-Sprache: ${lang}. Sortiere: zuerst alle "green", dann "yellow", dann "red".
-Gib NUR ein JSON-Array zurück: [{"name": "Rinderfilet mit Ofenkartoffel", "light": "green", "kcal": 580, "p": 48, "c": 42, "f": 21, "tip": "Top-Wahl mit 48g Eiweiß!", "icon": "🥩"}]` }];
-
-      if (base64DataUrl) {
-        const idx = base64DataUrl.indexOf(',');
-        parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } });
-      }
-      const parsed = await callGeminiRequest(parts);
-      const arr = Array.isArray(parsed) ? parsed : (parsed.dishes || [parsed]);
-      currentMenuDishes = arr.map(d => ({
-        name: String(d.name || 'Gericht'),
-        light: ['green', 'yellow', 'red'].includes(String(d.light).toLowerCase()) ? String(d.light).toLowerCase() : 'yellow',
-        kcal: Math.max(50, Math.round(Number(d.kcal) || 550)),
-        p: +(Number(d.p) || 25).toFixed(1), c: +(Number(d.c) || 45).toFixed(1), f: +(Number(d.f) || 22).toFixed(1),
-        tip: String(d.tip || ''), icon: d.icon || '🍽️'
-      }));
-      activeMenuFilter = 'all';
-      renderMenuResults(remKcal);
-    }
-
-    function setMenuFilter(f) {
-      activeMenuFilter = f;
-      const totals = state.todayLog.reduce((a, i) => a + i.kcal, 0);
-      renderMenuResults(Math.max(200, state.goals.kcal - totals));
-    }
-
-    function renderMenuResults(remKcal) {
-      $('menuResultCard').classList.remove('hidden');
-      const gCount = currentMenuDishes.filter(d => d.light === 'green').length;
-      const yCount = currentMenuDishes.filter(d => d.light === 'yellow').length;
-      const rCount = currentMenuDishes.filter(d => d.light === 'red').length;
-
-      $('lblMenuResultTitle').textContent = `Speisekarten-Ampel (${currentMenuDishes.length} Gerichte erkannt)`;
-      $('lblMenuCountSub').textContent = `Dein Rest: ${remKcal} kcal • 🟢 ${gCount}x Grün | 🟡 ${yCount}x Gelb | 🔴 ${rCount}x Rot`;
-
-      $('menuFilter-all').textContent = `Alle (${currentMenuDishes.length})`;
-      $('menuFilter-green').textContent = `🟢 (${gCount})`;
-      $('menuFilter-yellow').textContent = `🟡 (${yCount})`;
-      $('menuFilter-red').textContent = `🔴 (${rCount})`;
-
-      ['all', 'green', 'yellow', 'red'].forEach(k => {
-        $('menuFilter-' + k).className = activeMenuFilter === k
-          ? 'py-1.5 rounded-lg bg-slate-700 text-white shadow'
-          : 'py-1.5 rounded-lg text-slate-400 hover:text-white';
-      });
-
-      const styles = {
-        green: { badge: '🟢 GRÜN', border: 'border-emerald-500/40', bg: 'bg-emerald-500/15 text-emerald-300', tipColor: 'text-emerald-300' },
-        yellow: { badge: '🟡 GELB', border: 'border-amber-500/40', bg: 'bg-amber-500/15 text-amber-300', tipColor: 'text-amber-300' },
-        red: { badge: '🔴 ROT', border: 'border-rose-500/40', bg: 'bg-rose-500/15 text-rose-300', tipColor: 'text-rose-300' }
+function compressImageFile(file) {
+  const maxDim = scannerMode === 'menu' ? 1400 : 850, quality = scannerMode === 'menu' ? 0.85 : 0.78;
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale); canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const tCanvas = document.createElement('canvas');
+        tCanvas.width = 96; tCanvas.height = 96;
+        tCanvas.getContext('2d').drawImage(img, 0, 0, 96, 96);
+        resolve({ fullDataUrl: canvas.toDataURL('image/jpeg', quality), thumbDataUrl: tCanvas.toDataURL('image/jpeg', 0.6) });
       };
+      img.onerror = reject; img.src = e.target.result;
+    };
+    reader.onerror = reject; reader.readAsDataURL(file);
+  });
+}
 
-      const filtered = currentMenuDishes
-        .map((d, idx) => ({ d, idx }))
-        .filter(({ d }) => activeMenuFilter === 'all' || d.light === activeMenuFilter);
+async function handlePhotoSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const compressed = await compressImageFile(file);
+    selectedPhotoBase64 = compressed.fullDataUrl; selectedPhotoThumb = compressed.thumbDataUrl;
+    $('photoPreview').src = selectedPhotoBase64;
+    $('photoPreviewContainer').classList.remove('hidden');
+    $('apiErrorBox').classList.add('hidden');
+    analyzeInput();
+  } catch (e) { alert('Foto-Fehler'); }
+}
 
-      $('menuItemsList').innerHTML = filtered.map(({ d, idx }) => {
-        const st = styles[d.light] || styles.yellow;
-        return `
-          <div class="bg-slate-900/90 border ${st.border} rounded-2xl p-3 space-y-1.5">
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex items-center gap-2 min-w-0"><span class="text-base shrink-0">${d.icon}</span><span class="text-xs font-bold text-white">${d.name}</span></div>
-              <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-lg ${st.bg}">${st.badge}</span>
-            </div>
-            <p class="text-[11px] ${st.tipColor} leading-relaxed font-medium">💡 ${d.tip}</p>
-            <div class="flex items-center justify-between pt-1 border-t border-slate-800">
-              <span class="text-[10px] text-slate-400"><b>~${d.kcal} kcal</b> • E: ${d.p}g | K: ${d.c}g | F: ${d.f}g</span>
-              <button onclick="logMenuDish(${idx})" class="bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-emerald-400 font-bold text-[11px] px-3 py-1 rounded-xl active:scale-95 transition">
-                + Bestellen & eintragen
-              </button>
-            </div>
-          </div>`;
-      }).join('');
-    }
+function clearPhoto() { selectedPhotoBase64 = null; selectedPhotoThumb = null; $('cameraInput').value = ''; $('photoPreviewContainer').classList.add('hidden'); }
 
-    function logMenuDish(idx) {
-      const d = currentMenuDishes[idx];
-      if (!d) return;
-      quickAdd(d.name, d.kcal, d.p, d.c, d.f, d.icon);
-      $('naturalInput').value = ''; clearPhoto(); closeMenuCard();
-    }
+async function analyzeInput() {
+  const text = $('naturalInput').value.trim();
+  if (!text && !selectedPhotoBase64) { alert('Bitte gib etwas ein oder wähle ein Foto aus.'); return; }
+  const btn = $('analyzeBtn'), origHtml = btn.innerHTML;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>KI analysiert...</span>`;
+  btn.disabled = true; $('apiErrorBox').classList.add('hidden');
 
-    function closeMenuCard() { $('menuResultCard').classList.add('hidden'); }
+  try {
+    if (scannerMode === 'fridge') await runFridgeLeftoverAI(text, selectedPhotoBase64);
+    else if (scannerMode === 'menu') await runMenuScannerAI(text, selectedPhotoBase64);
+    else if (isValidApiKey(state.geminiApiKey)) openReviewCard(await callGeminiVisionAPI(text, selectedPhotoBase64));
+    else if (text) openReviewCard(parseNaturalText(text));
+  } catch (err) {
+    if (scannerMode === 'meal' && text) openReviewCard(parseNaturalText(text));
+    else { $('apiErrorBox').classList.remove('hidden'); $('apiErrorText').innerHTML = `KI-Hinweis: <b>${err.message || 'Fehler'}</b>`; }
+  } finally { btn.innerHTML = origHtml; btn.disabled = false; }
+}
 
-    // FEATURE 3: SMARTE EINKAUFSLISTE
-    function addIngredientsToShop(comboText, sourceTitle) {
-      const parts = comboText.split(/[+,•]/).map(s => s.replace(/\.$/, '').trim()).filter(s => s.length > 2);
-      parts.forEach(p => {
-        if (!state.shoppingList.some(i => i.name.toLowerCase() === p.toLowerCase())) {
-          state.shoppingList.unshift({ id: Date.now() + Math.random(), name: p, source: sourceTitle, checked: false });
-        }
-      });
-      saveState(); renderShoppingList();
-      showUndoToast(`🛒 ${parts.length} Zutaten auf Einkaufsliste gesetzt!`);
-    }
+async function callGeminiRequest(parts) {
+  const apiKey = state.geminiApiKey.trim();
+  const payload = { contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json' } };
+  const models = ['gemini-3.0-flash', 'gemini-3-flash-preview', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+  const buildUrl = (m, v) => v ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}` : `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const isAq = apiKey.startsWith('AQ.'), queue = [];
+  models.forEach(m => { queue.push(buildUrl(m, isAq)); queue.push(buildUrl(m, !isAq)); });
 
-    function addManualShopItem() {
-      const val = $('shopItemInput').value.trim();
-      if (!val) return;
-      state.shoppingList.unshift({ id: Date.now(), name: val, source: 'Manuell', checked: false });
-      $('shopItemInput').value = ''; saveState(); renderShoppingList();
-    }
-
-    function toggleShopItem(idx) { state.shoppingList[idx].checked = !state.shoppingList[idx].checked; saveState(); renderShoppingList(); }
-    function removeShopItem(idx) { state.shoppingList.splice(idx, 1); saveState(); renderShoppingList(); }
-    function clearShoppingList() { if (confirm('Einkaufsliste komplett leeren?')) { state.shoppingList = []; saveState(); renderShoppingList(); } }
-
-    function shareShoppingListWhatsApp() {
-      if (!state.shoppingList.length) { alert('Deine Einkaufsliste ist noch leer.'); return; }
-      const lines = state.shoppingList.map(i => `${i.checked ? '✅' : '⬜'} ${i.name}`).join('\n');
-      window.open(`https://wa.me/?text=${encodeURIComponent('🛒 Meine CalSnap AI Einkaufsliste:\n' + lines)}`, '_blank');
-    }
-
-    function renderShoppingList() {
-      const container = $('shoppingListContainer');
-      if (!state.shoppingList || !state.shoppingList.length) {
-        container.innerHTML = `<div class="text-center py-3 text-[11px] text-slate-500">Noch leer – tippe oben bei einem Essens-Vorschlag auf „🛒 Einkauf“, um alle Zutaten automatisch hinzuzufügen!</div>`;
-        return;
+  let lastErr = null;
+  for (let i = 0; i < queue.length; i++) {
+    try {
+      const res = await fetch(queue[i], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        const msg = data.error?.message || `HTTP ${res.status}`;
+        lastErr = new Error(msg);
+        const sug = msg.match(/models\/([a-zA-Z0-9._-]+)/);
+        if (sug && sug[1] && !models.includes(sug[1])) { models.push(sug[1]); queue.splice(i + 1, 0, buildUrl(sug[1], isAq), buildUrl(sug[1], !isAq)); }
+        continue;
       }
-      container.innerHTML = state.shoppingList.map((item, idx) => `
-        <div class="flex items-center justify-between bg-slate-900/75 px-3 py-2 rounded-xl border border-slate-800/80 text-xs">
-          <button onclick="toggleShopItem(${idx})" class="flex items-center gap-2.5 text-left min-w-0 flex-1">
-            <i class="fa-solid ${item.checked ? 'fa-square-check text-emerald-400' : 'fa-square text-slate-600'} text-sm"></i>
-            <span class="${item.checked ? 'line-through text-slate-500' : 'text-white font-medium'} truncate">${item.name}</span>
-          </button>
-          <button onclick="removeShopItem(${idx})" class="text-slate-500 hover:text-rose-400 px-1.5"><i class="fa-solid fa-xmark"></i></button>
-        </div>`).join('');
-    }
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const m = raw.replace(/```json/g, '').replace(/```/g, '').trim().match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
+      if (m) return JSON.parse(m[0]);
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('KI-Verbindung fehlgeschlagen');
+}
 
-    function openReviewCard(items) {
-      pendingDetectedItems = items; currentPortionScale = 1.0;
-      $('portionSlider').value = 100; $('portionScaleLabel').textContent = '100% (Normal)';
-      $('reviewCard').classList.remove('hidden'); renderReviewItems();
-    }
+async function callGeminiVisionAPI(text, base64DataUrl) {
+  const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
+  const parts = [{ text: `Ernährungsexperte: Analysiere Foto/Text ("${text || 'Foto'}"). Schätze Gramm (~g) & berechne: kcal, p, c, f, sugar (Zucker g), fiber (Ballaststoffe g), vitC (% Tagesbedarf Vit C), mag (% Tagesbedarf Mg/Eisen). Bei >14g Zucker oder stark verarbeiteten/frittierten Speisen kurzer Warnhinweis im Feld "warn" (sonst ""). Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"name": "1x Birne (~160g)", "kcal": 92, "p": 0.6, "c": 22.0, "f": 0.3, "sugar": 15.0, "fiber": 5.0, "vitC": 12, "mag": 6, "warn": "", "icon": "🍐"}]` }];
+  if (base64DataUrl) { const idx = base64DataUrl.indexOf(','); parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } }); }
+  const parsed = await callGeminiRequest(parts), arr = Array.isArray(parsed) ? parsed : (parsed.items || [parsed]);
+  return arr.map(i => ({ name: String(i.name || 'Mahlzeit (~250g)'), kcal: Math.max(1, Math.round(Number(i.kcal) || 250)), p: +(Number(i.p) || 10).toFixed(1), c: +(Number(i.c) || 25).toFixed(1), f: +(Number(i.f) || 8).toFixed(1), sugar: +(Number(i.sugar) || 2).toFixed(1), fiber: +(Number(i.fiber) || 2).toFixed(1), vitC: Math.round(Number(i.vitC) || 5), mag: Math.round(Number(i.mag) || 8), warn: String(i.warn || ''), icon: i.icon || '🍽️' }));
+}
 
-    function closeReviewCard() { $('reviewCard').classList.add('hidden'); pendingDetectedItems = []; }
-    function removePendingItem(idx) { pendingDetectedItems.splice(idx, 1); if (!pendingDetectedItems.length) closeReviewCard(); else renderReviewItems(); }
+async function runFridgeLeftoverAI(text, base64DataUrl) {
+  const totals = state.todayLog.reduce((a, i) => ({ kcal: a.kcal + i.kcal, p: a.p + i.p }), { kcal: 0, p: 0 });
+  const remKcal = Math.max(250, state.goals.kcal - totals.kcal), remProt = Math.max(15, state.goals.protein - Math.round(totals.p));
+  const parts = [{ text: `Fitness-Koch: Analysiere Foto/Text ("${text || 'Foto'}"). Offenes Budget: ${remKcal} kcal, ${remProt}g Eiweiß. Erstelle 3 schnelle Rezepte aus den Zutaten. Gib NUR ein JSON-Array zurück: [{"title": "High-Protein Omelett (~390 kcal)", "detectedIngredients": "Eier, Tomaten, Schinken", "ingredientsList": "3 Eier, 60g Schinken, 2 Tomaten", "steps": "Kurz in der Pfanne anbraten.", "kcal": 390, "p": 36, "c": 8, "f": 23, "icon": "🍳"}]` }];
+  if (base64DataUrl) { const idx = base64DataUrl.indexOf(','); parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } }); }
+  const parsed = await callGeminiRequest(parts), arr = Array.isArray(parsed) ? parsed : (parsed.recipes || [parsed]);
+  currentFridgeRecipes = arr.map(r => ({ title: String(r.title || 'Rezept'), detectedIngredients: String(r.detectedIngredients || text || 'Vorräte'), ingredientsList: String(r.ingredientsList || ''), steps: String(r.steps || ''), kcal: Math.max(80, Math.round(Number(r.kcal) || 400)), p: +(Number(r.p) || 28).toFixed(1), c: +(Number(r.c) || 20).toFixed(1), f: +(Number(r.f) || 15).toFixed(1), icon: r.icon || '🥘' }));
+  renderFridgeResults(remKcal);
+}
 
-    function editPendingItem(idx) {
-      const item = pendingDetectedItems[idx];
-      const n = prompt('Name anpassen:', item.name); if (n && n.trim()) item.name = n.trim();
-      const k = prompt('Kalorien (kcal) anpassen:', item.kcal); if (k !== null && !isNaN(parseInt(k, 10))) item.kcal = Math.max(0, parseInt(k, 10));
-      renderReviewItems();
-    }
+function renderFridgeResults(remKcal) {
+  $('fridgeResultCard').classList.remove('hidden');
+  $('lblFridgeResultTitle').textContent = `🧊 Kühlschrank-Rezepte (${remKcal} kcal Rest)`;
+  $('lblFridgeIngredients').textContent = currentFridgeRecipes[0]?.detectedIngredients ? `Zutaten: ${currentFridgeRecipes[0].detectedIngredients}` : '';
+  $('fridgeRecipesList').innerHTML = currentFridgeRecipes.map((r, idx) => `<div class="subcard border-cyan-500/30 space-y-2"><div class="flex justify-between gap-2"><span class="text-xs font-bold text-cyan-300">${r.icon} ${r.title}</span><span class="shrink-0 text-xs font-bold text-white bg-cyan-500/20 px-2 py-0.5 rounded-lg">${r.kcal} kcal</span></div><div class="text-[11px] text-emerald-300 font-semibold">🧾 ${r.ingredientsList}</div><p class="text-xs text-slate-300">👨‍🍳 ${r.steps}</p><div class="flex justify-between items-center pt-1 border-t border-slate-800"><span class="text-[10px] text-slate-400">E: ${r.p}g • K: ${r.c}g • F: ${r.f}g</span><div class="flex gap-1.5"><button onclick="addIngredientsToShop('${r.ingredientsList.replace(/'/g, '')}', '${r.title.replace(/'/g, '')}')" class="bg-slate-800 text-sky-300 text-[11px] font-bold px-2.5 py-1 rounded-xl">🛒 Einkauf</button><button onclick="logFridgeRecipe(${idx})" class="bg-cyan-400 text-slate-950 font-bold text-[11px] px-3 py-1 rounded-xl">+ Eintragen</button></div></div></div>`).join('');
+}
 
-    function updatePortionScale(val) { currentPortionScale = parseInt(val, 10) / 100; $('portionScaleLabel').textContent = `${val}%`; renderReviewItems(); }
+function logFridgeRecipe(idx) { const r = currentFridgeRecipes[idx]; if (r) { quickAdd(r.title, r.kcal, r.p, r.c, r.f, r.icon); $('naturalInput').value = ''; clearPhoto(); closeFridgeCard(); } }
+function closeFridgeCard() { $('fridgeResultCard').classList.add('hidden'); }
 
-    function renderReviewItems() {
-      let total = 0;
-      $('detectedItemsList').innerHTML = pendingDetectedItems.map((item, idx) => {
-        const k = Math.round(item.kcal * currentPortionScale);
-        const p = +(item.p * currentPortionScale).toFixed(1), c = +(item.c * currentPortionScale).toFixed(1), f = +(item.f * currentPortionScale).toFixed(1);
-        total += k;
-        return `<div class="flex items-center justify-between bg-slate-900/90 px-3 py-2.5 rounded-2xl border border-slate-800">
-          <div class="flex items-center gap-2.5 min-w-0"><span class="text-lg">${item.icon || '🍽️'}</span><div class="min-w-0"><div class="text-xs font-bold text-white truncate">${item.name}</div><div class="text-[10px] text-slate-400">E: ${p}g • K: ${c}g • F: ${f}g</div></div></div>
-          <div class="flex items-center gap-1.5 shrink-0 ml-2"><span class="text-xs font-extrabold text-emerald-400 mr-1">${k} kcal</span><button onclick="editPendingItem(${idx})" class="bg-slate-800 text-slate-300 px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-pen"></i></button><button onclick="removePendingItem(${idx})" class="bg-rose-500/15 text-rose-400 px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-trash-can"></i></button></div>
-        </div>`;
-      }).join('');
-      $('reviewTotalKcal').textContent = total;
-    }
+async function runMenuScannerAI(text, base64DataUrl) {
+  const totals = state.todayLog.reduce((a, i) => ({ kcal: a.kcal + i.kcal, p: a.p + i.p }), { kcal: 0, p: 0 });
+  const remKcal = Math.max(200, state.goals.kcal - totals.kcal), remProt = Math.max(15, state.goals.protein - Math.round(totals.p));
+  const parts = [{ text: `Restaurant-Berater: Analysiere Speisekarten-Foto/Text ("${text || 'Foto'}"). WICHTIG: Erkenne und bewerte ALLE lesbaren Gerichte auf der Speisekarte vollständig (auch 20-30 Gerichte!). Offenes Budget: ${remKcal} kcal, ${remProt}g Eiweiß. Ampel: "green" (Top), "yellow" (Bestell-Trick im Feld "tip"), "red" (Kalorienfalle mit Grund im Feld "tip"). Sortiere: green, yellow, red. Gib NUR ein JSON-Array zurück: [{"name": "Rinderfilet", "light": "green", "kcal": 580, "p": 48, "c": 42, "f": 21, "tip": "Top-Wahl!", "icon": "🥩"}]` }];
+  if (base64DataUrl) { const idx = base64DataUrl.indexOf(','); parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } }); }
+  const parsed = await callGeminiRequest(parts), arr = Array.isArray(parsed) ? parsed : (parsed.dishes || [parsed]);
+  currentMenuDishes = arr.map(d => ({ name: String(d.name || 'Gericht'), light: ['green', 'yellow', 'red'].includes(String(d.light).toLowerCase()) ? String(d.light).toLowerCase() : 'yellow', kcal: Math.max(50, Math.round(Number(d.kcal) || 550)), p: +(Number(d.p) || 25).toFixed(1), c: +(Number(d.c) || 45).toFixed(1), f: +(Number(d.f) || 22).toFixed(1), tip: String(d.tip || ''), icon: d.icon || '🍽️' }));
+  activeMenuFilter = 'all'; renderMenuResults(remKcal);
+}
 
-    function confirmDetectedItems() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      let names = []; lastAddedCount = pendingDetectedItems.length;
-      pendingDetectedItems.forEach(i => {
-        const entry = { id: Date.now() + Math.random(), name: i.name, kcal: Math.round(i.kcal * currentPortionScale), p: +(i.p * currentPortionScale).toFixed(1), c: +(i.c * currentPortionScale).toFixed(1), f: +(i.f * currentPortionScale).toFixed(1), icon: i.icon || '🍽️', thumb: selectedPhotoThumb || null, time: timeStr, timestampISO: now.toISOString() };
-        state.todayLog.unshift(entry); names.push(entry.name);
-      });
-      saveState(); $('naturalInput').value = ''; clearPhoto(); closeReviewCard(); renderAll();
-      showUndoToast(names.join(', '));
-    }
+function setMenuFilter(f) { activeMenuFilter = f; renderMenuResults(Math.max(200, state.goals.kcal - state.todayLog.reduce((a, i) => a + i.kcal, 0))); }
 
-    function quickAdd(name, kcal, p, c, f, icon) {
-      const now = new Date();
-      state.todayLog.unshift({ id: Date.now(), name, kcal, p, c, f, icon, thumb: null, time: now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }), timestampISO: now.toISOString() });
-      lastAddedCount = 1; saveState(); renderAll(); showUndoToast(`${name} (${kcal} kcal)`);
-    }
+function renderMenuResults(remKcal) {
+  $('menuResultCard').classList.remove('hidden');
+  const g = currentMenuDishes.filter(d => d.light === 'green').length, y = currentMenuDishes.filter(d => d.light === 'yellow').length, r = currentMenuDishes.filter(d => d.light === 'red').length;
+  $('lblMenuResultTitle').textContent = `📖 Speisekarten-Ampel (${currentMenuDishes.length} Gerichte)`;
+  $('lblMenuCountSub').textContent = `Rest: ${remKcal} kcal • 🟢 ${g} | 🟡 ${y} | 🔴 ${r}`;
+  $('menuFilter-all').textContent = `Alle (${currentMenuDishes.length})`; $('menuFilter-green').textContent = `🟢 (${g})`; $('menuFilter-yellow').textContent = `🟡 (${y})`; $('menuFilter-red').textContent = `🔴 (${r})`;
+  ['all', 'green', 'yellow', 'red'].forEach(k => { $('menuFilter-' + k).className = activeMenuFilter === k ? 'py-1.5 rounded-lg bg-slate-700 text-white shadow' : 'py-1.5 rounded-lg text-slate-400'; });
+  const styles = { green: ['🟢 GRÜN', 'border-emerald-500/40', 'text-emerald-300'], yellow: ['🟡 GELB', 'border-amber-500/40', 'text-amber-300'], red: ['🔴 ROT', 'border-rose-500/40', 'text-rose-300'] };
+  const filtered = currentMenuDishes.map((d, idx) => ({ d, idx })).filter(({ d }) => activeMenuFilter === 'all' || d.light === activeMenuFilter);
+  $('menuItemsList').innerHTML = filtered.map(({ d, idx }) => {
+    const [badge, border, col] = styles[d.light] || styles.yellow;
+    return `<div class="subcard ${border} space-y-1.5"><div class="flex justify-between gap-2"><span class="text-xs font-bold text-white">${d.icon} ${d.name}</span><span class="shrink-0 text-[10px] font-bold ${col}">${badge}</span></div><p class="text-[11px] ${col}">💡 ${d.tip}</p><div class="flex justify-between items-center pt-1 border-t border-slate-800"><span class="text-[10px] text-slate-400"><b>~${d.kcal} kcal</b> • E: ${d.p}g | K: ${d.c}g | F: ${d.f}g</span><button onclick="logMenuDish(${idx})" class="bg-slate-800 text-emerald-400 font-bold text-[11px] px-3 py-1 rounded-xl">+ Eintragen</button></div></div>`;
+  }).join('');
+}
 
-    function showUndoToast(label) {
-      $('undoToastText').textContent = label;
-      $('undoToast').classList.remove('hidden');
-      if (undoTimer) clearTimeout(undoTimer);
-      undoTimer = setTimeout(() => $('undoToast').classList.add('hidden'), 6500);
-    }
+function logMenuDish(idx) { const d = currentMenuDishes[idx]; if (d) { quickAdd(d.name, d.kcal, d.p, d.c, d.f, d.icon); $('naturalInput').value = ''; clearPhoto(); closeMenuCard(); } }
+function closeMenuCard() { $('menuResultCard').classList.add('hidden'); }
 
-    function undoLastAction() {
-      if (lastAddedCount > 0 && state.todayLog.length >= lastAddedCount) { state.todayLog.splice(0, lastAddedCount); lastAddedCount = 0; saveState(); renderAll(); }
-      $('undoToast').classList.add('hidden');
-    }
+function logEnergy(score, tag, icon) {
+  const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const recentMeals = state.todayLog.slice(0, 2).map(m => m.name).join(', ') || 'Noch keine Mahlzeit';
+  const recentSugar = state.todayLog.slice(0, 2).reduce((s, m) => s + (m.sugar || 0), 0);
+  const insight = score <= 2
+    ? (recentSugar >= 14 ? `💡 Muster erkannt: Dein „${tag}“ folgt auf ${recentMeals} (${Math.round(recentSugar)}g Zucker). Der schnelle Blutzuckeranstieg sorgt jetzt für den Abfall. Tipp: Trinke 1 Glas Wasser + Eiweiß-Snack!` : `💡 Hinweis zu „${tag}“ (nach ${recentMeals}): Trinke jetzt +250ml Wasser und achte beim nächsten Essen auf 30g Eiweiß.`)
+    : `✅ Stark! „${tag}“ nach ${recentMeals} – diese Mahlzeit liefert dir konstante Energie!`;
+  state.energyLog.unshift({ id: Date.now(), time: timeStr, score, tag, icon, recentMeals, insight });
+  state.energyLog = state.energyLog.slice(0, 15);
+  saveState(); $('energyPatternBox').textContent = insight; $('energyPatternBox').classList.remove('hidden'); renderEnergyLog();
+}
 
-    function addWater(l) { state.waterLiters = +(state.waterLiters + l).toFixed(2); saveState(); renderAll(); }
-    function removeLogItem(idx) { state.todayLog.splice(idx, 1); saveState(); renderAll(); }
-    function clearTodayLog() { if (confirm('Tageszähler auf 0 setzen?')) { state.todayLog = []; state.waterLiters = 0; state.lastActiveDate = getTodayDateKey(); saveState(); renderAll(); } }
+async function analyzeEnergyPatternsAI() {
+  const box = $('energyPatternBox'); box.classList.remove('hidden');
+  if (!state.energyLog.length) { box.textContent = 'Tippe zuerst oben auf einen der 4 Energie-Buttons (Fit, Fokus, Müde oder Heißhunger)!'; return; }
+  if (!isValidApiKey(state.geminiApiKey)) return;
+  box.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> KI analysiert deine Energie-Muster...`;
+  try {
+    const sum = state.energyLog.slice(0, 6).map(e => `${e.time}: ${e.tag} (nach: ${e.recentMeals})`).join(' | ');
+    const parsed = await callGeminiRequest([{ text: `Coach: Analysiere diese Energie-Einträge und Mahlzeiten: "${sum}". Gib 1 prägnanten Satz zu Mustern + 1 Tipp. Gib NUR JSON zurück: {"analysis": "Text"}` }]);
+    box.textContent = `🧠 KI-Muster: ${parsed.analysis || parsed[0]?.analysis || state.energyLog[0].insight}`;
+  } catch (e) { box.textContent = state.energyLog[0].insight; }
+}
 
-    const mealCombosLow = [
-      ['Leichter Sattmacher-Abendteller (~240 kcal)', 'Gemischter Salat + Joghurt-Dressing + 150g Kräuter-Magerquark', 'Dazu passt 1 kleiner Apfel.', 240, 28, 16, 6, '🥗'],
-      ['Eiweiß-Snack am Abend (~210 kcal)', '2 Eier + frische Tomaten + Salatgurke', 'Dazu noch 1 Handvoll Beeren.', 210, 15, 8, 11, '🥚'],
-      ['Süßer Quark-Birnen-Becher (~250 kcal)', '250g Magerquark + 1 Birne + Zimt', 'Hält über Nacht optimal satt.', 250, 28, 28, 1, '🥣'],
-      ['Thunfisch-Salat-Bowl (~260 kcal)', 'Blattsalat + Tomaten + 1 Dose Thunfisch + Zitronen-Dressing', '32g Eiweiß bei minimalen Kalorien!', 260, 32, 9, 8, '🐟']
-    ];
+function renderEnergyLog() {
+  $('energyLogList').innerHTML = (state.energyLog || []).slice(0, 3).map(e => `<div class="flex justify-between bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-800"><span>${e.icon} <b class="text-white">${e.tag}</b> (${e.time})</span><span class="text-slate-400 truncate max-w-[140px]">nach: ${e.recentMeals}</span></div>`).join('');
+}
 
-    const mealCombosHigh = [
-      ['Salat-Kombi mit Hähnchen (~560 kcal)', 'Großer gemischter Salat + Joghurt-Dressing + 180g Hähnchenbrust + 1 Vollkornbrötchen', 'Dazu passt noch 1 Apfel.', 560, 46, 48, 14, '🥗'],
-      ['Hähnchen, Ofenkartoffeln & Salat (~590 kcal)', '180g Hähnchenbrust + 200g Kartoffeln + Salatgurke + Joghurt-Dressing', 'Dazu passt 1 Magerquark mit Obst!', 590, 44, 52, 15, '🍗'],
-      ['Lachsfilet mit Reis & Gartensalat (~640 kcal)', '180g Lachsfilet + 160g Reis + gemischter Salat + Honig-Senf-Dressing', 'Dazu 1 Birne oder Beeren als Nachtisch.', 640, 44, 58, 22, '🐟'],
-      ['Portion Lasagne + Beilagensalat (~660 kcal)', 'Portion Lasagne Bolognese (~350g) + grüner Salat + Balsamico-Dressing', 'Passt entspannt in dein Tagesbudget!', 660, 32, 54, 32, '🍝'],
-      ['2x Hähnchen-Fitness-Wraps (~540 kcal)', '2 Vollkorn-Wraps + 160g Hähnchenbrust + Salat + Tomaten + Joghurt-Dip', 'Dazu passt noch 1 Apfel oder Birne.', 540, 42, 55, 14, '🌯'],
-      ['Rindersteak / Schnitzel mit Kartoffeln (~720 kcal)', '200g Rindersteak + 200g Kartoffeln + Beilagensalat', 'Macht richtig satt mit 52g Eiweiß!', 720, 52, 60, 26, '🥩']
-    ];
+function addIngredientsToShop(comboText, sourceTitle) {
+  const parts = comboText.split(/[+,•]/).map(s => s.replace(/\.$/, '').trim()).filter(s => s.length > 2);
+  parts.forEach(p => { if (!state.shoppingList.some(i => i.name.toLowerCase() === p.toLowerCase())) state.shoppingList.unshift({ id: Date.now() + Math.random(), name: p, source: sourceTitle, checked: false }); });
+  saveState(); renderShoppingList(); showUndoToast(`🛒 ${parts.length} Zutaten auf Einkaufsliste!`);
+}
 
-    function getMealSuggestionsForRemaining(rem) {
-      const src = rem <= 450 ? mealCombosLow : mealCombosHigh;
-      return src.map(([title, combo, extra, kcal, p, c, f, icon]) => ({ title, combo, extra, kcal, p, c, f, icon }));
-    }
+function addManualShopItem() { const v = $('shopItemInput').value.trim(); if (v) { state.shoppingList.unshift({ id: Date.now(), name: v, source: 'Manuell', checked: false }); $('shopItemInput').value = ''; saveState(); renderShoppingList(); } }
+function toggleShopItem(idx) { state.shoppingList[idx].checked = !state.shoppingList[idx].checked; saveState(); renderShoppingList(); }
+function removeShopItem(idx) { state.shoppingList.splice(idx, 1); saveState(); renderShoppingList(); }
+function clearShoppingList() { if (confirm('Einkaufsliste leeren?')) { state.shoppingList = []; saveState(); renderShoppingList(); } }
+function shareShoppingListWhatsApp() { if (!state.shoppingList.length) return; window.open(`https://wa.me/?text=${encodeURIComponent('🛒 Einkaufsliste:\n' + state.shoppingList.map(i => `${i.checked ? '✅' : '⬜'} ${i.name}`).join('\n'))}`, '_blank'); }
 
-    function nextSuggestionSet() {
-      customAiSuggestions = null;
-      suggestionOffset += 2;
-      if ($('spinIdeaIcon')) $('spinIdeaIcon').style.transform = `rotate(${suggestionOffset * 90}deg)`;
-      renderAll();
-    }
+function renderShoppingList() {
+  const c = $('shoppingListContainer');
+  if (!state.shoppingList || !state.shoppingList.length) { c.innerHTML = `<div class="text-center py-2 text-[11px] text-slate-500">Tippe bei einem Vorschlag auf „🛒 Einkauf“, um Zutaten hinzuzufügen.</div>`; return; }
+  c.innerHTML = state.shoppingList.map((item, idx) => `<div class="flex justify-between bg-slate-900/75 px-3 py-2 rounded-xl border border-slate-800 text-xs"><button onclick="toggleShopItem(${idx})" class="flex items-center gap-2 text-left flex-1 truncate"><i class="fa-solid ${item.checked ? 'fa-square-check text-emerald-400' : 'fa-square text-slate-600'}"></i><span class="${item.checked ? 'line-through text-slate-500' : 'text-white'} truncate">${item.name}</span></button><button onclick="removeShopItem(${idx})" class="text-slate-500 hover:text-rose-400 px-1"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
+}
 
-    async function generateAIMealIdeas() {
-      if (!isValidApiKey(state.geminiApiKey)) { nextSuggestionSet(); return; }
-      const rem = Math.max(200, state.goals.kcal - state.todayLog.reduce((a, i) => a + i.kcal, 0));
-      const btn = $('aiCustomIdeaBtn');
-      const orig = btn.innerHTML;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>KI kocht neue Ideen...</span>`;
-      btn.disabled = true;
-      try {
-        const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
-        const parsed = await callGeminiRequest([{ text: `Abnehm-Coach: Nutzer hat noch ${rem} kcal übrig. Erfinde 2 abwechslungsreiche Mahlzeit-Kombis (Zutaten mit + getrennt im Feld "combo"). Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"title": "Name (~600 kcal)", "combo": "180g Hähnchen + 150g Reis + Salat", "extra": "Dazu passt...", "kcal": 600, "p": 42, "c": 52, "f": 18, "icon": "🥗"}]` }]);
-        const arr = Array.isArray(parsed) ? parsed : [parsed];
-        customAiSuggestions = arr.map(s => ({
-          title: String(s.title || 'KI-Wunschgericht'), combo: String(s.combo || ''), extra: String(s.extra || ''),
-          kcal: Math.max(100, Math.round(Number(s.kcal) || 500)), p: Math.round(Number(s.p) || 35), c: Math.round(Number(s.c) || 45), f: Math.round(Number(s.f) || 15), icon: s.icon || '✨'
-        }));
-        renderAll();
-      } catch (e) { nextSuggestionSet(); } finally { btn.innerHTML = orig; btn.disabled = false; }
-    }
+function openReviewCard(items) { pendingDetectedItems = items; currentPortionScale = 1.0; $('portionSlider').value = 100; $('portionScaleLabel').textContent = '100%'; $('reviewCard').classList.remove('hidden'); renderReviewItems(); }
+function closeReviewCard() { $('reviewCard').classList.add('hidden'); pendingDetectedItems = []; }
+function removePendingItem(idx) { pendingDetectedItems.splice(idx, 1); if (!pendingDetectedItems.length) closeReviewCard(); else renderReviewItems(); }
+function editPendingItem(idx) { const it = pendingDetectedItems[idx], n = prompt('Name:', it.name); if (n) it.name = n.trim(); const k = prompt('kcal:', it.kcal); if (k !== null && !isNaN(parseInt(k, 10))) it.kcal = Math.max(0, parseInt(k, 10)); renderReviewItems(); }
+function updatePortionScale(val) { currentPortionScale = parseInt(val, 10) / 100; $('portionScaleLabel').textContent = `${val}%`; renderReviewItems(); }
 
-    function addWeightEntry() {
-      const val = parseFloat($('weightInput').value);
-      if (isNaN(val) || val < 40 || val > 250) return;
-      state.weightLog.push({ date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }), weight: +val.toFixed(1) });
-      $('weightInput').value = ''; saveState(); renderWeightTab();
-    }
+function renderReviewItems() {
+  let total = 0;
+  $('detectedItemsList').innerHTML = pendingDetectedItems.map((item, idx) => {
+    const k = Math.round(item.kcal * currentPortionScale), p = +(item.p * currentPortionScale).toFixed(1), c = +(item.c * currentPortionScale).toFixed(1), f = +(item.f * currentPortionScale).toFixed(1), sug = +((item.sugar || 0) * currentPortionScale).toFixed(1);
+    total += k;
+    return `<div class="subcard ${item.warn || sug >= 14 ? 'border-amber-500/50' : ''} space-y-1"><div class="flex justify-between items-center"><div class="flex items-center gap-2 min-w-0"><span>${item.icon || '🍽️'}</span><div class="min-w-0"><div class="text-xs font-bold text-white truncate">${item.name}</div><div class="text-[10px] text-slate-400">E:${p}g K:${c}g F:${f}g • 🍬${sug}g</div></div></div><div class="flex items-center gap-1 shrink-0"><span class="text-xs font-bold text-emerald-400 mr-1">${k} kcal</span><button onclick="editPendingItem(${idx})" class="bg-slate-800 text-slate-300 px-2 py-1 rounded text-[10px]"><i class="fa-solid fa-pen"></i></button><button onclick="removePendingItem(${idx})" class="bg-rose-500/15 text-rose-400 px-2 py-1 rounded text-[10px]"><i class="fa-solid fa-trash-can"></i></button></div></div>${item.warn ? `<div class="text-[10px] text-amber-300 bg-amber-500/10 px-2 py-1 rounded">${item.warn}</div>` : ''}</div>`;
+  }).join('');
+  $('reviewTotalKcal').textContent = total;
+}
 
-    function deleteWeightEntry(idx) { state.weightLog.splice(idx, 1); saveState(); renderWeightTab(); }
-    function clearAllWeights() { if (confirm('Gewichts-Verlauf leeren?')) { state.weightLog = []; saveState(); renderWeightTab(); } }
+function confirmDetectedItems() {
+  const now = new Date(), timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  let names = []; lastAddedCount = pendingDetectedItems.length;
+  pendingDetectedItems.forEach(i => {
+    state.todayLog.unshift({ id: Date.now() + Math.random(), name: i.name, kcal: Math.round(i.kcal * currentPortionScale), p: +(i.p * currentPortionScale).toFixed(1), c: +(i.c * currentPortionScale).toFixed(1), f: +(i.f * currentPortionScale).toFixed(1), sugar: +((i.sugar || 0) * currentPortionScale).toFixed(1), fiber: +((i.fiber || 0) * currentPortionScale).toFixed(1), vitC: Math.round((i.vitC || 0) * currentPortionScale), mag: Math.round((i.mag || 0) * currentPortionScale), warn: i.warn || '', icon: i.icon || '🍽️', thumb: selectedPhotoThumb || null, time: timeStr, timestampISO: now.toISOString() });
+    names.push(i.name);
+  });
+  saveState(); $('naturalInput').value = ''; clearPhoto(); closeReviewCard(); renderAll(); showUndoToast(names.join(', '));
+}
 
-    function promptTargetWeight() {
-      const input = prompt('Zielgewicht (kg):', state.goals.targetWeight);
-      if (input !== null) {
-        const val = parseFloat(input.replace(',', '.'));
-        if (!isNaN(val) && val >= 40 && val <= 250) { state.goals.targetWeight = +val.toFixed(1); saveState(); renderWeightTab(); }
-      }
-    }
+function quickAdd(name, kcal, p, c, f, icon, sugar = 2, fiber = 1, vitC = 4, mag = 5) {
+  const now = new Date();
+  state.todayLog.unshift({ id: Date.now(), name, kcal, p, c, f, sugar, fiber, vitC, mag, warn: '', icon, thumb: null, time: now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }), timestampISO: now.toISOString() });
+  lastAddedCount = 1; saveState(); renderAll(); showUndoToast(`${name} (${kcal} kcal)`);
+}
 
-    function calculatePersonalGoal() {
-      const age = parseFloat($('calcAge').value) || 43;
-      const height = parseFloat($('calcHeight').value) || 186;
-      const enteredW = parseFloat($('calcWeight').value);
-      const enteredTarget = parseFloat($('calcTargetWeight').value);
-      const activity = parseFloat($('calcActivity').value) || 1.25;
-      const latestW = state.weightLog.length > 0 ? state.weightLog[state.weightLog.length - 1].weight : 98;
-      const weight = !isNaN(enteredW) && enteredW >= 40 ? enteredW : latestW;
-      const targetWeight = !isNaN(enteredTarget) && enteredTarget >= 40 ? enteredTarget : state.goals.targetWeight;
+function showUndoToast(label) { $('undoToastText').textContent = label; $('undoToast').classList.remove('hidden'); if (undoTimer) clearTimeout(undoTimer); undoTimer = setTimeout(() => $('undoToast').classList.add('hidden'), 6500); }
+function undoLastAction() { if (lastAddedCount > 0 && state.todayLog.length >= lastAddedCount) { state.todayLog.splice(0, lastAddedCount); lastAddedCount = 0; saveState(); renderAll(); } $('undoToast').classList.add('hidden'); }
+function addWater(l) { state.waterLiters = +(state.waterLiters + l).toFixed(2); saveState(); renderAll(); }
+function removeLogItem(idx) { state.todayLog.splice(idx, 1); saveState(); renderAll(); }
+function clearTodayLog() { if (confirm('Tageszähler auf 0 setzen?')) { state.todayLog = []; state.waterLiters = 0; state.lastActiveDate = getTodayDateKey(); saveState(); renderAll(); } }
 
-      if (!isNaN(enteredW) && enteredW >= 40) {
-        state.weightLog.push({ date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }), weight: +enteredW.toFixed(1) });
-      }
-      const bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
-      const recKcal = Math.max(1500, Math.round(bmr * activity) - 550);
-      state.goals.kcal = recKcal;
-      state.goals.protein = Math.round(weight * 1.6);
-      state.goals.fat = Math.round((recKcal * 0.28) / 9);
-      state.goals.carbs = Math.round((recKcal - (state.goals.protein * 4) - (state.goals.fat * 9)) / 4);
-      state.goals.targetWeight = +targetWeight.toFixed(1);
-      saveState(); renderAll();
-      alert(`Neues Tagesziel gespeichert: ${recKcal} kcal (${state.goals.protein}g Eiweiß).`);
-    }
+const mealCombosLow = [
+  ['Leichter Sattmacher-Abendteller (~240 kcal)', 'Gemischter Salat + Joghurt-Dressing + 150g Kräuter-Magerquark', 'Dazu passt 1 kleiner Apfel.', 240, 28, 16, 6, '🥗'],
+  ['Eiweiß-Snack am Abend (~210 kcal)', '2 Eier + frische Tomaten + Salatgurke', 'Dazu noch 1 Handvoll Beeren.', 210, 15, 8, 11, '🥚'],
+  ['Süßer Quark-Birnen-Becher (~250 kcal)', '250g Magerquark + 1 Birne + Zimt', 'Hält über Nacht optimal satt.', 250, 28, 28, 1, '🥣'],
+  ['Thunfisch-Salat-Bowl (~260 kcal)', 'Blattsalat + Tomaten + 1 Dose Thunfisch + Zitronen-Dressing', '32g Eiweiß bei minimalen Kalorien!', 260, 32, 9, 8, '🐟']
+];
 
-    function saveManualGoals() {
-      const kcal = parseInt($('manualKcalGoal').value, 10);
-      const prot = parseInt($('manualProteinGoal').value, 10);
-      if (kcal > 800) state.goals.kcal = kcal;
-      if (prot > 30) state.goals.protein = prot;
-      saveState(); renderAll(); alert('Gespeichert!');
-    }
+const mealCombosHigh = [
+  ['Salat-Kombi mit Hähnchen (~560 kcal)', 'Großer gemischter Salat + Joghurt-Dressing + 180g Hähnchenbrust + 1 Vollkornbrötchen', 'Dazu passt noch 1 Apfel.', 560, 46, 48, 14, '🥗'],
+  ['Hähnchen, Ofenkartoffeln & Salat (~590 kcal)', '180g Hähnchenbrust + 200g Kartoffeln + Salatgurke + Joghurt-Dressing', 'Dazu passt 1 Magerquark mit Obst!', 590, 44, 52, 15, '🍗'],
+  ['Lachsfilet mit Reis & Gartensalat (~640 kcal)', '180g Lachsfilet + 160g Reis + gemischter Salat + Honig-Senf-Dressing', 'Dazu 1 Birne oder Beeren als Nachtisch.', 640, 44, 58, 22, '🐟'],
+  ['Portion Lasagne + Beilagensalat (~660 kcal)', 'Portion Lasagne Bolognese (~350g) + grüner Salat + Balsamico-Dressing', 'Passt entspannt in dein Tagesbudget!', 660, 32, 54, 32, '🍝'],
+  ['2x Hähnchen-Fitness-Wraps (~540 kcal)', '2 Vollkorn-Wraps + 160g Hähnchenbrust + Salat + Tomaten + Joghurt-Dip', 'Dazu passt noch 1 Apfel oder Birne.', 540, 42, 55, 14, '🌯'],
+  ['Rindersteak / Schnitzel mit Kartoffeln (~720 kcal)', '200g Rindersteak + 200g Kartoffeln + Beilagensalat', 'Macht richtig satt mit 52g Eiweiß!', 720, 52, 60, 26, '🥩']
+];
 
-    function switchTab(tabName) {
-      ['cockpit', 'weight', 'access'].forEach(tab => {
-        $('tab-' + tab).classList.toggle('hidden', tab !== tabName);
-        const navBtn = $('nav-' + tab);
-        navBtn.classList.toggle('text-emerald-400', tab === tabName);
-        navBtn.classList.toggle('text-slate-400', tab !== tabName);
-      });
-    }
+function getMealSuggestionsForRemaining(rem) { return (rem <= 450 ? mealCombosLow : mealCombosHigh).map(([title, combo, extra, kcal, p, c, f, icon]) => ({ title, combo, extra, kcal, p, c, f, icon })); }
+function nextSuggestionSet() { customAiSuggestions = null; suggestionOffset += 2; if ($('spinIdeaIcon')) $('spinIdeaIcon').style.transform = `rotate(${suggestionOffset * 90}deg)`; renderAll(); }
 
-    function renderQuickAddButtons() {
-      const list = quickAddItems[state.lang] || quickAddItems.de;
-      $('quickAddContainer').innerHTML = list.map(i => i.water ? `
-        <button onclick="addWater(${i.water})" class="shrink-0 glass px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-medium active:scale-95 transition">
-          <span>${i.icon}</span><div class="text-left"><div class="text-sky-300 font-semibold">${i.label}</div><div class="text-[10px] text-slate-400">${i.sub}</div></div>
-        </button>` : `
-        <button onclick="quickAdd('${i.name}', ${i.kcal}, ${i.p}, ${i.c}, ${i.f}, '${i.icon}')" class="shrink-0 glass px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-medium active:scale-95 transition">
-          <span>${i.icon}</span><div class="text-left"><div class="text-white font-semibold">${i.label}</div><div class="text-[10px] text-slate-400">${i.sub}</div></div>
-        </button>`).join('');
-    }
+async function generateAIMealIdeas() {
+  if (!isValidApiKey(state.geminiApiKey)) { nextSuggestionSet(); return; }
+  const rem = Math.max(200, state.goals.kcal - state.todayLog.reduce((a, i) => a + i.kcal, 0));
+  const btn = $('aiCustomIdeaBtn'), orig = btn.innerHTML;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>KI kocht neue Ideen...</span>`; btn.disabled = true;
+  try {
+    const parsed = await callGeminiRequest([{ text: `Abnehm-Coach: Nutzer hat noch ${rem} kcal übrig. Erfinde 2 abwechslungsreiche Mahlzeit-Kombis (Zutaten mit + getrennt im Feld "combo"). Gib NUR ein JSON-Array zurück: [{"title": "Name (~600 kcal)", "combo": "180g Hähnchen + 150g Reis + Salat", "extra": "Dazu passt...", "kcal": 600, "p": 42, "c": 52, "f": 18, "icon": "🥗"}]` }]);
+    const arr = Array.isArray(parsed) ? parsed : [parsed];
+    customAiSuggestions = arr.map(s => ({ title: String(s.title || 'KI-Wunschgericht'), combo: String(s.combo || ''), extra: String(s.extra || ''), kcal: Math.max(100, Math.round(Number(s.kcal) || 500)), p: Math.round(Number(s.p) || 35), c: Math.round(Number(s.c) || 45), f: Math.round(Number(s.f) || 15), icon: s.icon || '✨' }));
+    renderAll();
+  } catch (e) { nextSuggestionSet(); } finally { btn.innerHTML = orig; btn.disabled = false; }
+}
 
-    function renderMealSuggestions(remaining) {
-      $('suggestionsSubtitle').textContent = remaining <= 50 ? 'Tagesziel fast erreicht! Leichte Ideen:' : `Du hast noch ${remaining} kcal übrig – passende Kombis:`;
-      let picked = [];
-      if (customAiSuggestions && customAiSuggestions.length > 0) {
-        picked = customAiSuggestions;
-      } else {
-        const all = getMealSuggestionsForRemaining(Math.max(200, remaining));
-        picked = [all[suggestionOffset % all.length], all[(suggestionOffset + 1) % all.length]];
-      }
+function addWeightEntry() { const v = parseFloat($('weightInput').value); if (!isNaN(v) && v >= 40 && v <= 250) { state.weightLog.push({ date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }), weight: +v.toFixed(1) }); $('weightInput').value = ''; saveState(); renderWeightTab(); } }
+function deleteWeightEntry(idx) { state.weightLog.splice(idx, 1); saveState(); renderWeightTab(); }
+function clearAllWeights() { if (confirm('Gewichts-Verlauf leeren?')) { state.weightLog = []; saveState(); renderWeightTab(); } }
+function promptTargetWeight() { const inp = prompt('Zielgewicht (kg):', state.goals.targetWeight); if (inp !== null) { const v = parseFloat(inp.replace(',', '.')); if (!isNaN(v) && v >= 40 && v <= 250) { state.goals.targetWeight = +v.toFixed(1); saveState(); renderWeightTab(); } } }
 
-      $('mealSuggestionsList').innerHTML = picked.map(s => `
-        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 space-y-2">
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2"><span class="text-lg">${s.icon}</span><span class="text-xs font-bold text-emerald-300">${s.title}</span></div>
-            <span class="shrink-0 text-xs font-extrabold text-white bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-lg">~${s.kcal} kcal</span>
-          </div>
-          <p class="text-xs text-slate-200 leading-relaxed">${s.combo}</p>
-          <p class="text-[11px] text-amber-300/90 font-medium">💡 ${s.extra}</p>
-          <div class="pt-1 flex justify-end gap-2">
-            <button onclick="addIngredientsToShop('${s.combo.replace(/'/g, '')}', '${s.title.replace(/'/g, '')}')" class="bg-slate-800 hover:bg-sky-500 hover:text-slate-950 text-sky-300 text-[11px] font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1 active:scale-95">
-              <i class="fa-solid fa-cart-plus"></i><span>🛒 Einkauf</span>
-            </button>
-            <button onclick="quickAdd('${s.title.replace(/'/g, '')}', ${s.kcal}, ${s.p}, ${s.c}, ${s.f}, '${s.icon}')" class="bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-emerald-400 text-[11px] font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 active:scale-95">
-              <i class="fa-solid fa-plus"></i><span>Eintragen</span>
-            </button>
-          </div>
-        </div>`).join('');
-    }
+function calculatePersonalGoal() {
+  const age = parseFloat($('calcAge').value) || 43, height = parseFloat($('calcHeight').value) || 186, enteredW = parseFloat($('calcWeight').value), enteredT = parseFloat($('calcTargetWeight').value), act = parseFloat($('calcActivity').value) || 1.25;
+  const latestW = state.weightLog.length > 0 ? state.weightLog[state.weightLog.length - 1].weight : 98;
+  const weight = !isNaN(enteredW) && enteredW >= 40 ? enteredW : latestW;
+  if (!isNaN(enteredW) && enteredW >= 40) state.weightLog.push({ date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }), weight: +enteredW.toFixed(1) });
+  const recKcal = Math.max(1500, Math.round(((10 * weight) + (6.25 * height) - (5 * age) + 5) * act) - 550);
+  state.goals.kcal = recKcal; state.goals.protein = Math.round(weight * 1.6); state.goals.fat = Math.round((recKcal * 0.28) / 9); state.goals.carbs = Math.round((recKcal - (state.goals.protein * 4) - (state.goals.fat * 9)) / 4);
+  if (!isNaN(enteredT) && enteredT >= 40) state.goals.targetWeight = +enteredT.toFixed(1);
+  saveState(); renderAll(); alert(`Neues Tagesziel: ${recKcal} kcal (${state.goals.protein}g Eiweiß).`);
+}
 
-    function renderPastDays() {
-      const card = $('pastDaysCard');
-      if (!state.pastDaysLog || !state.pastDaysLog.length) { card.classList.add('hidden'); return; }
-      card.classList.remove('hidden');
-      $('pastDaysList').innerHTML = state.pastDaysLog.slice(0, 7).map(d => {
-        const diff = d.goal - d.kcal;
-        return `<div class="flex items-center justify-between bg-slate-900/60 px-3 py-2 rounded-xl border border-slate-800/60">
-          <span class="text-slate-400 font-medium">${d.date}</span>
-          <div class="flex items-center gap-3"><span class="text-white font-bold">${d.kcal} / ${d.goal} kcal</span><span class="${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'} text-[11px] font-semibold">${diff >= 0 ? `-${diff} kcal` : `+${Math.abs(diff)} kcal`}</span></div>
-        </div>`;
-      }).join('');
-    }
+function saveManualGoals() { const k = parseInt($('manualKcalGoal').value, 10), p = parseInt($('manualProteinGoal').value, 10); if (k > 800) state.goals.kcal = k; if (p > 30) state.goals.protein = p; saveState(); renderAll(); alert('Gespeichert!'); }
 
-    function renderWeightTab() {
-      const log = state.weightLog;
-      $('targetWeightDisplay').textContent = state.goals.targetWeight.toFixed(1) + ' kg';
-      if (log.length > 0) {
-        const latest = log[log.length - 1].weight;
-        $('currentWeightDisplay').textContent = latest.toFixed(1) + ' kg';
-        let trend = log[0].weight;
-        log.forEach(e => { trend = (e.weight * 0.35) + (trend * 0.65); });
-        $('trendWeightDisplay').textContent = trend.toFixed(1) + ' kg';
-        const diff = +(latest - log[0].weight).toFixed(1);
-        $('weightDiffBadge').textContent = (diff <= 0 ? `${diff} kg` : `+${diff} kg`);
-      } else {
-        $('currentWeightDisplay').textContent = '-- kg';
-        $('trendWeightDisplay').textContent = '-- kg';
-        $('weightDiffBadge').textContent = 'Start';
-      }
-      $('weightHistoryList').innerHTML = !log.length ? `<div class="text-center py-4 text-xs text-slate-500">--</div>` :
-        log.map((item, idx) => ({ item, idx })).reverse().map(({ item, idx }) => `
-          <div class="flex justify-between items-center bg-slate-900/60 px-3.5 py-2.5 rounded-xl text-xs border border-slate-800/60">
-            <span class="text-slate-400">${item.date}</span>
-            <div class="flex items-center gap-3"><span class="font-bold text-white">${item.weight.toFixed(1)} kg</span><button onclick="deleteWeightEntry(${idx})" class="bg-rose-500/15 text-rose-400 px-2 py-1 rounded-lg"><i class="fa-solid fa-trash-can"></i></button></div>
-          </div>`).join('');
-    }
+function switchTab(tabName) {
+  ['cockpit', 'weight', 'access'].forEach(tab => {
+    $('tab-' + tab).classList.toggle('hidden', tab !== tabName);
+    $('nav-' + tab).classList.toggle('text-emerald-400', tab === tabName);
+    $('nav-' + tab).classList.toggle('text-slate-400', tab !== tabName);
+  });
+}
 
-    function renderAll() {
-      checkAutomaticDailyReset(); applyTranslations(); renderQuickAddButtons();
-      $('currentDateDisplay').textContent = new Date().toLocaleDateString(state.lang === 'pl' ? 'pl-PL' : 'de-DE', { weekday: 'long', day: '2-digit', month: 'long' });
+function renderQuickAddButtons() {
+  $('quickAddContainer').innerHTML = quickAddList.map(i => i.water ? `<button onclick="addWater(${i.water})" class="shrink-0 glass px-3.5 py-2 flex items-center gap-2 text-xs font-medium"><span>${i.icon}</span><div class="text-left"><div class="text-sky-300 font-semibold">${i.label}</div><div class="text-[10px] text-slate-400">${i.sub}</div></div></button>` : `<button onclick="quickAdd('${i.name}', ${i.kcal}, ${i.p}, ${i.c}, ${i.f}, '${i.icon}', ${i.sugar||0}, ${i.fiber||0}, ${i.vitC||0}, ${i.mag||0})" class="shrink-0 glass px-3.5 py-2 flex items-center gap-2 text-xs font-medium"><span>${i.icon}</span><div class="text-left"><div class="text-white font-semibold">${i.label}</div><div class="text-[10px] text-slate-400">${i.sub}</div></div></button>`).join('');
+}
 
-      const totals = state.todayLog.reduce((a, i) => ({ kcal: a.kcal + i.kcal, p: a.p + i.p, c: a.c + i.c, f: a.f + i.f }), { kcal: 0, p: 0, c: 0, f: 0 });
-      const goalKcal = state.goals.kcal;
-      const remaining = goalKcal - totals.kcal;
+function renderMealSuggestions(remaining) {
+  $('suggestionsSubtitle').textContent = remaining <= 50 ? 'Tagesziel fast erreicht! Leichte Ideen:' : `Du hast noch ${remaining} kcal übrig – passende Kombis:`;
+  const all = getMealSuggestionsForRemaining(Math.max(200, remaining));
+  const picked = customAiSuggestions && customAiSuggestions.length > 0 ? customAiSuggestions : [all[suggestionOffset % all.length], all[(suggestionOffset + 1) % all.length]];
+  $('mealSuggestionsList').innerHTML = picked.map(s => `<div class="subcard space-y-2"><div class="flex justify-between gap-2"><span class="text-xs font-bold text-emerald-300">${s.icon} ${s.title}</span><span class="shrink-0 text-xs font-bold text-white bg-emerald-500/20 px-2 py-0.5 rounded-lg">~${s.kcal} kcal</span></div><p class="text-xs text-slate-200">${s.combo}</p><p class="text-[11px] text-amber-300">💡 ${s.extra}</p><div class="pt-1 flex justify-end gap-2"><button onclick="addIngredientsToShop('${s.combo.replace(/'/g, '')}', '${s.title.replace(/'/g, '')}')" class="bg-slate-800 text-sky-300 text-[11px] font-bold px-3 py-1.5 rounded-xl">🛒 Einkauf</button><button onclick="quickAdd('${s.title.replace(/'/g, '')}', ${s.kcal}, ${s.p}, ${s.c}, ${s.f}, '${s.icon}', 4, 5, 25, 20)" class="bg-slate-800 text-emerald-400 text-[11px] font-bold px-3 py-1.5 rounded-xl">+ Eintragen</button></div></div>`).join('');
+}
 
-      $('goalKcalDisplay').textContent = goalKcal;
-      $('eatenKcalDisplay').textContent = totals.kcal;
-      $('waterDisplay').textContent = state.waterLiters.toFixed(2);
+function renderPastDays() {
+  const card = $('pastDaysCard');
+  if (!state.pastDaysLog || !state.pastDaysLog.length) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  $('pastDaysList').innerHTML = state.pastDaysLog.slice(0, 7).map(d => {
+    const diff = d.goal - d.kcal;
+    return `<div class="flex justify-between bg-slate-900/60 px-3 py-2 rounded-xl border border-slate-800"><span class="text-slate-400">${d.date}</span><div class="flex gap-3"><span class="text-white font-bold">${d.kcal} / ${d.goal} kcal</span><span class="${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'} text-[11px] font-semibold">${diff >= 0 ? `-${diff} kcal` : `+${Math.abs(diff)} kcal`}</span></div></div>`;
+  }).join('');
+}
 
-      const remEl = $('remainingKcalDisplay');
-      remEl.textContent = remaining >= 0 ? remaining : '+' + Math.abs(remaining);
-      remEl.className = remaining >= 0 ? 'text-2xl font-extrabold tracking-tight text-white' : 'text-2xl font-extrabold tracking-tight text-rose-400';
-      $('remainingLabel').textContent = remaining >= 0 ? 'kcal übrig' : 'kcal drüber';
+function renderWeightTab() {
+  const log = state.weightLog;
+  $('targetWeightDisplay').textContent = state.goals.targetWeight.toFixed(1) + ' kg';
+  if (log.length > 0) {
+    const latest = log[log.length - 1].weight;
+    $('currentWeightDisplay').textContent = latest.toFixed(1) + ' kg';
+    let trend = log[0].weight; log.forEach(e => { trend = (e.weight * 0.35) + (trend * 0.65); });
+    $('trendWeightDisplay').textContent = trend.toFixed(1) + ' kg';
+    const diff = +(latest - log[0].weight).toFixed(1);
+    $('weightDiffBadge').textContent = (diff <= 0 ? `${diff} kg` : `+${diff} kg`);
+  }
+  $('weightHistoryList').innerHTML = !log.length ? `<div class="text-center py-4 text-xs text-slate-500">--</div>` : log.map((item, idx) => ({ item, idx })).reverse().map(({ item, idx }) => `<div class="flex justify-between items-center bg-slate-900/60 px-3.5 py-2.5 rounded-xl text-xs border border-slate-800"><span class="text-slate-400">${item.date}</span><div class="flex items-center gap-3"><span class="font-bold text-white">${item.weight.toFixed(1)} kg</span><button onclick="deleteWeightEntry(${idx})" class="bg-rose-500/15 text-rose-400 px-2 py-1 rounded-lg"><i class="fa-solid fa-trash-can"></i></button></div></div>`).join('');
+}
 
-      const ring = $('kcalRing');
-      ring.style.strokeDashoffset = 314.16 - (Math.min(1, totals.kcal / goalKcal) * 314.16);
-      ring.setAttribute('stroke', remaining >= 0 ? '#10b981' : '#f43f5e');
+function renderAll() {
+  checkAutomaticDailyReset(); applyTranslations(); renderQuickAddButtons();
+  $('currentDateDisplay').textContent = new Date().toLocaleDateString(state.lang === 'pl' ? 'pl-PL' : 'de-DE', { weekday: 'long', day: '2-digit', month: 'long' });
 
-      $('proteinDisplay').textContent = Math.round(totals.p);
-      $('proteinGoalDisplay').textContent = state.goals.protein;
-      $('proteinBar').style.width = Math.min(100, (totals.p / state.goals.protein) * 100) + '%';
-      $('carbsDisplay').textContent = Math.round(totals.c);
-      $('carbsGoalDisplay').textContent = state.goals.carbs;
-      $('carbsBar').style.width = Math.min(100, (totals.c / state.goals.carbs) * 100) + '%';
-      $('fatDisplay').textContent = Math.round(totals.f);
-      $('fatGoalDisplay').textContent = state.goals.fat;
-      $('fatBar').style.width = Math.min(100, (totals.f / state.goals.fat) * 100) + '%';
+  const totals = state.todayLog.reduce((a, i) => ({ kcal: a.kcal + i.kcal, p: a.p + i.p, c: a.c + i.c, f: a.f + i.f, sugar: a.sugar + (i.sugar || 0), fiber: a.fiber + (i.fiber || 0), vitC: a.vitC + (i.vitC || 0), mag: a.mag + (i.mag || 0) }), { kcal: 0, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0 });
+  const goalKcal = state.goals.kcal, remaining = goalKcal - totals.kcal;
 
-      renderMealSuggestions(remaining);
-      renderShoppingList();
-      renderPastDays();
+  $('goalKcalDisplay').textContent = goalKcal;
+  $('eatenKcalDisplay').textContent = totals.kcal;
+  $('waterDisplay').textContent = state.waterLiters.toFixed(2);
 
-      $('todayLogList').innerHTML = !state.todayLog.length ? `<div class="text-center py-6 text-xs text-slate-500">Noch keine Mahlzeiten für heute eingetragen.</div>` :
-        state.todayLog.map((item, idx) => `
-          <div class="flex items-center justify-between bg-slate-900/75 px-3.5 py-2.5 rounded-2xl border border-slate-800/80">
-            <div class="flex items-center gap-3 min-w-0">
-              ${item.thumb ? `<img src="${item.thumb}" class="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-700" alt="Foto" />` : `<span class="text-xl shrink-0">${item.icon || '🍽️'}</span>`}
-              <div class="min-w-0"><div class="text-xs font-bold text-white truncate">${item.name}</div><div class="text-[10px] text-slate-400">${item.time} • B/E: ${item.p}g | W/K: ${item.c}g | T/F: ${item.f}g</div></div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0 ml-2">
-              <span class="text-xs font-extrabold text-emerald-400">${item.kcal} kcal</span>
-              <button onclick="removeLogItem(${idx})" class="bg-rose-500/15 text-rose-400 border border-rose-500/30 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1 active:scale-90 transition"><i class="fa-solid fa-trash-can text-[10px]"></i><span>Löschen</span></button>
-            </div>
-          </div>`).join('');
+  // Hydrations-Wächter Status nach Tageszeit
+  const expectedWater = Math.min(2.5, Math.max(0.5, (new Date().getHours() - 7) * 0.2));
+  const wBadge = $('waterStatusBadge');
+  if (state.waterLiters >= expectedWater) { wBadge.textContent = '💧 Optimal im Plan'; wBadge.className = 'inline-block mt-1 text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-medium'; }
+  else { wBadge.textContent = '⚠️ Trinkerinnerung: +250ml!'; wBadge.className = 'inline-block mt-1 text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-medium'; }
 
-      $('masterCodeSetting').value = state.masterCode;
-      $('geminiKeyInput').value = state.geminiApiKey || '';
-      $('manualKcalGoal').value = state.goals.kcal;
-      $('manualProteinGoal').value = state.goals.protein;
+  const remEl = $('remainingKcalDisplay');
+  remEl.textContent = remaining >= 0 ? remaining : '+' + Math.abs(remaining);
+  remEl.className = remaining >= 0 ? 'text-2xl font-extrabold text-white' : 'text-2xl font-extrabold text-rose-400';
+  $('remainingLabel').textContent = remaining >= 0 ? 'kcal übrig' : 'kcal drüber';
 
-      const hasKey = isValidApiKey(state.geminiApiKey);
-      $('aiModeStatus').textContent = hasKey ? 'Gemini Vision KI aktiv' : 'Smart-Modus (Key fehlt ⚙)';
-      $('aiModeStatus').className = hasKey ? 'badge-ok' : 'badge-warn';
-      $('keySavedBadge').textContent = hasKey ? 'Aktiv (Lokal geschützt)' : 'Key eintragen';
-      $('keySavedBadge').className = hasKey ? 'badge-ok' : 'badge-warn';
+  const ring = $('kcalRing');
+  ring.style.strokeDashoffset = 314.16 - (Math.min(1, totals.kcal / goalKcal) * 314.16);
+  ring.setAttribute('stroke', remaining >= 0 ? '#10b981' : '#f43f5e');
 
-      renderInviteCodes();
-      renderWeightTab();
-    }
+  $('proteinDisplay').textContent = Math.round(totals.p); $('proteinGoalDisplay').textContent = state.goals.protein;
+  $('proteinBar').style.width = Math.min(100, (totals.p / state.goals.protein) * 100) + '%';
+  $('carbsDisplay').textContent = Math.round(totals.c); $('carbsGoalDisplay').textContent = state.goals.carbs;
+  $('carbsBar').style.width = Math.min(100, (totals.c / state.goals.carbs) * 100) + '%';
+  $('fatDisplay').textContent = Math.round(totals.f); $('fatGoalDisplay').textContent = state.goals.fat;
+  $('fatBar').style.width = Math.min(100, (totals.f / state.goals.fat) * 100) + '%';
 
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && state.unlocked) renderAll(); });
-    renderAppVisibility();
-  </script>
+  // Mikronährstoffe & Zucker-Wächter
+  $('fiberDisplay').textContent = Math.round(totals.fiber);
+  $('vitCDisplay').textContent = Math.min(100, Math.round(totals.vitC));
+  $('magDisplay').textContent = Math.min(100, Math.round(totals.mag));
+  $('sugarDisplay').textContent = Math.round(totals.sugar);
+  const hasInflammatory = state.todayLog.some(i => i.warn && i.warn.length > 0);
+  $('sugarWarnBanner').classList.toggle('hidden', totals.sugar <= 35 && !hasInflammatory);
+
+  renderMealSuggestions(remaining);
+  renderShoppingList();
+  renderEnergyLog();
+  renderPastDays();
+
+  $('todayLogList').innerHTML = !state.todayLog.length ? `<div class="text-center py-6 text-xs text-slate-500">Noch keine Mahlzeiten für heute eingetragen.</div>` :
+    state.todayLog.map((item, idx) => `<div class="subcard space-y-1"><div class="flex items-center justify-between"><div class="flex items-center gap-3 min-w-0">${item.thumb ? `<img src="${item.thumb}" class="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-700" alt="Foto" />` : `<span class="text-xl shrink-0">${item.icon || '🍽️'}</span>`}<div class="min-w-0"><div class="text-xs font-bold text-white truncate">${item.name}</div><div class="text-[10px] text-slate-400">${item.time} • E:${item.p}g K:${item.c}g F:${item.f}g • 🍬${item.sugar || 0}g</div></div></div><div class="flex items-center gap-2 shrink-0 ml-2"><span class="text-xs font-extrabold text-emerald-400">${item.kcal} kcal</span><button onclick="removeLogItem(${idx})" class="bg-rose-500/15 text-rose-400 border border-rose-500/30 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold"><i class="fa-solid fa-trash-can text-[10px]"></i></button></div></div>${item.warn ? `<div class="text-[10px] text-amber-300 bg-amber-500/10 px-2 py-1 rounded-lg">${item.warn}</div>` : ''}</div>`).join('');
+
+  $('masterCodeSetting').value = state.masterCode;
+  $('geminiKeyInput').value = state.geminiApiKey || '';
+  $('manualKcalGoal').value = state.goals.kcal;
+  $('manualProteinGoal').value = state.goals.protein;
+
+  const hasKey = isValidApiKey(state.geminiApiKey);
+  $('aiModeStatus').textContent = hasKey ? 'Gemini Vision KI aktiv' : 'Smart-Modus (Key fehlt ⚙)';
+  $('aiModeStatus').className = hasKey ? 'badge-ok' : 'badge-warn';
+  $('keySavedBadge').textContent = hasKey ? 'Aktiv (Lokal geschützt)' : 'Key eintragen';
+  $('keySavedBadge').className = hasKey ? 'badge-ok' : 'badge-warn';
+
+  renderInviteCodes();
+  renderWeightTab();
+}
+
+document.addEventListener('visibilitychange', () => { if (!document.hidden && state.unlocked) renderAll(); });
+renderAppVisibility();
+</script>
 </body>
 </html>
