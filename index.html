@@ -127,7 +127,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2.5 mt-4">
-          <button onclick="focusFoodInput()" class="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition"><i class="fa-solid fa-plus-circle"></i><span id="btnMainAddFood">Essen hinzufügen</span></button>
+          <button onclick="focusFoodInput('meal')" class="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition"><i class="fa-solid fa-plus-circle"></i><span id="btnMainAddFood">Essen hinzufügen</span></button>
           <button onclick="addWater(0.25)" class="bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 font-bold py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition"><i class="fa-solid fa-droplet"></i><span id="btnMainAddWater">+250ml Wasser</span></button>
         </div>
       </div>
@@ -140,35 +140,48 @@
         <div id="quickAddContainer" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
       </div>
 
-      <!-- KI-SCANNER -->
-      <div id="scannerCard" class="glass rounded-3xl p-4 shadow-lg border border-emerald-500/20">
-        <div class="flex items-center justify-between mb-2">
+      <!-- MULTI-MODUS KI-SCANNER (FEATURE 1 INTEGRIERT: MAHLZEIT | KÜHLSCHRANK-RESTE) -->
+      <div id="scannerCard" class="glass rounded-3xl p-4 shadow-lg border border-emerald-500/20 space-y-3">
+        <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="lblScannerTitle" class="text-xs font-bold uppercase tracking-wider text-emerald-400">KI-Scanner (Foto & Text)</span>
+            <span id="lblScannerTitle" class="text-xs font-bold uppercase tracking-wider text-emerald-400">Smart KI-Scanner</span>
           </div>
           <button onclick="switchTab('access')" id="aiModeStatus" class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">Status prüfen</button>
         </div>
 
-        <div id="photoPreviewContainer" class="hidden mb-3 relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
-          <img id="photoPreview" src="" alt="Essensfoto" class="w-full h-44 object-cover" />
+        <!-- MODUS-UMSCHALTER: MAHLZEIT vs. KÜHLSCHRANK-RESTE-VERWERTER -->
+        <div class="grid grid-cols-2 gap-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
+          <button id="modeBtn-meal" onclick="setScannerMode('meal')" class="py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 bg-emerald-500 text-slate-950 shadow transition">
+            <span>🍽️</span><span id="lblModeMeal">Mahlzeit tracken</span>
+          </button>
+          <button id="modeBtn-fridge" onclick="setScannerMode('fridge')" class="py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 text-slate-300 hover:text-white transition">
+            <span>🧊</span><span id="lblModeFridge">Kühlschrank-Reste</span>
+          </button>
+        </div>
+
+        <div id="fridgeModeBanner" class="hidden bg-cyan-500/10 border border-cyan-500/30 rounded-2xl p-2.5 text-[11px] text-cyan-200 flex items-center gap-2">
+          <i class="fa-solid fa-snowflake text-cyan-400 text-sm shrink-0"></i>
+          <span id="lblFridgeBanner">Fotografiere deinen offenen Kühlschrank oder tippe Vorräte ein – die KI zaubert Rezepte passend zu deinen offenen Tageskalorien!</span>
+        </div>
+
+        <div id="photoPreviewContainer" class="hidden relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
+          <img id="photoPreview" src="" alt="Foto" class="w-full h-44 object-cover" />
           <button onclick="clearPhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
           <div class="p-2.5 bg-slate-900/95 text-xs text-emerald-300 flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Foto bereit – optional unten Notiz ergänzen</span></div>
         </div>
 
-        <div id="apiErrorBox" class="hidden mb-3 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-xs text-amber-200 space-y-2">
+        <div id="apiErrorBox" class="hidden p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-xs text-amber-200 space-y-2">
           <div class="font-bold flex items-center gap-1.5 text-amber-300"><i class="fa-solid fa-triangle-exclamation"></i><span>Hinweis zur Foto-KI:</span></div>
           <p id="apiErrorText" class="text-[11px] leading-relaxed"></p>
-          <div class="flex gap-2 pt-1">
-            <button onclick="switchTab('access')" class="bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-[11px] flex items-center gap-1">
-              <i class="fa-solid fa-key"></i><span>Jetzt Key einrichten</span>
-            </button>
-          </div>
+          <button onclick="switchTab('access')" class="bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-[11px] flex items-center gap-1">
+            <i class="fa-solid fa-key"></i><span>Jetzt Key prüfen</span>
+          </button>
         </div>
 
         <textarea id="naturalInput" rows="2" placeholder="Schreibe z. B.: „1 Portion Lasagne“ oder „1 Birne“..." class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-emerald-400 rounded-2xl p-3 text-sm text-white placeholder-slate-500 outline-none resize-none transition"></textarea>
 
-        <div class="flex items-center gap-2 mt-2.5">
+        <div class="flex items-center gap-2">
           <label class="cursor-pointer shrink-0 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 active:scale-95 transition border border-emerald-500/30">
             <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
             <span id="btnPhotoText">Foto / Kamera</span>
@@ -181,7 +194,7 @@
         </div>
       </div>
 
-      <!-- PRÜFFENSTER -->
+      <!-- PRÜFFENSTER FÜR NORMALE MAHLZEITEN -->
       <div id="reviewCard" class="hidden glass rounded-3xl p-4 border-2 border-emerald-500/40 shadow-2xl space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i><h3 id="lblReviewTitle" class="text-sm font-bold">Erkannte Mahlzeit prüfen & anpassen</h3></div>
@@ -195,6 +208,21 @@
         <button onclick="confirmDetectedItems()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-2xl text-sm shadow-lg shadow-emerald-500/20 transition">
           <span id="btnConfirmReview">Ins Tagebuch übernehmen</span> (<span id="reviewTotalKcal">0</span> kcal)
         </button>
+      </div>
+
+      <!-- NEU: ERGEBNIS-FENSTER FÜR FEATURE 1 (KÜHLSCHRANK-RESTE-VERWERTER) -->
+      <div id="fridgeResultCard" class="hidden glass rounded-3xl p-4 border-2 border-cyan-400/50 shadow-2xl space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🧊</span>
+            <div>
+              <h3 id="lblFridgeResultTitle" class="text-sm font-bold text-cyan-300">Kühlschrank-Rezepte für deinen Rest</h3>
+              <p id="lblFridgeIngredients" class="text-[11px] text-slate-400"></p>
+            </div>
+          </div>
+          <button onclick="closeFridgeCard()" class="text-slate-400 hover:text-white text-xs">Schließen</button>
+        </div>
+        <div id="fridgeRecipesList" class="space-y-3"></div>
       </div>
 
       <!-- VORSCHLÄGE (MIT GROSSER AUSWAHL + LIVE KI-KOCH) -->
@@ -226,7 +254,7 @@
       </div>
 
       <div id="pastDaysCard" class="glass rounded-3xl p-4 hidden">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-2"><i class="fa-solid fa-calendar-check text-emerald-400"></i><span>Vergangene Tage</span></h3>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-2"><i class="fa-solid fa-calendar-check text-emerald-400"></i><span>Vergangene Tage (30-Tage-Archiv)</span></h3>
         <div id="pastDaysList" class="space-y-1.5 text-xs"></div>
       </div>
     </section>
@@ -283,10 +311,6 @@
           <span id="keySavedBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold">Prüfen</span>
         </div>
 
-        <p class="text-xs text-slate-300 leading-relaxed">
-          Du musst den Schlüssel <b>nicht abtippen</b>! Nutze einfach die Buttons unten direkt auf deinem iPhone:
-        </p>
-
         <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="w-full bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-sky-300 font-bold py-3 px-4 rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
           <i class="fa-solid fa-up-right-from-square"></i>
           <span>1. Google AI Studio hier auf dem iPhone öffnen</span>
@@ -303,9 +327,9 @@
         </button>
 
         <div class="pt-1">
-          <label class="text-[11px] text-slate-400 block mb-1">Dein gespeicherter Schlüssel (sichtbar zur Kontrolle):</label>
+          <label class="text-[11px] text-slate-400 block mb-1">Dein gespeicherter Schlüssel:</label>
           <div class="flex gap-2">
-            <input id="geminiKeyInput" type="text" placeholder="Hier lang tippen -> Einsetzen (AQ... oder AIza...)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-emerald-300 font-mono" />
+            <input id="geminiKeyInput" type="text" placeholder="AQ... oder AIza..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-emerald-300 font-mono" />
             <button onclick="saveGeminiKey()" class="bg-emerald-500 text-slate-950 font-bold px-3.5 py-2.5 rounded-xl text-xs shrink-0 active:scale-95 transition">Speichern</button>
           </div>
         </div>
@@ -386,9 +410,12 @@
         dailyGoal: 'Tagesziel', eaten: 'Gegessen', water: 'Wasser heute', kcalLeft: 'kcal übrig', kcalOver: 'kcal drüber',
         protein: 'Eiweiß', carbs: 'Kohlenh.', fat: 'Fett', mainAddFood: 'Essen hinzufügen', mainAddWater: '+250ml Wasser',
         quickAdd: 'Schnell-Log (1 Fingertipp)', quickAddHint: 'Antippen zum Hinzufügen',
-        scannerTitle: 'KI-Scanner (Foto & Text)',
-        inputPlaceholder: 'Schreibe z. B.: „1 Portion Lasagne“ oder „1 Birne“...',
-        btnPhoto: 'Foto / Kamera', btnAnalyze: 'Per KI analysieren', reviewTitle: 'Erkannte Mahlzeit prüfen & anpassen',
+        scannerTitle: 'Smart KI-Scanner', modeMeal: 'Mahlzeit tracken', modeFridge: 'Kühlschrank-Reste',
+        fridgeBanner: 'Fotografiere deinen offenen Kühlschrank oder tippe Vorräte ein – die KI zaubert Rezepte passend zu deinen offenen Tageskalorien!',
+        inputPlaceholderMeal: 'Schreibe z. B.: „1 Portion Lasagne“ oder „1 Birne“...',
+        inputPlaceholderFridge: 'Welche Zutaten hast du da? Z. B.: „Eier, Tomaten, Schinken, Käse, Kartoffeln“ (oder mach ein Foto vom Kühlschrank)...',
+        btnPhoto: 'Foto / Kamera', btnAnalyzeMeal: 'Per KI analysieren', btnAnalyzeFridge: 'Rezepte für Rest-kcal zaubern',
+        reviewTitle: 'Erkannte Mahlzeit prüfen & anpassen',
         btnCancel: 'Abbrechen', portionAdjust: 'Portionsgröße per Regler anpassen:', btnConfirmReview: 'Ins Tagebuch übernehmen',
         suggestionsTitle: 'Was kann ich heute noch essen?', btnMoreIdeas: 'Neue Ideen',
         aiIdeaBtn: '✨ Frische KI-Ideen live für meinen Rest berechnen',
@@ -408,9 +435,12 @@
         dailyGoal: 'Cel dzienny', eaten: 'Zjedzone', water: 'Woda dzisiaj', kcalLeft: 'kcal pozostało', kcalOver: 'kcal ponad cel',
         protein: 'Białko', carbs: 'Węglow.', fat: 'Tłuszcz', mainAddFood: 'Dodaj posiłek', mainAddWater: '+250ml Wody',
         quickAdd: 'Szybkie dodawanie (1 klik)', quickAddHint: 'Dotknij, aby dodać',
-        scannerTitle: 'Skaner AI (Zdjęcie i Tekst)',
-        inputPlaceholder: 'Napisz np.: „1 porcja lasagne” lub „1 gruszka”...',
-        btnPhoto: 'Zdjęcie / Aparat', btnAnalyze: 'Analizuj przez AI', reviewTitle: 'Sprawdź i dopasuj posiłek',
+        scannerTitle: 'Inteligentny Skaner AI', modeMeal: 'Dodaj posiłek', modeFridge: 'Resztki z lodówki',
+        fridgeBanner: 'Zrób zdjęcie otwartej lodówki lub wpisz składniki – AI stworzy przepisy idealnie dopasowane do Twoich pozostałych kalorii!',
+        inputPlaceholderMeal: 'Napisz np.: „1 porcja lasagne” lub „1 gruszka”...',
+        inputPlaceholderFridge: 'Jakie masz składniki? Np.: „Jajka, pomidory, szynka, ser, ziemniaki” (lub zrób zdjęcie lodówki)...',
+        btnPhoto: 'Zdjęcie / Aparat', btnAnalyzeMeal: 'Analizuj przez AI', btnAnalyzeFridge: 'Stwórz przepisy z lodówki',
+        reviewTitle: 'Sprawdź i dopasuj posiłek',
         btnCancel: 'Anuluj', portionAdjust: 'Dopasuj wielkość porcji:', btnConfirmReview: 'Dodaj do dziennika',
         suggestionsTitle: 'Co mogę jeszcze dzisiaj zjeść?', btnMoreIdeas: 'Inne pomysły',
         aiIdeaBtn: '✨ Generuj nowe pomysły AI dla pozostałych kalorii',
@@ -448,15 +478,20 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
+    // ERWEITERTES DATENMODELL (v3 Architektur für alle 8 Roadmap-Features)
     const defaultState = {
       lang: 'de', unlocked: false, userRole: 'admin', masterCode: 'START-2026', geminiApiKey: getDefaultEncodedKey(),
       inviteCodes: [{ name: 'Familie', code: 'FIT-FAMILIE-7821' }],
-      goals: { kcal: 1900, protein: 140, carbs: 180, fat: 65, targetWeight: 83.0 },
-      lastActiveDate: getTodayDateKey(), waterLiters: 0, todayLog: [], pastDaysLog: [], weightLog: []
+      goals: { kcal: 1900, protein: 140, carbs: 180, fat: 65, targetWeight: 83.0, maxSugarG: 35, fiberGoalG: 30, waterGoalLiters: 2.5 },
+      lastActiveDate: getTodayDateKey(), waterLiters: 0,
+      todayLog: [], pastDaysLog: [], weightLog: [],
+      energyLog: [], shoppingList: [], fridgeItems: []
     };
 
     let state = loadState();
+    let scannerMode = 'meal'; // 'meal' | 'fridge'
     let pendingDetectedItems = [];
+    let currentFridgeRecipes = [];
     let currentPortionScale = 1.0;
     let selectedPhotoBase64 = null;
     let selectedPhotoThumb = null;
@@ -476,7 +511,11 @@
         const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('calsnap_ai_state_v1');
         if (!raw) return JSON.parse(JSON.stringify(defaultState));
         const loaded = Object.assign(JSON.parse(JSON.stringify(defaultState)), JSON.parse(raw));
+        loaded.goals = Object.assign(JSON.parse(JSON.stringify(defaultState.goals)), loaded.goals || {});
         if (!Array.isArray(loaded.pastDaysLog)) loaded.pastDaysLog = [];
+        if (!Array.isArray(loaded.energyLog)) loaded.energyLog = [];
+        if (!Array.isArray(loaded.shoppingList)) loaded.shoppingList = [];
+        if (!Array.isArray(loaded.fridgeItems)) loaded.fridgeItems = [];
         if (!isValidApiKey(loaded.geminiApiKey)) loaded.geminiApiKey = getDefaultEncodedKey();
         return loaded;
       } catch (e) { return JSON.parse(JSON.stringify(defaultState)); }
@@ -507,8 +546,13 @@
         if (state.todayLog && state.todayLog.length > 0) {
           const totalKcal = state.todayLog.reduce((sum, item) => sum + item.kcal, 0);
           const totalP = Math.round(state.todayLog.reduce((sum, item) => sum + item.p, 0));
-          state.pastDaysLog.unshift({ date: state.lastActiveDate, kcal: totalKcal, protein: totalP, goal: state.goals.kcal });
-          state.pastDaysLog = state.pastDaysLog.slice(0, 7);
+          const totalC = Math.round(state.todayLog.reduce((sum, item) => sum + item.c, 0));
+          const totalF = Math.round(state.todayLog.reduce((sum, item) => sum + item.f, 0));
+          state.pastDaysLog.unshift({
+            date: state.lastActiveDate, kcal: totalKcal, protein: totalP, carbs: totalC, fat: totalF,
+            waterLiters: state.waterLiters, goal: state.goals.kcal
+          });
+          state.pastDaysLog = state.pastDaysLog.slice(0, 30); // 30 Tage für 14-Tage-Prognose!
         }
         state.todayLog = []; state.waterLiters = 0; state.lastActiveDate = todayKey; saveState();
       } else if (!state.lastActiveDate) { state.lastActiveDate = todayKey; saveState(); }
@@ -522,6 +566,20 @@
       saveState(); applyTranslations(); renderAll();
     }
 
+    function setScannerMode(mode) {
+      scannerMode = mode;
+      const isFridge = mode === 'fridge';
+      document.getElementById('modeBtn-meal').className = !isFridge
+        ? 'py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 bg-emerald-500 text-slate-950 shadow transition'
+        : 'py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 text-slate-300 hover:text-white transition';
+      document.getElementById('modeBtn-fridge').className = isFridge
+        ? 'py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 bg-cyan-400 text-slate-950 shadow transition'
+        : 'py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 text-slate-300 hover:text-white transition';
+      document.getElementById('fridgeModeBanner').classList.toggle('hidden', !isFridge);
+      document.getElementById('naturalInput').placeholder = isFridge ? t('inputPlaceholderFridge') : t('inputPlaceholderMeal');
+      document.getElementById('btnAnalyzeText').textContent = isFridge ? t('btnAnalyzeFridge') : t('btnAnalyzeMeal');
+    }
+
     function applyTranslations() {
       const map = {
         lockLangIndicator: 'langIndicator', headerLangBtn: 'headerLang', lockBadge: 'lockBadge',
@@ -529,7 +587,8 @@
         lockError: 'lockError', lblDailyGoal: 'dailyGoal', lblEaten: 'eaten', lblWater: 'water',
         lblProtein: 'protein', lblCarbs: 'carbs', lblFat: 'fat', btnMainAddFood: 'mainAddFood',
         btnMainAddWater: 'mainAddWater', lblQuickAdd: 'quickAdd', lblQuickAddHint: 'quickAddHint',
-        lblScannerTitle: 'scannerTitle', btnPhotoText: 'btnPhoto', btnAnalyzeText: 'btnAnalyze',
+        lblScannerTitle: 'scannerTitle', lblModeMeal: 'modeMeal', lblModeFridge: 'modeFridge',
+        lblFridgeBanner: 'fridgeBanner', btnPhotoText: 'btnPhoto',
         lblReviewTitle: 'reviewTitle', btnCancelReview: 'btnCancel', lblPortionAdjust: 'portionAdjust',
         btnConfirmReview: 'btnConfirmReview', lblSuggestionsTitle: 'suggestionsTitle', btnMoreIdeas: 'btnMoreIdeas',
         lblAiIdeaBtn: 'aiIdeaBtn', lblTodayEaten: 'todayEaten', btnClearToday: 'btnClearToday', undoBtnLabel: 'undoBtn',
@@ -539,10 +598,11 @@
         lblWeightHistory: 'weightHistory', btnClearWeights: 'btnClearWeights'
       };
       Object.keys(map).forEach(id => { const el = document.getElementById(id); if (el) el.textContent = t(map[id]); });
-      document.getElementById('naturalInput').placeholder = t('inputPlaceholder');
+      setScannerMode(scannerMode);
     }
 
-    function focusFoodInput() {
+    function focusFoodInput(mode) {
+      if (mode) setScannerMode(mode);
       const el = document.getElementById('naturalInput');
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => el.focus(), 300);
@@ -605,9 +665,7 @@
         if (text && text.trim().length > 10) {
           document.getElementById('geminiKeyInput').value = text.trim();
           saveGeminiKey();
-        } else {
-          alert('Zwischenablage ist leer. Tippe alternativ unten kurz in das Textfeld und wähle „Einsetzen“.');
-        }
+        } else { alert('Zwischenablage ist leer.'); }
       } catch (e) {
         alert('Bitte tippe unten kurz in das Textfeld, wähle „Einsetzen“ und tippe auf Speichern.');
         document.getElementById('geminiKeyInput').focus();
@@ -660,8 +718,7 @@
         <div class="flex items-center justify-between bg-slate-950/70 px-3 py-2 rounded-xl border border-slate-800">
           <div><span class="font-semibold text-white">${item.name}:</span><code class="ml-1.5 text-emerald-400 font-mono">${item.code}</code></div>
           <button onclick="deleteInviteCode(${idx})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
 
     const localFoodDB = [
@@ -685,7 +742,6 @@
       { keys: ['döner', 'kebab'], nameDe: 'Döner Kebab (~350g)', namePl: 'Kebab (~350g)', kcal: 650, p: 38, c: 58, f: 28, icon: '🥙' },
       { keys: ['burger', 'cheeseburger', 'hamburger'], nameDe: 'Burger (~250g)', namePl: 'Burger (~250g)', kcal: 560, p: 30, c: 44, f: 28, icon: '🍔' },
       { keys: ['schnitzel', 'schabowy', 'kotlet', 'frikadelle', 'mielony'], nameDe: 'Schnitzel / Kotlet (~180g)', namePl: 'Kotlet schabowy / mielony (~180g)', kcal: 380, p: 32, c: 16, f: 21, icon: '🥩' },
-      { keys: ['bratwurst', 'wurst', 'würstchen', 'kiełbasa', 'kielbasa'], nameDe: 'Bratwurst / Wurst (~120g)', namePl: 'Kiełbasa (~120g)', kcal: 340, p: 16, c: 2, f: 30, icon: '🌭' },
       { keys: ['lachs', 'fisch', 'thunfisch', 'ryba', 'łosoś'], nameDe: 'Portion Fisch / Lachs (~180g)', namePl: 'Porcja ryby / łososia (~180g)', kcal: 320, p: 36, c: 0, f: 18, icon: '🐟' },
       { keys: ['suppe', 'eintopf', 'gulasch', 'zupa', 'rosół', 'żurek', 'bigos'], nameDe: 'Teller Suppe / Eintopf (~350ml)', namePl: 'Talerz zupy / Bigos (~350ml)', kcal: 290, p: 16, c: 24, f: 14, icon: '🍲' },
       { keys: ['kartoffel', 'kartoffeln', 'ziemniaki', 'ziemniak'], nameDe: 'Portion Kartoffeln (~200g)', namePl: 'Porcja ziemniaków (~200g)', kcal: 160, p: 4, c: 35, f: 0.2, icon: '🥔' },
@@ -773,10 +829,11 @@
       document.getElementById('photoPreviewContainer').classList.add('hidden');
     }
 
+    // ZENTRALER ROUTER FÜR ALLE KI-MODI (Mahlzeit & Kühlschrank-Reste)
     async function analyzeInput() {
       const text = document.getElementById('naturalInput').value.trim();
       if (!text && !selectedPhotoBase64) {
-        alert(state.lang === 'pl' ? 'Wpisz co zjadłeś lub zrób zdjęcie.' : 'Bitte gib ein, was du gegessen hast, oder wähle ein Foto aus.');
+        alert(state.lang === 'pl' ? 'Wpisz tekst lub zrób zdjęcie.' : 'Bitte gib etwas ein oder wähle ein Foto aus.');
         return;
       }
       const btn = document.getElementById('analyzeBtn');
@@ -786,23 +843,27 @@
       document.getElementById('apiErrorBox').classList.add('hidden');
 
       try {
-        if (isValidApiKey(state.geminiApiKey)) {
-          const items = await callGeminiVisionAPI(text, selectedPhotoBase64);
-          openReviewCard(items);
-        } else if (text) {
-          openReviewCard(parseNaturalText(text));
+        if (scannerMode === 'fridge') {
+          await runFridgeLeftoverAI(text, selectedPhotoBase64);
         } else {
-          const errBox = document.getElementById('apiErrorBox');
-          errBox.classList.remove('hidden');
-          document.getElementById('apiErrorText').innerHTML = 'Klicke unten auf <b>„Jetzt Key einrichten“</b> – oder schreibe kurz ins Textfeld, was auf dem Foto ist (z.B. „Birne“ oder „Lasagne“):';
+          if (isValidApiKey(state.geminiApiKey)) {
+            const items = await callGeminiVisionAPI(text, selectedPhotoBase64);
+            openReviewCard(items);
+          } else if (text) {
+            openReviewCard(parseNaturalText(text));
+          } else {
+            const errBox = document.getElementById('apiErrorBox');
+            errBox.classList.remove('hidden');
+            document.getElementById('apiErrorText').innerHTML = 'Bitte Key prüfen – oder schreibe kurz ins Textfeld, was auf dem Foto ist:';
+          }
         }
       } catch (err) {
-        if (text) {
+        if (scannerMode === 'meal' && text) {
           openReviewCard(parseNaturalText(text));
         } else {
           const errBox = document.getElementById('apiErrorBox');
           errBox.classList.remove('hidden');
-          document.getElementById('apiErrorText').innerHTML = `Google-KI-Hinweis: <b>${err.message || 'Anfrage fehlgeschlagen'}</b>.<br/>Tipp: Schreibe kurz ein Wort ins Textfeld (z.B. „Birne“ oder „Lasagne“) und klicke auf Analysieren!`;
+          document.getElementById('apiErrorText').innerHTML = `KI-Hinweis: <b>${err.message || 'Anfrage fehlgeschlagen'}</b>`;
         }
       } finally {
         btn.innerHTML = originalHtml; btn.disabled = false;
@@ -837,10 +898,9 @@
             continue;
           }
           const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const jsonMatch = rawText.replace(/```json/g, '').replace(/```/g, '').trim().match(/\[[\s\S]*\]/);
+          const jsonMatch = rawText.replace(/```json/g, '').replace(/```/g, '').trim().match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
           if (!jsonMatch) continue;
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          return JSON.parse(jsonMatch[0]);
         } catch (e) { lastErr = e; }
       }
       throw lastErr || new Error('KI-Verbindung fehlgeschlagen');
@@ -848,7 +908,7 @@
 
     async function callGeminiVisionAPI(text, base64DataUrl) {
       const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
-      const promptText = `Du bist ein präziser KI-Ernährungsexperte. Analysiere das Foto und/oder den Text ("${text || 'Siehe Foto'}"). Erkenne das genaue Lebensmittel oder Gericht, schätze das Gewicht in Gramm (~g) und berechne Kalorien (kcal), Eiweiß (p), Kohlenhydrate (c) und Fett (f). Antwortsprache: ${targetLang}. Gib AUSSCHLIESSLICH ein JSON-Array zurück: [{"name": "1x Birne (~160g)", "kcal": 92, "p": 0.6, "c": 22.0, "f": 0.3, "icon": "🍐"}]`;
+      const promptText = `Du bist ein präziser KI-Ernährungsexperte. Analysiere das Foto und/oder den Text ("${text || 'Siehe Foto'}"). Erkenne das genaue Lebensmittel oder Gericht, schätze das Gewicht in Gramm (~g) und berechne Kalorien (kcal), Eiweiß (p), Kohlenhydrate (c), Fett (f) und Zucker (sugarG). Antwortsprache: ${targetLang}. Gib AUSSCHLIESSLICH ein JSON-Array zurück: [{"name": "1x Birne (~160g)", "kcal": 92, "p": 0.6, "c": 22.0, "f": 0.3, "sugarG": 15.0, "icon": "🍐"}]`;
       const parts = [{ text: promptText }];
       if (base64DataUrl) {
         const commaIdx = base64DataUrl.indexOf(',');
@@ -857,12 +917,100 @@
         parts.push({ inlineData: { mimeType: mime, data: base64Data } });
       }
       const parsed = await callGeminiRequest(parts);
-      return parsed.map(item => ({
+      const arr = Array.isArray(parsed) ? parsed : (parsed.items || [parsed]);
+      return arr.map(item => ({
         name: String(item.name || 'Mahlzeit (~250g)'),
         kcal: Math.max(1, Math.round(Number(item.kcal) || 250)),
         p: +(Number(item.p) || 10).toFixed(1), c: +(Number(item.c) || 25).toFixed(1), f: +(Number(item.f) || 8).toFixed(1),
+        sugarG: +(Number(item.sugarG) || 2).toFixed(1),
         icon: item.icon || '🍽️'
       }));
+    }
+
+    // FEATURE 1: KÜHLSCHRANK-RESTE-VERWERTER (FOTO + TEXT -> REZEPTE PASSEND ZU REST-KALORIEN)
+    async function runFridgeLeftoverAI(text, base64DataUrl) {
+      const totals = state.todayLog.reduce((acc, i) => ({ kcal: acc.kcal + i.kcal, p: acc.p + i.p }), { kcal: 0, p: 0 });
+      const remKcal = Math.max(250, state.goals.kcal - totals.kcal);
+      const remProt = Math.max(15, state.goals.protein - Math.round(totals.p));
+      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+
+      const promptText = `Du bist ein kreativer Fitness- & Abnehm-Koch ("Kühlschrank-Reste-Verwerter").
+Analysiere das Foto vom offenen Kühlschrank / den Zutaten und den Text ("${text || 'Siehe Foto'}").
+Der Nutzer hat heute noch ${remKcal} kcal und ${remProt}g Eiweiß offen.
+Aufgabe:
+1. Liste alle erkannten Zutaten im Feld "ingredients" auf.
+2. Erstelle 2 bis 3 schnelle, leckere Rezepte aus diesen Zutaten (Gewürze/Basis-Zutaten dürfen ergänzt werden), die perfekt in das verbleibende Kalorienbudget (jeweils maximal ${Math.min(remKcal, 750)} kcal) passen und viel Eiweiß liefern!
+Antwortsprache: ${targetLang}.
+Gib AUSSCHLIESSLICH ein JSON-Array mit Rezepten zurück:
+[{"title": "High-Protein Schinken-Tomaten-Omelett (~390 kcal)", "detectedIngredients": "Eier, Tomaten, Schinken, Käse", "ingredientsList": "3 Eier, 60g Schinken, 2 Tomaten, 20g Käse", "steps": "Tomaten & Schinken kurz anbraten, verquirlte Eier darübergeben, Käse schmelzen lassen.", "kcal": 390, "p": 36, "c": 8, "f": 23, "icon": "🍳"}]`;
+
+      const parts = [{ text: promptText }];
+      if (base64DataUrl) {
+        const commaIdx = base64DataUrl.indexOf(',');
+        const mime = base64DataUrl.substring(5, commaIdx).split(';')[0];
+        const base64Data = base64DataUrl.substring(commaIdx + 1);
+        parts.push({ inlineData: { mimeType: mime, data: base64Data } });
+      }
+
+      const parsed = await callGeminiRequest(parts);
+      const arr = Array.isArray(parsed) ? parsed : (parsed.recipes || [parsed]);
+      currentFridgeRecipes = arr.map(r => ({
+        title: String(r.title || 'Kühlschrank-Pfanne'),
+        detectedIngredients: String(r.detectedIngredients || text || 'Vorräte aus dem Kühlschrank'),
+        ingredientsList: String(r.ingredientsList || ''),
+        steps: String(r.steps || 'Kurz in der Pfanne zubereiten und genießen.'),
+        kcal: Math.max(80, Math.round(Number(r.kcal) || 420)),
+        p: +(Number(r.p) || 28).toFixed(1),
+        c: +(Number(r.c) || 22).toFixed(1),
+        f: +(Number(r.f) || 16).toFixed(1),
+        icon: r.icon || '🥘'
+      }));
+
+      state.fridgeItems = (currentFridgeRecipes[0]?.detectedIngredients || '').split(',').map(s => s.trim()).filter(Boolean);
+      saveState();
+      renderFridgeResults(remKcal);
+    }
+
+    function renderFridgeResults(remKcal) {
+      const card = document.getElementById('fridgeResultCard');
+      card.classList.remove('hidden');
+      const detected = currentFridgeRecipes[0]?.detectedIngredients || '';
+      document.getElementById('lblFridgeResultTitle').textContent = state.lang === 'pl'
+        ? `Przepisy z lodówki (Budget: ${remKcal} kcal)`
+        : `Kühlschrank-Rezepte (Budget: ${remKcal} kcal übrig)`;
+      document.getElementById('lblFridgeIngredients').textContent = detected
+        ? `${state.lang === 'pl' ? 'Rozpoznano:' : 'Erkannte Zutaten:'} ${detected}`
+        : '';
+
+      document.getElementById('fridgeRecipesList').innerHTML = currentFridgeRecipes.map((r, idx) => `
+        <div class="bg-slate-900/90 border border-cyan-500/30 rounded-2xl p-3.5 space-y-2">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2"><span class="text-lg">${r.icon}</span><span class="text-xs font-bold text-cyan-300">${r.title}</span></div>
+            <span class="shrink-0 text-xs font-extrabold text-white bg-cyan-500/20 border border-cyan-500/40 px-2 py-0.5 rounded-lg">${r.kcal} kcal</span>
+          </div>
+          <div class="text-[11px] text-emerald-300 font-semibold">🧾 ${r.ingredientsList}</div>
+          <p class="text-xs text-slate-300 leading-relaxed">👨‍🍳 ${r.steps}</p>
+          <div class="flex items-center justify-between pt-1 border-t border-slate-800">
+            <span class="text-[10px] text-slate-400">E/B: ${r.p}g • K/W: ${r.c}g • F/T: ${r.f}g</span>
+            <button onclick="logFridgeRecipe(${idx})" class="bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-[11px] px-3 py-1.5 rounded-xl active:scale-95 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-utensils"></i>
+              <span>${state.lang === 'pl' ? 'Ugotuj i dodaj' : 'Kochen & eintragen'}</span>
+            </button>
+          </div>
+        </div>`).join('');
+    }
+
+    function logFridgeRecipe(idx) {
+      const r = currentFridgeRecipes[idx];
+      if (!r) return;
+      quickAdd(r.title, r.kcal, r.p, r.c, r.f, r.icon);
+      document.getElementById('naturalInput').value = '';
+      clearPhoto();
+      closeFridgeCard();
+    }
+
+    function closeFridgeCard() {
+      document.getElementById('fridgeResultCard').classList.add('hidden');
     }
 
     function openReviewCard(items) {
@@ -924,7 +1072,8 @@
     }
 
     function confirmDetectedItems() {
-      const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
       let addedNames = []; lastAddedCount = pendingDetectedItems.length;
       pendingDetectedItems.forEach(item => {
         const entry = {
@@ -933,7 +1082,9 @@
           p: +(item.p * currentPortionScale).toFixed(1),
           c: +(item.c * currentPortionScale).toFixed(1),
           f: +(item.f * currentPortionScale).toFixed(1),
-          icon: item.icon || '🍽️', thumb: selectedPhotoThumb || null, time: timeStr
+          sugarG: +((item.sugarG || 0) * currentPortionScale).toFixed(1),
+          icon: item.icon || '🍽️', thumb: selectedPhotoThumb || null,
+          time: timeStr, timestampISO: now.toISOString()
         };
         state.todayLog.unshift(entry); addedNames.push(entry.name);
       });
@@ -942,8 +1093,9 @@
     }
 
     function quickAdd(name, kcal, p, c, f, icon) {
-      const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      state.todayLog.unshift({ id: Date.now(), name, kcal, p, c, f, icon, thumb: null, time: timeStr });
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      state.todayLog.unshift({ id: Date.now(), name, kcal, p, c, f, icon, thumb: null, time: timeStr, timestampISO: now.toISOString() });
       lastAddedCount = 1; saveState(); renderAll(); showUndoToast(`${name} (${kcal} kcal)`);
     }
 
@@ -971,7 +1123,6 @@
       }
     }
 
-    // UMFANGREICHE VORSCHLAGS-LISTE (JEDES MAL NEUE IDEEN BEIM KLICKEN!)
     function getMealSuggestionsForRemaining(rem) {
       const isPl = state.lang === 'pl';
       if (rem <= 380) {
@@ -1051,7 +1202,8 @@
       try {
         const prompt = `Du bist ein motivierender Abnehm-Coach. Der Nutzer hat heute noch ${remaining} kcal übrig. Erfinde 2 abwechslungsreiche, leckere Mahlzeit-Kombinationen (Hauptgericht + Salat mit Dressing + was man dazu noch essen kann), die in dieses Budget passen. Antwortsprache: ${targetLang}. Gib AUSSCHLIESSLICH ein JSON-Array mit 2 Objekten zurück: [{"title": "Name (~620 kcal)", "combo": "Genaue Beschreibung mit Gramm und Dressing", "extra": "Dazu kannst du noch ... essen", "kcal": 620, "p": 45, "c": 55, "f": 18, "icon": "🥗"}]`;
         const parsed = await callGeminiRequest([{ text: prompt }]);
-        customAiSuggestions = parsed.map(s => ({
+        const arr = Array.isArray(parsed) ? parsed : [parsed];
+        customAiSuggestions = arr.map(s => ({
           title: String(s.title || 'KI-Wunschgericht'), combo: String(s.combo || ''), extra: String(s.extra || 'Perfekt für dein Tagesziel!'),
           kcal: Math.max(100, Math.round(Number(s.kcal) || 500)), p: Math.round(Number(s.p) || 35), c: Math.round(Number(s.c) || 45), f: Math.round(Number(s.f) || 15),
           icon: s.icon || '✨'
@@ -1085,200 +1237,4 @@
       const enteredWeight = parseFloat(document.getElementById('calcWeight').value);
       const enteredTarget = parseFloat(document.getElementById('calcTargetWeight').value);
       const activity = parseFloat(document.getElementById('calcActivity').value) || 1.25;
-      const latestLoggedWeight = state.weightLog.length > 0 ? state.weightLog[state.weightLog.length - 1].weight : 98;
-      const weight = !isNaN(enteredWeight) && enteredWeight >= 40 ? enteredWeight : latestLoggedWeight;
-      const targetWeight = !isNaN(enteredTarget) && enteredTarget >= 40 ? enteredTarget : state.goals.targetWeight;
-
-      if (!isNaN(enteredWeight) && enteredWeight >= 40) {
-        const dateStr = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
-        state.weightLog.push({ date: dateStr, weight: +enteredWeight.toFixed(1) });
-      }
-      const bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
-      const tdee = Math.round(bmr * activity);
-      const recommendedKcal = Math.max(1500, tdee - 550);
-      state.goals.kcal = recommendedKcal;
-      state.goals.protein = Math.round(weight * 1.6);
-      state.goals.fat = Math.round((recommendedKcal * 0.28) / 9);
-      state.goals.carbs = Math.round((recommendedKcal - (state.goals.protein * 4) - (state.goals.fat * 9)) / 4);
-      state.goals.targetWeight = +targetWeight.toFixed(1);
-      saveState(); renderAll();
-      alert(`Neues Tagesziel gespeichert: ${recommendedKcal} kcal (${state.goals.protein}g Eiweiß).`);
-    }
-
-    function saveManualGoals() {
-      const kcal = parseInt(document.getElementById('manualKcalGoal').value, 10);
-      const prot = parseInt(document.getElementById('manualProteinGoal').value, 10);
-      if (kcal > 800) state.goals.kcal = kcal;
-      if (prot > 30) state.goals.protein = prot;
-      saveState(); renderAll(); alert('Gespeichert!');
-    }
-
-    function switchTab(tabName) {
-      ['cockpit', 'weight', 'access'].forEach(tab => {
-        document.getElementById('tab-' + tab).classList.toggle('hidden', tab !== tabName);
-        const navBtn = document.getElementById('nav-' + tab);
-        navBtn.classList.toggle('text-emerald-400', tab === tabName);
-        navBtn.classList.toggle('text-slate-400', tab !== tabName);
-      });
-    }
-
-    function renderQuickAddButtons() {
-      const list = quickAddItems[state.lang] || quickAddItems.de;
-      document.getElementById('quickAddContainer').innerHTML = list.map(item => item.water ? `
-        <button onclick="addWater(${item.water})" class="shrink-0 glass px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-medium active:scale-95 transition">
-          <span>${item.icon}</span><div class="text-left"><div class="text-sky-300 font-semibold">${item.label}</div><div class="text-[10px] text-slate-400">${item.sub}</div></div>
-        </button>` : `
-        <button onclick="quickAdd('${item.name}', ${item.kcal}, ${item.p}, ${item.c}, ${item.f}, '${item.icon}')" class="shrink-0 glass px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-medium active:scale-95 transition">
-          <span>${item.icon}</span><div class="text-left"><div class="text-white font-semibold">${item.label}</div><div class="text-[10px] text-slate-400">${item.sub}</div></div>
-        </button>`).join('');
-    }
-
-    function renderMealSuggestions(remaining) {
-      const sub = document.getElementById('suggestionsSubtitle');
-      sub.textContent = remaining <= 50
-        ? (state.lang === 'pl' ? 'Cel osiągnięty! Lekkie propozycje:' : 'Tagesziel fast erreicht! Leichte Ideen:')
-        : (state.lang === 'pl' ? `Masz jeszcze ${remaining} kcal:` : `Du hast noch ${remaining} kcal übrig – passende Kombis:`);
-
-      let picked = [];
-      if (customAiSuggestions && customAiSuggestions.length > 0) {
-        picked = customAiSuggestions;
-      } else {
-        const all = getMealSuggestionsForRemaining(Math.max(200, remaining));
-        picked = [all[suggestionOffset % all.length], all[(suggestionOffset + 1) % all.length]];
-      }
-
-      document.getElementById('mealSuggestionsList').innerHTML = picked.map(s => `
-        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 space-y-2">
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2"><span class="text-lg">${s.icon}</span><span class="text-xs font-bold text-emerald-300">${s.title}</span></div>
-            <span class="shrink-0 text-xs font-extrabold text-white bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-lg">~${s.kcal} kcal</span>
-          </div>
-          <p class="text-xs text-slate-200 leading-relaxed">${s.combo}</p>
-          <p class="text-[11px] text-amber-300/90 font-medium">💡 ${s.extra}</p>
-          <div class="pt-1 flex justify-end">
-            <button onclick="quickAdd('${s.title.replace(/'/g, '')}', ${s.kcal}, ${s.p}, ${s.c}, ${s.f}, '${s.icon}')" class="bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-emerald-400 text-[11px] font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 active:scale-95">
-              <i class="fa-solid fa-plus"></i><span>${state.lang === 'pl' ? 'Dodaj ten zestaw' : 'Diesen Vorschlag eintragen'}</span>
-            </button>
-          </div>
-        </div>`).join('');
-    }
-
-    function renderPastDays() {
-      const card = document.getElementById('pastDaysCard');
-      if (!state.pastDaysLog || state.pastDaysLog.length === 0) { card.classList.add('hidden'); return; }
-      card.classList.remove('hidden');
-      document.getElementById('pastDaysList').innerHTML = state.pastDaysLog.map(d => {
-        const diff = d.goal - d.kcal;
-        return `<div class="flex items-center justify-between bg-slate-900/60 px-3 py-2 rounded-xl border border-slate-800/60">
-          <span class="text-slate-400 font-medium">${d.date}</span>
-          <div class="flex items-center gap-3"><span class="text-white font-bold">${d.kcal} / ${d.goal} kcal</span><span class="${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'} text-[11px] font-semibold">${diff >= 0 ? `-${diff} kcal` : `+${Math.abs(diff)} kcal`}</span></div>
-        </div>`;
-      }).join('');
-    }
-
-    function renderWeightTab() {
-      const log = state.weightLog;
-      document.getElementById('targetWeightDisplay').textContent = state.goals.targetWeight.toFixed(1) + ' kg';
-      if (log.length > 0) {
-        const latest = log[log.length - 1].weight;
-        document.getElementById('currentWeightDisplay').textContent = latest.toFixed(1) + ' kg';
-        let trend = log[0].weight;
-        log.forEach(e => { trend = (e.weight * 0.35) + (trend * 0.65); });
-        document.getElementById('trendWeightDisplay').textContent = trend.toFixed(1) + ' kg';
-        const diff = +(latest - log[0].weight).toFixed(1);
-        document.getElementById('weightDiffBadge').textContent = (diff <= 0 ? `${diff} kg` : `+${diff} kg`);
-      } else {
-        document.getElementById('currentWeightDisplay').textContent = '-- kg';
-        document.getElementById('trendWeightDisplay').textContent = '-- kg';
-        document.getElementById('weightDiffBadge').textContent = 'Start';
-      }
-      const list = document.getElementById('weightHistoryList');
-      list.innerHTML = log.length === 0 ? `<div class="text-center py-4 text-xs text-slate-500 bg-slate-900/40 rounded-xl">--</div>` :
-        log.map((item, idx) => ({ item, idx })).reverse().map(({ item, idx }) => `
-          <div class="flex justify-between items-center bg-slate-900/60 px-3.5 py-2.5 rounded-xl text-xs border border-slate-800/60">
-            <span class="text-slate-400">${item.date}</span>
-            <div class="flex items-center gap-3"><span class="font-bold text-white">${item.weight.toFixed(1)} kg</span><button onclick="deleteWeightEntry(${idx})" class="bg-rose-500/15 text-rose-400 px-2 py-1 rounded-lg"><i class="fa-solid fa-trash-can"></i></button></div>
-          </div>`).join('');
-    }
-
-    function renderAll() {
-      checkAutomaticDailyReset(); applyTranslations(); renderQuickAddButtons();
-      const locale = state.lang === 'pl' ? 'pl-PL' : 'de-DE';
-      document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString(locale, { weekday: 'long', day: '2-digit', month: 'long' });
-
-      const totals = state.todayLog.reduce((acc, i) => ({ kcal: acc.kcal + i.kcal, p: acc.p + i.p, c: acc.c + i.c, f: acc.f + i.f }), { kcal: 0, p: 0, c: 0, f: 0 });
-      const goalKcal = state.goals.kcal;
-      const remaining = goalKcal - totals.kcal;
-
-      document.getElementById('goalKcalDisplay').textContent = goalKcal;
-      document.getElementById('eatenKcalDisplay').textContent = totals.kcal;
-      document.getElementById('waterDisplay').textContent = state.waterLiters.toFixed(2);
-
-      const remEl = document.getElementById('remainingKcalDisplay');
-      const remLabel = document.getElementById('remainingLabel');
-      remEl.textContent = remaining >= 0 ? remaining : '+' + Math.abs(remaining);
-      remEl.className = remaining >= 0 ? 'text-2xl font-extrabold tracking-tight text-white' : 'text-2xl font-extrabold tracking-tight text-rose-400';
-      remLabel.textContent = remaining >= 0 ? t('kcalLeft') : t('kcalOver');
-
-      const ring = document.getElementById('kcalRing');
-      ring.style.strokeDashoffset = 314.16 - (Math.min(1, totals.kcal / goalKcal) * 314.16);
-      ring.setAttribute('stroke', remaining >= 0 ? '#10b981' : '#f43f5e');
-
-      document.getElementById('proteinDisplay').textContent = Math.round(totals.p);
-      document.getElementById('proteinGoalDisplay').textContent = state.goals.protein;
-      document.getElementById('proteinBar').style.width = Math.min(100, (totals.p / state.goals.protein) * 100) + '%';
-      document.getElementById('carbsDisplay').textContent = Math.round(totals.c);
-      document.getElementById('carbsGoalDisplay').textContent = state.goals.carbs;
-      document.getElementById('carbsBar').style.width = Math.min(100, (totals.c / state.goals.carbs) * 100) + '%';
-      document.getElementById('fatDisplay').textContent = Math.round(totals.f);
-      document.getElementById('fatGoalDisplay').textContent = state.goals.fat;
-      document.getElementById('fatBar').style.width = Math.min(100, (totals.f / state.goals.fat) * 100) + '%';
-
-      renderMealSuggestions(remaining);
-      renderPastDays();
-
-      const logContainer = document.getElementById('todayLogList');
-      logContainer.innerHTML = state.todayLog.length === 0 ? `<div class="text-center py-6 text-xs text-slate-500">${t('emptyLog')}</div>` :
-        state.todayLog.map((item, idx) => `
-          <div class="flex items-center justify-between bg-slate-900/75 px-3.5 py-2.5 rounded-2xl border border-slate-800/80">
-            <div class="flex items-center gap-3 min-w-0">
-              ${item.thumb ? `<img src="${item.thumb}" class="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-700" alt="Foto" />` : `<span class="text-xl shrink-0">${item.icon || '🍽️'}</span>`}
-              <div class="min-w-0">
-                <div class="text-xs font-bold text-white truncate">${item.name}</div>
-                <div class="text-[10px] text-slate-400">${item.time} • B/E: ${item.p}g | W/K: ${item.c}g | T/F: ${item.f}g</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0 ml-2">
-              <span class="text-xs font-extrabold text-emerald-400">${item.kcal} kcal</span>
-              <button onclick="removeLogItem(${idx})" class="bg-rose-500/15 text-rose-400 border border-rose-500/30 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1 active:scale-90 transition">
-                <i class="fa-solid fa-trash-can text-[10px]"></i><span>${t('deleteItem')}</span>
-              </button>
-            </div>
-          </div>`).join('');
-
-      document.getElementById('masterCodeSetting').value = state.masterCode;
-      document.getElementById('geminiKeyInput').value = state.geminiApiKey || '';
-      document.getElementById('manualKcalGoal').value = state.goals.kcal;
-      document.getElementById('manualProteinGoal').value = state.goals.protein;
-
-      const hasKey = isValidApiKey(state.geminiApiKey);
-      const statusBtn = document.getElementById('aiModeStatus');
-      const keyBadge = document.getElementById('keySavedBadge');
-      statusBtn.textContent = hasKey ? 'Gemini Vision KI aktiv' : 'Smart-Modus (Key fehlt ⚙)';
-      statusBtn.className = hasKey
-        ? 'text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold'
-        : 'text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold';
-      keyBadge.textContent = hasKey ? 'Aktiv (Lokal geschützt)' : 'Key eintragen';
-      keyBadge.className = hasKey
-        ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold'
-        : 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold';
-
-      renderInviteCodes();
-      renderWeightTab();
-    }
-
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && state.unlocked) renderAll(); });
-    renderAppVisibility();
-  </script>
-</body>
-</html>
+      const latestLoggedWeight = state.weightLog.length >
