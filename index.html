@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="CalSnap AI" />
-<title>CalSnap AI v3.5</title>
+<title>CalSnap AI v3.6</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 <style>
@@ -23,7 +23,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f172a;
 .fjb{display:flex;align-items:center;justify-content:space-between}
 .btn-g{background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.4);color:#6ee7b7;font-weight:700;padding:8px 12px;border-radius:14px;font-size:12px}
 .btn-b{background:rgba(14,165,233,.2);border:1px solid rgba(14,165,233,.4);color:#7dd3fc;font-weight:700;padding:8px 12px;border-radius:14px;font-size:12px}
-.q-btn{width:22px;height:22px;border-radius:99px;background:rgba(148,163,184,.15);color:#cbd5e1;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.15)}
+.q-btn{width:22px;height:22px;border-radius:99px;background:rgba(148,163,184,.15);color:#fcd34d;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(252,211,77,.3)}
 input,textarea,select{user-select:text}
 </style>
 </head>
@@ -41,7 +41,7 @@ input,textarea,select{user-select:text}
 <div id="helpModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
   <div class="glass max-w-sm w-full border border-emerald-500/40 shadow-2xl space-y-3">
     <div class="fjb border-b border-slate-800 pb-2">
-      <h3 id="helpModalTitle" class="text-sm font-bold text-emerald-400">💡 Funktions-Erklärung</h3>
+      <h3 class="text-sm font-bold text-emerald-400">💡 Funktions-Erklärung</h3>
       <button onclick="closeHelpModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-300 text-xs">✕</button>
     </div>
     <div id="helpModalBody" class="text-xs text-slate-200 space-y-2.5 leading-relaxed max-h-[65vh] overflow-y-auto"></div>
@@ -65,7 +65,7 @@ input,textarea,select{user-select:text}
     <button onclick="unlockApp()" class="w-full mt-3 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-3 rounded-2xl shadow-lg"><i class="fa-solid fa-unlock-keyhole mr-1"></i><span data-t="unlockBtn">App freischalten</span></button>
     <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] text-emerald-400">Admin: <code class="bg-slate-900 px-1.5 py-0.5 rounded text-white">START-2026</code></div>
   </div>
-  <div class="text-center text-xs text-slate-600">CalSnap AI v3.5 • DE 🇩🇪 & PL 🇵🇱</div>
+  <div class="text-center text-xs text-slate-600">CalSnap AI v3.6 • DE 🇩🇪 & PL 🇵🇱</div>
 </div>
 
 <!-- HAUPT-APP -->
@@ -136,12 +136,12 @@ input,textarea,select{user-select:text}
 
     <div id="quickAddContainer" class="flex gap-2 overflow-x-auto no-sb pb-1"></div>
 
-    <!-- === [MODUL-SCANNER] === -->
+    <!-- SMART KI-SCANNER -->
     <div class="glass border border-emerald-500/20 space-y-2.5">
       <div class="fjb">
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold uppercase text-emerald-400" data-t="scannerTitle">⚡ Smart KI-Scanner</span>
-          <button onclick="openHelpModal('scanner')" class="q-btn" title="Erklärung">?</button>
+          <button onclick="openHelpModal('scanner')" class="q-btn">?</button>
         </div>
         <button onclick="switchTab('access')" id="aiModeStatus" class="b-ok">Status</button>
       </div>
@@ -153,8 +153,8 @@ input,textarea,select{user-select:text}
         <button id="modeBtn-pot" onclick="setScannerMode('pot')" class="py-1.5 rounded-xl text-[11px] font-bold text-slate-300">🍲 <span data-t="mPot">Topf</span></button>
       </div>
 
-      <div id="scannerModeHint" class="p-2 rounded-xl bg-slate-900/90 border border-slate-700 text-[11px] text-teal-300 fjb gap-2">
-        <span id="scannerModeHintText">🍽️ Fotografiere deinen Teller oder eine Packung (Tipp bei Joghurt/Packungen: Nährwerttabelle mitfotografieren für 100% Präzision!).</span>
+      <div class="p-2 rounded-xl bg-slate-900/90 border border-slate-700 text-[11px] text-teal-300 fjb gap-2">
+        <span id="scannerModeHintText">🍽️ Fotografiere Teller oder Packung (Tipp bei Joghurt/Bechern: Nährwerttabelle zeigen oder „200g“ dazuschreiben).</span>
         <button onclick="openHelpModal('scanner')" class="q-btn shrink-0">?</button>
       </div>
 
@@ -181,7 +181,7 @@ input,textarea,select{user-select:text}
       </div>
     </div>
 
-    <!-- PRÜFFENSTER MAHLZEIT + PACKUNGS-SCHNELLWAHL -->
+    <!-- PRÜFFENSTER MAHLZEIT -->
     <div id="reviewCard" class="hidden glass border-2 border-emerald-500/40 space-y-2.5">
       <div class="fjb"><h3 class="text-sm font-bold text-emerald-300" data-t="revTitle">✨ Mahlzeit & Physik-Check</h3><button onclick="closeReviewCard()" class="text-slate-400 text-xs" data-t="cancel">Abbrechen</button></div>
       <div id="detectedItemsList" class="space-y-2 max-h-56 overflow-y-auto"></div>
@@ -228,7 +228,7 @@ input,textarea,select{user-select:text}
       <button onclick="confirmPotShare()" class="w-full bg-orange-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs">+ Meinen Teller-Anteil eintragen</button>
     </div>
 
-    <!-- === [MODUL-SOS] ENERGIE & INTERAKTIVE HEISSHUNGER-FEUERWEHR === -->
+    <!-- ENERGIE & INTERAKTIVE HEISSHUNGER-FEUERWEHR -->
     <div class="glass border border-violet-500/30 space-y-2.5">
       <div class="fjb">
         <div class="flex items-center gap-2">
@@ -244,7 +244,6 @@ input,textarea,select{user-select:text}
         <button onclick="openSOSDialog()" class="sc !p-2 border-rose-500/30"><div class="text-base">🍫</div><div class="text-[10px] font-bold text-rose-300" data-t="eCrave">Heißhunger</div></button>
       </div>
 
-      <!-- INTERAKTIVES SOS-DIAGNOSE-PANEL -->
       <div id="sosInteractiveBox" class="hidden sc border-rose-500/40 space-y-2">
         <div class="fjb"><span class="text-xs font-bold text-rose-300">🚒 Worauf hast du gerade akut Appetit?</span><button onclick="$('sosInteractiveBox').classList.add('hidden')" class="text-xs text-slate-400">✕</button></div>
         <div class="grid grid-cols-2 gap-1.5 text-[11px] font-bold">
@@ -260,14 +259,36 @@ input,textarea,select{user-select:text}
       <div id="energyLogList" class="space-y-1 max-h-24 overflow-y-auto text-[11px]"></div>
     </div>
 
-    <!-- VORSCHLÄGE -->
+    <!-- VORSCHLÄGE & ECHTER KI-WUNSCHGERICHT-KOCH -->
     <div class="glass border border-teal-500/25 space-y-2.5">
       <div class="fjb gap-2">
-        <div><h2 class="text-sm font-bold" data-t="sugTitle">💡 Was kann ich noch essen?</h2><p id="suggestionsSubtitle" class="text-[11px] text-slate-400"></p></div>
-        <button onclick="nextSuggestionSet()" class="shrink-0 btn-g !py-1.5"><i id="spinIdeaIcon" class="fa-solid fa-arrows-rotate mr-1"></i><span data-t="moreIdeas">Neue Ideen</span></button>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm font-bold" data-t="sugTitle">💡 Was kann ich noch essen?</h2>
+            <button onclick="openHelpModal('wishes')" class="q-btn">?</button>
+          </div>
+          <p id="suggestionsSubtitle" class="text-[11px] text-slate-400"></p>
+        </div>
+        <button onclick="nextSuggestionSet()" class="shrink-0 btn-g !py-1.5"><i id="spinIdeaIcon" class="fa-solid fa-arrows-rotate mr-1"></i><span data-t="moreIdeas">Blättern</span></button>
       </div>
       <div id="mealSuggestionsList" class="space-y-2"></div>
-      <button id="aiCustomIdeaBtn" onclick="generateAIMealIdeas()" class="w-full bg-slate-800 border border-emerald-500/30 text-emerald-300 font-semibold py-2 rounded-xl text-xs"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i><span data-t="aiIdeas">✨ KI-Wunschgerichte berechnen</span></button>
+
+      <div class="sc border-violet-500/30 space-y-2 pt-2.5">
+        <div class="text-[11px] font-bold text-violet-300">✨ Worauf hast du Appetit? (KI erfindet 2 Wunschgerichte für deinen Rest):</div>
+        <div class="grid grid-cols-4 gap-1 text-[10px] font-bold">
+          <button onclick="generateAIMealIdeas('Pasta, Nudeln oder Auflauf')" class="bg-slate-800 hover:bg-violet-500/20 text-slate-200 py-1.5 rounded-lg border border-slate-700">🍝 Pasta</button>
+          <button onclick="generateAIMealIdeas('Schnelle 10-Minuten-Pfanne')" class="bg-slate-800 hover:bg-violet-500/20 text-slate-200 py-1.5 rounded-lg border border-slate-700">⚡ 10-Min</button>
+          <button onclick="generateAIMealIdeas('Deftig wie Burger, Wrap oder Döner in Fitness-Version')" class="bg-slate-800 hover:bg-violet-500/20 text-slate-200 py-1.5 rounded-lg border border-slate-700">🌮 Deftig</button>
+          <button onclick="generateAIMealIdeas('Süßes Protein-Gericht wie Pfannkuchen, Kaiserschmarrn oder Bowl')" class="bg-slate-800 hover:bg-violet-500/20 text-slate-200 py-1.5 rounded-lg border border-slate-700">🥞 Süß</button>
+        </div>
+        <div class="flex gap-1.5">
+          <input id="wishInput" type="text" placeholder="Oder eigener Wunsch (z.B. Griechisch, Garnelen, Vegetarisch)..." class="inp !py-1.5" />
+          <button id="aiCustomIdeaBtn" onclick="generateAIMealIdeas()" class="shrink-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-md">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Zaubern
+          </button>
+        </div>
+        <div id="aiWishResultBox" class="hidden space-y-2 pt-2 border-t border-violet-500/30"></div>
+      </div>
     </div>
 
     <!-- EINKAUFSLISTE -->
@@ -294,7 +315,7 @@ input,textarea,select{user-select:text}
       <div id="todayLogList" class="space-y-2"></div>
     </div>
 
-    <!-- === [MODUL-HISTORIE] 30-TAGE-ARCHIV INKL. NACHTRAGEN === -->
+    <!-- 30-TAGE-ARCHIV INKL. NACHTRAGEN -->
     <div class="glass space-y-2.5">
       <div class="fjb">
         <h3 class="text-xs font-bold uppercase text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-calendar-days text-emerald-400"></i><span data-t="pastDays">Vergangene Tage (30-Tage-Archiv)</span></h3>
@@ -410,7 +431,7 @@ const TR = {
   confirmBtn:['Übernehmen','Dodaj'], close:['Schließen','Zamknij'],
   energyTitle:['⚡ Energie & 🚒 Heißhunger-SOS','⚡ Energia i 🚒 SOS-Głód'], energySub:['Tracke Fokus oder starte den SOS-Coach','Zapisz energię lub włącz SOS'],
   eFit:['Fit','Siła'], eFocus:['Fokus','Fokus'], eTired:['Müde','Spadek'], eCrave:['Heißhunger','Głód'],
-  sugTitle:['💡 Was kann ich noch essen?','💡 Co mogę jeszcze zjeść?'], moreIdeas:['Neue Ideen','Inne pomysły'], aiIdeas:['✨ KI-Wunschgerichte berechnen','✨ Generuj pomysły AI'],
+  sugTitle:['💡 Was kann ich noch essen?','💡 Co mogę jeszcze zjeść?'], moreIdeas:['Blättern','Dalej'],
   shopTitle:['🛒 Smarte Einkaufsliste','🛒 Lista Zakupów'], addBtn:['+ Neu','+ Dodaj'],
   todayEaten:['Heute gegessen','Dzisiaj zjedzone'], resetDay:['Reset 0','Wyzeruj'], pastDays:['Vergangene Tage (30-Tage-Archiv)','Poprzednie dni (Archiwum 30 dni)'],
   wTitle:['Gewichts-Trend & Prognose','Waga, Trend i Prognoza'], wSub:['7-Tage-Glättung & Zieldatum','Trend 7-dniowy i data celu'],
@@ -423,7 +444,8 @@ const TR = {
 const HELP_TEXTS = {
   scanner: `<b>🍽️ Essen (Teller & Packungen):</b> Fotografiere dein Gericht. <b>Profi-Tipp für Joghurt/Verpackungen:</b> Fotografiere direkt die Nährwerttabelle oder schreibe die Bechergröße (z.B. „200g“) dazu – unser Atwater-Physikfilter prüft Kalorien & Makros auf 100% Exaktheit!<br/><br/><b>🧊 Reste (Kühlschrank-Verwerter):</b> Fotografiere deine Vorräte im Kühlschrank. Die KI erkennt ablaufende Lebensmittel (⏰ Haltbarkeits-Alarm) und zaubert Rezepte exakt für deine offenen Tageskalorien.<br/><br/><b>📖 Karte (Restaurant-Ampel):</b> Fotografiere eine Speisekarte. Die KI liest alle 20+ Gerichte und sortiert sie nach 🟢 Grün (Top), 🟡 Gelb (mit Bestell-Trick) und 🔴 Rot.<br/><br/><b>🍲 Topf (Familien-Topf-Rechner):</b> Fotografiere den großen Kochtopf für die ganze Familie und stelle per Regler ein, wie viel du dir davon auf deinen Teller geschöpft hast!`,
   sos: `<b>⚡ Energie-Tracker:</b> Klicke nach dem Essen auf Fit, Fokus oder Müde. Die App erkennt, welche Lebensmittel bei dir ein Nachmittagstief auslösen.<br/><br/><b>🚒 Heißhunger-Feuerwehr (SOS):</b> Wenn dich der Heißhunger packt, klicke auf SOS! Die App prüft deinen aktuellen Wasserstand & Blutzucker-Rebound und gibt dir sofort 3 rettende Gegen-Snacks unter 120 kcal.`,
-  overview: `<b>Willkommen bei CalSnap AI v3.5!</b><br/>• <b>?</b>-Symbole erklären dir jederzeit jede Funktion.<br/>• Unten bei <b>Vergangene Tage</b> siehst du jetzt dein komplettes 30-Tage-Archiv und kannst über <b>+ Tag nachtragen</b> jederzeit vergangene Tage ergänzen!`
+  wishes: `<b>🔄 Blättern (Oben rechts):</b> Schaltet durch 6 bewährte Alltags-Klassiker.<br/><br/><b>✨ KI-Wunschgericht-Zauberer (Unten):</b> Tippe auf einen Wunsch-Button (🍝 Pasta, ⚡ 10-Min, 🌮 Deftig, 🥞 Süß) oder schreibe dein Wunsch-Essen ins Feld. Die KI erfindet 2 neue Rezepte nach deinem Wunsch passend zu deinen Restkalorien!`,
+  overview: `<b>Willkommen bei CalSnap AI v3.6!</b><br/>• <b>?</b>-Symbole erklären dir jederzeit jede Funktion.<br/>• Unten bei <b>Vergangene Tage</b> siehst du dein komplettes 30-Tage-Archiv und kannst über <b>+ Tag nachtragen</b> vergangene Tage ergänzen!`
 };
 
 function openHelpModal(topic) { $('helpModalBody').innerHTML = HELP_TEXTS[topic] || HELP_TEXTS.overview; $('helpModal').classList.remove('hidden'); }
@@ -514,7 +536,7 @@ function setScannerMode(mode) {
     $('naturalInput').placeholder = 'Gesamten Topf fotografieren oder beschreiben...';
     tx('btnAnalyzeText', isPl ? 'Oblicz garnek' : 'Topf-Rechner');
   } else {
-    tx('scannerModeHintText', '🍽️ Teller oder Packung fotografieren (Tipp bei Joghurt/Bechern: Nährwerttabelle zeigen oder z.B. „200g“ dazuschreiben).');
+    tx('scannerModeHintText', '🍽️ Teller oder Packung fotografieren (Tipp bei Joghurt/Bechern: Nährwerttabelle zeigen oder „200g“ dazuschreiben).');
     $('naturalInput').placeholder = isPl ? 'Napisz lub powiedz np.: „Jogurt High Protein 200g”...' : 'Schreibe oder sprich z. B.: „High Protein Joghurt 200g“...';
     tx('btnAnalyzeText', isPl ? 'Analizuj AI' : 'KI-Scan');
   }
@@ -653,7 +675,6 @@ function parseNaturalText(text) {
   return results;
 }
 
-// EDGE-CASE 1 FIX: ADAPTIVE LUMINANZ-AUFHELLUNG BEI DUNKLEN KÜHLSCHRANK-FOTOS
 function compressImageFile(file) {
   const maxDim = scannerMode === 'menu' ? 1400 : 950, quality = scannerMode === 'menu' ? 0.85 : 0.80;
   return new Promise((resolve, reject) => {
@@ -666,16 +687,13 @@ function compressImageFile(file) {
         canvas.width = Math.round(img.width * scale); canvas.height = Math.round(img.height * scale);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        // Prüfe Helligkeit und helle zu dunkle Fotos automatisch auf
         try {
           const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
           let lum = 0;
           for (let i = 0; i < d.length; i += 16) lum += 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
           if (lum / (d.length / 16) < 68) {
-            ctx.globalCompositeOperation = 'screen';
-            ctx.fillStyle = 'rgba(45,45,45,0.35)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = 'rgba(45,45,45,0.35)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.globalCompositeOperation = 'source-over';
           }
         } catch (err) {}
         const tCanvas = document.createElement('canvas');
@@ -751,7 +769,6 @@ async function callGeminiRequest(parts) {
   throw lastErr || new Error('KI-Verbindung fehlgeschlagen');
 }
 
-// EDGE-CASE 2 FIX: VERPACKUNGS-/HIGH-PROTEIN-OCR + ATWATER-THERMODYNAMIK-VALIDIERUNG
 async function callGeminiVisionAPI(text, base64DataUrl) {
   const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
   const parts = [{ text: `Ernährungsexperte & OCR-Scanner: Analysiere Foto/Text ("${text || 'Foto'}").
@@ -765,7 +782,6 @@ Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"name": "High Protein Joghur
     const p = +(Number(i.p) || 10).toFixed(1), c = +(Number(i.c) || 20).toFixed(1), f = +(Number(i.f) || 5).toFixed(1), fib = +(Number(i.fiber) || 0).toFixed(1);
     const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * fib);
     const rawKcal = Math.round(Number(i.kcal) || atwaterKcal);
-    // Atwater-Plausibilitäts-Korrektur bei >12% Abweichung
     const finalKcal = Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.12 ? atwaterKcal : rawKcal;
     return { name: String(i.name || 'Mahlzeit') + ' ✅', kcal: Math.max(0, finalKcal), p, c, f, sugar: +(Number(i.sugar) || 2).toFixed(1), fiber: fib, vitC: Math.round(Number(i.vitC) || 5), mag: Math.round(Number(i.mag) || 8), waterMl: Math.round(Number(i.waterMl) || 0), warn: String(i.warn || ''), icon: i.icon || '🍽️' };
   });
@@ -853,7 +869,6 @@ function renderMenuResults(remKcal) {
 function logMenuDish(idx) { const d = currentMenuDishes[idx]; if (d) { quickAdd(d.name, d.kcal, d.p, d.c, d.f, d.icon); $('naturalInput').value = ''; clearPhoto(); closeMenuCard(); } }
 function closeMenuCard() { $('menuResultCard').classList.add('hidden'); }
 
-// INTERAKTIVES ENERGIE- & HEISSHUNGER-FEUERWEHR-SYSTEM
 function logEnergy(score, tag, icon) {
   const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   const recentMeals = state.todayLog.slice(0, 2).map(m => m.name).join(', ') || 'Noch keine Mahlzeit';
@@ -966,44 +981,42 @@ const mealCombosPl = [
 function getMealSuggestionsForRemaining() { return (state.lang === 'pl' ? mealCombosPl : mealCombosDe).map(([title, combo, extra, kcal, p, c, f, icon]) => ({ title, combo, extra, kcal, p, c, f, icon })); }
 function nextSuggestionSet() { customAiSuggestions = null; suggestionOffset += 2; if ($('spinIdeaIcon')) $('spinIdeaIcon').style.transform = `rotate(${suggestionOffset * 90}deg)`; renderAll(); }
 
-async function generateAIMealIdeas() {
-  if (!isValidApiKey(state.geminiApiKey)) { nextSuggestionSet(); return; }
+// NEU: ECHTER KI-WUNSCHGERICHT-GENERATOR MIT EIGENER ERGEBNIS-BOX
+async function generateAIMealIdeas(presetWish) {
+  const wish = (presetWish || ($('wishInput') ? $('wishInput').value.trim() : '') || 'Kreative neue Überraschungs-Gerichte').trim();
+  if ($('wishInput') && presetWish) $('wishInput').value = presetWish;
   const rem = Math.max(200, state.goals.kcal - state.todayLog.reduce((a, i) => a + i.kcal, 0));
-  const btn = $('aiCustomIdeaBtn'), orig = btn.innerHTML;
+  const remP = Math.max(15, state.goals.protein - Math.round(state.todayLog.reduce((a, i) => a + i.p, 0)));
+  const btn = $('aiCustomIdeaBtn'), orig = btn.innerHTML, outBox = $('aiWishResultBox');
   btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; btn.disabled = true;
+  outBox.classList.remove('hidden');
+  outBox.innerHTML = `<div class="text-center py-2 text-xs text-violet-300"><i class="fa-solid fa-spinner fa-spin mr-1"></i>KI kreiert 2 neue Rezepte für „<b>${wish}</b>“ (${rem} kcal)...</div>`;
+
   try {
     const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
-    const parsed = await callGeminiRequest([{ text: `Abnehm-Coach: Nutzer hat noch ${rem} kcal übrig. Erfinde 2 Mahlzeit-Kombis (Zutaten mit + getrennt in "combo"). Sprache: ${lang}. Gib NUR JSON-Array zurück: [{"title": "Name (~600 kcal)", "combo": "180g Hähnchen + 150g Reis + Salat", "extra": "Dazu passt...", "kcal": 600, "p": 42, "c": 52,"f": 18, "icon": "🥗"}]` }]);
-    const arr = Array.isArray(parsed) ? parsed : [parsed];
-    customAiSuggestions = arr.map(s => ({ title: String(s.title || 'KI-Gericht'), combo: String(s.combo || ''), extra: String(s.extra || ''), kcal: Math.max(100, Math.round(Number(s.kcal) || 500)), p: Math.round(Number(s.p) || 35), c: Math.round(Number(s.c) || 45), f: Math.round(Number(s.f) || 15), icon: s.icon || '✨' }));
-    renderAll();
-  } catch (e) { nextSuggestionSet(); } finally { btn.innerHTML = orig; btn.disabled = false; }
+    const parsed = await callGeminiRequest([{ text: `Fitness-Koch: Nutzerwunsch: "${wish}". Offenes Budget: ${rem} kcal, ${remP}g Eiweiß. Erfinde 2 KOMPLETT NEUE, kreative Gerichte exakt passend zum Wunsch "${wish}" (jeweils max. ${Math.min(rem, 750)} kcal, KEINE Standard-Hähnchen-Reis-Wiederholung!). Gib in "combo" die Zutaten mit + getrennt und in "steps" 1 kurzen Zubereitungssatz an. Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"title": "Name (~540 kcal)", "combo": "Zutat 1 + Zutat 2", "steps": "Kurze Anleitung.", "kcal": 540, "p": 42, "c": 52, "f": 16, "icon": "🍝"}]` }]);
+    const arr = Array.isArray(parsed) ? parsed : (parsed.meals || parsed.recipes || parsed.items || Object.values(parsed).find(Array.isArray) || [parsed]);
+    window.latestWishMeals = arr.map(s => ({ title: String(s.title || wish), combo: String(s.combo || ''), steps: String(s.steps || s.extra || 'Frisch zubereiten.'), kcal: Math.max(100, Math.round(Number(s.kcal) || 480)), p: Math.round(Number(s.p) || 35), c: Math.round(Number(s.c) || 45), f: Math.round(Number(s.f) || 15), icon: s.icon || '✨' }));
+    outBox.innerHTML = `<div class="text-[11px] font-bold text-emerald-300">✨ Deine 2 frisch erfundenen KI-Wunschgerichte („${wish}“):</div>` + window.latestWishMeals.map((s, idx) => `<div class="bg-violet-950/40 border border-violet-400/50 rounded-2xl p-3 space-y-1.5"><div class="fjb gap-2"><span class="text-xs font-bold text-violet-200">${s.icon} ${s.title}</span><span class="shrink-0 text-xs font-extrabold text-white bg-violet-500/30 px-2 py-0.5 rounded-lg">${s.kcal} kcal</span></div><div class="text-[11px] text-emerald-300 font-semibold">🧾 ${s.combo}</div><p class="text-[11px] text-slate-300">👨‍🍳 ${s.steps}</p><div class="fjb pt-1 border-t border-slate-800"><span class="text-[10px] text-slate-400">E:${s.p}g • K:${s.c}g • F:${s.f}g</span><div class="flex gap-1.5"><button onclick="addIngredientsToShop('${s.combo.replace(/'/g, '')}', '${s.title.replace(/'/g, '')}')" class="bg-slate-800 text-sky-300 text-[11px] font-bold px-2.5 py-1 rounded-xl">🛒 Einkauf</button><button onclick="logWishMeal(${idx})" class="bg-violet-400 text-slate-950 font-bold text-[11px] px-3 py-1 rounded-xl">+ Eintragen</button></div></div></div>`).join('');
+  } catch (e) { outBox.innerHTML = `<div class="text-xs text-rose-300 p-2">⚠️ KI-Hinweis: ${e.message || 'Bitte Key prüfen.'}</div>`; } finally { btn.innerHTML = orig; btn.disabled = false; }
 }
 
-// 30-TAGE-HISTORIE INKL. NACHTRAGS- & LÖSCH-FUNKTION
+function logWishMeal(idx) { const s = (window.latestWishMeals || [])[idx]; if (s) quickAdd(s.title, s.kcal, s.p, s.c, s.f, s.icon, 4, 5, 25, 20); }
+
 function promptAddPastDay() {
-  const d = prompt('Datum eingeben (z. B. Gestern oder 18.02.2026):', 'Gestern');
-  if (!d) return;
-  const k = prompt('Gegessene Kalorien (kcal) an diesem Tag:', '1750');
-  if (!k || isNaN(parseInt(k, 10))) return;
+  const d = prompt('Datum eingeben (z. B. Gestern oder 18.02.2026):', 'Gestern'); if (!d) return;
+  const k = prompt('Gegessene Kalorien (kcal) an diesem Tag:', '1750'); if (!k || isNaN(parseInt(k, 10))) return;
   state.pastDaysLog.unshift({ date: d.trim(), kcal: parseInt(k, 10), protein: 120, goal: state.goals.kcal });
   saveState(); renderAll(); showUndoToast(`📅 ${d} (${k} kcal) nachgetragen!`);
 }
 
-function deletePastDay(idx) {
-  state.pastDaysLog.splice(idx, 1);
-  saveState(); renderAll();
-}
+function deletePastDay(idx) { state.pastDaysLog.splice(idx, 1); saveState(); renderAll(); }
 
 function renderPastDays() {
   const list = $('pastDaysList');
-  if (!state.pastDaysLog || !state.pastDaysLog.length) {
-    list.innerHTML = `<div class="text-center py-3 text-slate-500">Noch keine vergangenen Tage gespeichert. Klicke oben rechts auf „+ Tag nachtragen“, um vergangene Tage zu ergänzen!</div>`;
-    return;
-  }
-  list.innerHTML = state.pastDaysLog.map((d, idx) => {
+  if (!state.pastDaysLog || !state.pastDaysLog.length) { list.innerHTML = `<div class="text-center py-3 text-slate-500">Noch keine vergangenen Tage gespeichert. Klicke oben rechts auf „+ Tag nachtragen“!</div>`; return; }list.innerHTML = state.pastDaysLog.map((d, idx) => {
     const diff = d.goal - d.kcal;
-    return `<div class="fjb bg-slate-900/60 px-3 py-2 rounded-xl border border-slate-800"><span class="text-slate-300 font-medium">${d.date}</span><div class="flex items-center gap-2.5"><span class="text-white font-bold">${d.kcal}/${d.goal} kcal</span><span class="${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'} text-[11px] font-semibold">${diff >= 0 ? `-${diff}` : `+${Math.abs(diff)}`} kcal</span><button onclick="deletePastDay(${idx})" class="text-slate-500 hover:text-rose-400 px-1"><i class="fa-solid fa-trash-can text-[10px]"></i></button></div></div>`;
+    return `<div class="fjb bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-800"><span class="text-slate-300 font-medium">${d.date}</span><div class="flex items-center gap-2.5"><span class="text-white font-bold">${d.kcal}/${d.goal} kcal</span><span class="${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'} text-[11px] font-semibold">${diff >= 0 ? `-${diff}` : `+${Math.abs(diff)}`} kcal</span><button onclick="deletePastDay(${idx})" class="text-slate-500 hover:text-rose-400 px-1"><i class="fa-solid fa-trash-can text-[10px]"></i></button></div></div>`;
   }).join('');
 }
 
@@ -1072,6 +1085,16 @@ function renderMealSuggestions(remaining) {
   const all = getMealSuggestionsForRemaining();
   const picked = customAiSuggestions && customAiSuggestions.length > 0 ? customAiSuggestions : [all[suggestionOffset % all.length], all[(suggestionOffset + 1) % all.length]];
   $('mealSuggestionsList').innerHTML = picked.map(s => `<div class="sc space-y-1.5"><div class="fjb gap-2"><span class="text-xs font-bold text-emerald-300">${s.icon} ${s.title}</span><span class="shrink-0 text-xs font-bold text-white bg-emerald-500/20 px-2 py-0.5 rounded-lg">~${s.kcal} kcal</span></div><p class="text-xs text-slate-200">${s.combo}</p><p class="text-[11px] text-amber-300">💡 ${s.extra}</p><div class="pt-1 flex justify-end gap-2"><button onclick="addIngredientsToShop('${s.combo.replace(/'/g, '')}', '${s.title.replace(/'/g, '')}')" class="bg-slate-800 text-sky-300 text-[11px] font-bold px-2.5 py-1 rounded-xl">🛒 Einkauf</button><button onclick="quickAdd('${s.title.replace(/'/g, '')}', ${s.kcal}, ${s.p}, ${s.c}, ${s.f}, '${s.icon}', 4, 5, 25, 20)" class="bg-slate-800 text-emerald-400 text-[11px] font-bold px-3 py-1 rounded-xl">+ Log</button></div></div>`).join('');
+}
+
+function renderPastDays() {
+  const card = $('pastDaysCard');
+  if (!state.pastDaysLog || !state.pastDaysLog.length) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  $('pastDaysList').innerHTML = state.pastDaysLog.slice(0, 7).map(d => {
+    const diff = d.goal - d.kcal;
+    return `<div class="fjb bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-800"><span class="text-slate-400">${d.date}</span><div class="flex gap-3"><span class="text-white font-bold">${d.kcal}/${d.goal} kcal</span><span class="${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'} text-[11px] font-semibold">${diff >= 0 ? `-${diff}` : `+${Math.abs(diff)}`} kcal</span></div></div>`;
+  }).join('');
 }
 
 function renderWeightTab() {
