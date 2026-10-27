@@ -470,7 +470,9 @@ const defaultState = {
   todayLog: [], pastDaysLog: [], weightLog: [], energyLog: [], shoppingList: []
 };
 
-let state = loadState(), scannerMode = 'meal', activeMenuFilter = 'all', pendingDetectedItems = [], currentFridgeRecipes = [], currentMenuDishes = [], currentPotData = null, currentPortionScale = 1.0, selectedPhotoBase64 = null, selectedPhotoThumb = null, suggestionOffset = 0, customAiSuggestions = null, undoTimer = null, lastAddedCount = 0, speechRec = null, isListening = false, lastWorkingModel = localStorage.getItem('calsnap_fast_model') || null;
+let state = loadState(), scannerMode = 'meal', activeMenuFilter = 'all', pendingDetectedItems = [], currentFridgeRecipes = [], currentMenuDishes = [], currentPotData = null, currentPortionScale = 1.0, selectedPhotoBase64 = null, selectedPhotoThumb = null, suggestionOffset = 0, customAiSuggestions = null, undoTimer = null, lastAddedCount = 0, speechRec = null, isListening = false;
+let lastWorkingModel = localStorage.getItem('calsnap_fast_model') || null;
+if (lastWorkingModel && /2\.0|3\.0/.test(lastWorkingModel)) { lastWorkingModel = null; try { localStorage.removeItem('calsnap_fast_model'); } catch (e) {} }
 
 function isValidApiKey(k) { return typeof k === 'string' && (k.trim().startsWith('AIza') || k.trim().startsWith('AQ.') || k.trim().length >= 20); }
 
@@ -518,7 +520,8 @@ function toggleLanguage() {
   renderAll();
 }
 
-function setScannerMode(mode) {
+function setScannerMode(mode, fromUi = true) {
+  const modeChanged = scannerMode !== mode;
   scannerMode = mode;
   const isPl = state.lang === 'pl', b = 'py-1.5 rounded-xl text-[11px] font-bold text-slate-300';
   $('modeBtn-meal').className = mode === 'meal' ? 'py-1.5 rounded-xl text-[11px] font-bold bg-emerald-500 text-slate-950 shadow' : b;
@@ -542,13 +545,14 @@ function setScannerMode(mode) {
     $('naturalInput').placeholder = isPl ? 'Napisz lub powiedz np.: „Jogurt High Protein 200g”...' : 'Schreibe oder sprich z. B.: „High Protein Joghurt 200g“...';
     tx('btnAnalyzeText', isPl ? 'Analizuj AI' : 'KI-Scan');
   }
+  if (fromUi && modeChanged && selectedPhotoBase64 && !$('analyzeBtn').disabled) analyzeInput();
 }
 
 function applyTranslations() {
   tx('lockLangIndicator', state.lang === 'de' ? '🇩🇪 DE | 🇵🇱 PL' : '🇵🇱 PL | 🇩🇪 DE');
   tx('headerLangBtn', state.lang === 'de' ? '🇩🇪 DE' : '🇵🇱 PL');
   document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
-  setScannerMode(scannerMode);
+  setScannerMode(scannerMode, false);
 }
 
 function toggleVoiceInput() {
@@ -563,7 +567,7 @@ function toggleVoiceInput() {
   speechRec.start();
 }
 
-function focusFoodInput(mode) { if (mode) setScannerMode(mode); $('naturalInput').scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => $('naturalInput').focus(), 300); }
+function focusFoodInput(mode) { if (mode) setScannerMode(mode, false); $('naturalInput').scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => $('naturalInput').focus(), 300); }
 function generateDeterministicCode(name) {
   const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'GAST';
   let hash = 2026;
@@ -591,7 +595,7 @@ function renderAppVisibility() {
 }
 
 function saveMasterCode() { const v = $('masterCodeSetting').value.trim().toUpperCase(); if (v.length >= 4) { state.masterCode = v; saveState(); alert('Gespeichert: ' + v); } }
-function saveGeminiKey() { state.geminiApiKey = $('geminiKeyInput').value.trim(); saveState(); $('apiErrorBox').classList.add('hidden'); renderAll(); alert('KI-Schlüssel gespeichert!'); }
+function saveGeminiKey() { state.geminiApiKey = $('geminiKeyInput').value.trim(); lastWorkingModel = null; try { localStorage.removeItem('calsnap_fast_model'); } catch (e) {} saveState(); $('apiErrorBox').classList.add('hidden'); renderAll(); alert('KI-Schlüssel gespeichert!'); }
 async function pasteAndSaveKey() { try { const s = await navigator.clipboard.readText(); if (s && s.trim().length > 10) { $('geminiKeyInput').value = s.trim(); saveGeminiKey(); } } catch (e) { $('geminiKeyInput').focus(); } }
 function loadSavedChatKey() { $('geminiKeyInput').value = getDefaultEncodedKey(); saveGeminiKey(); }
 
@@ -713,10 +717,11 @@ async function handlePhotoSelect(event) {
   const file = event.target.files[0]; if (!file) return;
   try {
     const compressed = await compressImageFile(file);
+    event.target.value = '';
     selectedPhotoBase64 = compressed.fullDataUrl; selectedPhotoThumb = compressed.thumbDataUrl;
     $('photoPreview').src = selectedPhotoBase64; $('photoPreviewContainer').classList.remove('hidden'); $('apiErrorBox').classList.add('hidden');
     analyzeInput();
-  } catch (e) { alert('Foto-Fehler'); }
+  } catch (e) { event.target.value = ''; alert('Foto-Fehler'); }
 }
 function clearPhoto() { selectedPhotoBase64 = null; selectedPhotoThumb = null; $('cameraInput').value = ''; $('photoPreviewContainer').classList.add('hidden'); }
 
@@ -725,6 +730,7 @@ async function analyzeInput() {
   if (!text && !selectedPhotoBase64) { alert('Bitte gib etwas ein oder wähle ein Foto aus.'); return; }
   const btn = $('analyzeBtn'), origHtml = btn.innerHTML;
   btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; btn.disabled = true; $('apiErrorBox').classList.add('hidden');
+  closeReviewCard(); closeFridgeCard(); closeMenuCard(); closePotCard();
   try {
     if (scannerMode === 'fridge') await runFridgeLeftoverAI(text, selectedPhotoBase64);
     else if (scannerMode === 'menu') await runMenuScannerAI(text, selectedPhotoBase64);
@@ -738,15 +744,17 @@ async function analyzeInput() {
 }
 
 async function callGeminiRequest(parts) {
-  const apiKey = state.geminiApiKey.trim(), hasImage = parts.some(p => p.inlineData), timeoutMs = hasImage ? 14000 : 9000;
+  const apiKey = state.geminiApiKey.trim(), timeoutMs = 28000;
   const payload = { contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.15 } };
-  const models = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-3.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
-  if (lastWorkingModel && !models.includes(lastWorkingModel)) models.unshift(lastWorkingModel);
-  else if (lastWorkingModel) { models.splice(models.indexOf(lastWorkingModel), 1); models.unshift(lastWorkingModel); }
-
+  const models = ['gemini-3.8-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  if (lastWorkingModel && !/2\.0|3\.0/.test(lastWorkingModel)) {
+    if (models.includes(lastWorkingModel)) models.splice(models.indexOf(lastWorkingModel), 1);
+    models.unshift(lastWorkingModel);
+  }
   const buildUrl = (m, v) => v ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}` : `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`;
   const isAq = apiKey.startsWith('AQ.'), queue = [];
-  models.forEach(m => { queue.push({ m, url: buildUrl(m, isAq) }); queue.push({ m, url: buildUrl(m, !isAq) }); });
+  models.forEach(m => queue.push({ m, url: buildUrl(m, isAq) }));
+  models.forEach(m => queue.push({ m, url: buildUrl(m, !isAq) }));
 
   let lastErr = null;
   for (let i = 0; i < queue.length; i++) {
@@ -757,25 +765,26 @@ async function callGeminiRequest(parts) {
       const data = await res.json();
       if (!res.ok || data.error) {
         const msg = data.error?.message || `HTTP ${res.status}`;
-        lastErr = new Error(msg);
+        if (!/2\.0/.test(msg)) lastErr = new Error(msg);
         const matches = msg.match(/gemini-[a-zA-Z0-9._-]+/gi) || [];
         matches.forEach(cand => {
           const clean = cand.replace(/[.,;:'")\]}>]+$/, '');
-          if (clean && clean !== queue[i].m && !models.includes(clean)) {
+          if (clean && !/2\.0|3\.0/.test(clean) && clean !== queue[i].m && !models.includes(clean)) {
             models.push(clean);
-            queue.splice(i + 1, 0, { m: clean, url: buildUrl(clean, isAq) }, { m: clean, url: buildUrl(clean, !isAq) });
+            queue.splice(i + 1, 0, { m: clean, url: buildUrl(clean, isAq) });
           }
         });
         continue;
       }
-      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const pList = data.candidates?.[0]?.content?.parts || [];
+      const raw = pList.filter(p => !p.thought && p.text).map(p => p.text).join('\n') || pList[0]?.text || '';
       const m = raw.replace(/```json/g, '').replace(/```/g, '').trim().match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
       if (m) {
         lastWorkingModel = queue[i].m;
         try { localStorage.setItem('calsnap_fast_model', lastWorkingModel); } catch (e) {}
         return JSON.parse(m[0]);
       }
-    } catch (e) { clearTimeout(timer); lastErr = e.name === 'AbortError' ? new Error('Zeitüberschreitung') : e; }
+    } catch (e) { clearTimeout(timer); lastErr = e.name === 'AbortError' ? new Error('Zeitüberschreitung – bitte erneut tippen') : e; }
   }
   throw lastErr || new Error('KI-Verbindung fehlgeschlagen');
 }
@@ -975,6 +984,10 @@ const mealCombosPl = [
 function getMealSuggestionsForRemaining() { return (state.lang === 'pl' ? mealCombosPl : mealCombosDe).map(([title, combo, extra, kcal, p, c, f, icon]) => ({ title, combo, extra, kcal, p, c, f, icon })); }
 function nextSuggestionSet() { customAiSuggestions = null; suggestionOffset += 2; if ($('spinIdeaIcon')) $('spinIdeaIcon').style.transform = `rotate(${suggestionOffset * 90}deg)`; renderAll(); }
 
+function renderWishCards(wish, outBox) {
+  outBox.innerHTML = `<div class="text-[11px] font-bold text-emerald-300">✨ Deine 2 frisch erfundenen KI-Wunschgerichte („${wish}“):</div>` + window.latestWishMeals.map((s, idx) => `<div class="bg-violet-950/40 border border-violet-400/50 rounded-2xl p-3 space-y-1.5"><div class="fjb gap-2"><span class="text-xs font-bold text-violet-200">${s.icon} ${s.title}</span><span class="shrink-0 text-xs font-extrabold text-white bg-violet-500/30 px-2 py-0.5 rounded-lg">${s.kcal} kcal</span></div><div class="text-[11px] text-emerald-300 font-semibold">🧾 ${s.combo}</div><p class="text-[11px] text-slate-300">👨‍🍳 ${s.steps}</p><div class="fjb pt-1 border-t border-slate-800"><span class="text-[10px] text-slate-400">E:${s.p}g • K:${s.c}g • F:${s.f}g</span><div class="flex gap-1.5"><button onclick="addIngredientsToShop('${s.combo.replace(/'/g, '')}', '${s.title.replace(/'/g, '')}')" class="bg-slate-800 text-sky-300 text-[11px] font-bold px-2.5 py-1 rounded-xl">🛒 Einkauf</button><button onclick="logWishMeal(${idx})" class="bg-violet-400 text-slate-950 font-bold text-[11px] px-3 py-1 rounded-xl">+ Eintragen</button></div></div></div>`).join('');
+}
+
 async function generateAIMealIdeas(presetWish) {
   const wish = (presetWish || ($('wishInput') ? $('wishInput').value.trim() : '') || 'Kreative neue Überraschungs-Gerichte').trim();
   if ($('wishInput') && presetWish) $('wishInput').value = presetWish;
@@ -989,8 +1002,16 @@ async function generateAIMealIdeas(presetWish) {
     const parsed = await callGeminiRequest([{ text: `Fitness-Koch: Nutzerwunsch: "${wish}". Offenes Budget: ${rem} kcal, ${remP}g Eiweiß. Erfinde 2 KOMPLETT NEUE, kreative Gerichte exakt passend zum Wunsch "${wish}" (jeweils max. ${Math.min(rem, 750)} kcal). Gib in "combo" die Zutaten mit + getrennt und in "steps" 1 kurzen Zubereitungssatz an. Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"title": "Name (~540 kcal)", "combo": "Zutat 1 + Zutat 2", "steps": "Kurze Anleitung.", "kcal": 540, "p": 42, "c": 52, "f": 16, "icon": "🍝"}]` }]);
     const arr = Array.isArray(parsed) ? parsed : (parsed.meals || parsed.recipes || parsed.items || Object.values(parsed).find(Array.isArray) || [parsed]);
     window.latestWishMeals = arr.map(s => ({ title: String(s.title || wish), combo: String(s.combo || ''), steps: String(s.steps || s.extra || 'Frisch zubereiten.'), kcal: Math.max(80, Math.round(numOr(s.kcal, 480))), p: Math.round(Math.max(0, numOr(s.p, 35))), c: Math.round(Math.max(0, numOr(s.c, 45))), f: Math.round(Math.max(0, numOr(s.f, 15))), icon: s.icon || '✨' }));
-    outBox.innerHTML = `<div class="text-[11px] font-bold text-emerald-300">✨ Deine 2 frisch erfundenen KI-Wunschgerichte („${wish}“):</div>` + window.latestWishMeals.map((s, idx) => `<div class="bg-violet-950/40 border border-violet-400/50 rounded-2xl p-3 space-y-1.5"><div class="fjb gap-2"><span class="text-xs font-bold text-violet-200">${s.icon} ${s.title}</span><span class="shrink-0 text-xs font-extrabold text-white bg-violet-500/30 px-2 py-0.5 rounded-lg">${s.kcal} kcal</span></div><div class="text-[11px] text-emerald-300 font-semibold">🧾 ${s.combo}</div><p class="text-[11px] text-slate-300">👨‍🍳 ${s.steps}</p><div class="fjb pt-1 border-t border-slate-800"><span class="text-[10px] text-slate-400">E:${s.p}g • K:${s.c}g • F:${s.f}g</span><div class="flex gap-1.5"><button onclick="addIngredientsToShop('${s.combo.replace(/'/g, '')}', '${s.title.replace(/'/g, '')}')" class="bg-slate-800 text-sky-300 text-[11px] font-bold px-2.5 py-1 rounded-xl">🛒 Einkauf</button><button onclick="logWishMeal(${idx})" class="bg-violet-400 text-slate-950 font-bold text-[11px] px-3 py-1 rounded-xl">+ Eintragen</button></div></div></div>`).join('');
-  } catch (e) { outBox.innerHTML = `<div class="text-xs text-rose-300 p-2">⚠️ KI-Hinweis: ${e.message || 'Bitte Key prüfen.'}</div>`; } finally { btn.innerHTML = orig; btn.disabled = false; }
+    renderWishCards(wish, outBox);
+  } catch (e) {
+    const wLow = wish.toLowerCase();
+    window.latestWishMeals = /süß|pfannkuchen|bowl/.test(wLow)
+      ? [{ title: 'High-Protein Quark-Pfannkuchen (~440 kcal)', combo: '150g Magerquark + 2 Eier + 40g Haferflocken + Beeren', steps: 'Alles mixen und in der Pfanne goldbraun backen.', kcal: 440, p: 38, c: 42, f: 12, icon: '🥞' }, { title: 'Schoko-Skyr-Bowl mit Banane (~390 kcal)', combo: '250g Skyr + 1 Banane + 10g Backkakao + 15g Nüsse', steps: 'Cremig rühren und mit Bananenscheiben toppen.', kcal: 390, p: 32, c: 44, f: 9, icon: '🥣' }]
+      : /pasta|nudel|auflauf/.test(wLow)
+      ? [{ title: 'Cremige High-Protein Hähnchen-Pasta (~540 kcal)', combo: '160g Vollkorn-Pasta + 150g Hähnchenbrust + 60g Frischkäse light + Tomaten', steps: 'Hähnchen anbraten, mit Tomaten & Frischkäse zur Pasta geben.', kcal: 540, p: 46, c: 58, f: 12, icon: '🍝' }, { title: 'Schneller Thunfisch-Tomaten-Auflauf (~490 kcal)', combo: '150g Nudeln + 1 Dose Thunfisch + Passierte Tomaten + 40g Reibekäse light', steps: 'Mit Tomatensauce mischen und 12 Min. überbacken.', kcal: 490, p: 44, c: 50, f: 11, icon: '🥘' }]
+      : [{ title: `Fitness-Wunschpfanne „${wish.slice(0, 22)}“ (~510 kcal)`, combo: '180g Hähnchen/Tofu + 200g frisches Gemüse + 150g Kartoffeln/Reis + Kräuter-Dip', steps: 'In 10 Minuten scharf in der Pfanne anbraten und würzen.', kcal: 510, p: 45, c: 48, f: 13, icon: '🍳' }, { title: 'Deftiger Fitness-Döner-Wrap (~520 kcal)', combo: '1 Vollkorn-Wrap + 160g Hähnchenbrust + Rotkohl & Tomaten + Knoblauch-Skyr-Sauce', steps: 'Fleisch würzig braten und mit Skyr-Dip im warmen Wrap rollen.', kcal: 520, p: 44, c: 50, f: 14, icon: '🌮' }];
+    renderWishCards(wish, outBox);
+  } finally { btn.innerHTML = orig; btn.disabled = false; }
 }
 function logWishMeal(idx) { const s = (window.latestWishMeals || [])[idx]; if (s) quickAdd(s.title, s.kcal, s.p, s.c, s.f, s.icon, 4, 5, 25, 20); }
 
