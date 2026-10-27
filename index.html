@@ -470,7 +470,7 @@ const defaultState = {
   todayLog: [], pastDaysLog: [], weightLog: [], energyLog: [], shoppingList: []
 };
 
-let state = loadState(), scannerMode = 'meal', activeMenuFilter = 'all', pendingDetectedItems = [], currentFridgeRecipes = [], currentMenuDishes = [], currentPotData = null, currentPortionScale = 1.0, selectedPhotoBase64 = null, selectedPhotoThumb = null, suggestionOffset = 0, customAiSuggestions = null, undoTimer = null, lastAddedCount = 0, speechRec = null, isListening = false, lastWorkingEndpoint = null;
+let state = loadState(), scannerMode = 'meal', activeMenuFilter = 'all', pendingDetectedItems = [], currentFridgeRecipes = [], currentMenuDishes = [], currentPotData = null, currentPortionScale = 1.0, selectedPhotoBase64 = null, selectedPhotoThumb = null, suggestionOffset = 0, customAiSuggestions = null, undoTimer = null, lastAddedCount = 0, speechRec = null, isListening = false, lastWorkingModel = localStorage.getItem('calsnap_fast_model') || null;
 
 function isValidApiKey(k) { return typeof k === 'string' && (k.trim().startsWith('AIza') || k.trim().startsWith('AQ.') || k.trim().length >= 20); }
 
@@ -591,7 +591,7 @@ function renderAppVisibility() {
 }
 
 function saveMasterCode() { const v = $('masterCodeSetting').value.trim().toUpperCase(); if (v.length >= 4) { state.masterCode = v; saveState(); alert('Gespeichert: ' + v); } }
-function saveGeminiKey() { state.geminiApiKey = $('geminiKeyInput').value.trim(); lastWorkingEndpoint = null; saveState(); $('apiErrorBox').classList.add('hidden'); renderAll(); alert('KI-Schlüssel gespeichert!'); }
+function saveGeminiKey() { state.geminiApiKey = $('geminiKeyInput').value.trim(); saveState(); $('apiErrorBox').classList.add('hidden'); renderAll(); alert('KI-Schlüssel gespeichert!'); }
 async function pasteAndSaveKey() { try { const s = await navigator.clipboard.readText(); if (s && s.trim().length > 10) { $('geminiKeyInput').value = s.trim(); saveGeminiKey(); } } catch (e) { $('geminiKeyInput').focus(); } }
 function loadSavedChatKey() { $('geminiKeyInput').value = getDefaultEncodedKey(); saveGeminiKey(); }
 
@@ -738,25 +738,43 @@ async function analyzeInput() {
 }
 
 async function callGeminiRequest(parts) {
-  const apiKey = state.geminiApiKey.trim(), hasImage = parts.some(p => p.inlineData), timeoutMs = hasImage ? 12000 : 8500;
+  const apiKey = state.geminiApiKey.trim(), hasImage = parts.some(p => p.inlineData), timeoutMs = hasImage ? 14000 : 9000;
   const payload = { contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.15 } };
-  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
+  const models = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-3.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+  if (lastWorkingModel && !models.includes(lastWorkingModel)) models.unshift(lastWorkingModel);
+  else if (lastWorkingModel) { models.splice(models.indexOf(lastWorkingModel), 1); models.unshift(lastWorkingModel); }
+
   const buildUrl = (m, v) => v ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}` : `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`;
   const isAq = apiKey.startsWith('AQ.'), queue = [];
-  if (lastWorkingEndpoint) queue.push(lastWorkingEndpoint);
-  models.forEach(m => { const u = buildUrl(m, isAq); if (!queue.includes(u)) queue.push(u); });
-  models.slice(0, 2).forEach(m => { const u = buildUrl(m, !isAq); if (!queue.includes(u)) queue.push(u); });
+  models.forEach(m => { queue.push({ m, url: buildUrl(m, isAq) }); queue.push({ m, url: buildUrl(m, !isAq) }); });
+
   let lastErr = null;
   for (let i = 0; i < queue.length; i++) {
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetch(queue[i], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: controller.signal });
+      const res = await fetch(queue[i].url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: controller.signal });
       clearTimeout(timer);
       const data = await res.json();
-      if (!res.ok || data.error) { lastErr = new Error(data.error?.message || `HTTP ${res.status}`); continue; }
+      if (!res.ok || data.error) {
+        const msg = data.error?.message || `HTTP ${res.status}`;
+        lastErr = new Error(msg);
+        const matches = msg.match(/gemini-[a-zA-Z0-9._-]+/gi) || [];
+        matches.forEach(cand => {
+          const clean = cand.replace(/[.,;:'")\]}>]+$/, '');
+          if (clean && clean !== queue[i].m && !models.includes(clean)) {
+            models.push(clean);
+            queue.splice(i + 1, 0, { m: clean, url: buildUrl(clean, isAq) }, { m: clean, url: buildUrl(clean, !isAq) });
+          }
+        });
+        continue;
+      }
       const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       const m = raw.replace(/```json/g, '').replace(/```/g, '').trim().match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
-      if (m) { lastWorkingEndpoint = queue[i]; return JSON.parse(m[0]); }
+      if (m) {
+        lastWorkingModel = queue[i].m;
+        try { localStorage.setItem('calsnap_fast_model', lastWorkingModel); } catch (e) {}
+        return JSON.parse(m[0]);
+      }
     } catch (e) { clearTimeout(timer); lastErr = e.name === 'AbortError' ? new Error('Zeitüberschreitung') : e; }
   }
   throw lastErr || new Error('KI-Verbindung fehlgeschlagen');
