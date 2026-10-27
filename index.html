@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="CalSnap AI" />
-<title>CalSnap AI v4.0 Enterprise</title>
+<title>CalSnap AI v4.1 Enterprise</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 <style>
@@ -20,7 +20,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif
 .inp { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 0.75rem; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #fff; outline: none; }
 .b-ok { font-size: 10px; padding: 2px 10px; border-radius: 99px; background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); font-weight: 600; }
 .b-warn { font-size: 10px; padding: 2px 10px; border-radius: 99px; background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); font-weight: 600; }
-.sc, .subcard { background: rgba(15, 23, 42, 0.8); border: 1px solid #1e293b; border-radius: 1rem; padding: 0.75rem; }
+.sc { background: rgba(15, 23, 42, 0.8); border: 1px solid #1e293b; border-radius: 1rem; padding: 0.75rem; }
 .fjb { display: flex; align-items: center; justify-content: space-between; }
 .btn-g { background: rgba(16,185,129,.2); border: 1px solid rgba(16,185,129,.4); color: #6ee7b7; font-weight: 700; padding: 8px 12px; border-radius: 14px; font-size: 12px; }
 .btn-b { background: rgba(14,165,233,.2); border: 1px solid rgba(14,165,233,.4); color: #7dd3fc; font-weight: 700; padding: 8px 12px; border-radius: 14px; font-size: 12px; }
@@ -40,11 +40,11 @@ input, textarea, select { user-select: text; }
 <div id="helpModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
   <div class="glass max-w-sm w-full border border-emerald-500/40 shadow-2xl space-y-3">
     <div class="fjb border-b border-slate-800 pb-2">
-      <h3 class="text-sm font-bold text-emerald-400">💡 Hilfe & Erklärung</h3>
+      <h3 class="text-sm font-bold text-emerald-400" data-t="helpTitle">💡 Hilfe & Erklärung</h3>
       <button onclick="closeHelpModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-300 text-xs">✕</button>
     </div>
     <div id="helpModalBody" class="text-xs text-slate-200 space-y-2.5 leading-relaxed max-h-[65vh] overflow-y-auto"></div>
-    <button onclick="closeHelpModal()" class="w-full bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs">Schließen</button>
+    <button onclick="closeHelpModal()" class="w-full bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs" data-t="close">Schließen</button>
   </div>
 </div>
 
@@ -63,7 +63,7 @@ input, textarea, select { user-select: text; }
     <button onclick="unlockApp()" class="w-full mt-3 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold py-3 rounded-2xl shadow-lg"><i class="fa-solid fa-unlock-keyhole mr-1"></i><span data-t="unlockBtn">App freischalten</span></button>
     <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] text-emerald-400">Admin: <code class="bg-slate-900 px-1.5 py-0.5 rounded text-white">START-2026</code></div>
   </div>
-  <div class="text-center text-xs text-slate-600 pb-4">CalSnap AI v4.0 • DE 🇩🇪 & PL 🇵🇱</div>
+  <div class="text-center text-xs text-slate-600 pb-4">CalSnap AI v4.1 • DE 🇩🇪 & PL 🇵🇱</div>
 </div>
 
 <div id="appContainer" class="max-w-md mx-auto px-4 pt-1 hidden">
@@ -118,7 +118,7 @@ input, textarea, select { user-select: text; }
       <div class="grid grid-cols-4 gap-1.5 mt-2 text-center">
         <div class="sc !p-1.5"><div class="text-[10px] text-slate-400" data-t="fiber">🌾 Ballast.</div><div class="text-xs font-bold text-teal-300"><span id="fiberDisplay">0</span>/30g</div></div>
         <div class="sc !p-1.5"><div class="text-[10px] text-slate-400">🍊 Vit. C</div><div class="text-xs font-bold text-amber-300"><span id="vitCDisplay">0</span>%</div></div>
-        <div class="sc !p-1.5"><div class="text-[10px] text-slate-400" data-t="mag">⚡ Mg/Fe</div><div class="text-xs font-bold text-sky-300"><span id="magDisplay">0</span>%</div></div>
+        <div class="sc !p-1.5"><div class="text-[10px] text-slate-400">⚡ Mg/Fe</div><div class="text-xs font-bold text-sky-300"><span id="magDisplay">0</span>%</div></div>
         <div class="sc !p-1.5"><div class="text-[10px] text-slate-400" data-t="sugar">🍬 Zucker</div><div class="text-xs font-bold text-emerald-300"><span id="sugarDisplay">0</span>/35g</div></div>
       </div>
 
@@ -176,7 +176,6 @@ input, textarea, select { user-select: text; }
       </div>
     </div>
 
-    <!-- PRÜFFENSTER MAHLZEIT -->
     <div id="reviewCard" class="hidden glass border-2 border-emerald-500/40 space-y-2.5">
       <div class="fjb"><h3 class="text-sm font-bold text-emerald-300" data-t="revTitle">✨ Mahlzeit & Physik-Check</h3><button onclick="closeReviewCard()" class="text-slate-400 text-xs" data-t="cancel">Abbrechen</button></div>
       <div id="detectedItemsList" class="space-y-2 max-h-56 overflow-y-auto"></div>
@@ -193,14 +192,12 @@ input, textarea, select { user-select: text; }
       <button onclick="confirmDetectedItems()" class="w-full bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs"><span data-t="confirmBtn">Übernehmen</span> (<span id="reviewTotalKcal">0</span> kcal)</button>
     </div>
 
-    <!-- ERGEBNIS KÜHLSCHRANK -->
     <div id="fridgeResultCard" class="hidden glass border-2 border-cyan-400/50 space-y-2.5">
       <div class="fjb"><div><h3 id="lblFridgeResultTitle" class="text-sm font-bold text-cyan-300">🧊 Rezepte</h3><p id="lblFridgeIngredients" class="text-[11px] text-slate-400"></p></div><button onclick="closeFridgeCard()" class="text-slate-400 text-xs" data-t="close">Schließen</button></div>
       <div id="fridgeExpiryBox" class="hidden p-2 rounded-xl bg-amber-500/15 border border-amber-500/40 text-[11px] text-amber-300 font-semibold"></div>
       <div id="fridgeRecipesList" class="space-y-2.5"></div>
     </div>
 
-    <!-- ERGEBNIS SPEISEKARTE -->
     <div id="menuResultCard" class="hidden glass border-2 border-amber-400/50 space-y-2.5">
       <div class="fjb"><div><h3 id="lblMenuResultTitle" class="text-sm font-bold text-amber-300">📖 Speisekarten-Ampel</h3><p id="lblMenuCountSub" class="text-[11px] text-slate-400"></p></div><button onclick="closeMenuCard()" class="text-slate-400 text-xs" data-t="close">Schließen</button></div>
       <div class="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-[11px] font-bold">
@@ -212,7 +209,6 @@ input, textarea, select { user-select: text; }
       <div id="menuItemsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
     </div>
 
-    <!-- ERGEBNIS FAMILIEN-TOPF -->
     <div id="potResultCard" class="hidden glass border-2 border-orange-400/50 space-y-2.5">
       <div class="fjb"><div><h3 id="potTitleDisplay" class="text-sm font-bold text-orange-300">🍲 Familien-Topf</h3><p id="potTotalSub" class="text-[11px] text-slate-400"></p></div><button onclick="closePotCard()" class="text-slate-400 text-xs" data-t="close">Schließen</button></div>
       <div class="sc space-y-2.5">
@@ -223,7 +219,6 @@ input, textarea, select { user-select: text; }
       <button onclick="confirmPotShare()" class="w-full bg-orange-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs">+ Meinen Teller-Anteil eintragen</button>
     </div>
 
-    <!-- ENERGIE & HEISSHUNGER-FEUERWEHR -->
     <div class="glass border border-violet-500/30 space-y-2.5">
       <div class="fjb">
         <div class="flex items-center gap-2">
@@ -254,7 +249,6 @@ input, textarea, select { user-select: text; }
       <div id="energyLogList" class="space-y-1 max-h-24 overflow-y-auto text-[11px]"></div>
     </div>
 
-    <!-- VORSCHLÄGE & KI-WUNSCHGERICHT -->
     <div class="glass border border-teal-500/25 space-y-2.5">
       <div class="fjb gap-2">
         <div>
@@ -286,7 +280,6 @@ input, textarea, select { user-select: text; }
       </div>
     </div>
 
-    <!-- EINKAUFSLISTE -->
     <div class="glass border border-sky-500/25 space-y-2.5">
       <div class="fjb">
         <h2 class="text-sm font-bold" data-t="shopTitle">🛒 Smarte Einkaufsliste</h2>
@@ -310,7 +303,7 @@ input, textarea, select { user-select: text; }
       <div id="todayLogList" class="space-y-2"></div>
     </div>
 
-    <div id="pastDaysCard" class="glass space-y-2.5">
+    <div class="glass space-y-2.5">
       <div class="fjb">
         <h3 class="text-xs font-bold uppercase text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-calendar-days text-emerald-400"></i><span data-t="pastDays">Vergangene Tage (30-Tage-Archiv)</span></h3>
         <button onclick="promptAddPastDay()" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-xl text-[11px] font-bold">+ Tag nachtragen</button>
@@ -319,14 +312,13 @@ input, textarea, select { user-select: text; }
     </div>
   </section>
 
-  <!-- TAB 2: GEWICHT & RECHNER -->
   <section id="tab-weight" class="space-y-3.5 hidden">
     <div class="glass">
       <div class="fjb mb-2"><div><h2 class="text-base font-bold" data-t="wTitle">Gewichts-Trend & Prognose</h2><p class="text-xs text-slate-400" data-t="wSub">7-Tage-Glättung & Zieldatum</p></div><span class="b-ok" id="weightDiffBadge">Start</span></div>
       <div class="grid grid-cols-3 gap-2 my-3">
-        <div class="subcard text-center"><span class="text-[11px] text-slate-400 block" data-t="wCurr">Aktuell</span><span id="currentWeightDisplay" class="text-base font-extrabold text-white">-- kg</span></div>
-        <div class="subcard text-center border-emerald-500/30"><span class="text-[11px] text-emerald-400 block" data-t="wTrend">7-Tage-Trend</span><span id="trendWeightDisplay" class="text-base font-extrabold text-emerald-400">-- kg</span></div>
-        <div onclick="promptTargetWeight()" class="subcard text-center cursor-pointer"><span class="text-[11px] text-slate-400 block"><span data-t="wTarget">Ziel</span> ✏️</span><span id="targetWeightDisplay" class="text-base font-extrabold text-teal-300">83.0 kg</span></div>
+        <div class="sc text-center"><span class="text-[11px] text-slate-400 block" data-t="wCurr">Aktuell</span><span id="currentWeightDisplay" class="text-base font-extrabold text-white">-- kg</span></div>
+        <div class="sc text-center border-emerald-500/30"><span class="text-[11px] text-emerald-400 block" data-t="wTrend">7-Tage-Trend</span><span id="trendWeightDisplay" class="text-base font-extrabold text-emerald-400">-- kg</span></div>
+        <div onclick="promptTargetWeight()" class="sc text-center cursor-pointer"><span class="text-[11px] text-slate-400 block"><span data-t="wTarget">Ziel</span> ✏️</span><span id="targetWeightDisplay" class="text-base font-extrabold text-teal-300">83.0 kg</span></div>
       </div>
 
       <div id="prognosisBox" class="mb-3 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-200"></div>
@@ -358,7 +350,6 @@ input, textarea, select { user-select: text; }
     </div>
   </section>
 
-  <!-- TAB 3: FREIGABE & KI -->
   <section id="tab-access" class="space-y-3.5 hidden">
     <div class="glass space-y-2.5 border border-emerald-500/40">
       <div class="fjb"><h3 class="text-sm font-bold">📸 Echte Gemini Foto-KI</h3><span id="keySavedBadge" class="b-ok">Prüfen</span></div>
@@ -406,14 +397,15 @@ input, textarea, select { user-select: text; }
     <button onclick="switchTab('access')" id="nav-access" class="flex flex-col items-center gap-1 py-1 text-slate-400"><i class="fa-solid fa-key text-lg"></i><span class="text-[10px] font-semibold" data-t="nav3">Freigabe & KI</span></button>
   </div>
 </nav>
-
 <script>
 const STORAGE_KEY = 'calsnap_ai_state_v2';
 const $ = id => document.getElementById(id);
 const tx = (id, v) => { const e = $(id); if (e) e.textContent = v; };
+const numOr = (v, def = 0) => (v !== undefined && v !== null && v !== '' && !isNaN(Number(v))) ? Number(v) : def;
 const getDefaultEncodedKey = () => atob(['QVEu','QWI4Uk42','S0QzSmZ5','WEF3VXJu','ZTdjVHh6','VmluS2p1','dHZ5VmNq','aFpiWmZI','OHB4YWFw','LXc='].join(''));
 
 const TR = {
+  helpTitle:['💡 Hilfe & Erklärung','💡 Pomoc i wyjaśnienie'],
   undo:['Rückgängig','Cofnij'], lockBadge:['Privat & Geschützt','Prywatna i Chroniona'], lockSub:['Bitte gib deinen persönlichen Freigabe-Code ein.','Wpisz swój kod dostępu, aby odblokować aplikację.'],
   lockLbl:['Zugangscode / Einladungscode','Kod dostępu / zaproszenia'], lockErr:['Ungültiger Code.','Nieprawidłowy kod.'], unlockBtn:['App freischalten','Odblokuj aplikację'],
   dailyGoal:['Tagesziel','Cel dzienny'], eaten:['Gegessen','Zjedzone'], water:['Wasser heute','Woda dzisiaj'], protein:['Eiweiß','Białko'], carbs:['Kohlenh.','Węglow.'], fat:['Fett','Tłuszcz'],
@@ -436,13 +428,27 @@ const TR = {
 };
 
 const HELP_TEXTS = {
-  scanner: `<b>🍽️ Essen:</b> Fotografiere dein Gericht oder eine Packung. <b>Profi-Tipp bei High-Protein Joghurt/Verpackungen:</b> Fotografiere direkt die Nährwerttabelle oder nenne die Bechergröße (z. B. „200g“) – die Atwater-Physik-Engine berechnet Kalorien & Makros laborpräzise!<br/><br/><b>🧊 Reste (Kühlschrank):</b> Erkennt Vorräte + ⏰ Haltbarkeits-Alarm.<br/><br/><b>📖 Karte:</b> Speisekarten-Scan für 20+ Gerichte per Ampel 🟢🟡🔴.<br/><br/><b>🍲 Topf (Familien-Topf):</b> Schöpfe per Regler deinen exakten Teller-Anteil aus dem Gesamttopf ab!`,
-  sos: `<b>⚡ Energie-Tracker:</b> Klicke nach dem Essen auf Fit, Fokus oder Müde, um Nahrungsmuster zu erkennen.<br/><br/><b>🚒 Heißhunger-Feuerwehr (SOS):</b> Wenn dich der Heißhunger packt, klicke auf SOS! Die App prüft deinen aktuellen Wasserstand & Blutzucker-Rebound und gibt dir sofort 3 rettende Gegen-Snacks unter 120 kcal.`,
-  wishes: `<b>🔄 Blättern:</b> Blättert durch 6 bewährte Alltags-Kombis.<br/><br/><b>✨ KI-Wunschgericht:</b> Tippe auf einen Wunsch-Button (🍝 Pasta, ⚡ 10-Min, 🌮 Deftig, 🥞 Süß) oder schreibe dein Wunsch-Essen ins Feld. Die KI erfindet 2 neue Rezepte nach deinem Wunsch passend zu deinen Restkalorien!`,
-  overview: `<b>CalSnap AI v4.0 Enterprise</b><br/>• Fragezeichen <b>?</b> erklären dir jederzeit jede Funktion.<br/>• <b>30-Tage-Archiv</b> unten im Cockpit erlaubt jederzeitiges Nachschlagen & Nachtragen!`
+  de: {
+    scanner: `<b>🍽️ Essen:</b> Fotografiere dein Gericht, eine Packung oder gib z. B. <i>„3 x Milchkaffee mit jeweils 2 Würfeln Zucker“</i> ein. <b>Profi-Tipp bei Verpackungen:</b> Fotografiere direkt die Nährwerttabelle oder nenne die Bechergröße (z. B. „200g“) – die Atwater-Physik-Engine berechnet Kalorien & Makros laborpräzise!<br/><br/><b>🧊 Reste (Kühlschrank):</b> Erkennt Vorräte + ⏰ Haltbarkeits-Alarm.<br/><br/><b>📖 Karte:</b> Speisekarten-Scan für 20+ Gerichte per Ampel 🟢🟡🔴.<br/><br/><b>🍲 Topf (Familien-Topf):</b> Schöpfe per Regler deinen exakten Teller-Anteil aus dem Gesamttopf ab!`,
+    sos: `<b>⚡ Energie-Tracker:</b> Klicke nach dem Essen auf Fit, Fokus oder Müde, um Nahrungsmuster zu erkennen.<br/><br/><b>🚒 Heißhunger-Feuerwehr (SOS):</b> Wenn dich der Heißhunger packt, klicke auf SOS! Die App prüft deinen aktuellen Wasserstand & Blutzucker-Rebound und gibt dir sofort rettende Gegen-Snacks unter 155 kcal.`,
+    wishes: `<b>🔄 Blättern:</b> Blättert durch 6 bewährte Alltags-Kombis.<br/><br/><b>✨ KI-Wunschgericht:</b> Tippe auf einen Wunsch-Button (🍝 Pasta, ⚡ 10-Min, 🌮 Deftig, 🥞 Süß) oder schreibe dein Wunsch-Essen ins Feld. Die KI erfindet 2 neue Rezepte passend zu deinen Restkalorien!`,
+    overview: `<b>CalSnap AI v4.1 Enterprise</b><br/>• Fragezeichen <b>?</b> erklären dir jederzeit jede Funktion auf Deutsch 🇩🇪 und Polnisch 🇵🇱.<br/>• <b>Smart KI-Scanner:</b> Versteht Fotos, Sprache und Mengen wie <i>„3 x Milchkaffee mit jeweils 2 Würfeln Zucker“</i>.<br/>• <b>30-Tage-Archiv</b> unten im Cockpit erlaubt jederzeitiges Nachschlagen & Nachtragen!`
+  },
+  pl: {
+    scanner: `<b>🍽️ Posiłek:</b> Zrób zdjęcie talerza, opakowania lub wpisz np. <i>„3 x kawa z mlekiem i po 2 kostki cukru”</i>. <b>Wskazówka przy opakowaniach:</b> Sfotografuj tabelę wartości odżywczych lub podaj gramaturę (np. „200g”) – silnik fizyki Atwatera oblicza kalorie i makro z laboratoryjną precyzją!<br/><br/><b>🧊 Lodówka (Resztki):</b> Rozpoznaje produkty z lodówki + ⏰ alarm świeżości i tworzy szybkie przepisy.<br/><br/><b>📖 Menu (Karta dań):</b> Skanuje kartę w restauracji (nawet 20+ dań) i ocenia je sygnalizacją 🟢🟡🔴.<br/><br/><b>🍲 Garnek (Wspólny obiad):</b> Oblicza cały garnek/zapiekankę i pozwala suwakiem nałożyć dokładnie Twoją porcję!`,
+    sos: `<b>⚡ Tracker Energii:</b> Kliknij po posiłku Siła, Fokus lub Spadek, aby wykryć wpływ jedzenia na Twój poziom cukru i energii.<br/><br/><b>🚒 Straż Pożarna Głodu (SOS):</b> Gdy dopadnie Cię nagła ochota na słodkie lub słone, kliknij SOS! Aplikacja sprawdzi nawodnienie i cukier oraz poda natychmiastową przekąskę ratunkową poniżej 155 kcal.`,
+    wishes: `<b>🔄 Dalej:</b> Przełącza pomiędzy 6 sprawdzonymi zestawami dopasowanymi do Twoich pozostałych kalorii.<br/><br/><b>✨ Wymarzone danie AI:</b> Kliknij przycisk (🍝 Pasta, ⚡ 10-Min, 🌮 Sycące, 🥞 Słodkie) lub wpisz własną zachciankę. Sztuczna inteligencja stworzy 2 nowe przepisy idealnie mieszczące się w Twoim bilansie!`,
+    overview: `<b>CalSnap AI v4.1 Enterprise</b><br/>• Ikony znaku zapytania <b>?</b> wyjaśniają każdą funkcję po polsku 🇵🇱 i niemiecku 🇩🇪.<br/>• <b>Skaner AI:</b> Rozumie zdjęcia, głos oraz dokładne ilości (np. <i>„3 x kawa z mlekiem i po 2 kostki cukru”</i>).<br/>• <b>Archiwum 30 dni</b> na dole panelu pozwala w każdej chwili sprawdzić historię i dopisać wcześniejsze dni!`
+  }
 };
 
-function openHelpModal(topic) { $('helpModalBody').innerHTML = HELP_TEXTS[topic] || HELP_TEXTS.overview; $('helpModal').classList.remove('hidden'); }
+let currentHelpTopic = 'overview';
+function openHelpModal(topic) {
+  currentHelpTopic = topic || 'overview';
+  const dict = HELP_TEXTS[state.lang === 'pl' ? 'pl' : 'de'] || HELP_TEXTS.de;
+  $('helpModalBody').innerHTML = dict[currentHelpTopic] || dict.overview;
+  $('helpModal').classList.remove('hidden');
+}
 function closeHelpModal() { $('helpModal').classList.add('hidden'); }
 
 const quickAddItems = [
@@ -455,7 +461,6 @@ const quickAddItems = [
 ];
 
 const getTodayDateKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
-
 const defaultState = {
   lang: 'de', unlocked: false, userRole: 'admin', masterCode: 'START-2026', geminiApiKey: getDefaultEncodedKey(),
   inviteCodes: [{ name: 'Familie', code: 'FIT-FAMILIE-7821' }],
@@ -465,7 +470,7 @@ const defaultState = {
   todayLog: [], pastDaysLog: [], weightLog: [], energyLog: [], shoppingList: []
 };
 
-let state = loadState(), scannerMode = 'meal', activeMenuFilter = 'all', pendingDetectedItems = [], currentFridgeRecipes = [], currentMenuDishes = [], currentPotData = null, currentPortionScale = 1.0, selectedPhotoBase64 = null, selectedPhotoThumb = null, suggestionOffset = 0, customAiSuggestions = null, undoTimer = null, lastAddedCount = 0, speechRec = null, isListening = false;
+let state = loadState(), scannerMode = 'meal', activeMenuFilter = 'all', pendingDetectedItems = [], currentFridgeRecipes = [], currentMenuDishes = [], currentPotData = null, currentPortionScale = 1.0, selectedPhotoBase64 = null, selectedPhotoThumb = null, suggestionOffset = 0, customAiSuggestions = null, undoTimer = null, lastAddedCount = 0, speechRec = null, isListening = false, lastWorkingEndpoint = null;
 
 function isValidApiKey(k) { return typeof k === 'string' && (k.trim().startsWith('AIza') || k.trim().startsWith('AQ.') || k.trim().length >= 20); }
 
@@ -481,7 +486,6 @@ function loadState() {
     return loaded;
   } catch (e) { return JSON.parse(JSON.stringify(defaultState)); }
 }
-
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 
 function checkInviteUrlParams() {
@@ -498,8 +502,7 @@ function checkAutomaticDailyReset() {
   const todayKey = getTodayDateKey();
   if (state.lastActiveDate && state.lastActiveDate !== todayKey) {
     if (state.todayLog && state.todayLog.length > 0) {
-      const totalKcal = state.todayLog.reduce((s, i) => s + i.kcal, 0);
-      const totalP = Math.round(state.todayLog.reduce((s, i) => s + i.p, 0));
+      const totalKcal = state.todayLog.reduce((s, i) => s + i.kcal, 0), totalP = Math.round(state.todayLog.reduce((s, i) => s + i.p, 0));
       state.pastDaysLog.unshift({ date: state.lastActiveDate, kcal: totalKcal, protein: totalP, goal: state.goals.kcal });
       state.pastDaysLog = state.pastDaysLog.slice(0, 30);
     }
@@ -508,7 +511,12 @@ function checkAutomaticDailyReset() {
 }
 
 function t(k) { const idx = state.lang === 'pl' ? 1 : 0; return (TR[k] && TR[k][idx]) || k; }
-function toggleLanguage() { state.lang = state.lang === 'de' ? 'pl' : 'de'; customAiSuggestions = null; saveState(); applyTranslations(); renderAll(); }
+function toggleLanguage() {
+  state.lang = state.lang === 'de' ? 'pl' : 'de';
+  customAiSuggestions = null; saveState(); applyTranslations();
+  if (!$('helpModal').classList.contains('hidden')) openHelpModal(currentHelpTopic);
+  renderAll();
+}
 
 function setScannerMode(mode) {
   scannerMode = mode;
@@ -518,19 +526,19 @@ function setScannerMode(mode) {
   $('modeBtn-menu').className = mode === 'menu' ? 'py-1.5 rounded-xl text-[11px] font-bold bg-amber-400 text-slate-950 shadow' : b;
   $('modeBtn-pot').className = mode === 'pot' ? 'py-1.5 rounded-xl text-[11px] font-bold bg-orange-400 text-slate-950 shadow' : b;
   if (mode === 'fridge') {
-    tx('scannerModeHintText', '🧊 Kühlschrank-Reste + ⏰ Haltbarkeits-Alarm: Fotografiere deine Vorräte!');
-    $('naturalInput').placeholder = 'Zutaten (z. B. Eier, Tomaten, Schinken, Quark)...';
+    tx('scannerModeHintText', isPl ? '🧊 Resztki z lodówki + ⏰ Alarm świeżości: Zrób zdjęcie zapasów!' : '🧊 Kühlschrank-Reste + ⏰ Haltbarkeits-Alarm: Fotografiere deine Vorräte!');
+    $('naturalInput').placeholder = isPl ? 'Składniki (np. jajka, pomidory, szynka, twaróg)...' : 'Zutaten (z. B. Eier, Tomaten, Schinken, Quark)...';
     tx('btnAnalyzeText', isPl ? 'Przepisy' : 'Rezepte');
   } else if (mode === 'menu') {
-    tx('scannerModeHintText', '📖 Speisekarten-Ampel: Fotografiere die Karte – alle 20+ Gerichte per 🟢🟡🔴!');
-    $('naturalInput').placeholder = 'Speisekarte fotografieren oder Gerichte eintippen...';
+    tx('scannerModeHintText', isPl ? '📖 Karta dań: Zrób zdjęcie menu – ocena wszystkich dań 🟢🟡🔴!' : '📖 Speisekarten-Ampel: Fotografiere die Karte – alle 20+ Gerichte per 🟢🟡🔴!');
+    $('naturalInput').placeholder = isPl ? 'Zrób zdjęcie karty dań lub wpisz potrawy...' : 'Speisekarte fotografieren oder Gerichte eintippen...';
     tx('btnAnalyzeText', isPl ? 'Karta 🟢🟡🔴' : 'Ampel-Check');
   } else if (mode === 'pot') {
-    tx('scannerModeHintText', '🍲 Familien-Topf: Fotografiere den gesamten Topf/Auflauf – berechnet genau deine Portion!');
-    $('naturalInput').placeholder = 'Gesamten Topf fotografieren oder beschreiben...';
+    tx('scannerModeHintText', isPl ? '🍲 Wspólny garnek: Zrób zdjęcie całego garnka – oblicz dokładnie swoją porcję!' : '🍲 Familien-Topf: Fotografiere den gesamten Topf/Auflauf – berechnet genau deine Portion!');
+    $('naturalInput').placeholder = isPl ? 'Zrób zdjęcie całego garnka lub opisz danie...' : 'Gesamten Topf fotografieren oder beschreiben...';
     tx('btnAnalyzeText', isPl ? 'Oblicz garnek' : 'Topf-Rechner');
   } else {
-    tx('scannerModeHintText', '🍽️ Teller oder Packung fotografieren (Tipp bei Joghurt/Bechern: Nährwerttabelle zeigen oder „200g“ dazuschreiben).');
+    tx('scannerModeHintText', isPl ? '🍽️ Zrób zdjęcie talerza/etykiety lub wpisz np. „3 x kawa z mlekiem i po 2 kostki cukru”.' : '🍽️ Teller oder Packung fotografieren (Tipp bei Joghurt/Bechern: Nährwerttabelle zeigen oder „200g“ dazuschreiben).');
     $('naturalInput').placeholder = isPl ? 'Napisz lub powiedz np.: „Jogurt High Protein 200g”...' : 'Schreibe oder sprich z. B.: „High Protein Joghurt 200g“...';
     tx('btnAnalyzeText', isPl ? 'Analizuj AI' : 'KI-Scan');
   }
@@ -547,8 +555,7 @@ function toggleVoiceInput() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { $('naturalInput').focus(); alert('Tipp: Nutze das Mikrofon-Symbol unten rechts auf deiner iPhone-Tastatur!'); return; }
   if (isListening && speechRec) { speechRec.stop(); return; }
-  speechRec = new SR();
-  speechRec.lang = state.lang === 'pl' ? 'pl-PL' : 'de-DE';
+  speechRec = new SR(); speechRec.lang = state.lang === 'pl' ? 'pl-PL' : 'de-DE';
   speechRec.onstart = () => { isListening = true; $('voiceBtn').className = 'shrink-0 bg-rose-500 text-white px-3 py-2.5 rounded-xl text-xs font-bold animate-pulse'; tx('voiceBtnText', '🎙️...'); };
   speechRec.onresult = e => { $('naturalInput').value = ($('naturalInput').value ? $('naturalInput').value + ' ' : '') + e.results[0][0].transcript; setTimeout(() => analyzeInput(), 200); };
   speechRec.onend = () => { isListening = false; $('voiceBtn').className = 'shrink-0 bg-slate-800 text-rose-300 px-3 py-2.5 rounded-xl text-xs font-semibold border border-rose-500/30'; tx('voiceBtnText', t('btnVoice')); };
@@ -557,26 +564,22 @@ function toggleVoiceInput() {
 }
 
 function focusFoodInput(mode) { if (mode) setScannerMode(mode); $('naturalInput').scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => $('naturalInput').focus(), 300); }
-
 function generateDeterministicCode(name) {
   const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'GAST';
   let hash = 2026;
   for (let i = 0; i < clean.length; i++) { hash = ((hash << 5) - hash) + clean.charCodeAt(i); hash |= 0; }
   return `FIT-${clean}-${Math.abs(hash % 9000) + 1000}`;
 }
-
 function verifyInviteFormat(code) { const p = code.split('-'); return p.length === 3 && p[0] === 'FIT' && generateDeterministicCode(p[1]) === code; }
 
 function unlockApp() {
   const input = $('accessCodeInput').value.trim().toUpperCase();
-  const isMaster = (input === state.masterCode.toUpperCase());
-  const isListed = state.inviteCodes.some(c => c.code.toUpperCase() === input);
+  const isMaster = (input === state.masterCode.toUpperCase()), isListed = state.inviteCodes.some(c => c.code.toUpperCase() === input);
   if (isMaster || isListed || verifyInviteFormat(input)) {
     state.unlocked = true; state.userRole = isMaster ? 'admin' : 'guest';
     saveState(); $('lockError').classList.add('hidden'); renderAppVisibility();
   } else { $('lockError').classList.remove('hidden'); }
 }
-
 function lockApp() { state.unlocked = false; saveState(); $('accessCodeInput').value = ''; renderAppVisibility(); }
 
 function renderAppVisibility() {
@@ -588,35 +591,36 @@ function renderAppVisibility() {
 }
 
 function saveMasterCode() { const v = $('masterCodeSetting').value.trim().toUpperCase(); if (v.length >= 4) { state.masterCode = v; saveState(); alert('Gespeichert: ' + v); } }
-function saveGeminiKey() { state.geminiApiKey = $('geminiKeyInput').value.trim(); saveState(); $('apiErrorBox').classList.add('hidden'); renderAll(); alert('KI-Schlüssel gespeichert!'); }
+function saveGeminiKey() { state.geminiApiKey = $('geminiKeyInput').value.trim(); lastWorkingEndpoint = null; saveState(); $('apiErrorBox').classList.add('hidden'); renderAll(); alert('KI-Schlüssel gespeichert!'); }
 async function pasteAndSaveKey() { try { const s = await navigator.clipboard.readText(); if (s && s.trim().length > 10) { $('geminiKeyInput').value = s.trim(); saveGeminiKey(); } } catch (e) { $('geminiKeyInput').focus(); } }
 function loadSavedChatKey() { $('geminiKeyInput').value = getDefaultEncodedKey(); saveGeminiKey(); }
 
 function generateInviteCode() {
-  const name = $('guestNameInput').value.trim();
-  if (!name) return;
+  const name = $('guestNameInput').value.trim(); if (!name) return;
   const code = generateDeterministicCode(name);
   if (!state.inviteCodes.some(c => c.code === code)) { state.inviteCodes.push({ name, code }); saveState(); }
   tx('generatedCodeText', code); $('generatedCodeBox').classList.remove('hidden'); $('guestNameInput').value = ''; renderInviteCodes();
 }
-
 function getInviteMessageText(code) {
   let baseUrl = window.location.href.includes('http') ? window.location.href.split('#')[0].split('?')[0] : 'https://kadorabomaiz-glitch.github.io/calsnap/';
   const params = new URLSearchParams({ code });
   if (isValidApiKey(state.geminiApiKey)) params.set('k', btoa(state.geminiApiKey.trim()));
   return `CalSnap AI:\n🔗 ${baseUrl}?${params.toString()}\n🔑 Code: ${code}`;
 }
-
 function copyInviteCode() { navigator.clipboard.writeText(getInviteMessageText($('generatedCodeText').textContent)); alert('Kopiert!'); }
 function shareInviteWhatsApp() { window.open(`https://wa.me/?text=${encodeURIComponent(getInviteMessageText($('generatedCodeText').textContent))}`, '_blank'); }
 function deleteInviteCode(idx) { state.inviteCodes.splice(idx, 1); saveState(); renderInviteCodes(); }
-
-function renderInviteCodes() {
-  $('inviteCodeList').innerHTML = state.inviteCodes.map((item, idx) => `<div class="fjb bg-slate-950/70 px-3 py-2 rounded-xl border border-slate-800"><div><span class="font-semibold text-white">${item.name}:</span><code class="ml-1.5 text-emerald-400 font-mono">${item.code}</code></div><button onclick="deleteInviteCode(${idx})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button></div>`).join('');
-}
+function renderInviteCodes() { $('inviteCodeList').innerHTML = state.inviteCodes.map((item, idx) => `<div class="fjb bg-slate-950/70 px-3 py-2 rounded-xl border border-slate-800"><div><span class="font-semibold text-white">${item.name}:</span><code class="ml-1.5 text-emerald-400 font-mono">${item.code}</code></div><button onclick="deleteInviteCode(${idx})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button></div>`).join(''); }
 
 const foodTuples = [
   ['high protein|proteinpudding|protein joghurt|skyr|magerquark|twaróg','High Protein Joghurt/Quark (200g Becher)',130,20,8,0.5,'🥣',7,0,2,12,''],
+  ['milchkaffee|latte macchiato|cappuccino|kaffee mit milch|kawa z mlekiem|latte','Milchkaffee / Cappuccino (~250ml)',75,4.0,6.0,3.8,'☕',6.0,0,0,4,''],
+  ['espresso|schwarzer kaffee|kaffee schwarz|kawa czarna','Kaffee schwarz / Espresso',2,0.2,0,0,'☕',0,0,0,2,''],
+  ['kaffee|kawa','Kaffee (~200ml)',35,1.2,3.5,1.2,'☕',3.5,0,0,2,''],
+  ['würfel zucker|würfeln zucker|zuckerwürfel|würfelzucker|tl zucker|löffel zucker|kostka cukru|kostki cukru|kostek cukru|zucker|cukier','Würfel / TL Zucker (~3g)',12,0,3.0,0,'🍬',3.0,0,0,0,'⚠️ Reiner Industriezucker!'],
+  ['honig|miód','Portion Honig (~10g)',31,0,8.0,0,'🍯',8.0,0,0,1,''],
+  ['hafermilch|mandelmilch|napój owsiany','Hafermilch (~200ml)',92,1.6,14.0,3.0,'🥛',7.0,1.5,0,4,''],
+  ['milch|vollmilch|mleko','Glas Milch (~200ml)',128,6.8,9.6,7.0,'🥛',9.6,0,2,8,''],
   ['birne|birnen|gruszka','Birne (~160g)',92,0.6,22,0.3,'🍐',15,5,12,6,''],
   ['lasagne|lasania','Portion Lasagne (~350g)',540,28,44,27,'🍝',7,3,10,18,''],
   ['carbonara','Spaghetti Carbonara (~350g)',610,25,65,27,'🍝',4,2.5,2,12,'⚠️ Viel gesättigtes Fett & Weißmehl.'],
@@ -630,7 +634,6 @@ const foodTuples = [
   ['brötchen|semmel|bułka','Brötchen (~65g)',165,5.5,33,1.2,'🥖',2,1.5,0,5,''],
   ['rührei|spiegelei|omelett|jajecznica','Rührei/Omelett (~150g)',240,18,2,18,'🍳',1,0,0,16,''],
   ['ei|eier|jajko|jajka','Ei gekocht (~55g)',78,6.5,0.6,5.5,'🥚',0.3,0,0,6,''],
-  ['kaffee|kawa|cappuccino','Kaffee (~200ml)',35,1.2,3.5,1.2,'☕',3.5,0,0,2,''],
   ['hähnchen|huhn|putenbrust|kurczak','Hähnchenbrust (~180g)',220,42,0,5,'🍗',0,0,0,18,''],
   ['reis|ryż','Portion Reis (~180g)',240,5,52,0.6,'🍚',0.5,1.5,0,8,''],
   ['nudeln|pasta|spaghetti|makaron','Portion Nudeln (~200g)',310,11,62,2,'🍝',2,3,0,10,''],
@@ -643,7 +646,7 @@ const foodTuples = [
   ['kartoffel|kartoffeln|ziemniaki','Portion Kartoffeln (~200g)',160,4,35,0.2,'🥔',2,4,25,14,''],
   ['pommes|frytki','Portion Pommes (~150g)',365,4,45,18,'🍟',1,4,8,10,'⚠️ Frittiert (Entzündungs-Trigger)!'],
   ['salat|sałatka|mizeria','Gemischter Salat (~220g)',165,4,10,11,'🥗',4,5,45,16,''],
-  ['quark|magerquark|skyr|joghurt|twaróg','Quark / Skyr (250g)',170,28,10,1.5,'🥣',9,0,2,12,''],
+  ['quark|joghurt','Quark / Joghurt (250g)',170,28,10,1.5,'🥣',9,0,2,12,''],
   ['haferflocken|müsli|owsianka','Haferflocken / Müsli (~180g)',240,9,38,5,'🌾',4,6,0,25,''],
   ['schokolade|riegel|czekolada|kuchen','Süßigkeit / Kuchen (~60g)',240,3,32,11,'🍫',26,1,0,6,'⚠️ Hoher Zuckeranteil (26g)!'],
   ['pierogi|piroggen','Portion Pierogi (~240g)',420,14,62,12,'🥟',3,3,4,12,''],
@@ -651,22 +654,28 @@ const foodTuples = [
 ];
 
 function parseNumberWord(w) {
-  const m = { ein:1, eine:1, einen:1, zwei:2, drei:3, vier:4, fünf:5, halbe:0.5, jeden:1, jedna:1, dwa:2, dwie:2, trzy:3 };
+  const m = { ein:1, eine:1, einen:1, zwei:2, drei:3, vier:4, fünf:5, sechs:6, halbe:0.5, jeden:1, jedna:1, dwa:2, dwie:2, trzy:3, cztery:4 };
   if (!w) return 1;
   const l = w.toLowerCase().replace(',', '.');
   return m[l] !== undefined ? m[l] : (parseFloat(l) || 1);
 }
 
 function parseNaturalText(text) {
-  const lower = text.toLowerCase(), results = [];
+  let working = text.toLowerCase();
+  const results = [], hasDistributive = /\b(jeweils|je|pro|po)\b/i.test(working);
+  let primaryMultiplier = 1;
   foodTuples.forEach(([keysStr, nameDe, kcal, p, c, f, icon, sugar, fiber, vitC, mag, warn]) => {
     for (const key of keysStr.split('|')) {
-      const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|halbe|jeden|jedna|dwa|dwie|trzy)\\s*(?:g|gramm|ml|glas|stück|szt|portion|porcja|teller|becher)?\\s+)?(${key})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
-      const match = lower.match(regex);
+      const regex = new RegExp(`(?:^|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])(?:(jeweils|je|pro|po)\\s+)?(?:(\\d+(?:[.,]\\d+)?|ein|eine|einen|zwei|drei|vier|fünf|sechs|halbe|jeden|jedna|dwa|dwie|trzy|cztery)\\s*(?:x|×|mal|razy|g|gramm|ml|glas|tasse|tassen|stück|szt|portion|porcja|teller|becher|würfel|würfeln|tl|el|löffel|kostka|kostki|kostek)?\\s+)?(${key})(?=$|[^a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ])`, 'i');
+      const match = working.match(regex);
       if (match) {
-        const rawNum = match[1] ? parseNumberWord(match[1]) : 1;
-        const count = rawNum > 20 ? +(rawNum / 200).toFixed(1) : rawNum;
+        const isSubItem = results.length > 0 && (Boolean(match[1]) || hasDistributive);
+        let rawNum = match[2] ? parseNumberWord(match[2]) : (/(würfeln|kostki|kostek)/i.test(match[0]) ? 2 : 1);
+        let count = rawNum > 20 ? +(rawNum / 200).toFixed(1) : rawNum;
+        if (results.length === 0 && count >= 1 && count <= 15) primaryMultiplier = count;
+        else if (isSubItem && primaryMultiplier > 1) count = +(count * primaryMultiplier).toFixed(1);
         results.push({ name: `${count !== 1 ? count + 'x ' : ''}${nameDe}`, kcal: Math.round(kcal * count), p: +(p * count).toFixed(1), c: +(c * count).toFixed(1), f: +(f * count).toFixed(1), sugar: +(sugar * count).toFixed(1), fiber: +(fiber * count).toFixed(1), vitC: Math.round(vitC * count), mag: Math.round(mag * count), warn: warn || '', icon });
+        working = working.replace(match[0], ' ');
         break;
       }
     }
@@ -676,28 +685,21 @@ function parseNaturalText(text) {
 }
 
 function compressImageFile(file) {
-  const maxDim = scannerMode === 'menu' ? 1400 : 950, quality = scannerMode === 'menu' ? 0.85 : 0.80;
+  const maxDim = scannerMode === 'menu' ? 1200 : 800, quality = scannerMode === 'menu' ? 0.82 : 0.76;
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = e => {
       const img = new Image();
       img.onload = () => {
-        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height)), canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale); canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         try {
-          const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-          let lum = 0;
+          const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data; let lum = 0;
           for (let i = 0; i < d.length; i += 16) lum += 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-          if (lum / (d.length / 16) < 68) {
-            ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = 'rgba(45,45,45,0.35)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.globalCompositeOperation = 'source-over';
-          }
+          if (lum / (d.length / 16) < 68) { ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = 'rgba(45,45,45,0.35)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.globalCompositeOperation = 'source-over'; }
         } catch (err) {}
-        const tCanvas = document.createElement('canvas');
-        tCanvas.width = 96; tCanvas.height = 96;
+        const tCanvas = document.createElement('canvas'); tCanvas.width = 96; tCanvas.height = 96;
         tCanvas.getContext('2d').drawImage(canvas, 0, 0, 96, 96);
         resolve({ fullDataUrl: canvas.toDataURL('image/jpeg', quality), thumbDataUrl: tCanvas.toDataURL('image/jpeg', 0.6) });
       };
@@ -708,27 +710,21 @@ function compressImageFile(file) {
 }
 
 async function handlePhotoSelect(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]; if (!file) return;
   try {
     const compressed = await compressImageFile(file);
     selectedPhotoBase64 = compressed.fullDataUrl; selectedPhotoThumb = compressed.thumbDataUrl;
-    $('photoPreview').src = selectedPhotoBase64;
-    $('photoPreviewContainer').classList.remove('hidden');
-    $('apiErrorBox').classList.add('hidden');
+    $('photoPreview').src = selectedPhotoBase64; $('photoPreviewContainer').classList.remove('hidden'); $('apiErrorBox').classList.add('hidden');
     analyzeInput();
   } catch (e) { alert('Foto-Fehler'); }
 }
-
 function clearPhoto() { selectedPhotoBase64 = null; selectedPhotoThumb = null; $('cameraInput').value = ''; $('photoPreviewContainer').classList.add('hidden'); }
 
 async function analyzeInput() {
   const text = $('naturalInput').value.trim();
   if (!text && !selectedPhotoBase64) { alert('Bitte gib etwas ein oder wähle ein Foto aus.'); return; }
   const btn = $('analyzeBtn'), origHtml = btn.innerHTML;
-  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
-  btn.disabled = true; $('apiErrorBox').classList.add('hidden');
-
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; btn.disabled = true; $('apiErrorBox').classList.add('hidden');
   try {
     if (scannerMode === 'fridge') await runFridgeLeftoverAI(text, selectedPhotoBase64);
     else if (scannerMode === 'menu') await runMenuScannerAI(text, selectedPhotoBase64);
@@ -742,29 +738,26 @@ async function analyzeInput() {
 }
 
 async function callGeminiRequest(parts) {
-  const apiKey = state.geminiApiKey.trim();
-  const payload = { contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json' } };
-  const models = ['gemini-3.0-flash', 'gemini-3-flash-preview', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+  const apiKey = state.geminiApiKey.trim(), hasImage = parts.some(p => p.inlineData), timeoutMs = hasImage ? 12000 : 8500;
+  const payload = { contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.15 } };
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
   const buildUrl = (m, v) => v ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}` : `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`;
   const isAq = apiKey.startsWith('AQ.'), queue = [];
-  models.forEach(m => { queue.push(buildUrl(m, isAq)); queue.push(buildUrl(m, !isAq)); });
-
+  if (lastWorkingEndpoint) queue.push(lastWorkingEndpoint);
+  models.forEach(m => { const u = buildUrl(m, isAq); if (!queue.includes(u)) queue.push(u); });
+  models.slice(0, 2).forEach(m => { const u = buildUrl(m, !isAq); if (!queue.includes(u)) queue.push(u); });
   let lastErr = null;
   for (let i = 0; i < queue.length; i++) {
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetch(queue[i], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const res = await fetch(queue[i], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: controller.signal });
+      clearTimeout(timer);
       const data = await res.json();
-      if (!res.ok || data.error) {
-        const msg = data.error?.message || `HTTP ${res.status}`;
-        lastErr = new Error(msg);
-        const sug = msg.match(/models\/([a-zA-Z0-9._-]+)/);
-        if (sug && sug[1] && !models.includes(sug[1])) { models.push(sug[1]); queue.splice(i + 1, 0, buildUrl(sug[1], isAq), buildUrl(sug[1], !isAq)); }
-        continue;
-      }
+      if (!res.ok || data.error) { lastErr = new Error(data.error?.message || `HTTP ${res.status}`); continue; }
       const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       const m = raw.replace(/```json/g, '').replace(/```/g, '').trim().match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
-      if (m) return JSON.parse(m[0]);
-    } catch (e) { lastErr = e; }
+      if (m) { lastWorkingEndpoint = queue[i]; return JSON.parse(m[0]); }
+    } catch (e) { clearTimeout(timer); lastErr = e.name === 'AbortError' ? new Error('Zeitüberschreitung') : e; }
   }
   throw lastErr || new Error('KI-Verbindung fehlgeschlagen');
 }
@@ -772,18 +765,19 @@ async function callGeminiRequest(parts) {
 async function callGeminiVisionAPI(text, base64DataUrl) {
   const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
   const parts = [{ text: `Ernährungsexperte & OCR-Scanner: Analysiere Foto/Text ("${text || 'Foto'}").
-WICHTIG BEI VERPACKTEN PRODUKTEN (z.B. High Protein Joghurt, Pudding, Riegel, Skyr):
-1. Lies exakt den Markennamen, aufgedruckte Protein-Claims (z.B. "20g Protein") und die echte Becher-/Packungsgröße (z.B. 200g Becher statt 100g) oder die Nährwerttabelle ab! High-Protein-Produkte haben wenig Fett (meist 0-1.5g) und wenig Zucker!
-2. Berechne Werte für den GESAMTEN Becher/Teller: kcal, p (Eiweiß g), c (Kohlenhydrate g), f (Fett g), sugar (Zucker g), fiber (Ballaststoffe g), vitC (%), mag (%), waterMl (ml falls Getränk).
-Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"name": "High Protein Joghurt (200g Becher)", "kcal": 126, "p": 20.0, "c": 8.0, "f": 0.6, "sugar": 7.0, "fiber": 0, "vitC": 2, "mag": 12, "waterMl": 0, "warn": "", "icon": "🥣"}]` }];
+WICHTIG BEI MENGEN, MULTIPLIKATOREN & ZUSÄTZEN:
+1. Achte exakt auf Anzahlen wie "3 x", "2x" sowie "jeweils", "je", "pro", "po"! Beispiel: "3 x Milchkaffee mit jeweils 2 Würfeln Zucker" = 3 Milchkaffees (~225 kcal, 12g p, 18g c, 11.4g f, 18g sugar) PLUS 3x2 = 6 Würfel Zucker (6x 3g = 18g Zucker = 72 kcal, 0g p, 18g c, 0g f, 18g sugar). Falls "mit jeweils Würfeln Zucker" ohne Zahl vor dem Plural steht, rechne 2 Würfel (6g Zucker) pro Getränk!
+2. Bei verpackten Produkten (z.B. High Protein Joghurt, Pudding, Skyr): Lies Markenname, Protein-Claims und die gesamte Bechergröße (z.B. 200g Becher) ab.
+3. Berechne die echten Gesamtwerte (0g bleibt exakt 0!): kcal, p (Eiweiß g), c (Kohlenhydrate g), f (Fett g), sugar (Zucker g), fiber (Ballaststoffe g), vitC (%), mag (%), waterMl (ml falls Wasser/ungesüßtes Getränk).
+Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"name": "3x Milchkaffee mit je 2 Würfeln Zucker", "kcal": 297, "p": 12.0, "c": 36.0, "f": 11.4, "sugar": 36.0, "fiber": 0, "vitC": 0, "mag": 12, "waterMl": 0, "warn": "⚠️ Hohe Zuckerlast (36g Zucker)!", "icon": "☕"}]` }];
   if (base64DataUrl) { const idx = base64DataUrl.indexOf(','); parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } }); }
   const parsed = await callGeminiRequest(parts), arr = Array.isArray(parsed) ? parsed : (parsed.items || [parsed]);
   return arr.map(i => {
-    const p = +(Number(i.p) || 10).toFixed(1), c = +(Number(i.c) || 20).toFixed(1), f = +(Number(i.f) || 5).toFixed(1), fib = +(Number(i.fiber) || 0).toFixed(1);
+    const p = +Math.max(0, numOr(i.p, 0)).toFixed(1), c = +Math.max(0, numOr(i.c, 0)).toFixed(1), f = +Math.max(0, numOr(i.f, 0)).toFixed(1), fib = +Math.max(0, numOr(i.fiber, 0)).toFixed(1), sug = +Math.max(0, numOr(i.sugar, 0)).toFixed(1);
     const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * fib);
-    const rawKcal = Math.round(Number(i.kcal) || atwaterKcal);
-    const finalKcal = Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.12 ? atwaterKcal : rawKcal;
-    return { name: String(i.name || 'Mahlzeit') + ' ✅', kcal: Math.max(0, finalKcal), p, c, f, sugar: +(Number(i.sugar) || 2).toFixed(1), fiber: fib, vitC: Math.round(Number(i.vitC) || 5), mag: Math.round(Number(i.mag) || 8), waterMl: Math.round(Number(i.waterMl) || 0), warn: String(i.warn || ''), icon: i.icon || '🍽️' };
+    const rawKcal = Math.round(Math.max(0, numOr(i.kcal, atwaterKcal)));
+    const finalKcal = (atwaterKcal > 0 && Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15) ? atwaterKcal : rawKcal;
+    return { name: String(i.name || 'Mahlzeit') + ' ✅', kcal: Math.max(0, finalKcal), p, c, f, sugar: sug, fiber: fib, vitC: Math.round(Math.max(0, numOr(i.vitC, 0))), mag: Math.round(Math.max(0, numOr(i.mag, 0))), waterMl: Math.round(Math.max(0, numOr(i.waterMl, 0))), warn: String(i.warn || (sug >= 20 ? `⚠️ Hohe Zuckermenge (${sug}g Zucker)!` : '')), icon: i.icon || '🍽️' };
   });
 }
 
@@ -792,7 +786,7 @@ async function runPotScannerAI(text, base64DataUrl) {
   const parts = [{ text: `Familien-Topf-Rechner: Analysiere Foto vom gesamten Kochtopf/Auflauf und Text ("${text || 'Foto'}"). Schätze Gesamtgewicht (totalWeightG), Gesamtkalorien (totalKcal), Gesamt-Makros (totalP, totalC, totalF) des GESAMTEN Topfes und normale Portionen (estPortions, z.B. 4). Sprache: ${lang}. Gib NUR ein JSON-Objekt zurück: {"title": "Topf Chili con Carne", "totalWeightG": 1600, "totalKcal": 1920, "totalP": 140, "totalC": 160, "totalF": 72, "estPortions": 4, "icon": "🍲"}` }];
   if (base64DataUrl) { const idx = base64DataUrl.indexOf(','); parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } }); }
   const parsed = await callGeminiRequest(parts), d = Array.isArray(parsed) ? parsed[0] : parsed;
-  currentPotData = { title: String(d.title || text || 'Familien-Topf'), totalWeightG: Math.max(300, Math.round(Number(d.totalWeightG) || 1400)), totalKcal: Math.max(200, Math.round(Number(d.totalKcal) || 1800)), totalP: Math.max(10, Math.round(Number(d.totalP) || 110)), totalC: Math.max(10, Math.round(Number(d.totalC) || 150)), totalF: Math.max(5, Math.round(Number(d.totalF) || 70)), estPortions: Math.max(2, Math.min(12, Math.round(Number(d.estPortions) || 4))), icon: d.icon || '🍲' };
+  currentPotData = { title: String(d.title || text || 'Familien-Topf'), totalWeightG: Math.max(300, Math.round(numOr(d.totalWeightG, 1400))), totalKcal: Math.max(200, Math.round(numOr(d.totalKcal, 1800))), totalP: Math.max(0, Math.round(numOr(d.totalP, 110))), totalC: Math.max(0, Math.round(numOr(d.totalC, 150))), totalF: Math.max(0, Math.round(numOr(d.totalF, 70))), estPortions: Math.max(2, Math.min(12, Math.round(numOr(d.estPortions, 4)))), icon: d.icon || '🍲' };
   $('potTotalSlider').value = currentPotData.estPortions; $('potMySlider').value = 1;
   $('potResultCard').classList.remove('hidden'); updatePotShareCalc();
 }
@@ -812,7 +806,6 @@ function confirmPotShare() {
   quickAdd(`${currentPotData.title} (${myP}/${totalP} Topf, ~${Math.round(currentPotData.totalWeightG * r)}g)`, Math.round(currentPotData.totalKcal * r), +(currentPotData.totalP * r).toFixed(1), +(currentPotData.totalC * r).toFixed(1), +(currentPotData.totalF * r).toFixed(1), currentPotData.icon);
   $('naturalInput').value = ''; clearPhoto(); closePotCard();
 }
-
 function closePotCard() { $('potResultCard').classList.add('hidden'); }
 
 async function runFridgeLeftoverAI(text, base64DataUrl) {
@@ -822,7 +815,7 @@ async function runFridgeLeftoverAI(text, base64DataUrl) {
   const parts = [{ text: `Fitness-Koch & Haltbarkeits-Wächter: Analysiere Foto/Text ("${text || 'Foto'}"). Offenes Budget: ${remKcal} kcal, ${remProt}g Eiweiß. 1. Nenne leicht verderbliche Zutaten in "expiryAlert" (Food Waste Prevention). 2. Erstelle 3 schnelle Rezepte. Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"title": "High-Protein Omelett (~390 kcal)", "detectedIngredients": "Eier, Tomaten, Schinken", "expiryAlert": "⏰ Zuerst verbrauchen: Offener Schinken & Tomaten (1-2 Tage haltbar)", "ingredientsList": "3 Eier, 60g Schinken, 2 Tomaten", "steps": "Kurz in der Pfanne anbraten.", "kcal": 390, "p": 36, "c": 8, "f": 23, "icon": "🍳"}]` }];
   if (base64DataUrl) { const idx = base64DataUrl.indexOf(','); parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } }); }
   const parsed = await callGeminiRequest(parts), arr = Array.isArray(parsed) ? parsed : (parsed.recipes || [parsed]);
-  currentFridgeRecipes = arr.map(r => ({ title: String(r.title || 'Rezept'), detectedIngredients: String(r.detectedIngredients || text || 'Vorräte'), expiryAlert: String(r.expiryAlert || ''), ingredientsList: String(r.ingredientsList || ''), steps: String(r.steps || ''), kcal: Math.max(80, Math.round(Number(r.kcal) || 400)), p: +(Number(r.p) || 28).toFixed(1), c: +(Number(r.c) || 20).toFixed(1), f: +(Number(r.f) || 15).toFixed(1), icon: r.icon || '🥘' }));
+  currentFridgeRecipes = arr.map(r => ({ title: String(r.title || 'Rezept'), detectedIngredients: String(r.detectedIngredients || text || 'Vorräte'), expiryAlert: String(r.expiryAlert || ''), ingredientsList: String(r.ingredientsList || ''), steps: String(r.steps || ''), kcal: Math.max(50, Math.round(numOr(r.kcal, 400))), p: +Math.max(0, numOr(r.p, 28)).toFixed(1), c: +Math.max(0, numOr(r.c, 20)).toFixed(1), f: +Math.max(0, numOr(r.f, 15)).toFixed(1), icon: r.icon || '🥘' }));
   renderFridgeResults(remKcal);
 }
 
@@ -834,7 +827,6 @@ function renderFridgeResults(remKcal) {
   tx('fridgeExpiryBox', exp); $('fridgeExpiryBox').classList.toggle('hidden', !exp);
   $('fridgeRecipesList').innerHTML = currentFridgeRecipes.map((r, idx) => `<div class="sc border-cyan-500/30 space-y-1.5"><div class="fjb gap-2"><span class="text-xs font-bold text-cyan-300">${r.icon} ${r.title}</span><span class="shrink-0 text-xs font-bold text-white bg-cyan-500/20 px-2 py-0.5 rounded-lg">${r.kcal} kcal</span></div><div class="text-[11px] text-emerald-300 font-semibold">🧾 ${r.ingredientsList}</div><p class="text-xs text-slate-300">👨‍🍳 ${r.steps}</p><div class="fjb pt-1 border-t border-slate-800"><span class="text-[10px] text-slate-400">E:${r.p}g K:${r.c}g F:${r.f}g</span><div class="flex gap-1.5"><button onclick="addIngredientsToShop('${r.ingredientsList.replace(/'/g, '')}', '${r.title.replace(/'/g, '')}')" class="bg-slate-800 text-sky-300 text-[11px] font-bold px-2.5 py-1 rounded-xl">🛒</button><button onclick="logFridgeRecipe(${idx})" class="bg-cyan-400 text-slate-950 font-bold text-[11px] px-3 py-1 rounded-xl">+ Log</button></div></div></div>`).join('');
 }
-
 function logFridgeRecipe(idx) { const r = currentFridgeRecipes[idx]; if (r) { quickAdd(r.title, r.kcal, r.p, r.c, r.f, r.icon); $('naturalInput').value = ''; clearPhoto(); closeFridgeCard(); } }
 function closeFridgeCard() { $('fridgeResultCard').classList.add('hidden'); }
 
@@ -845,17 +837,14 @@ async function runMenuScannerAI(text, base64DataUrl) {
   const parts = [{ text: `Restaurant-Berater: Analysiere Speisekarten-Foto/Text ("${text || 'Foto'}"). WICHTIG: Erkenne und bewerte ALLE lesbaren Gerichte vollständig (auch 20-30 Gerichte!). Budget: ${remKcal} kcal, ${remProt}g Eiweiß. Ampel: "green", "yellow" (Bestell-Trick in "tip"), "red" (Grund in "tip"). Sprache: ${lang}. Sortiere: green, yellow, red. Gib NUR ein JSON-Array zurück: [{"name": "Rinderfilet", "light": "green", "kcal": 580, "p": 48, "c": 42, "f": 21, "tip": "Top!", "icon": "🥩"}]` }];
   if (base64DataUrl) { const idx = base64DataUrl.indexOf(','); parts.push({ inlineData: { mimeType: base64DataUrl.substring(5, idx).split(';')[0], data: base64DataUrl.substring(idx + 1) } }); }
   const parsed = await callGeminiRequest(parts), arr = Array.isArray(parsed) ? parsed : (parsed.dishes || [parsed]);
-  currentMenuDishes = arr.map(d => ({ name: String(d.name || 'Gericht'), light: ['green', 'yellow', 'red'].includes(String(d.light).toLowerCase()) ? String(d.light).toLowerCase() : 'yellow', kcal: Math.max(50, Math.round(Number(d.kcal) || 550)), p: +(Number(d.p) || 25).toFixed(1), c: +(Number(d.c) || 45).toFixed(1), f: +(Number(d.f) || 22).toFixed(1), tip: String(d.tip || ''), icon: d.icon || '🍽️' }));
+  currentMenuDishes = arr.map(d => ({ name: String(d.name || 'Gericht'), light: ['green', 'yellow', 'red'].includes(String(d.light).toLowerCase()) ? String(d.light).toLowerCase() : 'yellow', kcal: Math.max(20, Math.round(numOr(d.kcal, 550))), p: +Math.max(0, numOr(d.p, 25)).toFixed(1), c: +Math.max(0, numOr(d.c, 45)).toFixed(1), f: +Math.max(0, numOr(d.f, 22)).toFixed(1), tip: String(d.tip || ''), icon: d.icon || '🍽️' }));
   activeMenuFilter = 'all'; renderMenuResults(remKcal);
 }
-
 function setMenuFilter(f) { activeMenuFilter = f; renderMenuResults(Math.max(200, state.goals.kcal - state.todayLog.reduce((a, i) => a + i.kcal, 0))); }
-
 function renderMenuResults(remKcal) {
   $('menuResultCard').classList.remove('hidden');
   const g = currentMenuDishes.filter(d => d.light === 'green').length, y = currentMenuDishes.filter(d => d.light === 'yellow').length, r = currentMenuDishes.filter(d => d.light === 'red').length;
-  tx('lblMenuResultTitle', `📖 Speisekarten-Ampel (${currentMenuDishes.length})`);
-  tx('lblMenuCountSub', `Rest: ${remKcal} kcal • 🟢 ${g} | 🟡 ${y} | 🔴 ${r}`);
+  tx('lblMenuResultTitle', `📖 Speisekarten-Ampel (${currentMenuDishes.length})`); tx('lblMenuCountSub', `Rest: ${remKcal} kcal • 🟢 ${g} | 🟡 ${y} | 🔴 ${r}`);
   tx('menuFilter-all', `Alle (${currentMenuDishes.length})`); tx('menuFilter-green', `🟢 (${g})`); tx('menuFilter-yellow', `🟡 (${y})`); tx('menuFilter-red', `🔴 (${r})`);
   ['all', 'green', 'yellow', 'red'].forEach(k => { $('menuFilter-' + k).className = activeMenuFilter === k ? 'py-1 rounded-lg bg-slate-700 text-white shadow' : 'py-1 rounded-lg text-slate-400'; });
   const styles = { green: ['🟢 GRÜN', 'border-emerald-500/40', 'text-emerald-300'], yellow: ['🟡 GELB', 'border-amber-500/40', 'text-amber-300'], red: ['🔴 ROT', 'border-rose-500/40', 'text-rose-300'] };
@@ -865,15 +854,13 @@ function renderMenuResults(remKcal) {
     return `<div class="sc ${border} space-y-1.5"><div class="fjb gap-2"><span class="text-xs font-bold text-white">${d.icon} ${d.name}</span><span class="shrink-0 text-[10px] font-bold ${col}">${badge}</span></div><p class="text-[11px] ${col}">💡 ${d.tip}</p><div class="fjb pt-1 border-t border-slate-800"><span class="text-[10px] text-slate-400"><b>~${d.kcal} kcal</b> • E:${d.p}g K:${d.c}g F:${d.f}g</span><button onclick="logMenuDish(${idx})" class="bg-slate-800 text-emerald-400 font-bold text-[11px] px-3 py-1 rounded-xl">+ Log</button></div></div>`;
   }).join('');
 }
-
 function logMenuDish(idx) { const d = currentMenuDishes[idx]; if (d) { quickAdd(d.name, d.kcal, d.p, d.c, d.f, d.icon); $('naturalInput').value = ''; clearPhoto(); closeMenuCard(); } }
 function closeMenuCard() { $('menuResultCard').classList.add('hidden'); }
 
 function logEnergy(score, tag, icon) {
   const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   const recentMeals = state.todayLog.slice(0, 2).map(m => m.name).join(', ') || 'Noch keine Mahlzeit';
-  const recentSugar = state.todayLog.slice(0, 2).reduce((s, m) => s + (m.sugar || 0), 0);
-  const recentProt = state.todayLog.slice(0, 2).reduce((s, m) => s + (m.p || 0), 0);
+  const recentSugar = state.todayLog.slice(0, 2).reduce((s, m) => s + (m.sugar || 0), 0), recentProt = state.todayLog.slice(0, 2).reduce((s, m) => s + (m.p || 0), 0);
   const insight = score <= 2
     ? (recentSugar >= 14 && recentProt < 15 ? `💡 Biochemie-Analyse: Dein „${tag}“ folgt auf ${recentMeals} (${Math.round(recentSugar)}g Zucker bei nur ${Math.round(recentProt)}g Eiweiß). Das ist ein klassischer Insulin-Rebound! Trinke jetzt 250ml Wasser + 15g Eiweiß.` : `💡 Analyse zu „${tag}“: Dein Wasserstand liegt bei ${state.waterLiters}L. Trinke jetzt 1 Glas Wasser und kombiniere beim nächsten Essen komplexe Kohlenhydrate mit 30g Eiweiß.`)
     : `✅ Perfekte Bio-Bilanz! „${tag}“ nach ${recentMeals} (${Math.round(recentProt)}g Eiweiß) – hält deinen Blutzucker konstant stabil!`;
@@ -881,9 +868,7 @@ function logEnergy(score, tag, icon) {
   state.energyLog = state.energyLog.slice(0, 15);
   saveState(); tx('energyPatternBox', insight); $('energyPatternBox').classList.remove('hidden'); renderEnergyLog();
 }
-
 function openSOSDialog() { $('sosInteractiveBox').classList.toggle('hidden'); $('sosSolutionOutput').classList.add('hidden'); }
-
 function solveCraving(type) {
   const out = $('sosSolutionOutput'); out.classList.remove('hidden');
   const sug = Math.round(state.todayLog.reduce((a, i) => a + (i.sugar || 0), 0));
@@ -896,11 +881,7 @@ function solveCraving(type) {
   const st = strategies[type] || strategies.sweet;
   out.innerHTML = `<div class="text-amber-300 font-semibold">🔍 Ursache: ${st.cause}</div><div class="text-slate-200">1. Trinke jetzt sofort 1 Glas Wasser (+250ml).<br/>2. Statt einer 600-kcal-Falle rettet dich dieser Gegen-Snack:</div><div class="fjb bg-slate-900 p-2 rounded-xl border border-emerald-500/40"><span class="font-bold text-emerald-300">${st.icon} ${st.snackName} (${st.kcal} kcal)</span><button onclick="addWater(0.25);quickAdd('${st.snackName}',${st.kcal},${st.p},${st.c},${st.f},'${st.icon}');$('sosInteractiveBox').classList.add('hidden')" class="bg-emerald-500 text-slate-950 font-bold px-2.5 py-1 rounded-lg text-[11px] shrink-0">+ Retter loggen</button></div>`;
 }
-
-function renderEnergyLog() {
-  $('energyLogList').innerHTML = (state.energyLog || []).slice(0, 3).map(e => `<div class="fjb bg-slate-900/60 px-3 py-1 rounded-xl border border-slate-800"><span>${e.icon} <b class="text-white">${e.tag}</b> (${e.time})</span><span class="text-slate-400 truncate max-w-[140px]">${e.recentMeals}</span></div>`).join('');
-}
-
+function renderEnergyLog() { $('energyLogList').innerHTML = (state.energyLog || []).slice(0, 3).map(e => `<div class="fjb bg-slate-900/60 px-3 py-1 rounded-xl border border-slate-800"><span>${e.icon} <b class="text-white">${e.tag}</b> (${e.time})</span><span class="text-slate-400 truncate max-w-[140px]">${e.recentMeals}</span></div>`).join(''); }
 function toggleCheatRescue() { state.cheatRescue.active = !state.cheatRescue.active; saveState(); renderAll(); showUndoToast(state.cheatRescue.active ? '🛡️ 4-Tage-Ausgleich aktiviert!' : 'Ausgleich beendet'); }
 
 function addIngredientsToShop(comboText, sourceTitle) {
@@ -908,13 +889,11 @@ function addIngredientsToShop(comboText, sourceTitle) {
   parts.forEach(p => { if (!state.shoppingList.some(i => i.name.toLowerCase() === p.toLowerCase())) state.shoppingList.unshift({ id: Date.now() + Math.random(), name: p, source: sourceTitle, checked: false }); });
   saveState(); renderShoppingList(); showUndoToast(`🛒 ${parts.length} Zutaten gespeichert!`);
 }
-
 function addManualShopItem() { const v = $('shopItemInput').value.trim(); if (v) { state.shoppingList.unshift({ id: Date.now(), name: v, source: 'Manuell', checked: false }); $('shopItemInput').value = ''; saveState(); renderShoppingList(); } }
 function toggleShopItem(idx) { state.shoppingList[idx].checked = !state.shoppingList[idx].checked; saveState(); renderShoppingList(); }
 function removeShopItem(idx) { state.shoppingList.splice(idx, 1); saveState(); renderShoppingList(); }
 function clearShoppingList() { if (confirm('Einkaufsliste leeren?')) { state.shoppingList = []; saveState(); renderShoppingList(); } }
 function shareShoppingListWhatsApp() { if (!state.shoppingList.length) return; window.open(`https://wa.me/?text=${encodeURIComponent('🛒 Einkaufsliste:\n' + state.shoppingList.map(i => `${i.checked ? '✅' : '⬜'} ${i.name}`).join('\n'))}`, '_blank'); }
-
 function renderShoppingList() {
   const c = $('shoppingListContainer');
   if (!state.shoppingList || !state.shoppingList.length) { c.innerHTML = `<div class="text-center py-2 text-[11px] text-slate-500">--</div>`; return; }
@@ -926,7 +905,6 @@ function closeReviewCard() { $('reviewCard').classList.add('hidden'); pendingDet
 function removePendingItem(idx) { pendingDetectedItems.splice(idx, 1); if (!pendingDetectedItems.length) closeReviewCard(); else renderReviewItems(); }
 function editPendingItem(idx) { const it = pendingDetectedItems[idx], n = prompt('Name:', it.name); if (n) it.name = n.trim(); const k = prompt('kcal:', it.kcal); if (k !== null && !isNaN(parseInt(k, 10))) it.kcal = Math.max(0, parseInt(k, 10)); renderReviewItems(); }
 function updatePortionScale(val) { currentPortionScale = parseInt(val, 10) / 100; $('portionSlider').value = val; tx('portionScaleLabel', `${val}%`); renderReviewItems(); }
-
 function renderReviewItems() {
   let total = 0;
   $('detectedItemsList').innerHTML = pendingDetectedItems.map((item, idx) => {
@@ -953,7 +931,6 @@ function quickAdd(name, kcal, p, c, f, icon, sugar = 2, fiber = 1, vitC = 4, mag
   state.todayLog.unshift({ id: Date.now(), name, kcal, p, c, f, sugar, fiber, vitC, mag, warn: '', icon, thumb: null, time: now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }), timestampISO: now.toISOString() });
   lastAddedCount = 1; saveState(); renderAll(); showUndoToast(`${name} (${kcal} kcal)`);
 }
-
 function showUndoToast(label) { tx('undoToastText', label); $('undoToast').classList.remove('hidden'); if (undoTimer) clearTimeout(undoTimer); undoTimer = setTimeout(() => $('undoToast').classList.add('hidden'), 6500); }
 function undoLastAction() { if (lastAddedCount > 0 && state.todayLog.length >= lastAddedCount) { state.todayLog.splice(0, lastAddedCount); lastAddedCount = 0; saveState(); renderAll(); } $('undoToast').classList.add('hidden'); }
 function addWater(l) { state.waterLiters = +(state.waterLiters + l).toFixed(2); saveState(); renderAll(); }
@@ -968,7 +945,6 @@ const mealCombosDe = [
   ['2x Hähnchen-Fitness-Wraps (~540 kcal)','2 Vollkorn-Wraps + 160g Hähnchen + Salat + Tomaten + Joghurt-Dip','Dazu passt noch 1 Apfel oder Birne.',540,42,55,14,'🌯'],
   ['Rindersteak / Schnitzel mit Kartoffeln (~720 kcal)','200g Rindersteak + 200g Kartoffeln + Beilagensalat','Macht richtig satt mit 52g Eiweiß!',720,52,60,26,'🥩']
 ];
-
 const mealCombosPl = [
   ['Sałatka + Kurczak (~560 kcal)','Duża sałatka + sos jogurtowy + 180g piersi z kurczaka + 1 bułka','Do tego pasuje jeszcze 1 jabłko.',560,46,48,14,'🥗'],
   ['Kurczak, ziemniaki i mizeria (~590 kcal)','180g piersi z kurczaka + 200g ziemniaków + ogórek + sos jogurtowy','Do tego twaróg z owocami!',590,44,52,15,'🍗'],
@@ -990,16 +966,14 @@ async function generateAIMealIdeas(presetWish) {
   btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; btn.disabled = true;
   outBox.classList.remove('hidden');
   outBox.innerHTML = `<div class="text-center py-2 text-xs text-violet-300"><i class="fa-solid fa-spinner fa-spin mr-1"></i>KI kreiert 2 neue Rezepte für „<b>${wish}</b>“ (${rem} kcal)...</div>`;
-
   try {
     const lang = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
-    const parsed = await callGeminiRequest([{ text: `Fitness-Koch: Nutzerwunsch: "${wish}". Offenes Budget: ${rem} kcal, ${remP}g Eiweiß. Erfinde 2 KOMPLETT NEUE, kreative Gerichte exakt passend zum Wunsch "${wish}" (jeweils max. ${Math.min(rem, 750)} kcal, KEINE Standard-Hähnchen-Reis-Wiederholung!). Gib in "combo" die Zutaten mit + getrennt und in "steps" 1 kurzen Zubereitungssatz an. Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"title": "Name (~540 kcal)", "combo": "Zutat 1 + Zutat 2", "steps": "Kurze Anleitung.", "kcal": 540, "p": 42, "c": 52, "f": 16, "icon": "🍝"}]` }]);
+    const parsed = await callGeminiRequest([{ text: `Fitness-Koch: Nutzerwunsch: "${wish}". Offenes Budget: ${rem} kcal, ${remP}g Eiweiß. Erfinde 2 KOMPLETT NEUE, kreative Gerichte exakt passend zum Wunsch "${wish}" (jeweils max. ${Math.min(rem, 750)} kcal). Gib in "combo" die Zutaten mit + getrennt und in "steps" 1 kurzen Zubereitungssatz an. Sprache: ${lang}. Gib NUR ein JSON-Array zurück: [{"title": "Name (~540 kcal)", "combo": "Zutat 1 + Zutat 2", "steps": "Kurze Anleitung.", "kcal": 540, "p": 42, "c": 52, "f": 16, "icon": "🍝"}]` }]);
     const arr = Array.isArray(parsed) ? parsed : (parsed.meals || parsed.recipes || parsed.items || Object.values(parsed).find(Array.isArray) || [parsed]);
-    window.latestWishMeals = arr.map(s => ({ title: String(s.title || wish), combo: String(s.combo || ''), steps: String(s.steps || s.extra || 'Frisch zubereiten.'), kcal: Math.max(100, Math.round(Number(s.kcal) || 480)), p: Math.round(Number(s.p) || 35), c: Math.round(Number(s.c) || 45), f: Math.round(Number(s.f) || 15), icon: s.icon || '✨' }));
+    window.latestWishMeals = arr.map(s => ({ title: String(s.title || wish), combo: String(s.combo || ''), steps: String(s.steps || s.extra || 'Frisch zubereiten.'), kcal: Math.max(80, Math.round(numOr(s.kcal, 480))), p: Math.round(Math.max(0, numOr(s.p, 35))), c: Math.round(Math.max(0, numOr(s.c, 45))), f: Math.round(Math.max(0, numOr(s.f, 15))), icon: s.icon || '✨' }));
     outBox.innerHTML = `<div class="text-[11px] font-bold text-emerald-300">✨ Deine 2 frisch erfundenen KI-Wunschgerichte („${wish}“):</div>` + window.latestWishMeals.map((s, idx) => `<div class="bg-violet-950/40 border border-violet-400/50 rounded-2xl p-3 space-y-1.5"><div class="fjb gap-2"><span class="text-xs font-bold text-violet-200">${s.icon} ${s.title}</span><span class="shrink-0 text-xs font-extrabold text-white bg-violet-500/30 px-2 py-0.5 rounded-lg">${s.kcal} kcal</span></div><div class="text-[11px] text-emerald-300 font-semibold">🧾 ${s.combo}</div><p class="text-[11px] text-slate-300">👨‍🍳 ${s.steps}</p><div class="fjb pt-1 border-t border-slate-800"><span class="text-[10px] text-slate-400">E:${s.p}g • K:${s.c}g • F:${s.f}g</span><div class="flex gap-1.5"><button onclick="addIngredientsToShop('${s.combo.replace(/'/g, '')}', '${s.title.replace(/'/g, '')}')" class="bg-slate-800 text-sky-300 text-[11px] font-bold px-2.5 py-1 rounded-xl">🛒 Einkauf</button><button onclick="logWishMeal(${idx})" class="bg-violet-400 text-slate-950 font-bold text-[11px] px-3 py-1 rounded-xl">+ Eintragen</button></div></div></div>`).join('');
   } catch (e) { outBox.innerHTML = `<div class="text-xs text-rose-300 p-2">⚠️ KI-Hinweis: ${e.message || 'Bitte Key prüfen.'}</div>`; } finally { btn.innerHTML = orig; btn.disabled = false; }
 }
-
 function logWishMeal(idx) { const s = (window.latestWishMeals || [])[idx]; if (s) quickAdd(s.title, s.kcal, s.p, s.c, s.f, s.icon, 4, 5, 25, 20); }
 
 function promptAddPastDay() {
@@ -1008,12 +982,9 @@ function promptAddPastDay() {
   state.pastDaysLog.unshift({ date: d.trim(), kcal: parseInt(k, 10), protein: 120, goal: state.goals.kcal });
   saveState(); renderAll(); showUndoToast(`📅 ${d} (${k} kcal) nachgetragen!`);
 }
-
 function deletePastDay(idx) { state.pastDaysLog.splice(idx, 1); saveState(); renderAll(); }
-
 function renderPastDays() {
   const list = $('pastDaysList');
-  if (!list) return;
   if (!state.pastDaysLog || !state.pastDaysLog.length) { list.innerHTML = `<div class="text-center py-3 text-slate-500">Noch keine vergangenen Tage gespeichert. Klicke oben rechts auf „+ Tag nachtragen“!</div>`; return; }
   list.innerHTML = state.pastDaysLog.map((d, idx) => {
     const diff = d.goal - d.kcal;
@@ -1029,7 +1000,6 @@ function addWeightEntry() {
     saveState(); renderWeightTab(); showUndoToast(`⚖️ ${v.toFixed(1)} kg gespeichert!`);
   }
 }
-
 function deleteWeightEntry(idx) { state.weightLog.splice(idx, 1); saveState(); renderWeightTab(); }
 function clearAllWeights() { if (confirm('Gewichts-Verlauf leeren?')) { state.weightLog = []; saveState(); renderWeightTab(); } }
 function promptTargetWeight() { const inp = prompt('Zielgewicht (kg):', state.goals.targetWeight); if (inp !== null) { const v = parseFloat(inp.replace(',', '.')); if (!isNaN(v) && v >= 35 && v <= 250) { state.goals.targetWeight = +v.toFixed(1); $('calcTargetWeight').value = v.toFixed(1); saveState(); renderWeightTab(); } } }
@@ -1041,7 +1011,6 @@ function calculatePersonalGoal() {
   const rawTopW = parseFloat(String($('weightInput').value || '').replace(',', '.'));
   const rawTarget = parseFloat(String($('calcTargetWeight').value || '').replace(',', '.'));
   const act = parseFloat($('calcActivity').value) || 1.25;
-
   const latestW = state.weightLog.length > 0 ? state.weightLog[state.weightLog.length - 1].weight : 98.0;
   const weight = (!isNaN(rawW) && rawW >= 35) ? rawW : ((!isNaN(rawTopW) && rawTopW >= 35) ? rawTopW : latestW);
   const targetW = (!isNaN(rawTarget) && rawTarget >= 35) ? rawTarget : (state.goals.targetWeight || 83.0);
@@ -1050,10 +1019,8 @@ function calculatePersonalGoal() {
   if (state.weightLog.length === 0 || state.weightLog[state.weightLog.length - 1].weight !== +weight.toFixed(1)) {
     state.weightLog.push({ date: todayStr, weight: +weight.toFixed(1) });
   }
-
   const tdee = Math.round(((10 * weight) + (6.25 * height) - (5 * age) + 5) * act);
   const recKcal = Math.max(1450, tdee - 550);
-
   state.goals.kcal = recKcal;
   state.goals.protein = Math.round(weight * 1.6);
   state.goals.fat = Math.round((recKcal * 0.28) / 9);
@@ -1092,10 +1059,12 @@ function renderMealSuggestions(remaining) {
 function renderWeightTab() {
   const log = state.weightLog || [], tw = Number(state.goals.targetWeight) || 83.0;
   tx('targetWeightDisplay', tw.toFixed(1) + ' kg');
+  if (document.activeElement !== $('calcTargetWeight')) $('calcTargetWeight').value = tw.toFixed(1);
   let latest = 98.0;
   if (log.length > 0) {
     latest = Number(log[log.length - 1].weight) || 98.0;
     tx('currentWeightDisplay', latest.toFixed(1) + ' kg');
+    if (document.activeElement !== $('calcWeight')) $('calcWeight').value = latest.toFixed(1);
     let trend = Number(log[0].weight) || latest;
     log.forEach(e => { trend = ((Number(e.weight) || latest) * 0.35) + (trend * 0.65); });
     tx('trendWeightDisplay', trend.toFixed(1) + ' kg');
@@ -1110,23 +1079,16 @@ function renderWeightTab() {
   const daysNeeded = Math.round((kgToLose * 7000) / Math.max(200, avgDeficit));
   const targetDate = new Date(Date.now() + daysNeeded * 86400000).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
   $('prognosisBox').innerHTML = kgToLose <= 0 ? `🎉 <b>Zielgewicht erreicht!</b>` : `📈 <b>KI-Prognose (Ausreißer-bereinigt):</b> Noch <b>${kgToLose} kg</b> bis zum Ziel. Bei deinem echten Schnitt (~${Math.round(avgDeficit)} kcal Defizit/Tag) erreichst du <b>${tw} kg</b> am <b>${targetDate}</b>!`;
-
   $('weightHistoryList').innerHTML = !log.length ? `<div class="text-center py-3 text-xs text-slate-500">--</div>` : log.map((item, idx) => ({ item, idx })).reverse().map(({ item, idx }) => `<div class="fjb bg-slate-900/60 px-3 py-2 rounded-xl text-xs border border-slate-800"><span class="text-slate-400">${item.date}</span><div class="flex items-center gap-3"><span class="font-bold text-white">${Number(item.weight).toFixed(1)} kg</span><button onclick="deleteWeightEntry(${idx})" class="bg-rose-500/15 text-rose-400 px-2 py-1 rounded-lg"><i class="fa-solid fa-trash-can"></i></button></div></div>`).join('');
 }
 
 function renderAll() {
   checkAutomaticDailyReset(); applyTranslations(); renderQuickAddButtons();
   tx('currentDateDisplay', new Date().toLocaleDateString(state.lang === 'pl' ? 'pl-PL' : 'de-DE', { weekday: 'long', day: '2-digit', month: 'long' }));
-
   const totals = state.todayLog.reduce((a, i) => ({ kcal: a.kcal + i.kcal, p: a.p + i.p, c: a.c + i.c, f: a.f + i.f, sugar: a.sugar + (i.sugar || 0), fiber: a.fiber + (i.fiber || 0), vitC: a.vitC + (i.vitC || 0), mag: a.mag + (i.mag || 0) }), { kcal: 0, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0 });
-  const baseGoal = state.goals.kcal;
-  const effectiveGoal = state.cheatRescue?.active ? Math.max(1350, baseGoal - 150) : baseGoal;
-  const remaining = effectiveGoal - totals.kcal;
+  const baseGoal = state.goals.kcal, effectiveGoal = state.cheatRescue?.active ? Math.max(1350, baseGoal - 150) : baseGoal, remaining = effectiveGoal - totals.kcal;
 
-  tx('goalKcalDisplay', effectiveGoal);
-  tx('eatenKcalDisplay', totals.kcal);
-  tx('waterDisplay', state.waterLiters.toFixed(2));
-
+  tx('goalKcalDisplay', effectiveGoal); tx('eatenKcalDisplay', totals.kcal); tx('waterDisplay', state.waterLiters.toFixed(2));
   $('cheatRescueBanner').classList.toggle('hidden', remaining >= 0 && !state.cheatRescue?.active);
   tx('cheatRescueBtn', state.cheatRescue?.active ? 'Aktiv (-150 kcal)' : '4-Tage-Ausgleich starten');
 
@@ -1151,16 +1113,11 @@ function renderAll() {
   tx('fatDisplay', Math.round(totals.f)); tx('fatGoalDisplay', state.goals.fat);
   $('fatBar').style.width = Math.min(100, (totals.f / state.goals.fat) * 100) + '%';
 
-  tx('fiberDisplay', Math.round(totals.fiber));
-  tx('vitCDisplay', Math.min(100, Math.round(totals.vitC)));
-  tx('magDisplay', Math.min(100, Math.round(totals.mag)));
-  tx('sugarDisplay', Math.round(totals.sugar));
+  tx('fiberDisplay', Math.round(totals.fiber)); tx('vitCDisplay', Math.min(100, Math.round(totals.vitC)));
+  tx('magDisplay', Math.min(100, Math.round(totals.mag))); tx('sugarDisplay', Math.round(totals.sugar));
   $('sugarWarnBanner').classList.toggle('hidden', totals.sugar <= 35 && !state.todayLog.some(i => i.warn));
 
-  renderMealSuggestions(remaining);
-  renderShoppingList();
-  renderEnergyLog();
-  renderPastDays();
+  renderMealSuggestions(remaining); renderShoppingList(); renderEnergyLog(); renderPastDays();
 
   $('todayLogList').innerHTML = !state.todayLog.length ? `<div class="text-center py-4 text-xs text-slate-500">--</div>` :
     state.todayLog.map((item, idx) => `<div class="sc space-y-1"><div class="fjb"><div class="flex items-center gap-2.5 min-w-0">${item.thumb ? `<img src="${item.thumb}" class="w-9 h-9 rounded-xl object-cover shrink-0 border border-slate-700" alt="Foto" />` : `<span class="text-lg shrink-0">${item.icon || '🍽️'}</span>`}<div class="min-w-0"><div class="text-xs font-bold text-white truncate">${item.name}</div><div class="text-[10px] text-slate-400">${item.time} • E:${item.p}g K:${item.c}g F:${item.f}g • 🍬${item.sugar || 0}g</div></div></div><div class="flex items-center gap-2 shrink-0 ml-2"><span class="text-xs font-extrabold text-emerald-400">${item.kcal} kcal</span><button onclick="removeLogItem(${idx})" class="bg-rose-500/15 text-rose-400 border border-rose-500/30 px-2 py-1 rounded-xl text-[11px]"><i class="fa-solid fa-trash-can text-[10px]"></i></button></div></div>${item.warn ? `<div class="text-[10px] text-amber-300 bg-amber-500/10 px-2 py-1 rounded">${item.warn}</div>` : ''}</div>`).join('');
@@ -1176,8 +1133,7 @@ function renderAll() {
   tx('keySavedBadge', hasKey ? 'Aktiv (Lokal geschützt)' : 'Key eintragen');
   $('keySavedBadge').className = hasKey ? 'b-ok' : 'b-warn';
 
-  renderInviteCodes();
-  renderWeightTab();
+  renderInviteCodes(); renderWeightTab();
 }
 
 document.addEventListener('visibilitychange', () => { if (!document.hidden && state.unlocked) renderAll(); });
