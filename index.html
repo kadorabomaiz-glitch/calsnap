@@ -263,7 +263,7 @@
       </section>
 
       <!-- ========================================================
-           CORRECTED MOVEMENT & LIVE-TRACKING COCKPIT
+           BEWEGUNG & LIVE-TRACKING COCKPIT (ANTI-FALSE-POSITIVE)
            ======================================================== -->
       <section class="glass-card p-3.5 space-y-3 border border-amber-500/30">
         <div class="flex items-center justify-between">
@@ -282,7 +282,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
-          <!-- STEP COUNTER CARD -->
+          <!-- STEP COUNTER CARD WITH RHYTHM-AWARE STATE MACHINE -->
           <div class="glass-subcard p-3 space-y-2 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
@@ -865,14 +865,29 @@
     let recognition = null;
     let isRecording = false;
 
-    // SENSOR & GPS LIVE TRACKER ENGINE STATE
+    // =========================================================================
+    // BIOMECHANICAL STEP ENGINE: DUAL-THRESHOLD STATE MACHINE & BURST FILTER
+    // =========================================================================
     let isStepTrackingActive = false;
     let gEst = 9.80665;
-    let lastStepTime = 0;
-    let stepSaveCounter = 0;
     let sensorEventCounter = 0;
     let sensorSampleTimer = null;
+    let stepSaveCounter = 0;
 
+    // Glättung & Signal-Historie (Rolling Buffer)
+    const ACCEL_WINDOW_SIZE = 4;
+    const accelWindow = [];
+
+    // Dual-Threshold State Machine: 0 = SEARCHING_PEAK, 1 = SEARCHING_VALLEY
+    let pedometerState = 0;
+    let peakValue = 0;
+    let peakTimestamp = 0;
+
+    // Anti-False-Positive Rhythm Buffer: Verhindert Zählen beim Anheben!
+    let rhythmBuffer = 0;
+    let lastStepCandidateTime = 0;
+
+    // GPS CYCLING ENGINE STATE
     let isCyclingTrackingActive = false;
     let cyclingWatchId = null;
     let cyclingSessionSec = 0;
@@ -1049,7 +1064,7 @@
     }
 
     // =========================================================================
-    // CORRECTION 1: DEADLOCK-FREE STEP COUNTER HARDWARE ENGINE
+    // HIGH-ACCURACY PEDOMETER: DUAL-THRESHOLD + 3-STEP RHYTHM BUFFER
     // =========================================================================
     async function toggleStepSensor() {
       if (isStepTrackingActive) {
@@ -1070,10 +1085,17 @@
         }
       }
 
-      lastStepTime = performance.now();
+      // Initialisierung der State Machine
+      pedometerState = 0;
+      peakValue = 0;
+      peakTimestamp = 0;
+      rhythmBuffer = 0;
+      lastStepCandidateTime = 0;
+      accelWindow.length = 0;
+      sensorEventCounter = 0;
+
       window.addEventListener('devicemotion', handleMotionStepEvent, { passive: true });
       isStepTrackingActive = true;
-      sensorEventCounter = 0;
 
       const btn = document.getElementById('btnStepSensor');
       if (btn) {
@@ -1084,24 +1106,24 @@
 
       const badge = document.getElementById('stepSensorStatusBadge');
       if (badge) {
-        badge.textContent = 'Verbinde...';
+        badge.textContent = 'Bereit (0 Hz)';
         badge.className = 'text-[9px] font-semibold text-amber-300 px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-500/40';
       }
 
       sensorSampleTimer = setInterval(() => {
         if (isStepTrackingActive && badge) {
           if (sensorEventCounter > 0) {
-            badge.textContent = `Live (${sensorEventCounter} Hz)`;
+            badge.textContent = rhythmBuffer >= 3 ? '🚶‍♂️ Gehen' : `Live (${sensorEventCounter} Hz)`;
             badge.className = 'text-[9px] font-semibold text-emerald-300 px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40';
           } else {
-            badge.textContent = 'Kein Signal (HTTPS?)';
+            badge.textContent = 'Kein Signal';
             badge.className = 'text-[9px] font-semibold text-rose-300 px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-500/40';
           }
           sensorEventCounter = 0;
         }
       }, 1000);
 
-      showToast('👟 Schrittzähler gestartet. Bewege das Smartphone!', 'info');
+      showToast('👟 Schrittzähler scharf. Gehe 3–4 Schritte los!', 'info');
     }
 
     function stopStepSensor() {
@@ -1111,6 +1133,8 @@
         sensorSampleTimer = null;
       }
       isStepTrackingActive = false;
+      rhythmBuffer = 0;
+      pedometerState = 0;
 
       const btn = document.getElementById('btnStepSensor');
       if (btn) {
@@ -1134,32 +1158,101 @@
       if (isCyclingTrackingActive) return;
       sensorEventCounter++;
 
-      let dynMagnitude = 0;
+      let instantMag = 0;
       const linAcc = e.acceleration;
 
       if (linAcc && linAcc.x !== null && linAcc.y !== null && linAcc.z !== null) {
-        dynMagnitude = Math.sqrt(linAcc.x * linAcc.x + linAcc.y * linAcc.y + linAcc.z * linAcc.z);
+        instantMag = Math.sqrt(linAcc.x * linAcc.x + linAcc.y * linAcc.y + linAcc.z * linAcc.z);
       } else {
         const raw = e.accelerationIncludingGravity;
         if (!raw || raw.x === null) return;
         const rawMag = Math.sqrt(raw.x * raw.x + raw.y * raw.y + raw.z * raw.z);
         gEst = 0.975 * gEst + 0.025 * rawMag;
-        dynMagnitude = Math.abs(rawMag - gEst);
+        instantMag = Math.abs(rawMag - gEst);
       }
 
+      // 1. Moving Average Smoothing über 4 Samples (Rauschunterdrückung)
+      accelWindow.push(instantMag);
+      if (accelWindow.length > ACCEL_WINDOW_SIZE) accelWindow.shift();
+      const smoothMag = accelWindow.reduce((a, b) => a + b, 0) / accelWindow.length;
+
       const now = performance.now();
-      // DEADLOCK ELIMINATED: Strikte Entprellung (260ms) ohne tödliche Obergrenze!
-      if (dynMagnitude > 1.15 && (now - lastStepTime) > 260) {
-        lastStepTime = now;
-        state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 1;
-        stepSaveCounter++;
-        if (stepSaveCounter >= 10) {
-          stepSaveCounter = 0;
-          recalcActiveExpenditure();
-          saveState();
+
+      // 2. Dual-Threshold Peak-to-Valley State Machine
+      const THRESHOLD_PEAK = 1.65;    // Oberschwelle: Echter Auftrittsimpuls
+      const THRESHOLD_VALLEY = 0.55;  // Unterschwelle: Rückkehr ins Wellental
+
+      if (pedometerState === 0) {
+        // Suche nach Peak (positiver Impuls)
+        if (smoothMag >= THRESHOLD_PEAK) {
+          pedometerState = 1;
+          peakValue = smoothMag;
+          peakTimestamp = now;
         }
-        renderActivityUIOnly();
+      } else if (pedometerState === 1) {
+        // Tracke maximalen Peak
+        if (smoothMag > peakValue) {
+          peakValue = smoothMag;
+          peakTimestamp = now;
+        }
+
+        const elapsedSincePeak = now - peakTimestamp;
+
+        // Suche nach Wellental (Entlastung)
+        if (smoothMag <= THRESHOLD_VALLEY) {
+          // Gültiges Fersenauftritt-zu-Wellental-Fenster: 140ms bis 650ms
+          if (elapsedSincePeak >= 140 && elapsedSincePeak <= 650 && (peakValue - smoothMag) >= 1.20) {
+            onStepCandidateRecognized(now);
+          }
+          pedometerState = 0;
+          peakValue = 0;
+        } else if (elapsedSincePeak > 750) {
+          // Timeout: Nur langsames Anheben/Neigen ohne Wellental -> Verwerfen!
+          pedometerState = 0;
+          peakValue = 0;
+        }
       }
+    }
+
+    function onStepCandidateRecognized(now) {
+      if (lastStepCandidateTime === 0) {
+        // Erster isolierter Impuls -> Puffer startet, noch kein Schritt gebucht!
+        rhythmBuffer = 1;
+        lastStepCandidateTime = now;
+        return;
+      }
+
+      const dt = now - lastStepCandidateTime;
+
+      // Menschliche Schrittkadenz: 310ms bis 1350ms (~0.74 bis 3.2 Schritte/Sekunde)
+      if (dt >= 310 && dt <= 1350) {
+        rhythmBuffer++;
+        lastStepCandidateTime = now;
+
+        if (rhythmBuffer === 3) {
+          // Geh-Rhythmus bestätigt! Bucht die 2 gehaltenen Puffer-Schritte + aktuellen Schritt nach
+          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 3;
+          triggerStepPersistence();
+        } else if (rhythmBuffer > 3) {
+          // Kontinuierliches Gehen -> Jeder Schritt zählt direkt in Echtzeit
+          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 1;
+          triggerStepPersistence();
+        }
+      } else if (dt > 1350) {
+        // Rhythmus abgerissen (z. B. Stehen geblieben oder Handy abgelegt) -> Neuer Pufferstart
+        rhythmBuffer = 1;
+        lastStepCandidateTime = now;
+      }
+    }
+
+    function triggerStepPersistence() {
+      stepSaveCounter++;
+      if (stepSaveCounter >= 8) {
+        stepSaveCounter = 0;
+        recalcActiveExpenditure();
+        saveState();
+      }
+      renderActivityUIOnly();
     }
 
     function addStepsManual(delta) {
@@ -1171,7 +1264,7 @@
     }
 
     // =========================================================================
-    // CORRECTION 2: ACCUMULATIVE GPS CYCLING ENGINE & CONSISTENT TIME DISPLAY
+    // ACCUMULATIVE GPS CYCLING ENGINE
     // =========================================================================
     async function toggleCyclingGps() {
       if (isCyclingTrackingActive) {
@@ -1216,7 +1309,6 @@
         const timerEl = document.getElementById('cyclingTimerText');
         if (timerEl) timerEl.textContent = timeStr;
 
-        // Kumulativ: Überschreibt niemals vorherige Tagesminuten!
         state.todayActivity.cyclingMinutes = Math.round((cyclingBaseMinutes + cyclingSessionSec / 60) * 10) / 10;
         recalcActiveExpenditure();
         renderActivityUIOnly();
@@ -1381,7 +1473,7 @@
     }
 
     // =========================================================================
-    // CORRECTION 3: PERSISTENT BIOMETRICS & CUSTOMIZABLE MACRO CALCULATOR
+    // PERSISTENT BIOMETRICS & CUSTOMIZABLE MACRO CALCULATOR
     // =========================================================================
     function saveUserProfile() {
       state.userProfile = {
@@ -1403,7 +1495,6 @@
       const bmr = 10 * p.weight + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
       const tdee = Math.round(bmr * p.activity);
 
-      // Falls der Nutzer bereits individuelle Ziele hat (wie 2425 kcal / 260g Protein), nutzen wir diese als Standard
       const recKcal = state.goals.kcal || Math.max(1400, tdee - 500);
       const recP = state.goals.protein || Math.round(p.weight * 2.2);
       const recC = state.goals.carbs || 85;
@@ -2718,7 +2809,6 @@ JSON-Schema:
       document.getElementById('currentDateLabel').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short' });
       if (!state.unlocked) document.getElementById('lockScreen').classList.remove('hidden');
 
-      // Initiale Befüllung des Biometrie-Rechners ohne spätere Overwrites
       if (state.userProfile) {
         if (document.getElementById('calcGender')) document.getElementById('calcGender').value = state.userProfile.gender || 'm';
         if (document.getElementById('calcAge')) document.getElementById('calcAge').value = state.userProfile.age || 35;
