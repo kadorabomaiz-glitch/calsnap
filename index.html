@@ -159,20 +159,11 @@
       <div class="flex items-center gap-1.5">
         <button id="langBtnDe" onclick="setLanguage('de')" class="px-2 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">DE</button>
         <button id="langBtnPl" onclick="setLanguage('pl')" class="px-2 py-1.5 rounded-lg text-xs font-bold bg-slate-800/80 text-slate-400 border border-slate-700">PL</button>
-        <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 transition" title="Einstellungen, Einladungen & API-Key">
+        <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 transition" title="Einstellungen, WhatsApp-Codes & Ziele">
           <i class="fa-solid fa-gear"></i>
         </button>
       </div>
     </header>
-
-    <!-- INSECURE HTTP CONTEXT WARNING BANNER (SHOWN ONLY IF SENSORS BLOCKED BY BROWSER) -->
-    <div id="httpsWarningBanner" class="hidden bg-rose-500/15 border border-rose-500/40 rounded-xl p-3 flex items-start gap-2.5 text-xs text-rose-200">
-      <i class="fa-solid fa-triangle-exclamation text-rose-400 text-sm mt-0.5"></i>
-      <div>
-        <p class="font-bold">HTTPS erforderlich für Live-Sensoren</p>
-        <p class="text-[11px] text-rose-300/80 mt-0.5">Dein Browser blockiert Beschleunigungssensoren und GPS im unverschlüsselten HTTP-Modus. Nutze HTTPS oder den manuellen ⌚ Quick-Sync.</p>
-      </div>
-    </div>
 
     <!-- CHEAT RESCUE BANNER -->
     <div id="cheatRescueBanner" class="hidden bg-amber-500/15 border border-amber-500/40 rounded-xl p-3 flex items-center justify-between">
@@ -187,7 +178,7 @@
     </div>
 
     <!-- ==========================================
-         TAB 1: TRACKER, MOTION & MULTIMODAL AI
+         TAB 1: TRACKER, BEWEGUNG & MULTIMODAL AI
          ========================================== -->
     <main id="tab-tracker" class="tab-content active space-y-4">
 
@@ -272,7 +263,7 @@
       </section>
 
       <!-- ========================================================
-           CORRECTED STEP & GPS CYCLING ENGINE (LIVE COCKPIT)
+           CORRECTED MOVEMENT & LIVE-TRACKING COCKPIT
            ======================================================== -->
       <section class="glass-card p-3.5 space-y-3 border border-amber-500/30">
         <div class="flex items-center justify-between">
@@ -291,7 +282,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
-          <!-- STEP COUNTER CARD (HARDWARE LINEAR ACCELERATION) -->
+          <!-- STEP COUNTER CARD -->
           <div class="glass-subcard p-3 space-y-2 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
@@ -317,7 +308,7 @@
             </div>
           </div>
 
-          <!-- GPS CYCLING TRACKER CARD (STOPWATCH + ACCURACY GATE) -->
+          <!-- GPS CYCLING TRACKER CARD -->
           <div class="glass-subcard p-3 space-y-2 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
@@ -325,7 +316,7 @@
                 <span id="cyclingKcalText" class="text-amber-400 font-bold">+0 kcal</span>
               </div>
               <div class="flex items-baseline justify-between mt-0.5">
-                <span id="cyclingTimerText" class="text-base font-extrabold text-white">00:00</span>
+                <span id="cyclingTimerText" class="text-base font-extrabold text-white">0 Min</span>
                 <span id="cyclingStatsText" class="text-xs font-bold text-emerald-400">0.0 km</span>
               </div>
               <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1">
@@ -605,7 +596,7 @@
     </main>
 
     <!-- ==========================================
-         TAB 3: GEWICHT, BIOMETRIE & HISTORIE
+         TAB 3: GEWICHT, BIOMETRIE & MAKRO-RECHNER
          ========================================== -->
     <main id="tab-weight" class="tab-content space-y-4">
       <section class="glass-card p-4 space-y-3.5">
@@ -647,36 +638,43 @@
         </button>
       </section>
 
-      <!-- BMR / TDEE GOAL CALCULATOR -->
-      <section class="glass-card p-4 space-y-3">
-        <h3 class="text-sm font-extrabold text-white">🎯 Mifflin-St Jeor Kalorien- & Makro-Rechner</h3>
+      <!-- IMPROVED PERSISTENT BMR / TDEE MACRO CALCULATOR -->
+      <section class="glass-card p-4 space-y-3.5 border border-emerald-500/30">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-extrabold text-white flex items-center gap-1.5">
+            <span>🎯</span>
+            <span>Mifflin-St Jeor Makro- & Ziel-Rechner</span>
+          </h3>
+          <span class="text-[10px] text-emerald-400 font-semibold">Profil gesichert</span>
+        </div>
+
         <div class="grid grid-cols-2 gap-2.5 text-xs">
           <div>
             <label class="text-slate-400 block mb-1">Geschlecht</label>
-            <select id="calcGender" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
+            <select id="calcGender" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
               <option value="m">Männlich</option>
               <option value="f">Weiblich</option>
             </select>
           </div>
           <div>
             <label class="text-slate-400 block mb-1">Alter (Jahre)</label>
-            <input id="calcAge" type="number" value="35" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+            <input id="calcAge" type="number" value="35" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
           </div>
           <div>
             <label class="text-slate-400 block mb-1">Größe (cm)</label>
-            <input id="calcHeight" type="number" value="178" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+            <input id="calcHeight" type="number" value="178" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
           </div>
           <div>
             <label class="text-slate-400 block mb-1">Aktuelles Gewicht (kg)</label>
-            <input id="calcWeight" type="number" step="0.1" value="86.0" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+            <input id="calcWeight" type="number" step="0.1" value="86.0" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
           </div>
           <div>
             <label class="text-slate-400 block mb-1">Zielgewicht (kg)</label>
-            <input id="calcTargetWeight" type="number" step="0.1" value="80.0" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+            <input id="calcTargetWeight" type="number" step="0.1" value="80.0" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
           </div>
           <div>
             <label class="text-slate-400 block mb-1">Basis-Aktivität</label>
-            <select id="calcActivity" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
+            <select id="calcActivity" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
               <option value="1.2">Sitzend (Büro)</option>
               <option value="1.375" selected>Leicht aktiv (1-3x Sport)</option>
               <option value="1.55">Mäßig aktiv (3-5x Sport)</option>
@@ -684,10 +682,13 @@
             </select>
           </div>
         </div>
-        <button onclick="calculatePersonalGoal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-emerald-300 font-bold text-xs">
-          Optimales Defizit & Makros berechnen
+
+        <button onclick="calculatePersonalGoal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs shadow-md transition">
+          Defizit & Makros berechnen
         </button>
-        <div id="calcResultBox" class="hidden glass-subcard p-3 space-y-2 text-xs"></div>
+
+        <!-- INTERACTIVE RESULT BOX WITH EDITABLE INPUTS BEFORE APPLYING -->
+        <div id="calcResultBox" class="hidden glass-subcard p-3 space-y-3 border border-emerald-500/40 text-xs"></div>
       </section>
 
       <!-- PAST DAYS ARCHIVE (NUTRITION & ACTIVITY) -->
@@ -758,19 +759,19 @@
       <div class="grid grid-cols-2 gap-2.5 text-xs">
         <div>
           <label class="text-slate-400 block mb-1">Basis-Tagesziel kcal</label>
-          <input id="goalKcalInput" type="number" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+          <input id="goalKcalInput" type="number" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-bold text-emerald-400" />
         </div>
         <div>
           <label class="text-slate-400 block mb-1">Eiweiß (g)</label>
-          <input id="goalProtInput" type="number" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+          <input id="goalProtInput" type="number" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-bold" />
         </div>
         <div>
           <label class="text-slate-400 block mb-1">Kohlenhydrate (g)</label>
-          <input id="goalCarbInput" type="number" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+          <input id="goalCarbInput" type="number" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-bold" />
         </div>
         <div>
           <label class="text-slate-400 block mb-1">Fett (g)</label>
-          <input id="goalFatInput" type="number" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+          <input id="goalFatInput" type="number" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-bold" />
         </div>
         <div class="col-span-2">
           <label class="text-slate-400 block mb-1">Zielgewicht (kg)</label>
@@ -779,7 +780,7 @@
       </div>
 
       <button onclick="saveSettings()" class="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20">
-        Einstellungen speichern
+        Einstellungen & Ziele speichern
       </button>
 
       <!-- ADMIN: WHATSAPP INVITE CODE GENERATOR -->
@@ -838,7 +839,8 @@
       masterCode: 'START-2026',
       geminiApiKey: '',
       inviteCodes: [],
-      goals: { kcal: 1900, protein: 140, carbs: 180, fat: 65, targetWeight: 83.0 },
+      goals: { kcal: 2425, protein: 260, carbs: 85, fat: 116, targetWeight: 80.0 },
+      userProfile: { gender: 'm', age: 35, height: 178, activity: 1.375, weight: 86.0 },
       cheatRescue: { active: false, dailyCut: 0 },
       lastActiveDate: new Date().toISOString().slice(0, 10),
       waterLiters: 0.0,
@@ -860,7 +862,6 @@
     let editingTarget = { source: null, index: -1 };
     let cachedMenuResults = [];
     let cachedPotResult = null;
-    let lastCalculatedGoals = null;
     let recognition = null;
     let isRecording = false;
 
@@ -874,8 +875,8 @@
 
     let isCyclingTrackingActive = false;
     let cyclingWatchId = null;
-    let cyclingStartTime = 0;
-    let cyclingElapsedSec = 0;
+    let cyclingSessionSec = 0;
+    let cyclingBaseMinutes = 0;
     let cyclingTimerInterval = null;
     let lastGpsCoords = null;
     let lastGpsTime = null;
@@ -939,6 +940,7 @@
           ...structuredClone(DEFAULT_STATE),
           ...parsed,
           goals: { ...DEFAULT_STATE.goals, ...(parsed.goals || {}) },
+          userProfile: { ...DEFAULT_STATE.userProfile, ...(parsed.userProfile || {}) },
           cheatRescue: { ...DEFAULT_STATE.cheatRescue, ...(parsed.cheatRescue || {}) },
           todayActivity: { ...DEFAULT_STATE.todayActivity, ...(parsed.todayActivity || {}) },
           activityLog: Array.isArray(parsed.activityLog) ? parsed.activityLog : [],
@@ -1022,9 +1024,9 @@
 
     function getUserWeightKg() {
       if (state.weightLog.length > 0) {
-        return numOr(state.weightLog[state.weightLog.length - 1].weight, 83.0);
+        return numOr(state.weightLog[state.weightLog.length - 1].weight, 86.0);
       }
-      return numOr(state.goals.targetWeight, 83.0);
+      return numOr(state.userProfile?.weight, numOr(state.goals.targetWeight, 86.0));
     }
 
     function recalcActiveExpenditure() {
@@ -1047,17 +1049,12 @@
     }
 
     // =========================================================================
-    // CORRECTION 1: STEP COUNTER HARDWARE ENGINE (ACCELERATION + BIO-FILTER)
+    // CORRECTION 1: DEADLOCK-FREE STEP COUNTER HARDWARE ENGINE
     // =========================================================================
     async function toggleStepSensor() {
       if (isStepTrackingActive) {
         stopStepSensor();
         return;
-      }
-
-      if (window.isSecureContext === false && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-        document.getElementById('httpsWarningBanner')?.classList.remove('hidden');
-        showToast('Achtung: Browser blockiert Sensoren ohne HTTPS.', 'warn');
       }
 
       if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -1073,6 +1070,7 @@
         }
       }
 
+      lastStepTime = performance.now();
       window.addEventListener('devicemotion', handleMotionStepEvent, { passive: true });
       isStepTrackingActive = true;
       sensorEventCounter = 0;
@@ -1150,7 +1148,8 @@
       }
 
       const now = performance.now();
-      if (dynMagnitude > 1.25 && (now - lastStepTime) > 260 && (now - lastStepTime) < 1800) {
+      // DEADLOCK ELIMINATED: Strikte Entprellung (260ms) ohne tödliche Obergrenze!
+      if (dynMagnitude > 1.15 && (now - lastStepTime) > 260) {
         lastStepTime = now;
         state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 1;
         stepSaveCounter++;
@@ -1172,7 +1171,7 @@
     }
 
     // =========================================================================
-    // CORRECTION 2: GPS CYCLING ENGINE (STOPWATCH & DYNAMIC ACCURACY GATE)
+    // CORRECTION 2: ACCUMULATIVE GPS CYCLING ENGINE & CONSISTENT TIME DISPLAY
     // =========================================================================
     async function toggleCyclingGps() {
       if (isCyclingTrackingActive) {
@@ -1190,8 +1189,8 @@
 
       lastGpsCoords = null;
       lastGpsTime = null;
-      cyclingStartTime = performance.now();
-      cyclingElapsedSec = 0;
+      cyclingSessionSec = 0;
+      cyclingBaseMinutes = numOr(state.todayActivity.cyclingMinutes, 0);
       isCyclingTrackingActive = true;
 
       const accBadge = document.getElementById('gpsAccuracyBadge');
@@ -1210,14 +1209,15 @@
       );
 
       cyclingTimerInterval = setInterval(() => {
-        cyclingElapsedSec++;
-        const mins = Math.floor(cyclingElapsedSec / 60);
-        const secs = cyclingElapsedSec % 60;
+        cyclingSessionSec++;
+        const mins = Math.floor(cyclingSessionSec / 60);
+        const secs = cyclingSessionSec % 60;
         const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         const timerEl = document.getElementById('cyclingTimerText');
         if (timerEl) timerEl.textContent = timeStr;
 
-        state.todayActivity.cyclingMinutes = Math.max(0, Math.round((cyclingElapsedSec / 60) * 10) / 10);
+        // Kumulativ: Überschreibt niemals vorherige Tagesminuten!
+        state.todayActivity.cyclingMinutes = Math.round((cyclingBaseMinutes + cyclingSessionSec / 60) * 10) / 10;
         recalcActiveExpenditure();
         renderActivityUIOnly();
       }, 1000);
@@ -1301,7 +1301,7 @@
         const dtHours = (now - lastGpsTime) / 3600000;
         let vKmh = crd.speed !== null && crd.speed >= 0 ? crd.speed * 3.6 : (dtHours > 0 ? dKm / dtHours : 0);
 
-        if (vKmh >= 4.0 && vKmh <= 55.0 && dKm > 0.003) {
+        if (vKmh >= 3.5 && vKmh <= 55.0 && dKm > 0.002) {
           state.todayActivity.cyclingKm = Math.round((numOr(state.todayActivity.cyclingKm, 0) + dKm) * 100) / 100;
           const prevSpeed = numOr(state.todayActivity.avgSpeedKmh, 18.0);
           state.todayActivity.avgSpeedKmh = Math.round((0.85 * prevSpeed + 0.15 * vKmh) * 10) / 10;
@@ -1369,6 +1369,10 @@
       document.getElementById('stepsKcalText').textContent = `+${stepKcal} kcal`;
       document.getElementById('stepsProgressBar').style.width = `${Math.min(100, (steps / 10000) * 100)}%`;
 
+      const timerEl = document.getElementById('cyclingTimerText');
+      if (timerEl && !isCyclingTrackingActive) {
+        timerEl.textContent = `${Math.round(cMin)} Min`;
+      }
       document.getElementById('cyclingStatsText').textContent = `${cKm.toFixed(1)} km`;
       document.getElementById('cyclingKcalText').textContent = `+${cyclingKcal} kcal`;
       document.getElementById('cyclingSpeedText').textContent = `Ø ${avgV.toFixed(1)} km/h`;
@@ -1377,7 +1381,90 @@
     }
 
     // =========================================================================
-    // CORRECTION 3: WHATSAPP DIRECT SHARE & INVITE CODE HANDLER
+    // CORRECTION 3: PERSISTENT BIOMETRICS & CUSTOMIZABLE MACRO CALCULATOR
+    // =========================================================================
+    function saveUserProfile() {
+      state.userProfile = {
+        gender: document.getElementById('calcGender').value,
+        age: numOr(document.getElementById('calcAge').value, 35),
+        height: numOr(document.getElementById('calcHeight').value, 178),
+        weight: numOr(document.getElementById('calcWeight').value, 86.0),
+        activity: numOr(document.getElementById('calcActivity').value, 1.375)
+      };
+      state.goals.targetWeight = numOr(document.getElementById('calcTargetWeight').value, 80.0);
+      saveState();
+    }
+
+    function calculatePersonalGoal() {
+      saveUserProfile();
+      const p = state.userProfile;
+      const targetW = numOr(state.goals.targetWeight, 80.0);
+
+      const bmr = 10 * p.weight + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
+      const tdee = Math.round(bmr * p.activity);
+
+      // Falls der Nutzer bereits individuelle Ziele hat (wie 2425 kcal / 260g Protein), nutzen wir diese als Standard
+      const recKcal = state.goals.kcal || Math.max(1400, tdee - 500);
+      const recP = state.goals.protein || Math.round(p.weight * 2.2);
+      const recC = state.goals.carbs || 85;
+      const recF = state.goals.fat || Math.round((recKcal - recP * 4 - recC * 4) / 9);
+
+      const box = document.getElementById('calcResultBox');
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <div class="space-y-2 border-b border-slate-800 pb-2.5">
+          <p class="text-slate-300">Grundumsatz: <strong>${Math.round(bmr)} kcal</strong> • Gesamtbedarf (TDEE): <strong>${tdee} kcal</strong></p>
+          <p class="text-[11px] text-emerald-400 font-semibold">Passe deine Wunsch-Makros vor dem Übernehmen direkt an:</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <label class="text-slate-400 block mb-0.5 font-semibold">Tagesziel (kcal)</label>
+            <input id="resGoalKcal" type="number" value="${recKcal}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold" />
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-0.5 font-semibold">Eiweiß (g)</label>
+            <input id="resGoalProt" type="number" value="${recP}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-0.5 font-semibold">Kohlenhydrate (g)</label>
+            <input id="resGoalCarb" type="number" value="${recC}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-0.5 font-semibold">Fett (g)</label>
+            <input id="resGoalFat" type="number" value="${recF}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
+          </div>
+          <div class="col-span-2">
+            <label class="text-slate-400 block mb-0.5 font-semibold">Zielgewicht (kg)</label>
+            <input id="resGoalTargetWeight" type="number" step="0.1" value="${targetW}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
+          </div>
+        </div>
+        <button onclick="applyCustomizedGoals()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20">
+          Als Basis-Tagesziel übernehmen & speichern
+        </button>
+      `;
+    }
+
+    function applyCustomizedGoals() {
+      const kcal = Math.max(1000, Math.round(numOr(document.getElementById('resGoalKcal').value, 2425)));
+      const p = Math.max(20, Math.round(numOr(document.getElementById('resGoalProt').value, 260)));
+      const c = Math.max(10, Math.round(numOr(document.getElementById('resGoalCarb').value, 85)));
+      const f = Math.max(10, Math.round(numOr(document.getElementById('resGoalFat').value, 116)));
+      const tw = numOr(document.getElementById('resGoalTargetWeight').value, 80.0);
+
+      state.goals.kcal = kcal;
+      state.goals.protein = p;
+      state.goals.carbs = c;
+      state.goals.fat = f;
+      state.goals.targetWeight = tw;
+
+      saveUserProfile();
+      saveState();
+      updateUI();
+      showToast(`🎯 Ziele übernommen: ${kcal} kcal • ${p}g E • ${c}g K • ${f}g F`, 'info');
+    }
+
+    // =========================================================================
+    // WHATSAPP INVITE ENGINE & GUEST ACCESS
     // =========================================================================
     function generateInviteCode() {
       const name = document.getElementById('newGuestName').value.trim();
@@ -2017,14 +2104,14 @@ JSON-Schema:
     function getRemainingMacros() {
       const cut = state.cheatRescue.active ? numOr(state.cheatRescue.dailyCut, 200) : 0;
       const totalActive = numOr(state.todayActivity.activeKcal, 0);
-      const effGoalKcal = Math.max(1000, numOr(state.goals.kcal, 1900) - cut + totalActive);
+      const effGoalKcal = Math.max(1000, numOr(state.goals.kcal, 2425) - cut + totalActive);
       const sums = state.todayLog.reduce((a, b) => ({
         kcal: a.kcal + numOr(b.kcal, 0),
         p: a.p + numOr(b.p, 0)
       }), { kcal: 0, p: 0 });
       return {
         remKcal: Math.max(150, Math.round(effGoalKcal - sums.kcal)),
-        remProt: Math.max(10, Math.round(numOr(state.goals.protein, 140) - sums.p))
+        remProt: Math.max(10, Math.round(numOr(state.goals.protein, 260) - sums.p))
       };
     }
 
@@ -2144,7 +2231,7 @@ JSON-Schema:
       ];
 
       try {
-        const prompt = `Erstelle 2 geniale Rezepte für den Wunsch "${craving}". Maximal ${remKcal} kcal pro Rezept (inkl. Aktivitäts-Bonus), Ziel ~${Math.min(55, remProt)}g Eiweiß. Antworte NUR als JSON-Array:
+        const prompt = `Erstelle 2 geniale Rezepte für den Wunsch "${craving}". Maximal ${remKcal} kcal pro Rezept (inkl. Aktivitäts-Bonus), Ziel ~${Math.min(65, remProt)}g Eiweiß. Antworte NUR als JSON-Array:
 [{"title":"Vollständiger Rezeptname inkl. Gramm","ingredients":"Zutat 1 (Gramm), Zutat 2 (Gramm)","steps":"Kurze 1-2 Satz Anleitung","kcal":520,"p":42,"c":48,"f":14,"icon":"🍝"}]`;
         const raw = await callGeminiRequest(prompt, null);
         const ideas = extractJSON(raw);
@@ -2226,7 +2313,7 @@ JSON-Schema:
       document.getElementById('cheatRescueBanner').classList.toggle('hidden', !state.cheatRescue.active);
 
       const { totalActive } = recalcActiveExpenditure();
-      const baseGoalKcal = numOr(state.goals.kcal, 1900);
+      const baseGoalKcal = numOr(state.goals.kcal, 2425);
       const effKcalGoal = Math.max(1000, baseGoalKcal - cut + totalActive);
 
       const sums = state.todayLog.reduce((acc, it) => {
@@ -2255,9 +2342,9 @@ JSON-Schema:
       ring.style.strokeDashoffset = String(circum - (pct / 100) * circum);
       ring.setAttribute('stroke', remKcal < 0 ? '#ef4444' : '#10b981');
 
-      const gP = Math.max(1, numOr(state.goals.protein, 140));
-      const gC = Math.max(1, numOr(state.goals.carbs, 180));
-      const gF = Math.max(1, numOr(state.goals.fat, 65));
+      const gP = Math.max(1, numOr(state.goals.protein, 260));
+      const gC = Math.max(1, numOr(state.goals.carbs, 85));
+      const gF = Math.max(1, numOr(state.goals.fat, 116));
       document.getElementById('protText').textContent = `${Math.round(sums.p)}/${gP}g`;
       document.getElementById('carbText').textContent = `${Math.round(sums.c)}/${gC}g`;
       document.getElementById('fatText').textContent = `${Math.round(sums.f)}/${gF}g`;
@@ -2472,7 +2559,8 @@ JSON-Schema:
       if (existingIdx >= 0) state.weightLog[existingIdx].weight = val;
       else state.weightLog.push({ date: today, weight: val });
       document.getElementById('weightInput').value = '';
-      document.getElementById('calcWeight').value = val;
+      if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = val;
+      if (state.userProfile) state.userProfile.weight = val;
       recalcActiveExpenditure();
       saveState();
       updateUI();
@@ -2501,8 +2589,6 @@ JSON-Schema:
         const latestT = trends[trends.length - 1];
         curEl.textContent = `${latestW.toFixed(1)} kg`;
         trendEl.textContent = `Trend: ${latestT.toFixed(1)} kg`;
-        document.getElementById('calcWeight').value = latestW;
-        document.getElementById('calcTargetWeight').value = numOr(state.goals.targetWeight, 80);
 
         const minW = Math.min(...log.map(x => x.weight), ...trends) - 0.5;
         const maxW = Math.max(...log.map(x => x.weight), ...trends) + 0.5;
@@ -2556,39 +2642,6 @@ JSON-Schema:
       showToast(state.cheatRescue.active ? '🛟 Cheat-Rescue aktiv (-200 kcal/Tag)' : 'Cheat-Rescue deaktiviert', 'info');
     }
 
-    function calculatePersonalGoal() {
-      const gender = document.getElementById('calcGender').value;
-      const age = numOr(document.getElementById('calcAge').value, 35);
-      const height = numOr(document.getElementById('calcHeight').value, 178);
-      const weight = numOr(document.getElementById('calcWeight').value, 85);
-      const targetW = numOr(document.getElementById('calcTargetWeight').value, 80);
-      const act = numOr(document.getElementById('calcActivity').value, 1.375);
-
-      const bmr = 10 * weight + 6.25 * height - 5 * age + (gender === 'm' ? 5 : -161);
-      const tdee = Math.round(bmr * act);
-      const recKcal = Math.max(1250, tdee - 500);
-      const recP = Math.round(weight * 1.8);
-      const recF = Math.round(weight * 0.8);
-      const recC = Math.max(60, Math.round((recKcal - recP * 4 - recF * 9) / 4));
-
-      lastCalculatedGoals = { kcal: recKcal, protein: recP, carbs: recC, fat: recF, targetWeight: targetW };
-      const box = document.getElementById('calcResultBox');
-      box.classList.remove('hidden');
-      box.innerHTML = `
-        <p class="text-slate-300">Grundumsatz: <strong>${Math.round(bmr)} kcal</strong> • Gesamtumsatz: <strong>${tdee} kcal</strong></p>
-        <p class="text-emerald-400 font-bold">Empfehlung (-500 kcal Defizit): ${recKcal} kcal (E:${recP}g • K:${recC}g • F:${recF}g)</p>
-        <button onclick="applyCalculatedGoals()" class="w-full mt-1.5 py-2 rounded-lg bg-emerald-500 text-slate-950 font-extrabold text-xs">Als neues Basis-Tagesziel übernehmen</button>
-      `;
-    }
-
-    function applyCalculatedGoals() {
-      if (!lastCalculatedGoals) return;
-      state.goals = { ...state.goals, ...lastCalculatedGoals };
-      saveState();
-      updateUI();
-      showToast('🎯 Basis-Ziele übernommen!', 'info');
-    }
-
     function switchTab(tab) {
       ['tracker', 'ideas', 'weight'].forEach(t => {
         document.getElementById('tab-' + t)?.classList.toggle('active', t === tab);
@@ -2608,11 +2661,11 @@ JSON-Schema:
 
     function openSettingsModal() {
       document.getElementById('apiKeyInput').value = state.geminiApiKey || '';
-      document.getElementById('goalKcalInput').value = numOr(state.goals.kcal, 1900);
-      document.getElementById('goalProtInput').value = numOr(state.goals.protein, 140);
-      document.getElementById('goalCarbInput').value = numOr(state.goals.carbs, 180);
-      document.getElementById('goalFatInput').value = numOr(state.goals.fat, 65);
-      document.getElementById('goalWeightInput').value = numOr(state.goals.targetWeight, 83);
+      document.getElementById('goalKcalInput').value = numOr(state.goals.kcal, 2425);
+      document.getElementById('goalProtInput').value = numOr(state.goals.protein, 260);
+      document.getElementById('goalCarbInput').value = numOr(state.goals.carbs, 85);
+      document.getElementById('goalFatInput').value = numOr(state.goals.fat, 116);
+      document.getElementById('goalWeightInput').value = numOr(state.goals.targetWeight, 80);
       renderInviteCodes();
       document.getElementById('settingsModal').classList.remove('hidden');
     }
@@ -2623,16 +2676,16 @@ JSON-Schema:
 
     function saveSettings() {
       state.geminiApiKey = document.getElementById('apiKeyInput').value.trim();
-      state.goals.kcal = Math.max(1000, Math.round(numOr(document.getElementById('goalKcalInput').value, 1900)));
-      state.goals.protein = Math.max(30, Math.round(numOr(document.getElementById('goalProtInput').value, 140)));
-      state.goals.carbs = Math.max(20, Math.round(numOr(document.getElementById('goalCarbInput').value, 180)));
-      state.goals.fat = Math.max(20, Math.round(numOr(document.getElementById('goalFatInput').value, 65)));
-      state.goals.targetWeight = numOr(document.getElementById('goalWeightInput').value, 83);
+      state.goals.kcal = Math.max(1000, Math.round(numOr(document.getElementById('goalKcalInput').value, 2425)));
+      state.goals.protein = Math.max(30, Math.round(numOr(document.getElementById('goalProtInput').value, 260)));
+      state.goals.carbs = Math.max(20, Math.round(numOr(document.getElementById('goalCarbInput').value, 85)));
+      state.goals.fat = Math.max(20, Math.round(numOr(document.getElementById('goalFatInput').value, 116)));
+      state.goals.targetWeight = numOr(document.getElementById('goalWeightInput').value, 80);
       recalcActiveExpenditure();
       saveState();
       closeSettingsModal();
       updateUI();
-      showToast('⚙️ Einstellungen gespeichert!', 'info');
+      showToast('⚙️ Einstellungen & Ziele gespeichert!', 'info');
     }
 
     function unlockApp() {
@@ -2664,6 +2717,19 @@ JSON-Schema:
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentDateLabel').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short' });
       if (!state.unlocked) document.getElementById('lockScreen').classList.remove('hidden');
+
+      // Initiale Befüllung des Biometrie-Rechners ohne spätere Overwrites
+      if (state.userProfile) {
+        if (document.getElementById('calcGender')) document.getElementById('calcGender').value = state.userProfile.gender || 'm';
+        if (document.getElementById('calcAge')) document.getElementById('calcAge').value = state.userProfile.age || 35;
+        if (document.getElementById('calcHeight')) document.getElementById('calcHeight').value = state.userProfile.height || 178;
+        if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = state.userProfile.weight || 86.0;
+        if (document.getElementById('calcActivity')) document.getElementById('calcActivity').value = state.userProfile.activity || 1.375;
+      }
+      if (document.getElementById('calcTargetWeight')) {
+        document.getElementById('calcTargetWeight').value = numOr(state.goals.targetWeight, 80.0);
+      }
+
       updateUI();
     });
   </script>
