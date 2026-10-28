@@ -263,7 +263,7 @@
       </section>
 
       <!-- ========================================================
-           BEWEGUNG & LIVE-TRACKING COCKPIT (ANTI-FALSE-POSITIVE)
+           BEWEGUNG & LIVE-TRACKING COCKPIT (BIPOLAR ZERO-CROSSING)
            ======================================================== -->
       <section class="glass-card p-3.5 space-y-3 border border-amber-500/30">
         <div class="flex items-center justify-between">
@@ -282,7 +282,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
-          <!-- STEP COUNTER CARD WITH RHYTHM-AWARE STATE MACHINE -->
+          <!-- STEP COUNTER CARD (BIPOLAR SIGNED WAVE ENGINE) -->
           <div class="glass-subcard p-3 space-y-2 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
@@ -650,30 +650,30 @@
 
         <div class="grid grid-cols-2 gap-2.5 text-xs">
           <div>
-            <label class="text-slate-400 block mb-1">Geschlecht</label>
+            <label class="text-slate-400 block mb-1 font-semibold">Geschlecht</label>
             <select id="calcGender" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
               <option value="m">Männlich</option>
               <option value="f">Weiblich</option>
             </select>
           </div>
           <div>
-            <label class="text-slate-400 block mb-1">Alter (Jahre)</label>
-            <input id="calcAge" type="number" value="35" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+            <label class="text-slate-400 block mb-1 font-semibold">Alter (Jahre)</label>
+            <input id="calcAge" type="number" value="35" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-bold" />
           </div>
           <div>
-            <label class="text-slate-400 block mb-1">Größe (cm)</label>
-            <input id="calcHeight" type="number" value="178" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+            <label class="text-slate-400 block mb-1 font-semibold">Größe (cm)</label>
+            <input id="calcHeight" type="number" value="178" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-bold" />
           </div>
           <div>
-            <label class="text-slate-400 block mb-1">Aktuelles Gewicht (kg)</label>
-            <input id="calcWeight" type="number" step="0.1" value="86.0" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+            <label class="text-slate-400 block mb-1 font-semibold">Aktuelles Gewicht (kg)</label>
+            <input id="calcWeight" type="number" step="0.1" value="86.0" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-bold" />
           </div>
           <div>
-            <label class="text-slate-400 block mb-1">Zielgewicht (kg)</label>
-            <input id="calcTargetWeight" type="number" step="0.1" value="80.0" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white" />
+            <label class="text-slate-400 block mb-1 font-semibold">Zielgewicht (kg)</label>
+            <input id="calcTargetWeight" type="number" step="0.1" value="80.0" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-bold" />
           </div>
           <div>
-            <label class="text-slate-400 block mb-1">Basis-Aktivität</label>
+            <label class="text-slate-400 block mb-1 font-semibold">Basis-Aktivität</label>
             <select id="calcActivity" onchange="saveUserProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
               <option value="1.2">Sitzend (Büro)</option>
               <option value="1.375" selected>Leicht aktiv (1-3x Sport)</option>
@@ -687,8 +687,8 @@
           Defizit & Makros berechnen
         </button>
 
-        <!-- INTERACTIVE RESULT BOX WITH EDITABLE INPUTS BEFORE APPLYING -->
-        <div id="calcResultBox" class="hidden glass-subcard p-3 space-y-3 border border-emerald-500/40 text-xs"></div>
+        <!-- INTERACTIVE RESULT BOX WITH DIRECTLY EDITABLE INPUTS BEFORE APPLYING -->
+        <div id="calcResultBox" class="hidden glass-subcard p-3.5 space-y-3 border border-emerald-500/40 text-xs"></div>
       </section>
 
       <!-- PAST DAYS ARCHIVE (NUTRITION & ACTIVITY) -->
@@ -866,26 +866,26 @@
     let isRecording = false;
 
     // =========================================================================
-    // BIOMECHANICAL STEP ENGINE: DUAL-THRESHOLD STATE MACHINE & BURST FILTER
+    // BIPOLAR ZERO-CROSSING STEP ENGINE (SELBST-KALIBRIEREND & FREEZE-FREI)
     // =========================================================================
     let isStepTrackingActive = false;
     let gEst = 9.80665;
+    let gInitialized = false;
     let sensorEventCounter = 0;
     let sensorSampleTimer = null;
     let stepSaveCounter = 0;
 
-    // Glättung & Signal-Historie (Rolling Buffer)
-    const ACCEL_WINDOW_SIZE = 4;
-    const accelWindow = [];
+    // 4-Sample Glättungspuffer für vorzeichenbehaftete Vertikalbeschleunigung
+    const SIGNED_WINDOW_SIZE = 4;
+    const signedAccelWindow = [];
 
-    // Dual-Threshold State Machine: 0 = SEARCHING_PEAK, 1 = SEARCHING_VALLEY
-    let pedometerState = 0;
-    let peakValue = 0;
-    let peakTimestamp = 0;
+    // Bipolare Hysterese-Phasen: 0 = WARTE_AUF_PEAK, 1 = WARTE_AUF_NEGATIVES_TAL
+    let stepPhase = 0;
+    let lastStepTime = 0;
 
-    // Anti-False-Positive Rhythm Buffer: Verhindert Zählen beim Anheben!
-    let rhythmBuffer = 0;
-    let lastStepCandidateTime = 0;
+    // 2-Schritt Kadenz-Puffer (Verhindert Zählen beim Anheben!)
+    let stepBurstBuffer = 0;
+    let lastCandidateTime = 0;
 
     // GPS CYCLING ENGINE STATE
     let isCyclingTrackingActive = false;
@@ -1064,7 +1064,7 @@
     }
 
     // =========================================================================
-    // HIGH-ACCURACY PEDOMETER: DUAL-THRESHOLD + 3-STEP RHYTHM BUFFER
+    // KORREKTUR 1: SELBST-KALIBRIERENDER BIPOLARER NULLDURCHGANGS-SCHRITTZÄHLER
     // =========================================================================
     async function toggleStepSensor() {
       if (isStepTrackingActive) {
@@ -1085,13 +1085,13 @@
         }
       }
 
-      // Initialisierung der State Machine
-      pedometerState = 0;
-      peakValue = 0;
-      peakTimestamp = 0;
-      rhythmBuffer = 0;
-      lastStepCandidateTime = 0;
-      accelWindow.length = 0;
+      // Initialisierung: Gravitation wird beim allerersten Sensor-Sample exakt kalibriert
+      gInitialized = false;
+      stepPhase = 0;
+      lastStepTime = performance.now();
+      stepBurstBuffer = 0;
+      lastCandidateTime = 0;
+      signedAccelWindow.length = 0;
       sensorEventCounter = 0;
 
       window.addEventListener('devicemotion', handleMotionStepEvent, { passive: true });
@@ -1113,7 +1113,7 @@
       sensorSampleTimer = setInterval(() => {
         if (isStepTrackingActive && badge) {
           if (sensorEventCounter > 0) {
-            badge.textContent = rhythmBuffer >= 3 ? '🚶‍♂️ Gehen' : `Live (${sensorEventCounter} Hz)`;
+            badge.textContent = stepBurstBuffer >= 2 ? '🚶‍♂️ Gehen' : `Live (${sensorEventCounter} Hz)`;
             badge.className = 'text-[9px] font-semibold text-emerald-300 px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40';
           } else {
             badge.textContent = 'Kein Signal';
@@ -1123,7 +1123,7 @@
         }
       }, 1000);
 
-      showToast('👟 Schrittzähler scharf. Gehe 3–4 Schritte los!', 'info');
+      showToast('👟 Schrittzähler aktiv. Gehe los!', 'info');
     }
 
     function stopStepSensor() {
@@ -1133,8 +1133,9 @@
         sensorSampleTimer = null;
       }
       isStepTrackingActive = false;
-      rhythmBuffer = 0;
-      pedometerState = 0;
+      stepBurstBuffer = 0;
+      stepPhase = 0;
+      gInitialized = false;
 
       const btn = document.getElementById('btnStepSensor');
       if (btn) {
@@ -1158,96 +1159,85 @@
       if (isCyclingTrackingActive) return;
       sensorEventCounter++;
 
-      let instantMag = 0;
-      const linAcc = e.acceleration;
+      const raw = e.accelerationIncludingGravity;
+      if (!raw || raw.x === null) return;
 
-      if (linAcc && linAcc.x !== null && linAcc.y !== null && linAcc.z !== null) {
-        instantMag = Math.sqrt(linAcc.x * linAcc.x + linAcc.y * linAcc.y + linAcc.z * linAcc.z);
-      } else {
-        const raw = e.accelerationIncludingGravity;
-        if (!raw || raw.x === null) return;
-        const rawMag = Math.sqrt(raw.x * raw.x + raw.y * raw.y + raw.z * raw.z);
-        gEst = 0.975 * gEst + 0.025 * rawMag;
-        instantMag = Math.abs(rawMag - gEst);
-      }
+      const rawMag = Math.sqrt(raw.x * raw.x + raw.y * raw.y + raw.z * raw.z);
 
-      // 1. Moving Average Smoothing über 4 Samples (Rauschunterdrückung)
-      accelWindow.push(instantMag);
-      if (accelWindow.length > ACCEL_WINDOW_SIZE) accelWindow.shift();
-      const smoothMag = accelWindow.reduce((a, b) => a + b, 0) / accelWindow.length;
-
-      const now = performance.now();
-
-      // 2. Dual-Threshold Peak-to-Valley State Machine
-      const THRESHOLD_PEAK = 1.65;    // Oberschwelle: Echter Auftrittsimpuls
-      const THRESHOLD_VALLEY = 0.55;  // Unterschwelle: Rückkehr ins Wellental
-
-      if (pedometerState === 0) {
-        // Suche nach Peak (positiver Impuls)
-        if (smoothMag >= THRESHOLD_PEAK) {
-          pedometerState = 1;
-          peakValue = smoothMag;
-          peakTimestamp = now;
-        }
-      } else if (pedometerState === 1) {
-        // Tracke maximalen Peak
-        if (smoothMag > peakValue) {
-          peakValue = smoothMag;
-          peakTimestamp = now;
-        }
-
-        const elapsedSincePeak = now - peakTimestamp;
-
-        // Suche nach Wellental (Entlastung)
-        if (smoothMag <= THRESHOLD_VALLEY) {
-          // Gültiges Fersenauftritt-zu-Wellental-Fenster: 140ms bis 650ms
-          if (elapsedSincePeak >= 140 && elapsedSincePeak <= 650 && (peakValue - smoothMag) >= 1.20) {
-            onStepCandidateRecognized(now);
-          }
-          pedometerState = 0;
-          peakValue = 0;
-        } else if (elapsedSincePeak > 750) {
-          // Timeout: Nur langsames Anheben/Neigen ohne Wellental -> Verwerfen!
-          pedometerState = 0;
-          peakValue = 0;
-        }
-      }
-    }
-
-    function onStepCandidateRecognized(now) {
-      if (lastStepCandidateTime === 0) {
-        // Erster isolierter Impuls -> Puffer startet, noch kein Schritt gebucht!
-        rhythmBuffer = 1;
-        lastStepCandidateTime = now;
+      // Selbst-Kalibrierung: Kein Start-Drift von 9.80665 mehr!
+      if (!gInitialized) {
+        gEst = rawMag;
+        gInitialized = true;
         return;
       }
 
-      const dt = now - lastStepCandidateTime;
+      // Träge Gravitations-Nachführung (0.96 / 0.04)
+      gEst = 0.96 * gEst + 0.04 * rawMag;
 
-      // Menschliche Schrittkadenz: 310ms bis 1350ms (~0.74 bis 3.2 Schritte/Sekunde)
-      if (dt >= 310 && dt <= 1350) {
-        rhythmBuffer++;
-        lastStepCandidateTime = now;
+      // ECHTER VORZEICHENBEHAFTETER VERTILKALWERT: KEIN Math.abs()!
+      // Positiv beim Auftreten (Kompression), echt negativ beim Entlasten (Wellental)
+      const aSigned = rawMag - gEst;
 
-        if (rhythmBuffer === 3) {
-          // Geh-Rhythmus bestätigt! Bucht die 2 gehaltenen Puffer-Schritte + aktuellen Schritt nach
-          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 3;
-          triggerStepPersistence();
-        } else if (rhythmBuffer > 3) {
-          // Kontinuierliches Gehen -> Jeder Schritt zählt direkt in Echtzeit
-          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 1;
-          triggerStepPersistence();
+      // 4-Sample Mittelwertglättung
+      signedAccelWindow.push(aSigned);
+      if (signedAccelWindow.length > SIGNED_WINDOW_SIZE) signedAccelWindow.shift();
+      const smoothSigned = signedAccelWindow.reduce((acc, v) => acc + v, 0) / signedAccelWindow.length;
+
+      const now = performance.now();
+
+      // BIPOLARE HYSTERESE:
+      // Phase 0: Warte auf Fersenaufsatz (Peak >= +0.75 m/s²)
+      if (stepPhase === 0) {
+        if (smoothSigned >= 0.75) {
+          stepPhase = 1;
         }
-      } else if (dt > 1350) {
-        // Rhythmus abgerissen (z. B. Stehen geblieben oder Handy abgelegt) -> Neuer Pufferstart
-        rhythmBuffer = 1;
-        lastStepCandidateTime = now;
+      }
+      // Phase 1: Warte auf zwingendes negatives Durchschwingen (Valley <= -0.55 m/s²)
+      else if (stepPhase === 1) {
+        if (smoothSigned <= -0.55) {
+          // Volle Sinus-Schwingung abgeschlossen! Mindestabstand 280ms
+          if (now - lastStepTime > 280) {
+            onStepCadenceTrigger(now);
+            lastStepTime = now;
+          }
+          stepPhase = 0;
+        }
       }
     }
 
-    function triggerStepPersistence() {
+    function onStepCadenceTrigger(now) {
+      if (lastCandidateTime === 0) {
+        stepBurstBuffer = 1;
+        lastCandidateTime = now;
+        return;
+      }
+
+      const dt = now - lastCandidateTime;
+
+      // Kadenzfenster: 280ms bis 1800ms
+      if (dt >= 280 && dt <= 1800) {
+        stepBurstBuffer++;
+        lastCandidateTime = now;
+
+        if (stepBurstBuffer === 2) {
+          // 2 rhythmische Schritte bestätigt: Bucht den 1. Puffer-Schritt + aktuellen Schritt (+2)
+          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 2;
+          persistStepUpdate();
+        } else if (stepBurstBuffer > 2) {
+          // Kontinuierliches Gehen: Jeder weitere Schritt zählt live (+1)
+          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 1;
+          persistStepUpdate();
+        }
+      } else if (dt > 1800) {
+        // Rhythmus abgerissen (z. B. Handy hingelegt): Puffer auf 1 zurückgesetzt, kein Fehlalarm
+        stepBurstBuffer = 1;
+        lastCandidateTime = now;
+      }
+    }
+
+    function persistStepUpdate() {
       stepSaveCounter++;
-      if (stepSaveCounter >= 8) {
+      if (stepSaveCounter >= 6) {
         stepSaveCounter = 0;
         recalcActiveExpenditure();
         saveState();
@@ -1473,7 +1463,7 @@
     }
 
     // =========================================================================
-    // PERSISTENT BIOMETRICS & CUSTOMIZABLE MACRO CALCULATOR
+    // KORREKTUR 2: REPARIERTER MAKRO-RECHNER MIT DIREKTER ÜBERNAHME
     // =========================================================================
     function saveUserProfile() {
       state.userProfile = {
@@ -1492,44 +1482,53 @@
       const p = state.userProfile;
       const targetW = numOr(state.goals.targetWeight, 80.0);
 
+      // Mifflin-St Jeor Grundumsatz & Gesamtumsatz
       const bmr = 10 * p.weight + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
       const tdee = Math.round(bmr * p.activity);
 
-      const recKcal = state.goals.kcal || Math.max(1400, tdee - 500);
-      const recP = state.goals.protein || Math.round(p.weight * 2.2);
-      const recC = state.goals.carbs || 85;
-      const recF = state.goals.fat || Math.round((recKcal - recP * 4 - recC * 4) / 9);
+      // Frische Berechnung OHNE '||'-Blockade:
+      let calcKcal = tdee;
+      if (targetW < p.weight - 0.5) {
+        calcKcal = Math.max(1200, tdee - 500); // 500 kcal Defizit zum Abnehmen
+      } else if (targetW > p.weight + 0.5) {
+        calcKcal = tdee + 300; // 300 kcal Überschuss für kontrollierten Aufbau
+      }
+
+      // Wissenschaftliche Makroverteilung (2.0g Protein/kg, 0.9g Fett/kg, Rest Kohlenhydrate)
+      const calcP = Math.round(p.weight * 2.0);
+      const calcF = Math.round(p.weight * 0.9);
+      const calcC = Math.max(50, Math.round((calcKcal - calcP * 4 - calcF * 9) / 4));
 
       const box = document.getElementById('calcResultBox');
       box.classList.remove('hidden');
       box.innerHTML = `
-        <div class="space-y-2 border-b border-slate-800 pb-2.5">
+        <div class="space-y-1.5 border-b border-slate-800 pb-2.5">
           <p class="text-slate-300">Grundumsatz: <strong>${Math.round(bmr)} kcal</strong> • Gesamtbedarf (TDEE): <strong>${tdee} kcal</strong></p>
-          <p class="text-[11px] text-emerald-400 font-semibold">Passe deine Wunsch-Makros vor dem Übernehmen direkt an:</p>
+          <p class="text-[11px] text-emerald-400 font-semibold">Empfehlung frisch berechnet. Passe Werte bei Bedarf vor Übernahme an:</p>
         </div>
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
             <label class="text-slate-400 block mb-0.5 font-semibold">Tagesziel (kcal)</label>
-            <input id="resGoalKcal" type="number" value="${recKcal}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold" />
+            <input id="resGoalKcal" type="number" value="${calcKcal}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold" />
           </div>
           <div>
             <label class="text-slate-400 block mb-0.5 font-semibold">Eiweiß (g)</label>
-            <input id="resGoalProt" type="number" value="${recP}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
+            <input id="resGoalProt" type="number" value="${calcP}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
           </div>
           <div>
             <label class="text-slate-400 block mb-0.5 font-semibold">Kohlenhydrate (g)</label>
-            <input id="resGoalCarb" type="number" value="${recC}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
+            <input id="resGoalCarb" type="number" value="${calcC}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
           </div>
           <div>
             <label class="text-slate-400 block mb-0.5 font-semibold">Fett (g)</label>
-            <input id="resGoalFat" type="number" value="${recF}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
+            <input id="resGoalFat" type="number" value="${calcF}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
           </div>
           <div class="col-span-2">
             <label class="text-slate-400 block mb-0.5 font-semibold">Zielgewicht (kg)</label>
             <input id="resGoalTargetWeight" type="number" step="0.1" value="${targetW}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
           </div>
         </div>
-        <button onclick="applyCustomizedGoals()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20">
+        <button id="btnApplyCustomGoals" onclick="applyCustomizedGoals()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition">
           Als Basis-Tagesziel übernehmen & speichern
         </button>
       `;
@@ -1541,17 +1540,32 @@
       const c = Math.max(10, Math.round(numOr(document.getElementById('resGoalCarb').value, 85)));
       const f = Math.max(10, Math.round(numOr(document.getElementById('resGoalFat').value, 116)));
       const tw = numOr(document.getElementById('resGoalTargetWeight').value, 80.0);
+      const curW = numOr(document.getElementById('calcWeight').value, 86.0);
 
+      // 1. Speichere neue Ziele im State
       state.goals.kcal = kcal;
       state.goals.protein = p;
       state.goals.carbs = c;
       state.goals.fat = f;
       state.goals.targetWeight = tw;
 
+      // 2. Synchronisiere aktuelles Gewicht für heute in die Trend-Engine
+      const today = new Date().toISOString().slice(0, 10);
+      const exIdx = state.weightLog.findIndex(w => w.date === today);
+      if (exIdx >= 0) state.weightLog[exIdx].weight = curW;
+      else state.weightLog.push({ date: today, weight: curW });
+
       saveUserProfile();
       saveState();
+
+      // 3. UI-Synchronisation & Wechsel zum Dashboard
       updateUI();
-      showToast(`🎯 Ziele übernommen: ${kcal} kcal • ${p}g E • ${c}g K • ${f}g F`, 'info');
+      showToast(`🎯 Übernommen: ${kcal} kcal • ${p}g E • ${c}g K • ${f}g F`, 'info');
+
+      // Schaltet automatisch nach 400ms zum Dashboard um, damit der Nutzer die neuen Ziele sofort sieht
+      setTimeout(() => {
+        switchTab('tracker');
+      }, 400);
     }
 
     // =========================================================================
@@ -2196,9 +2210,9 @@ JSON-Schema:
       const cut = state.cheatRescue.active ? numOr(state.cheatRescue.dailyCut, 200) : 0;
       const totalActive = numOr(state.todayActivity.activeKcal, 0);
       const effGoalKcal = Math.max(1000, numOr(state.goals.kcal, 2425) - cut + totalActive);
-      const sums = state.todayLog.reduce((a, b) => ({
-        kcal: a.kcal + numOr(b.kcal, 0),
-        p: a.p + numOr(b.p, 0)
+      const sums = state.todayLog.reduce((acc, it) => ({
+        kcal: acc.kcal + numOr(it.kcal, 0),
+        p: acc.p + numOr(it.p, 0)
       }), { kcal: 0, p: 0 });
       return {
         remKcal: Math.max(150, Math.round(effGoalKcal - sums.kcal)),
