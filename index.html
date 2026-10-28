@@ -263,7 +263,7 @@
       </section>
 
       <!-- ========================================================
-           BEWEGUNG & LIVE-TRACKING COCKPIT (BIPOLAR ZERO-CROSSING)
+           BEWEGUNG & LIVE-TRACKING COCKPIT (COUCH-RESISTENT)
            ======================================================== -->
       <section class="glass-card p-3.5 space-y-3 border border-amber-500/30">
         <div class="flex items-center justify-between">
@@ -282,7 +282,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
-          <!-- STEP COUNTER CARD (BIPOLAR SIGNED WAVE ENGINE) -->
+          <!-- STEP COUNTER CARD (5-STEP DEADBAND GAIT FILTER) -->
           <div class="glass-subcard p-3 space-y-2 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
@@ -866,7 +866,7 @@
     let isRecording = false;
 
     // =========================================================================
-    // BIPOLAR ZERO-CROSSING STEP ENGINE (SELBST-KALIBRIEREND & FREEZE-FREI)
+    // COUCH-RESISTANT 5-STEP GAIT FILTER & VARIANCE PEDOMETER ENGINE
     // =========================================================================
     let isStepTrackingActive = false;
     let gEst = 9.80665;
@@ -875,17 +875,20 @@
     let sensorSampleTimer = null;
     let stepSaveCounter = 0;
 
-    // 4-Sample Glättungspuffer für vorzeichenbehaftete Vertikalbeschleunigung
+    // Glättung & kinetische Varianz-Puffer
     const SIGNED_WINDOW_SIZE = 4;
     const signedAccelWindow = [];
+    const VARIANCE_WINDOW_SIZE = 20; // ~330ms Fenster bei 60Hz
+    const varianceWindow = [];
 
-    // Bipolare Hysterese-Phasen: 0 = WARTE_AUF_PEAK, 1 = WARTE_AUF_NEGATIVES_TAL
-    let stepPhase = 0;
+    // State Machine & Hysterese-Parameter
+    let stepPhase = 0; // 0 = Suche Peak, 1 = Suche Valley
+    let currentPeakVal = 0;
     let lastStepTime = 0;
 
-    // 2-Schritt Kadenz-Puffer (Verhindert Zählen beim Anheben!)
-    let stepBurstBuffer = 0;
-    let lastCandidateTime = 0;
+    // THE 5-STEP DEADBAND BUFFER (Verhindert Couch- & Handbewegungs-Fehlalarme!)
+    let gaitBuffer = 0;
+    let lastGaitCandidateTime = 0;
 
     // GPS CYCLING ENGINE STATE
     let isCyclingTrackingActive = false;
@@ -1064,7 +1067,7 @@
     }
 
     // =========================================================================
-    // KORREKTUR 1: SELBST-KALIBRIERENDER BIPOLARER NULLDURCHGANGS-SCHRITTZÄHLER
+    // COUCH-RESISTANT 5-STEP GAIT FILTER & SENSOR ENGINE
     // =========================================================================
     async function toggleStepSensor() {
       if (isStepTrackingActive) {
@@ -1085,13 +1088,15 @@
         }
       }
 
-      // Initialisierung: Gravitation wird beim allerersten Sensor-Sample exakt kalibriert
+      // Initialisierung: Exakter Nullpunkt ohne Start-Drift
       gInitialized = false;
       stepPhase = 0;
+      currentPeakVal = 0;
       lastStepTime = performance.now();
-      stepBurstBuffer = 0;
-      lastCandidateTime = 0;
+      gaitBuffer = 0;
+      lastGaitCandidateTime = 0;
       signedAccelWindow.length = 0;
+      varianceWindow.length = 0;
       sensorEventCounter = 0;
 
       window.addEventListener('devicemotion', handleMotionStepEvent, { passive: true });
@@ -1113,7 +1118,7 @@
       sensorSampleTimer = setInterval(() => {
         if (isStepTrackingActive && badge) {
           if (sensorEventCounter > 0) {
-            badge.textContent = stepBurstBuffer >= 2 ? '🚶‍♂️ Gehen' : `Live (${sensorEventCounter} Hz)`;
+            badge.textContent = gaitBuffer >= 5 ? '🚶‍♂️ Gehen aktiv' : `Bereit (${sensorEventCounter} Hz)`;
             badge.className = 'text-[9px] font-semibold text-emerald-300 px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40';
           } else {
             badge.textContent = 'Kein Signal';
@@ -1123,7 +1128,7 @@
         }
       }, 1000);
 
-      showToast('👟 Schrittzähler aktiv. Gehe los!', 'info');
+      showToast('👟 Schrittzähler scharf. Gehe 5 Schritte am Stück!', 'info');
     }
 
     function stopStepSensor() {
@@ -1133,7 +1138,7 @@
         sensorSampleTimer = null;
       }
       isStepTrackingActive = false;
-      stepBurstBuffer = 0;
+      gaitBuffer = 0;
       stepPhase = 0;
       gInitialized = false;
 
@@ -1164,80 +1169,101 @@
 
       const rawMag = Math.sqrt(raw.x * raw.x + raw.y * raw.y + raw.z * raw.z);
 
-      // Selbst-Kalibrierung: Kein Start-Drift von 9.80665 mehr!
+      // 1. Automatische Nullpunkt-Kalibrierung beim 1. Sample
       if (!gInitialized) {
         gEst = rawMag;
         gInitialized = true;
         return;
       }
 
-      // Träge Gravitations-Nachführung (0.96 / 0.04)
-      gEst = 0.96 * gEst + 0.04 * rawMag;
+      // Träge Gravitations-Nachführung (0.97 / 0.03)
+      gEst = 0.97 * gEst + 0.03 * rawMag;
 
-      // ECHTER VORZEICHENBEHAFTETER VERTILKALWERT: KEIN Math.abs()!
-      // Positiv beim Auftreten (Kompression), echt negativ beim Entlasten (Wellental)
+      // Vorzeichenbehaftete Vertikal-Beschleunigung: KEIN Math.abs()!
       const aSigned = rawMag - gEst;
 
-      // 4-Sample Mittelwertglättung
+      // 4-Sample Glättung
       signedAccelWindow.push(aSigned);
       if (signedAccelWindow.length > SIGNED_WINDOW_SIZE) signedAccelWindow.shift();
       const smoothSigned = signedAccelWindow.reduce((acc, v) => acc + v, 0) / signedAccelWindow.length;
 
+      // Kinetische Varianz-Prüfung über rollendes 20-Sample-Fenster (~330ms)
+      varianceWindow.push(smoothSigned);
+      if (varianceWindow.length > VARIANCE_WINDOW_SIZE) varianceWindow.shift();
+
+      let kineticVariance = 0;
+      if (varianceWindow.length >= 10) {
+        const mean = varianceWindow.reduce((a, b) => a + b, 0) / varianceWindow.length;
+        kineticVariance = varianceWindow.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / varianceWindow.length;
+      }
+
       const now = performance.now();
 
-      // BIPOLARE HYSTERESE:
-      // Phase 0: Warte auf Fersenaufsatz (Peak >= +0.75 m/s²)
+      // DUAL-THRESHOLD HYSTERESE MIT HOHEN REALEN GEH-SCHWELLEN:
+      // Peak-Schwelle: >= +1.20 m/s² (weiche Couch-Bewegungen erreichen dies nicht!)
       if (stepPhase === 0) {
-        if (smoothSigned >= 0.75) {
+        if (smoothSigned >= 1.20 && kineticVariance >= 0.40) {
           stepPhase = 1;
+          currentPeakVal = smoothSigned;
         }
       }
-      // Phase 1: Warte auf zwingendes negatives Durchschwingen (Valley <= -0.55 m/s²)
+      // Valley-Schwelle: <= -0.80 m/s² (zwingendes negatives Durchschwingen des Fußes!)
       else if (stepPhase === 1) {
-        if (smoothSigned <= -0.55) {
-          // Volle Sinus-Schwingung abgeschlossen! Mindestabstand 280ms
-          if (now - lastStepTime > 280) {
-            onStepCadenceTrigger(now);
+        if (smoothSigned > currentPeakVal) {
+          currentPeakVal = smoothSigned;
+        }
+
+        // Vollständige Schwingung: Tal <= -0.80 m/s² UND Gesamthub >= 2.00 m/s²
+        if (smoothSigned <= -0.80) {
+          const deltaHub = currentPeakVal - smoothSigned;
+          if (deltaHub >= 2.00 && (now - lastStepTime) >= 380) {
+            onGaitCadenceRecognized(now);
             lastStepTime = now;
           }
           stepPhase = 0;
+          currentPeakVal = 0;
         }
       }
     }
 
-    function onStepCadenceTrigger(now) {
-      if (lastCandidateTime === 0) {
-        stepBurstBuffer = 1;
-        lastCandidateTime = now;
+    // =========================================================================
+    // 5-SCHRITT-GAIT-DEADBAND (DIE COUCH-SPERRE)
+    // =========================================================================
+    function onGaitCadenceRecognized(now) {
+      if (lastGaitCandidateTime === 0) {
+        gaitBuffer = 1;
+        lastGaitCandidateTime = now;
         return;
       }
 
-      const dt = now - lastCandidateTime;
+      const dt = now - lastGaitCandidateTime;
 
-      // Kadenzfenster: 280ms bis 1800ms
-      if (dt >= 280 && dt <= 1800) {
-        stepBurstBuffer++;
-        lastCandidateTime = now;
+      // Echtes menschliches Schrittintervall: 380ms bis 1050ms
+      if (dt >= 380 && dt <= 1050) {
+        gaitBuffer++;
+        lastGaitCandidateTime = now;
 
-        if (stepBurstBuffer === 2) {
-          // 2 rhythmische Schritte bestätigt: Bucht den 1. Puffer-Schritt + aktuellen Schritt (+2)
-          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 2;
-          persistStepUpdate();
-        } else if (stepBurstBuffer > 2) {
-          // Kontinuierliches Gehen: Jeder weitere Schritt zählt live (+1)
+        if (gaitBuffer === 5) {
+          // GEHEN ZWEIFELSFREI BESTÄTIGT:
+          // Schreibt die 4 Puffer-Schritte + aktuellen Schritt (+5) auf einen Schlag gut!
+          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 5;
+          persistPedometerStep();
+        } else if (gaitBuffer > 5) {
+          // Kontinuierliche Fortbewegung: Jeder Folgeschritt zählt sofort live (+1)
           state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 1;
-          persistStepUpdate();
+          persistPedometerStep();
         }
-      } else if (dt > 1800) {
-        // Rhythmus abgerissen (z. B. Handy hingelegt): Puffer auf 1 zurückgesetzt, kein Fehlalarm
-        stepBurstBuffer = 1;
-        lastCandidateTime = now;
+      } else if (dt > 1150) {
+        // Rhythmus abgerissen (z. B. auf der Couch stillgehalten):
+        // Puffer verfällt sofort auf 1 -> KEINE Schritte werden gutgeschrieben!
+        gaitBuffer = 1;
+        lastGaitCandidateTime = now;
       }
     }
 
-    function persistStepUpdate() {
+    function persistPedometerStep() {
       stepSaveCounter++;
-      if (stepSaveCounter >= 6) {
+      if (stepSaveCounter >= 5) {
         stepSaveCounter = 0;
         recalcActiveExpenditure();
         saveState();
@@ -1463,7 +1489,7 @@
     }
 
     // =========================================================================
-    // KORREKTUR 2: REPARIERTER MAKRO-RECHNER MIT DIREKTER ÜBERNAHME
+    // MAKRO-RECHNER MIT DIREKTER BASIS-ÜBERNAHME
     // =========================================================================
     function saveUserProfile() {
       state.userProfile = {
@@ -1482,19 +1508,16 @@
       const p = state.userProfile;
       const targetW = numOr(state.goals.targetWeight, 80.0);
 
-      // Mifflin-St Jeor Grundumsatz & Gesamtumsatz
       const bmr = 10 * p.weight + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
       const tdee = Math.round(bmr * p.activity);
 
-      // Frische Berechnung OHNE '||'-Blockade:
       let calcKcal = tdee;
       if (targetW < p.weight - 0.5) {
-        calcKcal = Math.max(1200, tdee - 500); // 500 kcal Defizit zum Abnehmen
+        calcKcal = Math.max(1200, tdee - 500);
       } else if (targetW > p.weight + 0.5) {
-        calcKcal = tdee + 300; // 300 kcal Überschuss für kontrollierten Aufbau
+        calcKcal = tdee + 300;
       }
 
-      // Wissenschaftliche Makroverteilung (2.0g Protein/kg, 0.9g Fett/kg, Rest Kohlenhydrate)
       const calcP = Math.round(p.weight * 2.0);
       const calcF = Math.round(p.weight * 0.9);
       const calcC = Math.max(50, Math.round((calcKcal - calcP * 4 - calcF * 9) / 4));
@@ -1542,14 +1565,12 @@
       const tw = numOr(document.getElementById('resGoalTargetWeight').value, 80.0);
       const curW = numOr(document.getElementById('calcWeight').value, 86.0);
 
-      // 1. Speichere neue Ziele im State
       state.goals.kcal = kcal;
       state.goals.protein = p;
       state.goals.carbs = c;
       state.goals.fat = f;
       state.goals.targetWeight = tw;
 
-      // 2. Synchronisiere aktuelles Gewicht für heute in die Trend-Engine
       const today = new Date().toISOString().slice(0, 10);
       const exIdx = state.weightLog.findIndex(w => w.date === today);
       if (exIdx >= 0) state.weightLog[exIdx].weight = curW;
@@ -1558,11 +1579,9 @@
       saveUserProfile();
       saveState();
 
-      // 3. UI-Synchronisation & Wechsel zum Dashboard
       updateUI();
       showToast(`🎯 Übernommen: ${kcal} kcal • ${p}g E • ${c}g K • ${f}g F`, 'info');
 
-      // Schaltet automatisch nach 400ms zum Dashboard um, damit der Nutzer die neuen Ziele sofort sieht
       setTimeout(() => {
         switchTab('tracker');
       }, 400);
