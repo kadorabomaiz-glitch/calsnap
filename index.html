@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b131e" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>CalSnap AI v4.1 Enterprise — Nutrition, Vision & Motion</title>
+  <title>CalSnap AI v4.1 Enterprise — Smart Nutrition & Vision</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -102,14 +102,6 @@
       70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
       100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
-    .sensor-pulse-active {
-      animation: sensorPulse 1.5s infinite;
-    }
-    @keyframes sensorPulse {
-      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
-      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
   </style>
 </head>
 <body class="min-h-screen antialiased">
@@ -178,7 +170,7 @@
     </div>
 
     <!-- ==========================================
-         TAB 1: TRACKER, BEWEGUNG & MULTIMODAL AI
+         TAB 1: TRACKER, DASHBOARD & KI-SCANNER
          ========================================== -->
     <main id="tab-tracker" class="tab-content active space-y-4">
 
@@ -188,13 +180,12 @@
           <div>
             <p id="lblRemainingTitle" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Verbleibend heute</p>
             <div class="flex items-baseline gap-1.5 mt-0.5">
-              <span id="kcalRemaining" class="text-3xl font-extrabold text-white tracking-tight">1900</span>
+              <span id="kcalRemaining" class="text-3xl font-extrabold text-white tracking-tight">2425</span>
               <span class="text-xs font-semibold text-emerald-400">kcal</span>
             </div>
             <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
-              <span id="lblGoalWord">Basis</span>: <strong id="kcalGoalLabel" class="text-slate-200">1900</strong> •
-              🔥 <span id="lblActiveWord">Aktiv</span>: <strong id="kcalActiveBonusLabel" class="text-amber-400">+0</strong> •
-              <span id="lblEatenWord">Gegessen</span>: <strong id="kcalConsumedLabel" class="text-emerald-400">0</strong>
+              <span id="lblGoalWord">Ziel</span>: <strong id="kcalGoalLabel" class="text-slate-200">2425</strong> •
+              <span id="lblEatenWord">Gegessen</span>: <strong id="kcalConsumedLabel" class="text-emerald-400">0</strong> kcal
             </p>
           </div>
 
@@ -213,7 +204,7 @@
           <div class="glass-subcard p-2.5">
             <div class="flex justify-between text-[11px] font-semibold mb-1">
               <span id="lblMacroP" class="text-emerald-400">Eiweiß</span>
-              <span id="protText" class="text-slate-300">0/140g</span>
+              <span id="protText" class="text-slate-300">0/260g</span>
             </div>
             <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
               <div id="protBar" class="h-full bg-emerald-400 rounded-full transition-all duration-300" style="width:0%"></div>
@@ -223,7 +214,7 @@
           <div class="glass-subcard p-2.5">
             <div class="flex justify-between text-[11px] font-semibold mb-1">
               <span id="lblMacroC" class="text-sky-400">Kohlenh.</span>
-              <span id="carbText" class="text-slate-300">0/180g</span>
+              <span id="carbText" class="text-slate-300">0/85g</span>
             </div>
             <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
               <div id="carbBar" class="h-full bg-sky-400 rounded-full transition-all duration-300" style="width:0%"></div>
@@ -233,7 +224,7 @@
           <div class="glass-subcard p-2.5">
             <div class="flex justify-between text-[11px] font-semibold mb-1">
               <span id="lblMacroF" class="text-amber-400">Fett</span>
-              <span id="fatText" class="text-slate-300">0/65g</span>
+              <span id="fatText" class="text-slate-300">0/116g</span>
             </div>
             <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
               <div id="fatBar" class="h-full bg-amber-400 rounded-full transition-all duration-300" style="width:0%"></div>
@@ -259,106 +250,6 @@
             <p class="text-[10px] text-slate-400">⚡ Magn.</p>
             <p id="magPill" class="text-xs font-bold text-slate-200">0mg</p>
           </div>
-        </div>
-      </section>
-
-      <!-- ========================================================
-           BEWEGUNG & LIVE-TRACKING COCKPIT (COUCH-RESISTENT)
-           ======================================================== -->
-      <section class="glass-card p-3.5 space-y-3 border border-amber-500/30">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-sm">🏃‍♂️🚴‍♂️</span>
-            <h2 id="lblActivityTitle" class="text-xs font-extrabold text-white uppercase tracking-wider">Bewegung & Live-Tracking</h2>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span id="activeKcalBadge" class="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
-              🔥 +0 kcal
-            </span>
-            <button onclick="toggleActivityQuickSync()" class="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" title="Manuell / Smartwatch Sync">
-              ⌚ Sync
-            </button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2.5">
-          <!-- STEP COUNTER CARD (5-STEP DEADBAND GAIT FILTER) -->
-          <div class="glass-subcard p-3 space-y-2 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
-                <span>👟 <span id="lblStepsWord">Schritte</span></span>
-                <span id="stepsKcalText" class="text-emerald-400 font-bold">+0 kcal</span>
-              </div>
-              <div class="flex items-baseline justify-between mt-0.5">
-                <span id="stepsCountText" class="text-xl font-extrabold text-white">0</span>
-                <span id="stepSensorStatusBadge" class="text-[9px] font-semibold text-slate-500 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">Inaktiv</span>
-              </div>
-              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1.5">
-                <div id="stepsProgressBar" class="h-full bg-emerald-400 rounded-full transition-all duration-300" style="width:0%"></div>
-              </div>
-            </div>
-            <div class="grid grid-cols-12 gap-1.5 pt-1">
-              <button id="btnStepSensor" onclick="toggleStepSensor()" class="col-span-7 py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 flex items-center justify-center gap-1 transition">
-                <i class="fa-solid fa-person-walking"></i>
-                <span id="lblStepSensorBtn">Start</span>
-              </button>
-              <button onclick="addStepsManual(1000)" class="col-span-5 py-1.5 px-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-[11px] font-extrabold text-emerald-300">
-                +1.000
-              </button>
-            </div>
-          </div>
-
-          <!-- GPS CYCLING TRACKER CARD -->
-          <div class="glass-subcard p-3 space-y-2 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
-                <span>🚴‍♂️ <span id="lblCyclingWord">Radfahren</span></span>
-                <span id="cyclingKcalText" class="text-amber-400 font-bold">+0 kcal</span>
-              </div>
-              <div class="flex items-baseline justify-between mt-0.5">
-                <span id="cyclingTimerText" class="text-base font-extrabold text-white">0 Min</span>
-                <span id="cyclingStatsText" class="text-xs font-bold text-emerald-400">0.0 km</span>
-              </div>
-              <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1">
-                <span id="cyclingSpeedText">Ø 18.0 km/h</span>
-                <span id="gpsAccuracyBadge" class="text-[9px] text-slate-500 font-semibold">GPS: Standby</span>
-              </div>
-            </div>
-            <div class="grid grid-cols-12 gap-1.5 pt-1">
-              <button id="btnCyclingGps" onclick="toggleCyclingGps()" class="col-span-7 py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 flex items-center justify-center gap-1 transition">
-                <i class="fa-solid fa-location-crosshairs"></i>
-                <span id="lblCyclingGpsBtn">GPS Start</span>
-              </button>
-              <button onclick="addCyclingManual(15)" class="col-span-5 py-1.5 px-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-[11px] font-extrabold text-amber-300">
-                +15 Min
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- COLLAPSIBLE SMARTWATCH / MANUAL QUICK-SYNC DRAWER -->
-        <div id="activitySyncDrawer" class="hidden glass-subcard p-3 space-y-2.5 border border-emerald-500/30 text-xs">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-emerald-400">⌚ Smartwatch / Manuelle Synchronisation</span>
-            <button onclick="resetTodayActivity()" class="text-[11px] text-rose-400 hover:underline">Heute 0 setzen</button>
-          </div>
-          <div class="grid grid-cols-3 gap-2">
-            <div>
-              <label class="text-[10px] text-slate-400 block mb-1">Schritte gesamt</label>
-              <input id="syncStepsInput" type="number" min="0" step="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
-            </div>
-            <div>
-              <label class="text-[10px] text-slate-400 block mb-1">Rad-Minuten</label>
-              <input id="syncCyclingMinInput" type="number" min="0" step="5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
-            </div>
-            <div>
-              <label class="text-[10px] text-slate-400 block mb-1">Ø Rad km/h</label>
-              <input id="syncCyclingSpeedInput" type="number" min="5" max="55" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
-            </div>
-          </div>
-          <button onclick="applyManualActivitySync()" class="w-full py-2 rounded-lg bg-emerald-500 text-slate-950 font-extrabold text-xs">
-            Aktivitäts-Kalorien berechnen & übernehmen
-          </button>
         </div>
       </section>
 
@@ -554,11 +445,11 @@
             <h2 id="lblZaubernTitle" class="text-base font-extrabold text-white flex items-center gap-2">
               <span>✨</span> KI-Wunsch-Koch („Zaubern“)
             </h2>
-            <p id="lblZaubernSub" class="text-xs text-slate-400 mt-0.5">Maßgeschneidert auf dein offenes Tagesbudget (inkl. Aktiv-Bonus)</p>
+            <p id="lblZaubernSub" class="text-xs text-slate-400 mt-0.5">Maßgeschneidert auf dein offenes Tagesbudget</p>
           </div>
           <div class="text-right">
-            <span id="ideasRemKcal" class="text-sm font-extrabold text-emerald-400">1900 kcal</span>
-            <p id="ideasRemProt" class="text-[11px] text-slate-400">140g Eiweiß offen</p>
+            <span id="ideasRemKcal" class="text-sm font-extrabold text-emerald-400">2425 kcal</span>
+            <p id="ideasRemProt" class="text-[11px] text-slate-400">260g Eiweiß offen</p>
           </div>
         </div>
 
@@ -612,7 +503,7 @@
         </div>
 
         <div class="flex gap-2">
-          <input id="weightInput" type="number" step="0.1" placeholder="Heutiges Gewicht in kg (z. B. 84.5)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" />
+          <input id="weightInput" type="number" step="0.1" placeholder="Heutiges Gewicht in kg (z. B. 86.0)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" />
           <button onclick="logWeight()" class="px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">Speichern</button>
         </div>
 
@@ -638,7 +529,7 @@
         </button>
       </section>
 
-      <!-- IMPROVED PERSISTENT BMR / TDEE MACRO CALCULATOR -->
+      <!-- PERSISTENT BMR / TDEE MACRO CALCULATOR WITH EDITABLE RESULTS -->
       <section class="glass-card p-4 space-y-3.5 border border-emerald-500/30">
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-extrabold text-white flex items-center gap-1.5">
@@ -691,9 +582,9 @@
         <div id="calcResultBox" class="hidden glass-subcard p-3.5 space-y-3 border border-emerald-500/40 text-xs"></div>
       </section>
 
-      <!-- PAST DAYS ARCHIVE (NUTRITION & ACTIVITY) -->
+      <!-- PAST DAYS ARCHIVE -->
       <section class="glass-card p-4 space-y-3">
-        <h3 class="text-sm font-extrabold text-white">📅 Rückblick (Ernährung & Aktivität)</h3>
+        <h3 class="text-sm font-extrabold text-white">📅 Rückblick (Ernährungstagebuch)</h3>
         <div id="pastDaysContainer" class="space-y-2"></div>
       </section>
     </main>
@@ -814,7 +705,7 @@
     <div class="max-w-md mx-auto grid grid-cols-3 gap-2">
       <button id="navBtnTracker" onclick="switchTab('tracker')" class="flex flex-col items-center py-1.5 rounded-xl text-emerald-400 font-bold text-xs transition">
         <i class="fa-solid fa-camera-retro text-base mb-0.5"></i>
-        <span id="lblNavTracker">Scanner & Aktiv</span>
+        <span id="lblNavTracker">Scanner & Log</span>
       </button>
       <button id="navBtnIdeas" onclick="switchTab('ideas')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-400 font-bold text-xs transition">
         <i class="fa-solid fa-wand-magic-sparkles text-base mb-0.5"></i>
@@ -844,8 +735,6 @@
       cheatRescue: { active: false, dailyCut: 0 },
       lastActiveDate: new Date().toISOString().slice(0, 10),
       waterLiters: 0.0,
-      todayActivity: { steps: 0, cyclingMinutes: 0, cyclingKm: 0.0, avgSpeedKmh: 18.0, activeKcal: 0 },
-      activityLog: [],
       todayLog: [],
       pastDaysLog: [],
       weightLog: [],
@@ -865,71 +754,34 @@
     let recognition = null;
     let isRecording = false;
 
-    // =========================================================================
-    // COUCH-RESISTANT 5-STEP GAIT FILTER & VARIANCE PEDOMETER ENGINE
-    // =========================================================================
-    let isStepTrackingActive = false;
-    let gEst = 9.80665;
-    let gInitialized = false;
-    let sensorEventCounter = 0;
-    let sensorSampleTimer = null;
-    let stepSaveCounter = 0;
-
-    // Glättung & kinetische Varianz-Puffer
-    const SIGNED_WINDOW_SIZE = 4;
-    const signedAccelWindow = [];
-    const VARIANCE_WINDOW_SIZE = 20; // ~330ms Fenster bei 60Hz
-    const varianceWindow = [];
-
-    // State Machine & Hysterese-Parameter
-    let stepPhase = 0; // 0 = Suche Peak, 1 = Suche Valley
-    let currentPeakVal = 0;
-    let lastStepTime = 0;
-
-    // THE 5-STEP DEADBAND BUFFER (Verhindert Couch- & Handbewegungs-Fehlalarme!)
-    let gaitBuffer = 0;
-    let lastGaitCandidateTime = 0;
-
-    // GPS CYCLING ENGINE STATE
-    let isCyclingTrackingActive = false;
-    let cyclingWatchId = null;
-    let cyclingSessionSec = 0;
-    let cyclingBaseMinutes = 0;
-    let cyclingTimerInterval = null;
-    let lastGpsCoords = null;
-    let lastGpsTime = null;
-    let wakeLockSentinel = null;
-
     const I18N = {
       de: {
-        remTitle: 'Verbleibend heute', goalWord: 'Basis', eatenWord: 'Gegessen', activeWord: 'Aktiv',
+        remTitle: 'Verbleibend heute', goalWord: 'Ziel', eatenWord: 'Gegessen',
         macroP: 'Eiweiß', macroC: 'Kohlenh.', macroF: 'Fett', sugar: 'Zucker', fiber: 'Ballastst.',
         waterTitle: 'Wasser-Bilanz', scannerTitle: 'Smart KI-Scanner & Text',
-        activityTitle: 'Bewegung & Live-Tracking', stepsWord: 'Schritte', cyclingWord: 'Radfahren',
         modeMeal: 'Mahlzeit', modeFridge: 'Kühlschr.', modeMenu: 'Menü-Karte', modePot: 'Topf/Auflauf',
         btnPhoto: 'Foto', btnVoice: 'Sprache', btnScan: 'KI-Scan',
         previewTitle: 'Mahlzeit & Physik-Check', previewCancel: 'Abbrechen',
         portionScale: 'Portions-/Bechergröße:', todayLogTitle: 'Heutiges Tagebuch',
-        zaubernTitle: 'KI-Wunsch-Koch („Zaubern“)', zaubernSub: 'Maßgeschneidert auf dein offenes Tagesbudget (inkl. Aktiv-Bonus)',
+        zaubernTitle: 'KI-Wunsch-Koch („Zaubern“)', zaubernSub: 'Maßgeschneidert auf dein offenes Tagesbudget',
         btnZaubern: 'Rezepte jetzt zaubern', shopTitle: 'Einkaufsliste',
-        weightTitle: 'Gewichts- & Trend-Engine', navTracker: 'Scanner & Aktiv', navIdeas: 'Zaubern & Liste', navWeight: 'Gewicht & Ziel',
+        weightTitle: 'Gewichts- & Trend-Engine', navTracker: 'Scanner & Log', navIdeas: 'Zaubern & Liste', navWeight: 'Gewicht & Ziel',
         hintMeal: 'Tippe oder diktiere dein Essen (z. B. „Gemischter Salat mit Dressing, Brötchen, Cola und Saft“) oder mach ein Foto. Jede Komponente wird einzeln & vollständig aufgeschlüsselt!',
         hintFridge: 'Fotografiere deinen offenen Kühlschrank: Die KI erkennt Zutaten, prüft das MHD und zaubert passende Rezepte.',
         hintMenu: 'Fotografiere eine Speisekarte: Die KI bewertet alle Gerichte per Ampel (Grün / Gelb / Rot) inkl. Spar-Tipps.',
         hintPot: 'Fotografiere einen Topf oder Auflauf: Die KI berechnet das Gesamtgewicht und deine exakte Einzelportion.'
       },
       pl: {
-        remTitle: 'Pozostało dzisiaj', goalWord: 'Baza', eatenWord: 'Zjedzono', activeWord: 'Aktywność',
+        remTitle: 'Pozostało dzisiaj', goalWord: 'Cel', eatenWord: 'Zjedzono',
         macroP: 'Białko', macroC: 'Węglow.', macroF: 'Tłuszcz', sugar: 'Cukier', fiber: 'Błonnik',
         waterTitle: 'Bilans wody', scannerTitle: 'Skaner AI i Tekst',
-        activityTitle: 'Ruch i Śledzenie na żywo', stepsWord: 'Kroki', cyclingWord: 'Rower',
         modeMeal: 'Posiłek', modeFridge: 'Lodówka', modeMenu: 'Karta dań', modePot: 'Garnek',
         btnPhoto: 'Zdjęcie', btnVoice: 'Głos', btnScan: 'Skan AI',
         previewTitle: 'Kontrola Posiłku i Fizyki', previewCancel: 'Anuluj',
         portionScale: 'Wielkość porcji / kubka:', todayLogTitle: 'Dzisiejszy dziennik',
-        zaubernTitle: 'Kucharz AI („Czaruj”)', zaubernSub: 'Dopasowane do Twojego budżetu kalorii z bonusem aktywności',
+        zaubernTitle: 'Kucharz AI („Czaruj”)', zaubernSub: 'Dopasowane do Twojego budżetu kalorii',
         btnZaubern: 'Wyczaruj przepisy', shopTitle: 'Lista zakupów',
-        weightTitle: 'Waga i Trend 7-dniowy', navTracker: 'Skaner i Ruch', navIdeas: 'Przepisy', navWeight: 'Waga i Cel',
+        weightTitle: 'Waga i Trend 7-dniowy', navTracker: 'Skaner i Dziennik', navIdeas: 'Przepisy', navWeight: 'Waga i Cel',
         hintMeal: 'Wpisz lub podyktuj posiłek albo zrób zdjęcie. Każdy składnik zostanie rozpisany osobno w pełnym tekście!',
         hintFridge: 'Zrób zdjęcie wnętrza lodówki: AI rozpozna składniki i stworzy przepisy.',
         hintMenu: 'Zrób zdjęcie karty dań w restauracji: AI oceni dania (Zielone / Żółte / Czerwone).',
@@ -960,8 +812,6 @@
           goals: { ...DEFAULT_STATE.goals, ...(parsed.goals || {}) },
           userProfile: { ...DEFAULT_STATE.userProfile, ...(parsed.userProfile || {}) },
           cheatRescue: { ...DEFAULT_STATE.cheatRescue, ...(parsed.cheatRescue || {}) },
-          todayActivity: { ...DEFAULT_STATE.todayActivity, ...(parsed.todayActivity || {}) },
-          activityLog: Array.isArray(parsed.activityLog) ? parsed.activityLog : [],
           todayLog: Array.isArray(parsed.todayLog) ? parsed.todayLog : [],
           pastDaysLog: Array.isArray(parsed.pastDaysLog) ? parsed.pastDaysLog : [],
           weightLog: Array.isArray(parsed.weightLog) ? parsed.weightLog : [],
@@ -985,7 +835,7 @@
     function checkDayRollover() {
       const today = new Date().toISOString().slice(0, 10);
       if (state.lastActiveDate && state.lastActiveDate !== today) {
-        if (state.todayLog.length > 0 || state.todayActivity.steps > 0 || state.todayActivity.cyclingMinutes > 0) {
+        if (state.todayLog.length > 0) {
           const totals = state.todayLog.reduce((acc, it) => {
             acc.kcal += numOr(it.kcal, 0);
             acc.p += numOr(it.p, 0);
@@ -1000,25 +850,12 @@
             p: Math.round(totals.p),
             c: Math.round(totals.c),
             f: Math.round(totals.f),
-            itemsCount: state.todayLog.length,
-            steps: numOr(state.todayActivity.steps, 0),
-            cyclingMin: numOr(state.todayActivity.cyclingMinutes, 0),
-            activeKcal: numOr(state.todayActivity.activeKcal, 0)
+            itemsCount: state.todayLog.length
           });
           if (state.pastDaysLog.length > 30) state.pastDaysLog.length = 30;
-
-          state.activityLog.unshift({
-            date: state.lastActiveDate,
-            steps: numOr(state.todayActivity.steps, 0),
-            cyclingMinutes: numOr(state.todayActivity.cyclingMinutes, 0),
-            cyclingKm: numOr(state.todayActivity.cyclingKm, 0),
-            activeKcal: numOr(state.todayActivity.activeKcal, 0)
-          });
-          if (state.activityLog.length > 30) state.activityLog.length = 30;
         }
 
         state.todayLog = [];
-        state.todayActivity = { steps: 0, cyclingMinutes: 0, cyclingKm: 0.0, avgSpeedKmh: 18.0, activeKcal: 0 };
         state.waterLiters = 0.0;
         state.lastActiveDate = today;
         saveState();
@@ -1037,459 +874,11 @@
       el.className = `pointer-events-auto border px-4 py-2.5 rounded-xl text-xs font-bold shadow-xl flex items-center justify-between transition-all ${colors}`;
       el.innerHTML = `<span class="break-words leading-snug">${escapeHtml(msg)}</span>`;
       container.appendChild(el);
-      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 3400);
-    }
-
-    function getUserWeightKg() {
-      if (state.weightLog.length > 0) {
-        return numOr(state.weightLog[state.weightLog.length - 1].weight, 86.0);
-      }
-      return numOr(state.userProfile?.weight, numOr(state.goals.targetWeight, 86.0));
-    }
-
-    function recalcActiveExpenditure() {
-      const wKg = getUserWeightKg();
-      const steps = numOr(state.todayActivity.steps, 0);
-      const stepKcal = Math.round(steps * wKg * 0.0005);
-
-      const cMin = numOr(state.todayActivity.cyclingMinutes, 0);
-      const speed = numOr(state.todayActivity.avgSpeedKmh, 18.0);
-      let netMet = 5.0;
-      if (speed < 16.0) netMet = 3.0;
-      else if (speed < 20.0) netMet = 5.0;
-      else if (speed < 25.0) netMet = 7.0;
-      else netMet = 9.0;
-
-      const cyclingKcal = Math.round(((netMet * 3.5 * wKg) / 200) * cMin);
-      const totalActive = stepKcal + cyclingKcal;
-      state.todayActivity.activeKcal = totalActive;
-      return { stepKcal, cyclingKcal, totalActive };
+      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 3200);
     }
 
     // =========================================================================
-    // COUCH-RESISTANT 5-STEP GAIT FILTER & SENSOR ENGINE
-    // =========================================================================
-    async function toggleStepSensor() {
-      if (isStepTrackingActive) {
-        stopStepSensor();
-        return;
-      }
-
-      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-        try {
-          const perm = await DeviceMotionEvent.requestPermission();
-          if (perm !== 'granted') {
-            showToast('Bewegungssensor-Erlaubnis verweigert.', 'warn');
-            return;
-          }
-        } catch (err) {
-          showToast('Sensor-Berechtigungsfehler.', 'error');
-          return;
-        }
-      }
-
-      // Initialisierung: Exakter Nullpunkt ohne Start-Drift
-      gInitialized = false;
-      stepPhase = 0;
-      currentPeakVal = 0;
-      lastStepTime = performance.now();
-      gaitBuffer = 0;
-      lastGaitCandidateTime = 0;
-      signedAccelWindow.length = 0;
-      varianceWindow.length = 0;
-      sensorEventCounter = 0;
-
-      window.addEventListener('devicemotion', handleMotionStepEvent, { passive: true });
-      isStepTrackingActive = true;
-
-      const btn = document.getElementById('btnStepSensor');
-      if (btn) {
-        btn.classList.add('bg-emerald-500', 'text-slate-950', 'sensor-pulse-active');
-        btn.classList.remove('bg-slate-800', 'text-slate-200');
-        document.getElementById('lblStepSensorBtn').textContent = 'Stopp';
-      }
-
-      const badge = document.getElementById('stepSensorStatusBadge');
-      if (badge) {
-        badge.textContent = 'Bereit (0 Hz)';
-        badge.className = 'text-[9px] font-semibold text-amber-300 px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-500/40';
-      }
-
-      sensorSampleTimer = setInterval(() => {
-        if (isStepTrackingActive && badge) {
-          if (sensorEventCounter > 0) {
-            badge.textContent = gaitBuffer >= 5 ? '🚶‍♂️ Gehen aktiv' : `Bereit (${sensorEventCounter} Hz)`;
-            badge.className = 'text-[9px] font-semibold text-emerald-300 px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40';
-          } else {
-            badge.textContent = 'Kein Signal';
-            badge.className = 'text-[9px] font-semibold text-rose-300 px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-500/40';
-          }
-          sensorEventCounter = 0;
-        }
-      }, 1000);
-
-      showToast('👟 Schrittzähler scharf. Gehe 5 Schritte am Stück!', 'info');
-    }
-
-    function stopStepSensor() {
-      window.removeEventListener('devicemotion', handleMotionStepEvent);
-      if (sensorSampleTimer) {
-        clearInterval(sensorSampleTimer);
-        sensorSampleTimer = null;
-      }
-      isStepTrackingActive = false;
-      gaitBuffer = 0;
-      stepPhase = 0;
-      gInitialized = false;
-
-      const btn = document.getElementById('btnStepSensor');
-      if (btn) {
-        btn.classList.remove('bg-emerald-500', 'text-slate-950', 'sensor-pulse-active');
-        btn.classList.add('bg-slate-800', 'text-slate-200');
-        document.getElementById('lblStepSensorBtn').textContent = 'Start';
-      }
-
-      const badge = document.getElementById('stepSensorStatusBadge');
-      if (badge) {
-        badge.textContent = 'Inaktiv';
-        badge.className = 'text-[9px] font-semibold text-slate-500 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800';
-      }
-
-      recalcActiveExpenditure();
-      saveState();
-      updateUI();
-    }
-
-    function handleMotionStepEvent(e) {
-      if (isCyclingTrackingActive) return;
-      sensorEventCounter++;
-
-      const raw = e.accelerationIncludingGravity;
-      if (!raw || raw.x === null) return;
-
-      const rawMag = Math.sqrt(raw.x * raw.x + raw.y * raw.y + raw.z * raw.z);
-
-      // 1. Automatische Nullpunkt-Kalibrierung beim 1. Sample
-      if (!gInitialized) {
-        gEst = rawMag;
-        gInitialized = true;
-        return;
-      }
-
-      // Träge Gravitations-Nachführung (0.97 / 0.03)
-      gEst = 0.97 * gEst + 0.03 * rawMag;
-
-      // Vorzeichenbehaftete Vertikal-Beschleunigung: KEIN Math.abs()!
-      const aSigned = rawMag - gEst;
-
-      // 4-Sample Glättung
-      signedAccelWindow.push(aSigned);
-      if (signedAccelWindow.length > SIGNED_WINDOW_SIZE) signedAccelWindow.shift();
-      const smoothSigned = signedAccelWindow.reduce((acc, v) => acc + v, 0) / signedAccelWindow.length;
-
-      // Kinetische Varianz-Prüfung über rollendes 20-Sample-Fenster (~330ms)
-      varianceWindow.push(smoothSigned);
-      if (varianceWindow.length > VARIANCE_WINDOW_SIZE) varianceWindow.shift();
-
-      let kineticVariance = 0;
-      if (varianceWindow.length >= 10) {
-        const mean = varianceWindow.reduce((a, b) => a + b, 0) / varianceWindow.length;
-        kineticVariance = varianceWindow.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / varianceWindow.length;
-      }
-
-      const now = performance.now();
-
-      // DUAL-THRESHOLD HYSTERESE MIT HOHEN REALEN GEH-SCHWELLEN:
-      // Peak-Schwelle: >= +1.20 m/s² (weiche Couch-Bewegungen erreichen dies nicht!)
-      if (stepPhase === 0) {
-        if (smoothSigned >= 1.20 && kineticVariance >= 0.40) {
-          stepPhase = 1;
-          currentPeakVal = smoothSigned;
-        }
-      }
-      // Valley-Schwelle: <= -0.80 m/s² (zwingendes negatives Durchschwingen des Fußes!)
-      else if (stepPhase === 1) {
-        if (smoothSigned > currentPeakVal) {
-          currentPeakVal = smoothSigned;
-        }
-
-        // Vollständige Schwingung: Tal <= -0.80 m/s² UND Gesamthub >= 2.00 m/s²
-        if (smoothSigned <= -0.80) {
-          const deltaHub = currentPeakVal - smoothSigned;
-          if (deltaHub >= 2.00 && (now - lastStepTime) >= 380) {
-            onGaitCadenceRecognized(now);
-            lastStepTime = now;
-          }
-          stepPhase = 0;
-          currentPeakVal = 0;
-        }
-      }
-    }
-
-    // =========================================================================
-    // 5-SCHRITT-GAIT-DEADBAND (DIE COUCH-SPERRE)
-    // =========================================================================
-    function onGaitCadenceRecognized(now) {
-      if (lastGaitCandidateTime === 0) {
-        gaitBuffer = 1;
-        lastGaitCandidateTime = now;
-        return;
-      }
-
-      const dt = now - lastGaitCandidateTime;
-
-      // Echtes menschliches Schrittintervall: 380ms bis 1050ms
-      if (dt >= 380 && dt <= 1050) {
-        gaitBuffer++;
-        lastGaitCandidateTime = now;
-
-        if (gaitBuffer === 5) {
-          // GEHEN ZWEIFELSFREI BESTÄTIGT:
-          // Schreibt die 4 Puffer-Schritte + aktuellen Schritt (+5) auf einen Schlag gut!
-          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 5;
-          persistPedometerStep();
-        } else if (gaitBuffer > 5) {
-          // Kontinuierliche Fortbewegung: Jeder Folgeschritt zählt sofort live (+1)
-          state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 1;
-          persistPedometerStep();
-        }
-      } else if (dt > 1150) {
-        // Rhythmus abgerissen (z. B. auf der Couch stillgehalten):
-        // Puffer verfällt sofort auf 1 -> KEINE Schritte werden gutgeschrieben!
-        gaitBuffer = 1;
-        lastGaitCandidateTime = now;
-      }
-    }
-
-    function persistPedometerStep() {
-      stepSaveCounter++;
-      if (stepSaveCounter >= 5) {
-        stepSaveCounter = 0;
-        recalcActiveExpenditure();
-        saveState();
-      }
-      renderActivityUIOnly();
-    }
-
-    function addStepsManual(delta) {
-      state.todayActivity.steps = Math.max(0, numOr(state.todayActivity.steps, 0) + delta);
-      recalcActiveExpenditure();
-      saveState();
-      updateUI();
-      showToast(`+${delta} Schritte hinzugefügt`, 'info');
-    }
-
-    // =========================================================================
-    // ACCUMULATIVE GPS CYCLING ENGINE
-    // =========================================================================
-    async function toggleCyclingGps() {
-      if (isCyclingTrackingActive) {
-        stopCyclingGps();
-        return;
-      }
-      if (!('geolocation' in navigator)) {
-        showToast('GPS-Standort wird von diesem Browser nicht unterstützt.', 'error');
-        return;
-      }
-
-      if ('wakeLock' in navigator) {
-        try { wakeLockSentinel = await navigator.wakeLock.request('screen'); } catch (_) {}
-      }
-
-      lastGpsCoords = null;
-      lastGpsTime = null;
-      cyclingSessionSec = 0;
-      cyclingBaseMinutes = numOr(state.todayActivity.cyclingMinutes, 0);
-      isCyclingTrackingActive = true;
-
-      const accBadge = document.getElementById('gpsAccuracyBadge');
-      if (accBadge) {
-        accBadge.textContent = 'GPS: Suche...';
-        accBadge.className = 'text-[9px] text-amber-300 font-semibold';
-      }
-
-      cyclingWatchId = navigator.geolocation.watchPosition(
-        handleGpsCyclingPosition,
-        (err) => {
-          showToast(`GPS: ${err.message}`, 'warn');
-          if (accBadge) accBadge.textContent = 'GPS: Fehler';
-        },
-        { enableHighAccuracy: true, maximumAge: 2000, timeout: 8000 }
-      );
-
-      cyclingTimerInterval = setInterval(() => {
-        cyclingSessionSec++;
-        const mins = Math.floor(cyclingSessionSec / 60);
-        const secs = cyclingSessionSec % 60;
-        const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        const timerEl = document.getElementById('cyclingTimerText');
-        if (timerEl) timerEl.textContent = timeStr;
-
-        state.todayActivity.cyclingMinutes = Math.round((cyclingBaseMinutes + cyclingSessionSec / 60) * 10) / 10;
-        recalcActiveExpenditure();
-        renderActivityUIOnly();
-      }, 1000);
-
-      const btn = document.getElementById('btnCyclingGps');
-      if (btn) {
-        btn.classList.add('bg-amber-500', 'text-slate-950', 'sensor-pulse-active');
-        btn.classList.remove('bg-slate-800', 'text-slate-200');
-        document.getElementById('lblCyclingGpsBtn').textContent = 'GPS Stopp';
-      }
-      showToast('🚴‍♂️ GPS-Fahrrad-Tracker aktiv (Display bleibt an)', 'info');
-    }
-
-    function stopCyclingGps() {
-      if (cyclingWatchId !== null) {
-        navigator.geolocation.clearWatch(cyclingWatchId);
-        cyclingWatchId = null;
-      }
-      if (cyclingTimerInterval) {
-        clearInterval(cyclingTimerInterval);
-        cyclingTimerInterval = null;
-      }
-      if (wakeLockSentinel) {
-        wakeLockSentinel.release().catch(() => {});
-        wakeLockSentinel = null;
-      }
-
-      isCyclingTrackingActive = false;
-      const btn = document.getElementById('btnCyclingGps');
-      if (btn) {
-        btn.classList.remove('bg-amber-500', 'text-slate-950', 'sensor-pulse-active');
-        btn.classList.add('bg-slate-800', 'text-slate-200');
-        document.getElementById('lblCyclingGpsBtn').textContent = 'GPS Start';
-      }
-      const accBadge = document.getElementById('gpsAccuracyBadge');
-      if (accBadge) {
-        accBadge.textContent = 'GPS: Standby';
-        accBadge.className = 'text-[9px] text-slate-500 font-semibold';
-      }
-
-      recalcActiveExpenditure();
-      saveState();
-      updateUI();
-      showToast('🏁 Rad-Tracking beendet und im Tagebuch verbucht.', 'info');
-    }
-
-    function calcHaversineKm(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = ((lat2 - lat1) * Math.PI) / 180;
-      const dLon = ((lon2 - lon1) * Math.PI) / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-
-    function handleGpsCyclingPosition(pos) {
-      const crd = pos.coords;
-      const acc = crd.accuracy || 999;
-      const accBadge = document.getElementById('gpsAccuracyBadge');
-
-      if (accBadge) {
-        if (acc <= 30) {
-          accBadge.textContent = `🟢 GPS (±${Math.round(acc)}m)`;
-          accBadge.className = 'text-[9px] text-emerald-400 font-bold';
-        } else if (acc <= 65) {
-          accBadge.textContent = `🟡 GPS (±${Math.round(acc)}m)`;
-          accBadge.className = 'text-[9px] text-amber-300 font-semibold';
-        } else {
-          accBadge.textContent = `📡 GPS sucht (±${Math.round(acc)}m)`;
-          accBadge.className = 'text-[9px] text-slate-400 font-semibold';
-          return;
-        }
-      }
-
-      const now = performance.now();
-      if (lastGpsCoords && lastGpsTime) {
-        const dKm = calcHaversineKm(lastGpsCoords.latitude, lastGpsCoords.longitude, crd.latitude, crd.longitude);
-        const dtHours = (now - lastGpsTime) / 3600000;
-        let vKmh = crd.speed !== null && crd.speed >= 0 ? crd.speed * 3.6 : (dtHours > 0 ? dKm / dtHours : 0);
-
-        if (vKmh >= 3.5 && vKmh <= 55.0 && dKm > 0.002) {
-          state.todayActivity.cyclingKm = Math.round((numOr(state.todayActivity.cyclingKm, 0) + dKm) * 100) / 100;
-          const prevSpeed = numOr(state.todayActivity.avgSpeedKmh, 18.0);
-          state.todayActivity.avgSpeedKmh = Math.round((0.85 * prevSpeed + 0.15 * vKmh) * 10) / 10;
-        }
-      }
-
-      lastGpsCoords = crd;
-      lastGpsTime = now;
-      recalcActiveExpenditure();
-      renderActivityUIOnly();
-    }
-
-    function addCyclingManual(mins) {
-      state.todayActivity.cyclingMinutes = Math.max(0, numOr(state.todayActivity.cyclingMinutes, 0) + mins);
-      const dist = (mins * numOr(state.todayActivity.avgSpeedKmh, 18.0)) / 60;
-      state.todayActivity.cyclingKm = Math.round((numOr(state.todayActivity.cyclingKm, 0) + dist) * 10) / 10;
-      recalcActiveExpenditure();
-      saveState();
-      updateUI();
-      showToast(`+${mins} Min. Radfahren gutgeschrieben`, 'info');
-    }
-
-    function toggleActivityQuickSync() {
-      const drawer = document.getElementById('activitySyncDrawer');
-      const isClosed = drawer.classList.contains('hidden');
-      if (isClosed) {
-        document.getElementById('syncStepsInput').value = numOr(state.todayActivity.steps, 0);
-        document.getElementById('syncCyclingMinInput').value = Math.round(numOr(state.todayActivity.cyclingMinutes, 0));
-        document.getElementById('syncCyclingSpeedInput').value = numOr(state.todayActivity.avgSpeedKmh, 18.0);
-        drawer.classList.remove('hidden');
-      } else {
-        drawer.classList.add('hidden');
-      }
-    }
-
-    function applyManualActivitySync() {
-      state.todayActivity.steps = Math.max(0, Math.round(numOr(document.getElementById('syncStepsInput').value, 0)));
-      state.todayActivity.cyclingMinutes = Math.max(0, Math.round(numOr(document.getElementById('syncCyclingMinInput').value, 0)));
-      state.todayActivity.avgSpeedKmh = Math.min(55, Math.max(5, numOr(document.getElementById('syncCyclingSpeedInput').value, 18.0)));
-      state.todayActivity.cyclingKm = Math.round(((state.todayActivity.cyclingMinutes * state.todayActivity.avgSpeedKmh) / 60) * 10) / 10;
-      recalcActiveExpenditure();
-      saveState();
-      document.getElementById('activitySyncDrawer').classList.add('hidden');
-      updateUI();
-      showToast('⌚ Aktivität erfolgreich synchronisiert!', 'info');
-    }
-
-    function resetTodayActivity() {
-      state.todayActivity = { steps: 0, cyclingMinutes: 0, cyclingKm: 0.0, avgSpeedKmh: 18.0, activeKcal: 0 };
-      recalcActiveExpenditure();
-      saveState();
-      document.getElementById('activitySyncDrawer').classList.add('hidden');
-      updateUI();
-      showToast('Aktivität für heute zurückgesetzt.', 'info');
-    }
-
-    function renderActivityUIOnly() {
-      const { stepKcal, cyclingKcal, totalActive } = recalcActiveExpenditure();
-      const steps = numOr(state.todayActivity.steps, 0);
-      const cMin = numOr(state.todayActivity.cyclingMinutes, 0);
-      const cKm = numOr(state.todayActivity.cyclingKm, 0.0);
-      const avgV = numOr(state.todayActivity.avgSpeedKmh, 18.0);
-
-      document.getElementById('stepsCountText').textContent = steps.toLocaleString('de-DE');
-      document.getElementById('stepsKcalText').textContent = `+${stepKcal} kcal`;
-      document.getElementById('stepsProgressBar').style.width = `${Math.min(100, (steps / 10000) * 100)}%`;
-
-      const timerEl = document.getElementById('cyclingTimerText');
-      if (timerEl && !isCyclingTrackingActive) {
-        timerEl.textContent = `${Math.round(cMin)} Min`;
-      }
-      document.getElementById('cyclingStatsText').textContent = `${cKm.toFixed(1)} km`;
-      document.getElementById('cyclingKcalText').textContent = `+${cyclingKcal} kcal`;
-      document.getElementById('cyclingSpeedText').textContent = `Ø ${avgV.toFixed(1)} km/h`;
-      document.getElementById('activeKcalBadge').textContent = `🔥 +${totalActive} kcal`;
-      document.getElementById('kcalActiveBonusLabel').textContent = `+${totalActive}`;
-    }
-
-    // =========================================================================
-    // MAKRO-RECHNER MIT DIREKTER BASIS-ÜBERNAHME
+    // MAKRO-RECHNER (TAB 3): FRISCHE BERECHNUNG & 1-KLICK DASHBOARD-ÜBERNAHME
     // =========================================================================
     function saveUserProfile() {
       state.userProfile = {
@@ -1508,16 +897,19 @@
       const p = state.userProfile;
       const targetW = numOr(state.goals.targetWeight, 80.0);
 
+      // Mifflin-St Jeor Grundumsatz & Gesamtumsatz
       const bmr = 10 * p.weight + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
       const tdee = Math.round(bmr * p.activity);
 
+      // Ziel-Kalorien nach wissenschaftlichem Defizit / Überschuss
       let calcKcal = tdee;
       if (targetW < p.weight - 0.5) {
-        calcKcal = Math.max(1200, tdee - 500);
+        calcKcal = Math.max(1200, tdee - 500); // 500 kcal Defizit zum gesunden Fettabbau
       } else if (targetW > p.weight + 0.5) {
-        calcKcal = tdee + 300;
+        calcKcal = tdee + 300; // 300 kcal kontrollierter Aufbau
       }
 
+      // Wissenschaftliche Makroverteilung (2.0g Protein/kg, 0.9g Fett/kg, Rest Kohlenhydrate)
       const calcP = Math.round(p.weight * 2.0);
       const calcF = Math.round(p.weight * 0.9);
       const calcC = Math.max(50, Math.round((calcKcal - calcP * 4 - calcF * 9) / 4));
@@ -1527,7 +919,7 @@
       box.innerHTML = `
         <div class="space-y-1.5 border-b border-slate-800 pb-2.5">
           <p class="text-slate-300">Grundumsatz: <strong>${Math.round(bmr)} kcal</strong> • Gesamtbedarf (TDEE): <strong>${tdee} kcal</strong></p>
-          <p class="text-[11px] text-emerald-400 font-semibold">Empfehlung frisch berechnet. Passe Werte bei Bedarf vor Übernahme an:</p>
+          <p class="text-[11px] text-emerald-400 font-semibold">Empfehlung frisch berechnet. Passe Werte bei Bedarf direkt an:</p>
         </div>
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
@@ -1565,12 +957,14 @@
       const tw = numOr(document.getElementById('resGoalTargetWeight').value, 80.0);
       const curW = numOr(document.getElementById('calcWeight').value, 86.0);
 
+      // 1. Speichere neue Ziele im State
       state.goals.kcal = kcal;
       state.goals.protein = p;
       state.goals.carbs = c;
       state.goals.fat = f;
       state.goals.targetWeight = tw;
 
+      // 2. Synchronisiere aktuelles Gewicht für heute in die Trend-Engine
       const today = new Date().toISOString().slice(0, 10);
       const exIdx = state.weightLog.findIndex(w => w.date === today);
       if (exIdx >= 0) state.weightLog[exIdx].weight = curW;
@@ -1579,9 +973,11 @@
       saveUserProfile();
       saveState();
 
+      // 3. UI-Synchronisation & Wechsel zum Dashboard
       updateUI();
       showToast(`🎯 Übernommen: ${kcal} kcal • ${p}g E • ${c}g K • ${f}g F`, 'info');
 
+      // Schaltet automatisch nach 400ms zum Dashboard um, damit der Nutzer die neuen Ziele live im Ring sieht
       setTimeout(() => {
         switchTab('tracker');
       }, 400);
@@ -2227,8 +1623,7 @@ JSON-Schema:
     // =========================================================================
     function getRemainingMacros() {
       const cut = state.cheatRescue.active ? numOr(state.cheatRescue.dailyCut, 200) : 0;
-      const totalActive = numOr(state.todayActivity.activeKcal, 0);
-      const effGoalKcal = Math.max(1000, numOr(state.goals.kcal, 2425) - cut + totalActive);
+      const effGoalKcal = Math.max(1000, numOr(state.goals.kcal, 2425) - cut);
       const sums = state.todayLog.reduce((acc, it) => ({
         kcal: acc.kcal + numOr(it.kcal, 0),
         p: acc.p + numOr(it.p, 0)
@@ -2241,7 +1636,7 @@ JSON-Schema:
 
     async function runFridgeLeftoverAI(hintText, base64Img) {
       const { remKcal, remProt } = getRemainingMacros();
-      const prompt = `Analysiere das Kühlschrank-Foto / die Zutaten (${hintText || 'Kühlschrank'}). Erstelle 2 schnelle Rezepte passend für max. ${remKcal} kcal (inkl. Aktivitäts-Bonus) und ~${remProt}g Eiweiß. Antworte NUR als JSON-Array:
+      const prompt = `Analysiere das Kühlschrank-Foto / die Zutaten (${hintText || 'Kühlschrank'}). Erstelle 2 schnelle Rezepte passend für max. ${remKcal} kcal und ~${remProt}g Eiweiß. Antworte NUR als JSON-Array:
 [{"title":"Rezeptname","detectedIngredients":"Erkannte Zutaten","expiryAlert":"MHD/Frische-Tipp","ingredientsList":"Zutat 1, Zutat 2","steps":"Kurze Zubereitung","kcal":450,"p":38,"c":35,"f":14,"icon":"🥘"}]`;
       const raw = await callGeminiRequest(prompt, base64Img);
       const list = extractJSON(raw);
@@ -2355,7 +1750,7 @@ JSON-Schema:
       ];
 
       try {
-        const prompt = `Erstelle 2 geniale Rezepte für den Wunsch "${craving}". Maximal ${remKcal} kcal pro Rezept (inkl. Aktivitäts-Bonus), Ziel ~${Math.min(65, remProt)}g Eiweiß. Antworte NUR als JSON-Array:
+        const prompt = `Erstelle 2 geniale Rezepte für den Wunsch "${craving}". Maximal ${remKcal} kcal pro Rezept, Ziel ~${Math.min(65, remProt)}g Eiweiß. Antworte NUR als JSON-Array:
 [{"title":"Vollständiger Rezeptname inkl. Gramm","ingredients":"Zutat 1 (Gramm), Zutat 2 (Gramm)","steps":"Kurze 1-2 Satz Anleitung","kcal":520,"p":42,"c":48,"f":14,"icon":"🍝"}]`;
         const raw = await callGeminiRequest(prompt, null);
         const ideas = extractJSON(raw);
@@ -2402,7 +1797,6 @@ JSON-Schema:
       document.getElementById('lblRemainingTitle').textContent = t.remTitle;
       document.getElementById('lblGoalWord').textContent = t.goalWord;
       document.getElementById('lblEatenWord').textContent = t.eatenWord;
-      document.getElementById('lblActiveWord').textContent = t.activeWord;
       document.getElementById('lblMacroP').textContent = t.macroP;
       document.getElementById('lblMacroC').textContent = t.macroC;
       document.getElementById('lblMacroF').textContent = t.macroF;
@@ -2410,9 +1804,6 @@ JSON-Schema:
       document.getElementById('lblFiber').textContent = t.fiber;
       document.getElementById('lblWaterTitle').textContent = t.waterTitle;
       document.getElementById('lblScannerTitle').textContent = t.scannerTitle;
-      document.getElementById('lblActivityTitle').textContent = t.activityTitle;
-      document.getElementById('lblStepsWord').textContent = t.stepsWord;
-      document.getElementById('lblCyclingWord').textContent = t.cyclingWord;
       document.getElementById('lblModeMeal').textContent = t.modeMeal;
       document.getElementById('lblModeFridge').textContent = t.modeFridge;
       document.getElementById('lblModeMenu').textContent = t.modeMenu;
@@ -2436,9 +1827,8 @@ JSON-Schema:
       const cut = state.cheatRescue.active ? numOr(state.cheatRescue.dailyCut, 200) : 0;
       document.getElementById('cheatRescueBanner').classList.toggle('hidden', !state.cheatRescue.active);
 
-      const { totalActive } = recalcActiveExpenditure();
       const baseGoalKcal = numOr(state.goals.kcal, 2425);
-      const effKcalGoal = Math.max(1000, baseGoalKcal - cut + totalActive);
+      const effKcalGoal = Math.max(1000, baseGoalKcal - cut);
 
       const sums = state.todayLog.reduce((acc, it) => {
         acc.kcal += numOr(it.kcal, 0);
@@ -2455,7 +1845,6 @@ JSON-Schema:
       const remKcal = Math.round(effKcalGoal - sums.kcal);
       document.getElementById('kcalRemaining').textContent = remKcal;
       document.getElementById('kcalGoalLabel').textContent = baseGoalKcal;
-      document.getElementById('kcalActiveBonusLabel').textContent = `+${totalActive}`;
       document.getElementById('kcalConsumedLabel').textContent = Math.round(sums.kcal);
       document.getElementById('todayTotalKcal').textContent = `${Math.round(sums.kcal)} kcal`;
 
@@ -2489,7 +1878,6 @@ JSON-Schema:
       document.getElementById('ideasRemKcal').textContent = `${Math.max(0, remKcal)} kcal`;
       document.getElementById('ideasRemProt').textContent = `${Math.max(0, Math.round(gP - sums.p))}g Eiweiß offen`;
 
-      renderActivityUIOnly();
       renderTodayLog();
       renderShoppingList();
       renderWeightTab();
@@ -2685,7 +2073,6 @@ JSON-Schema:
       document.getElementById('weightInput').value = '';
       if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = val;
       if (state.userProfile) state.userProfile.weight = val;
-      recalcActiveExpenditure();
       saveState();
       updateUI();
       showToast('⚖️ Gewicht gespeichert & Trend aktualisiert!', 'info');
@@ -2740,12 +2127,9 @@ JSON-Schema:
           <div class="glass-subcard p-2.5 flex justify-between items-center text-xs">
             <div>
               <span class="font-bold text-slate-300">${escapeHtml(d.date)}</span>
-              <p class="text-[10px] text-slate-400">👟 ${numOr(d.steps,0)} Schritte • 🚴‍♂️ ${numOr(d.cyclingMin,0)} Min</p>
+              <p class="text-[10px] text-slate-400">${numOr(d.itemsCount, 0)} Einträge geloggt</p>
             </div>
-            <div class="text-right">
-              <strong class="text-emerald-400 block">${d.kcal} kcal</strong>
-              <span class="text-[10px] text-amber-400 font-bold">+${numOr(d.activeKcal, 0)} aktiv</span>
-            </div>
+            <strong class="text-emerald-400 block">${d.kcal} kcal</strong>
           </div>
         `).join('');
       }
@@ -2805,7 +2189,6 @@ JSON-Schema:
       state.goals.carbs = Math.max(20, Math.round(numOr(document.getElementById('goalCarbInput').value, 85)));
       state.goals.fat = Math.max(20, Math.round(numOr(document.getElementById('goalFatInput').value, 116)));
       state.goals.targetWeight = numOr(document.getElementById('goalWeightInput').value, 80);
-      recalcActiveExpenditure();
       saveState();
       closeSettingsModal();
       updateUI();
