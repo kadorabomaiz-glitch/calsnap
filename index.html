@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b131e" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>CalSnap AI v4.1 Enterprise — Smart Nutrition, Vision & Activity</title>
+  <title>CalSnap AI v4.1 Enterprise — Nutrition, Vision & Motion</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -102,11 +102,11 @@
       70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
       100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
-    .sensor-active {
-      animation: sensorPulse 1.6s infinite;
+    .sensor-pulse-active {
+      animation: sensorPulse 1.5s infinite;
     }
     @keyframes sensorPulse {
-      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
       70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
       100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
@@ -159,11 +159,20 @@
       <div class="flex items-center gap-1.5">
         <button id="langBtnDe" onclick="setLanguage('de')" class="px-2 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">DE</button>
         <button id="langBtnPl" onclick="setLanguage('pl')" class="px-2 py-1.5 rounded-lg text-xs font-bold bg-slate-800/80 text-slate-400 border border-slate-700">PL</button>
-        <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 transition" title="Einstellungen & API-Key">
+        <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 transition" title="Einstellungen, Einladungen & API-Key">
           <i class="fa-solid fa-gear"></i>
         </button>
       </div>
     </header>
+
+    <!-- INSECURE HTTP CONTEXT WARNING BANNER (SHOWN ONLY IF SENSORS BLOCKED BY BROWSER) -->
+    <div id="httpsWarningBanner" class="hidden bg-rose-500/15 border border-rose-500/40 rounded-xl p-3 flex items-start gap-2.5 text-xs text-rose-200">
+      <i class="fa-solid fa-triangle-exclamation text-rose-400 text-sm mt-0.5"></i>
+      <div>
+        <p class="font-bold">HTTPS erforderlich für Live-Sensoren</p>
+        <p class="text-[11px] text-rose-300/80 mt-0.5">Dein Browser blockiert Beschleunigungssensoren und GPS im unverschlüsselten HTTP-Modus. Nutze HTTPS oder den manuellen ⌚ Quick-Sync.</p>
+      </div>
+    </div>
 
     <!-- CHEAT RESCUE BANNER -->
     <div id="cheatRescueBanner" class="hidden bg-amber-500/15 border border-amber-500/40 rounded-xl p-3 flex items-center justify-between">
@@ -178,7 +187,7 @@
     </div>
 
     <!-- ==========================================
-         TAB 1: TRACKER, ACTIVITY & MULTIMODAL AI
+         TAB 1: TRACKER, MOTION & MULTIMODAL AI
          ========================================== -->
     <main id="tab-tracker" class="tab-content active space-y-4">
 
@@ -263,13 +272,13 @@
       </section>
 
       <!-- ========================================================
-           STEP & GPS CYCLING TRACKER ENGINE (NEAT + EAT)
+           CORRECTED STEP & GPS CYCLING ENGINE (LIVE COCKPIT)
            ======================================================== -->
       <section class="glass-card p-3.5 space-y-3 border border-amber-500/30">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-sm">🏃‍♂️🚴‍♂️</span>
-            <h2 id="lblActivityTitle" class="text-xs font-extrabold text-white uppercase tracking-wider">Schritte & GPS Rad-Tracker</h2>
+            <h2 id="lblActivityTitle" class="text-xs font-extrabold text-white uppercase tracking-wider">Bewegung & Live-Tracking</h2>
           </div>
           <div class="flex items-center gap-1.5">
             <span id="activeKcalBadge" class="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -282,16 +291,16 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
-          <!-- STEP COUNTER CARD (3D ACCELEROMETER) -->
+          <!-- STEP COUNTER CARD (HARDWARE LINEAR ACCELERATION) -->
           <div class="glass-subcard p-3 space-y-2 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
                 <span>👟 <span id="lblStepsWord">Schritte</span></span>
                 <span id="stepsKcalText" class="text-emerald-400 font-bold">+0 kcal</span>
               </div>
-              <div class="flex items-baseline gap-1 mt-0.5">
+              <div class="flex items-baseline justify-between mt-0.5">
                 <span id="stepsCountText" class="text-xl font-extrabold text-white">0</span>
-                <span class="text-[10px] text-slate-500">/ 10.000</span>
+                <span id="stepSensorStatusBadge" class="text-[9px] font-semibold text-slate-500 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">Inaktiv</span>
               </div>
               <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1.5">
                 <div id="stepsProgressBar" class="h-full bg-emerald-400 rounded-full transition-all duration-300" style="width:0%"></div>
@@ -300,7 +309,7 @@
             <div class="grid grid-cols-12 gap-1.5 pt-1">
               <button id="btnStepSensor" onclick="toggleStepSensor()" class="col-span-7 py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 flex items-center justify-center gap-1 transition">
                 <i class="fa-solid fa-person-walking"></i>
-                <span id="lblStepSensorBtn">Live Start</span>
+                <span id="lblStepSensorBtn">Start</span>
               </button>
               <button onclick="addStepsManual(1000)" class="col-span-5 py-1.5 px-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-[11px] font-extrabold text-emerald-300">
                 +1.000
@@ -308,7 +317,7 @@
             </div>
           </div>
 
-          <!-- GPS CYCLING TRACKER CARD (VELOCITY & HAVERSINE) -->
+          <!-- GPS CYCLING TRACKER CARD (STOPWATCH + ACCURACY GATE) -->
           <div class="glass-subcard p-3 space-y-2 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
@@ -316,11 +325,13 @@
                 <span id="cyclingKcalText" class="text-amber-400 font-bold">+0 kcal</span>
               </div>
               <div class="flex items-baseline justify-between mt-0.5">
-                <span id="cyclingStatsText" class="text-base font-extrabold text-white">0 Min • 0.0 km</span>
+                <span id="cyclingTimerText" class="text-base font-extrabold text-white">00:00</span>
+                <span id="cyclingStatsText" class="text-xs font-bold text-emerald-400">0.0 km</span>
               </div>
-              <p id="cyclingSpeedText" class="text-[10px] text-slate-400 mt-1">
-                Ø 18.0 km/h • GPS bereit
-              </p>
+              <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1">
+                <span id="cyclingSpeedText">Ø 18.0 km/h</span>
+                <span id="gpsAccuracyBadge" class="text-[9px] text-slate-500 font-semibold">GPS: Standby</span>
+              </div>
             </div>
             <div class="grid grid-cols-12 gap-1.5 pt-1">
               <button id="btnCyclingGps" onclick="toggleCyclingGps()" class="col-span-7 py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 flex items-center justify-center gap-1 transition">
@@ -679,7 +690,7 @@
         <div id="calcResultBox" class="hidden glass-subcard p-3 space-y-2 text-xs"></div>
       </section>
 
-      <!-- PAST DAYS ARCHIVE -->
+      <!-- PAST DAYS ARCHIVE (NUTRITION & ACTIVITY) -->
       <section class="glass-card p-4 space-y-3">
         <h3 class="text-sm font-extrabold text-white">📅 Rückblick (Ernährung & Aktivität)</h3>
         <div id="pastDaysContainer" class="space-y-2"></div>
@@ -730,11 +741,11 @@
     </div>
   </div>
 
-  <!-- SETTINGS & API KEY MODAL -->
+  <!-- SETTINGS, WHATSAPP INVITES & API KEY MODAL -->
   <div id="settingsModal" class="fixed inset-0 z-[95] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="glass-card w-full max-w-md max-h-[88vh] overflow-y-auto p-5 space-y-4 border border-slate-700">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-extrabold text-white">⚙️ System, Ziele & Gemini API</h3>
+        <h3 class="text-base font-extrabold text-white">⚙️ System, WhatsApp & Gemini API</h3>
         <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -771,19 +782,28 @@
         Einstellungen speichern
       </button>
 
-      <!-- ADMIN INVITE GENERATOR -->
+      <!-- ADMIN: WHATSAPP INVITE CODE GENERATOR -->
       <div id="adminSection" class="pt-3 border-t border-slate-800 space-y-2.5 text-xs">
-        <h4 class="font-bold text-amber-400">👑 Admin: Gast-Einladungscodes</h4>
+        <div class="flex items-center justify-between">
+          <h4 class="font-bold text-amber-400 flex items-center gap-1.5">
+            <i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i>
+            <span>Gast-Einladungen (WhatsApp & Link)</span>
+          </h4>
+          <span class="text-[10px] text-slate-500">1-Klick Teilen</span>
+        </div>
         <div class="flex gap-2">
           <input id="newGuestName" type="text" placeholder="Name des Gastes (z. B. Marta)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white" />
-          <button onclick="generateInviteCode()" class="px-3 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold">Code +</button>
+          <button onclick="generateInviteCode()" class="px-3.5 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold flex items-center gap-1">
+            <i class="fa-solid fa-plus"></i>
+            <span>Code</span>
+          </button>
         </div>
-        <div id="inviteCodesList" class="space-y-1.5"></div>
+        <div id="inviteCodesList" class="space-y-2 pt-1 max-h-48 overflow-y-auto pr-0.5"></div>
       </div>
 
       <div class="pt-3 border-t border-slate-800 flex justify-between gap-2 text-xs">
-        <button onclick="exportDataBackup()" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">💾 Backup Export</button>
-        <button onclick="lockApp()" class="flex-1 py-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">🔒 App sperren</button>
+        <button onclick="exportDataBackup()" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">💾 Backup</button>
+        <button onclick="lockApp()" class="flex-1 py-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">🔒 Sperren</button>
       </div>
     </div>
   </div>
@@ -846,14 +866,19 @@
 
     // SENSOR & GPS LIVE TRACKER ENGINE STATE
     let isStepTrackingActive = false;
-    let gEst = 9.81;
+    let gEst = 9.80665;
     let lastStepTime = 0;
     let stepSaveCounter = 0;
+    let sensorEventCounter = 0;
+    let sensorSampleTimer = null;
+
     let isCyclingTrackingActive = false;
     let cyclingWatchId = null;
+    let cyclingStartTime = 0;
+    let cyclingElapsedSec = 0;
+    let cyclingTimerInterval = null;
     let lastGpsCoords = null;
     let lastGpsTime = null;
-    let cyclingTimerInterval = null;
     let wakeLockSentinel = null;
 
     const I18N = {
@@ -861,7 +886,7 @@
         remTitle: 'Verbleibend heute', goalWord: 'Basis', eatenWord: 'Gegessen', activeWord: 'Aktiv',
         macroP: 'Eiweiß', macroC: 'Kohlenh.', macroF: 'Fett', sugar: 'Zucker', fiber: 'Ballastst.',
         waterTitle: 'Wasser-Bilanz', scannerTitle: 'Smart KI-Scanner & Text',
-        activityTitle: 'Schritte & GPS Rad-Tracker', stepsWord: 'Schritte', cyclingWord: 'Radfahren',
+        activityTitle: 'Bewegung & Live-Tracking', stepsWord: 'Schritte', cyclingWord: 'Radfahren',
         modeMeal: 'Mahlzeit', modeFridge: 'Kühlschr.', modeMenu: 'Menü-Karte', modePot: 'Topf/Auflauf',
         btnPhoto: 'Foto', btnVoice: 'Sprache', btnScan: 'KI-Scan',
         previewTitle: 'Mahlzeit & Physik-Check', previewCancel: 'Abbrechen',
@@ -878,7 +903,7 @@
         remTitle: 'Pozostało dzisiaj', goalWord: 'Baza', eatenWord: 'Zjedzono', activeWord: 'Aktywność',
         macroP: 'Białko', macroC: 'Węglow.', macroF: 'Tłuszcz', sugar: 'Cukier', fiber: 'Błonnik',
         waterTitle: 'Bilans wody', scannerTitle: 'Skaner AI i Tekst',
-        activityTitle: 'Kroki i Rower GPS', stepsWord: 'Kroki', cyclingWord: 'Rower',
+        activityTitle: 'Ruch i Śledzenie na żywo', stepsWord: 'Kroki', cyclingWord: 'Rower',
         modeMeal: 'Posiłek', modeFridge: 'Lodówka', modeMenu: 'Karta dań', modePot: 'Garnek',
         btnPhoto: 'Zdjęcie', btnVoice: 'Głos', btnScan: 'Skan AI',
         previewTitle: 'Kontrola Posiłku i Fizyki', previewCancel: 'Anuluj',
@@ -992,7 +1017,7 @@
       el.className = `pointer-events-auto border px-4 py-2.5 rounded-xl text-xs font-bold shadow-xl flex items-center justify-between transition-all ${colors}`;
       el.innerHTML = `<span class="break-words leading-snug">${escapeHtml(msg)}</span>`;
       container.appendChild(el);
-      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 3200);
+      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 3400);
     }
 
     function getUserWeightKg() {
@@ -1002,9 +1027,6 @@
       return numOr(state.goals.targetWeight, 83.0);
     }
 
-    // =========================================================================
-    // MATHEMATICAL EXPENDITURE ENGINE (NETTO-NEAT & NETTO-MET RADFAHREN)
-    // =========================================================================
     function recalcActiveExpenditure() {
       const wKg = getUserWeightKg();
       const steps = numOr(state.todayActivity.steps, 0);
@@ -1025,7 +1047,7 @@
     }
 
     // =========================================================================
-    // STEP COUNTER HARDWARE ENGINE (3D ACCELEROMETER & HYSTERESIS FILTER)
+    // CORRECTION 1: STEP COUNTER HARDWARE ENGINE (ACCELERATION + BIO-FILTER)
     // =========================================================================
     async function toggleStepSensor() {
       if (isStepTrackingActive) {
@@ -1033,11 +1055,16 @@
         return;
       }
 
+      if (window.isSecureContext === false && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        document.getElementById('httpsWarningBanner')?.classList.remove('hidden');
+        showToast('Achtung: Browser blockiert Sensoren ohne HTTPS.', 'warn');
+      }
+
       if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
         try {
           const perm = await DeviceMotionEvent.requestPermission();
           if (perm !== 'granted') {
-            showToast('Bewegungssensor-Zugriff verweigert.', 'warn');
+            showToast('Bewegungssensor-Erlaubnis verweigert.', 'warn');
             return;
           }
         } catch (err) {
@@ -1048,43 +1075,86 @@
 
       window.addEventListener('devicemotion', handleMotionStepEvent, { passive: true });
       isStepTrackingActive = true;
+      sensorEventCounter = 0;
+
       const btn = document.getElementById('btnStepSensor');
       if (btn) {
-        btn.classList.add('bg-emerald-500', 'text-slate-950', 'sensor-active');
+        btn.classList.add('bg-emerald-500', 'text-slate-950', 'sensor-pulse-active');
         btn.classList.remove('bg-slate-800', 'text-slate-200');
-        document.getElementById('lblStepSensorBtn').textContent = 'Live Stopp';
+        document.getElementById('lblStepSensorBtn').textContent = 'Stopp';
       }
-      showToast('👟 Live-Schrittzähler aktiv (Beschleunigungssensor)', 'info');
+
+      const badge = document.getElementById('stepSensorStatusBadge');
+      if (badge) {
+        badge.textContent = 'Verbinde...';
+        badge.className = 'text-[9px] font-semibold text-amber-300 px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-500/40';
+      }
+
+      sensorSampleTimer = setInterval(() => {
+        if (isStepTrackingActive && badge) {
+          if (sensorEventCounter > 0) {
+            badge.textContent = `Live (${sensorEventCounter} Hz)`;
+            badge.className = 'text-[9px] font-semibold text-emerald-300 px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40';
+          } else {
+            badge.textContent = 'Kein Signal (HTTPS?)';
+            badge.className = 'text-[9px] font-semibold text-rose-300 px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-500/40';
+          }
+          sensorEventCounter = 0;
+        }
+      }, 1000);
+
+      showToast('👟 Schrittzähler gestartet. Bewege das Smartphone!', 'info');
     }
 
     function stopStepSensor() {
       window.removeEventListener('devicemotion', handleMotionStepEvent);
+      if (sensorSampleTimer) {
+        clearInterval(sensorSampleTimer);
+        sensorSampleTimer = null;
+      }
       isStepTrackingActive = false;
+
       const btn = document.getElementById('btnStepSensor');
       if (btn) {
-        btn.classList.remove('bg-emerald-500', 'text-slate-950', 'sensor-active');
+        btn.classList.remove('bg-emerald-500', 'text-slate-950', 'sensor-pulse-active');
         btn.classList.add('bg-slate-800', 'text-slate-200');
-        document.getElementById('lblStepSensorBtn').textContent = 'Live Start';
+        document.getElementById('lblStepSensorBtn').textContent = 'Start';
       }
+
+      const badge = document.getElementById('stepSensorStatusBadge');
+      if (badge) {
+        badge.textContent = 'Inaktiv';
+        badge.className = 'text-[9px] font-semibold text-slate-500 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800';
+      }
+
+      recalcActiveExpenditure();
       saveState();
       updateUI();
     }
 
     function handleMotionStepEvent(e) {
       if (isCyclingTrackingActive) return;
-      const acc = e.accelerationIncludingGravity || e.acceleration;
-      if (!acc || acc.x === null) return;
+      sensorEventCounter++;
 
-      const aMag = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
-      gEst = 0.90 * gEst + 0.10 * aMag;
-      const aDyn = aMag - gEst;
+      let dynMagnitude = 0;
+      const linAcc = e.acceleration;
+
+      if (linAcc && linAcc.x !== null && linAcc.y !== null && linAcc.z !== null) {
+        dynMagnitude = Math.sqrt(linAcc.x * linAcc.x + linAcc.y * linAcc.y + linAcc.z * linAcc.z);
+      } else {
+        const raw = e.accelerationIncludingGravity;
+        if (!raw || raw.x === null) return;
+        const rawMag = Math.sqrt(raw.x * raw.x + raw.y * raw.y + raw.z * raw.z);
+        gEst = 0.975 * gEst + 0.025 * rawMag;
+        dynMagnitude = Math.abs(rawMag - gEst);
+      }
+
       const now = performance.now();
-
-      if (aDyn > 1.85 && (now - lastStepTime) > 280 && (now - lastStepTime) < 2000) {
+      if (dynMagnitude > 1.25 && (now - lastStepTime) > 260 && (now - lastStepTime) < 1800) {
         lastStepTime = now;
         state.todayActivity.steps = numOr(state.todayActivity.steps, 0) + 1;
         stepSaveCounter++;
-        if (stepSaveCounter >= 15) {
+        if (stepSaveCounter >= 10) {
           stepSaveCounter = 0;
           recalcActiveExpenditure();
           saveState();
@@ -1102,7 +1172,7 @@
     }
 
     // =========================================================================
-    // GPS CYCLING ENGINE (VELOCITY, HAVERSINE & WAKELOCK FOR HANDLEBAR)
+    // CORRECTION 2: GPS CYCLING ENGINE (STOPWATCH & DYNAMIC ACCURACY GATE)
     // =========================================================================
     async function toggleCyclingGps() {
       if (isCyclingTrackingActive) {
@@ -1115,37 +1185,50 @@
       }
 
       if ('wakeLock' in navigator) {
-        try {
-          wakeLockSentinel = await navigator.wakeLock.request('screen');
-        } catch (_) {}
+        try { wakeLockSentinel = await navigator.wakeLock.request('screen'); } catch (_) {}
       }
 
       lastGpsCoords = null;
       lastGpsTime = null;
+      cyclingStartTime = performance.now();
+      cyclingElapsedSec = 0;
       isCyclingTrackingActive = true;
+
+      const accBadge = document.getElementById('gpsAccuracyBadge');
+      if (accBadge) {
+        accBadge.textContent = 'GPS: Suche...';
+        accBadge.className = 'text-[9px] text-amber-300 font-semibold';
+      }
 
       cyclingWatchId = navigator.geolocation.watchPosition(
         handleGpsCyclingPosition,
         (err) => {
-          showToast(`GPS-Signalfehler: ${err.message}`, 'warn');
+          showToast(`GPS: ${err.message}`, 'warn');
+          if (accBadge) accBadge.textContent = 'GPS: Fehler';
         },
-        { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+        { enableHighAccuracy: true, maximumAge: 2000, timeout: 8000 }
       );
 
       cyclingTimerInterval = setInterval(() => {
-        state.todayActivity.cyclingMinutes = numOr(state.todayActivity.cyclingMinutes, 0) + 1;
+        cyclingElapsedSec++;
+        const mins = Math.floor(cyclingElapsedSec / 60);
+        const secs = cyclingElapsedSec % 60;
+        const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        const timerEl = document.getElementById('cyclingTimerText');
+        if (timerEl) timerEl.textContent = timeStr;
+
+        state.todayActivity.cyclingMinutes = Math.max(0, Math.round((cyclingElapsedSec / 60) * 10) / 10);
         recalcActiveExpenditure();
-        saveState();
         renderActivityUIOnly();
-      }, 60000);
+      }, 1000);
 
       const btn = document.getElementById('btnCyclingGps');
       if (btn) {
-        btn.classList.add('bg-amber-500', 'text-slate-950', 'sensor-active');
+        btn.classList.add('bg-amber-500', 'text-slate-950', 'sensor-pulse-active');
         btn.classList.remove('bg-slate-800', 'text-slate-200');
         document.getElementById('lblCyclingGpsBtn').textContent = 'GPS Stopp';
       }
-      showToast('🚴‍♂️ GPS-Fahrrad-Tracker gestartet (Screen aktiv)', 'info');
+      showToast('🚴‍♂️ GPS-Fahrrad-Tracker aktiv (Display bleibt an)', 'info');
     }
 
     function stopCyclingGps() {
@@ -1165,14 +1248,20 @@
       isCyclingTrackingActive = false;
       const btn = document.getElementById('btnCyclingGps');
       if (btn) {
-        btn.classList.remove('bg-amber-500', 'text-slate-950', 'sensor-active');
+        btn.classList.remove('bg-amber-500', 'text-slate-950', 'sensor-pulse-active');
         btn.classList.add('bg-slate-800', 'text-slate-200');
         document.getElementById('lblCyclingGpsBtn').textContent = 'GPS Start';
       }
+      const accBadge = document.getElementById('gpsAccuracyBadge');
+      if (accBadge) {
+        accBadge.textContent = 'GPS: Standby';
+        accBadge.className = 'text-[9px] text-slate-500 font-semibold';
+      }
+
       recalcActiveExpenditure();
       saveState();
       updateUI();
-      showToast('🏁 Rad-Tracking beendet und gespeichert.', 'info');
+      showToast('🏁 Rad-Tracking beendet und im Tagebuch verbucht.', 'info');
     }
 
     function calcHaversineKm(lat1, lon1, lat2, lon2) {
@@ -1189,15 +1278,30 @@
 
     function handleGpsCyclingPosition(pos) {
       const crd = pos.coords;
-      if (crd.accuracy > 35) return;
-      const now = performance.now();
+      const acc = crd.accuracy || 999;
+      const accBadge = document.getElementById('gpsAccuracyBadge');
 
+      if (accBadge) {
+        if (acc <= 30) {
+          accBadge.textContent = `🟢 GPS (±${Math.round(acc)}m)`;
+          accBadge.className = 'text-[9px] text-emerald-400 font-bold';
+        } else if (acc <= 65) {
+          accBadge.textContent = `🟡 GPS (±${Math.round(acc)}m)`;
+          accBadge.className = 'text-[9px] text-amber-300 font-semibold';
+        } else {
+          accBadge.textContent = `📡 GPS sucht (±${Math.round(acc)}m)`;
+          accBadge.className = 'text-[9px] text-slate-400 font-semibold';
+          return;
+        }
+      }
+
+      const now = performance.now();
       if (lastGpsCoords && lastGpsTime) {
         const dKm = calcHaversineKm(lastGpsCoords.latitude, lastGpsCoords.longitude, crd.latitude, crd.longitude);
         const dtHours = (now - lastGpsTime) / 3600000;
         let vKmh = crd.speed !== null && crd.speed >= 0 ? crd.speed * 3.6 : (dtHours > 0 ? dKm / dtHours : 0);
 
-        if (vKmh >= 4.5 && vKmh <= 55.0) {
+        if (vKmh >= 4.0 && vKmh <= 55.0 && dKm > 0.003) {
           state.todayActivity.cyclingKm = Math.round((numOr(state.todayActivity.cyclingKm, 0) + dKm) * 100) / 100;
           const prevSpeed = numOr(state.todayActivity.avgSpeedKmh, 18.0);
           state.todayActivity.avgSpeedKmh = Math.round((0.85 * prevSpeed + 0.15 * vKmh) * 10) / 10;
@@ -1225,7 +1329,7 @@
       const isClosed = drawer.classList.contains('hidden');
       if (isClosed) {
         document.getElementById('syncStepsInput').value = numOr(state.todayActivity.steps, 0);
-        document.getElementById('syncCyclingMinInput').value = numOr(state.todayActivity.cyclingMinutes, 0);
+        document.getElementById('syncCyclingMinInput').value = Math.round(numOr(state.todayActivity.cyclingMinutes, 0));
         document.getElementById('syncCyclingSpeedInput').value = numOr(state.todayActivity.avgSpeedKmh, 18.0);
         drawer.classList.remove('hidden');
       } else {
@@ -1265,15 +1369,107 @@
       document.getElementById('stepsKcalText').textContent = `+${stepKcal} kcal`;
       document.getElementById('stepsProgressBar').style.width = `${Math.min(100, (steps / 10000) * 100)}%`;
 
-      document.getElementById('cyclingStatsText').textContent = `${cMin} Min • ${cKm.toFixed(1)} km`;
+      document.getElementById('cyclingStatsText').textContent = `${cKm.toFixed(1)} km`;
       document.getElementById('cyclingKcalText').textContent = `+${cyclingKcal} kcal`;
-      document.getElementById('cyclingSpeedText').textContent = `Ø ${avgV.toFixed(1)} km/h • ${isCyclingTrackingActive ? 'GPS Live-Aufzeichnung' : 'Bereit'}`;
+      document.getElementById('cyclingSpeedText').textContent = `Ø ${avgV.toFixed(1)} km/h`;
       document.getElementById('activeKcalBadge').textContent = `🔥 +${totalActive} kcal`;
       document.getElementById('kcalActiveBonusLabel').textContent = `+${totalActive}`;
     }
 
     // =========================================================================
-    // IMAGE PRE-PROCESSING (94% FASTER SUB-SAMPLED LUMINANCE)
+    // CORRECTION 3: WHATSAPP DIRECT SHARE & INVITE CODE HANDLER
+    // =========================================================================
+    function generateInviteCode() {
+      const name = document.getElementById('newGuestName').value.trim();
+      if (!name) {
+        showToast('Bitte Namen für den Gast eingeben.', 'warn');
+        return;
+      }
+      const code = `FIT-${name.slice(0, 5).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+      state.inviteCodes.push({ name, code });
+      document.getElementById('newGuestName').value = '';
+      saveState();
+      renderInviteCodes();
+      showToast(`Code für ${name} generiert!`, 'info');
+    }
+
+    function deleteInviteCode(idx) {
+      state.inviteCodes.splice(idx, 1);
+      saveState();
+      renderInviteCodes();
+    }
+
+    function buildInviteMessage(code, name) {
+      const appUrl = window.location.href.split('#')[0];
+      return `Hallo ${name}! 👋\n\nHier ist dein persönlicher Einladungscode für CalSnap AI:\n🔑 Code: *${code}*\n\nÖffne einfach den Link und gib deinen Code ein:\n👉 ${appUrl}\n\nViel Erfolg beim Tracken! 🥗🔥`;
+    }
+
+    function shareViaWhatsApp(code, name) {
+      const msg = buildInviteMessage(code, name);
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, '_blank');
+    }
+
+    async function shareViaWebShare(code, name) {
+      const msg = buildInviteMessage(code, name);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'CalSnap AI Einladung',
+            text: msg
+          });
+          showToast('Einladung geteilt!', 'info');
+        } catch (_) {}
+      } else {
+        copyInviteText(code, name);
+      }
+    }
+
+    function copyInviteText(code, name) {
+      const msg = buildInviteMessage(code, name);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(msg).then(() => {
+          showToast('📋 Einladungstext in die Zwischenablage kopiert!', 'info');
+        });
+      } else {
+        showToast(`Code: ${code}`, 'info');
+      }
+    }
+
+    function renderInviteCodes() {
+      const el = document.getElementById('inviteCodesList');
+      if (!el) return;
+      if (!state.inviteCodes.length) {
+        el.innerHTML = `<p class="text-xs text-slate-500 py-1">Noch keine Gast-Codes angelegt.</p>`;
+        return;
+      }
+      el.innerHTML = state.inviteCodes.map((c, idx) => `
+        <div class="glass-subcard p-2.5 flex items-center justify-between gap-2 border border-slate-700/80">
+          <div class="min-w-0">
+            <span class="font-extrabold text-white text-xs block truncate">${escapeHtml(c.name)}</span>
+            <code class="text-emerald-400 font-bold text-xs tracking-wider">${escapeHtml(c.code)}</code>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="shareViaWhatsApp('${escapeHtml(c.code)}', '${escapeHtml(c.name)}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-emerald-600/30" title="Per WhatsApp senden">
+              <i class="fa-brands fa-whatsapp text-sm"></i>
+              <span>WhatsApp</span>
+            </button>
+            <button onclick="shareViaWebShare('${escapeHtml(c.code)}', '${escapeHtml(c.name)}')" class="w-7 h-7 rounded-lg bg-sky-600/80 hover:bg-sky-500 text-white text-xs flex items-center justify-center" title="Teilen">
+              <i class="fa-solid fa-share-nodes"></i>
+            </button>
+            <button onclick="copyInviteText('${escapeHtml(c.code)}', '${escapeHtml(c.name)}')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center justify-center" title="Kopieren">
+              <i class="fa-solid fa-copy"></i>
+            </button>
+            <button onclick="deleteInviteCode(${idx})" class="w-7 h-7 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-400 text-xs flex items-center justify-center" title="Löschen">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // HIGH-SPEED IMAGE PRE-PROCESSING (94% FASTER SUB-SAMPLED LUMINANCE)
     // =========================================================================
     async function compressImageFile(file) {
       return new Promise((resolve, reject) => {
@@ -1348,7 +1544,7 @@
         const prevImg = document.getElementById('photoPreviewImg');
         prevImg.src = res.dataUrl;
         prevContainer.classList.remove('hidden');
-        showToast('⚡ Foto komprimiert — starte KI-Turbo-Scan...', 'info');
+        showToast('⚡ Foto geladen — starte Turbo-Scan...', 'info');
         triggerUnifiedScanner();
       } catch (err) {
         showToast(err.message || 'Fehler beim Laden des Fotos', 'error');
@@ -2437,27 +2633,6 @@ JSON-Schema:
       closeSettingsModal();
       updateUI();
       showToast('⚙️ Einstellungen gespeichert!', 'info');
-    }
-
-    function generateInviteCode() {
-      const name = document.getElementById('newGuestName').value.trim().toUpperCase();
-      if (!name) return;
-      const code = `FIT-${name.slice(0, 6)}-${Math.floor(100 + Math.random() * 900)}`;
-      state.inviteCodes.push({ name, code });
-      document.getElementById('newGuestName').value = '';
-      saveState();
-      renderInviteCodes();
-    }
-
-    function renderInviteCodes() {
-      const el = document.getElementById('inviteCodesList');
-      if (!el) return;
-      el.innerHTML = state.inviteCodes.map(c => `
-        <div class="flex justify-between bg-slate-900 px-3 py-1.5 rounded-lg">
-          <span>${escapeHtml(c.name)}</span>
-          <code class="text-emerald-400 font-bold">${escapeHtml(c.code)}</code>
-        </div>
-      `).join('');
     }
 
     function unlockApp() {
