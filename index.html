@@ -724,7 +724,7 @@
       </button>
     </div>
   </nav>
-  <script>
+ <script>
 const STORAGE_KEY = 'calsnap_ai_state_v2';
 const LEGACY_KEY = 'calsnap_ai_state_v1';
 const API_BACKUP_KEY = 'calsnap_api_key_backup';
@@ -816,10 +816,10 @@ const I18N = {
     btnZaubern: 'Rezepte jetzt zaubern', shopTitle: 'Einkaufsliste', shopPlaceholder: 'Zutat hinzufügen...', emptyShop: 'Deine Einkaufsliste ist leer.',
     weightTitle: 'Gewichts- & Trend-Engine', weightPlaceholder: 'Heutiges Gewicht in kg (z. B. 86.0)', energyUnrated: 'Noch nicht bewertet',
     navTracker: 'Scanner & Log', navIdeas: 'Zaubern & Liste', navWeight: 'Gewicht & Ziel',
-    hintMeal: 'Tippe oder diktiere dein Essen oder mach ein Foto. Jede Komponente wird einzeln inkl. Volumetrie & Konfidenz aufgeschlüsselt!',
-    hintFridge: 'Fotografiere deinen offenen Kühlschrank: KI erkennt Zutaten, Volumetrie, MHD und zaubert passende Rezepte.',
-    hintMenu: 'Fotografiere eine Speisekarte: KI bewertet alle Gerichte per Ampel (Grün / Gelb / Rot) inkl. Spar-Tipps.',
-    hintPot: 'Fotografiere einen Topf oder Auflauf: KI berechnet Gesamtgewicht und deine exakte Einzelportion.'
+    hintMeal: 'Tippe oder diktiere dein Essen (z. B. „Gemischter Salat mit Dressing, Brötchen, Cola und Saft“) oder mach ein Foto. Jede Komponente wird einzeln & vollständig aufgeschlüsselt!',
+    hintFridge: 'Fotografiere deinen offenen Kühlschrank: Die KI erkennt Zutaten, prüft das MHD und zaubert passende Rezepte.',
+    hintMenu: 'Fotografiere eine Speisekarte: Die KI bewertet alle Gerichte per Ampel (Grün / Gelb / Rot) inkl. Spar-Tipps.',
+    hintPot: 'Fotografiere einen Topf oder Auflauf: Die KI berechnet das Gesamtgewicht und deine exakte Einzelportion.'
   },
   pl: {
     lockSub: 'Wpisz kod dostępu lub zaproszenia', lockPlaceholder: 'Kod np. FIT-JUSTY-442', unlockBtn: 'Odblokuj',
@@ -842,7 +842,7 @@ const I18N = {
     weightTitle: 'Waga i Trend 7-dniowy', weightPlaceholder: 'Dzisiejsza waga w kg (np. 86.0)', energyUnrated: 'Jeszcze nie oceniono',
     navTracker: 'Skaner i Dziennik', navIdeas: 'Przepisy', navWeight: 'Waga i Cel',
     hintMeal: 'Wpisz lub podyktuj posiłek albo zrób zdjęcie. Każdy składnik zostanie rozpisany osobno w pełnym tekście!',
-    hintFridge: 'Zrób zdjęcie wnętrza lodówki: AI rozpozna składniki, objętość i stworzy przepisy.',
+    hintFridge: 'Zrób zdjęcie wnętrza lodówki: AI rozpozna składniki i stworzy przepisy.',
     hintMenu: 'Zrób zdjęcie karty dań w restauracji: AI oceni dania (Zielone / Żółte / Czerwone).',
     hintPot: 'Zrób zdjęcie garnka lub zapiekanki: AI wyliczy kalorie dla Twojej porcji.'
   }
@@ -942,6 +942,10 @@ function styleMicroPill(pillEl, mode) {
 function updateUI() {
   checkDayRollover();
   const t = I18N[state.lang] || I18N.de, loc = state.lang === 'pl' ? 'pl-PL' : 'de-DE';
+  document.querySelector('.fa-flame-flame-curved')?.classList.replace('fa-flame-flame-curved', 'fa-fire-flame-curved');
+  const prevBadge = document.querySelector('#photoPreviewContainer div.bottom-2');
+  if (prevBadge) prevBadge.innerHTML = `<i class="fa-solid fa-check mr-1"></i>Foto bereit für Turbo-Analyse`;
+
   if ($('currentDateLabel')) $('currentDateLabel').textContent = new Date().toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: 'short' });
   if ($('langBtnDe') && $('langBtnPl')) {
     $('langBtnDe').className = state.lang === 'de' ? 'px-2 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'px-2 py-1.5 rounded-lg text-xs font-bold bg-slate-800/80 text-slate-400 border border-slate-700';
@@ -997,7 +1001,11 @@ function updateUI() {
   if ($('vitCPill')) { $('vitCPill').textContent = `${vitVal}/100mg`; styleMicroPill($('vitCPill'), vitVal >= 100 ? 'good' : 'normal'); }
   if ($('magPill')) { $('magPill').textContent = `${magVal}/350mg`; styleMicroPill($('magPill'), magVal >= 350 ? 'good' : 'normal'); }
 
-  const ab = $('sugarAlertBanner');
+  let ab = $('sugarAlertBanner');
+  if (!ab && $('sugarPill')?.parentElement?.parentElement) {
+    ab = document.createElement('div'); ab.id = 'sugarAlertBanner';
+    $('sugarPill').parentElement.parentElement.insertAdjacentElement('afterend', ab);
+  }
   if (ab) {
     if (sCrit) { ab.className = 'bg-rose-950/80 border border-rose-500/80 rounded-xl px-3 py-2 text-xs font-extrabold text-rose-200 flex items-center justify-between shadow-md'; ab.innerHTML = `<span>${escapeHtml(t.sugarCritAlert(sugVal, sugMax))}</span><span class="text-[10px] bg-rose-500/30 px-1.5 py-0.5 rounded text-rose-100">LIMIT</span>`; }
     else if (sWarn) { ab.className = 'bg-amber-950/70 border border-amber-500/60 rounded-xl px-3 py-2 text-xs font-bold text-amber-200 flex items-center justify-between'; ab.innerHTML = `<span>${escapeHtml(t.sugarWarnAlert(sugVal, sugMax))}</span><span class="text-[10px] bg-amber-500/25 px-1.5 py-0.5 rounded text-amber-100">WHO</span>`; }
@@ -1098,31 +1106,21 @@ function toggleVoiceInput() {
 
 async function runFridgeLeftoverAI(textVal, base64Img) {
   const { remKcal, remProt } = getRemainingMacros(), langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
-  const prompt = `Du bist ein KI-Küchenchef. Antworte auf ${langName}. Analysiere Kühlschrank/Zutaten ("${textVal || 'Kühlschrank-Check'}"). Erstelle 2-3 Rezepte für max. ${remKcal} kcal und ${remProt}g Eiweiß inkl. Konfidenz ("confidence" 85-99), Volumetrie ("volCm3" in cm³) und Kalorien-Toleranz ("errKcal"). JSON-Array: [{"title":"Name (g)","mhdNote":"MHD-Hinweis","ingredients":"Zutat 1, Zutat 2","steps":"Anleitung","kcal":480,"p":42,"c":35,"f":16,"confidence":94,"volCm3":420,"errKcal":18,"icon":"🧊"}]`;
+  const prompt = `Du bist ein KI-Küchenchef. Antworte auf ${langName}. Analysiere Kühlschrank/Zutaten ("${textVal || 'Kühlschrank-Check'}"). Erstelle 2-3 Rezepte für max. ${remKcal} kcal und ${remProt}g Eiweiß. JSON-Array: [{"title":"Name (g)","mhdNote":"MHD-Hinweis","ingredients":"Zutat 1, Zutat 2","steps":"Anleitung","kcal":480,"p":42,"c":35,"f":16,"icon":"🧊"}]`;
   let list = null;
   try { list = normalizeRecipeList(extractJSON(await callGeminiRequest(prompt, base64Img))); } catch (err) { if (!textVal && !base64Img) throw err; }
-  if (!list?.length) list = [{ title: 'Kühlschrank-Rescue Gemüse-Ei-Pfanne (380g)', mhdNote: 'Geöffnete Milchprodukte zuerst verbrauchen.', ingredients: '3 Eier, 150g Gemüse, 50g Hüttenkäse', steps: 'Gemüse anbraten, Eier und Hüttenkäse stocken lassen.', kcal: 410, p: 32, c: 12, f: 24, confidence: 92, volCm3: 390, errKcal: 16, icon: '🧊' }];
-  cachedFridgeRecipes = list.map(r => {
-    const kcal = Math.round(numOr(r.kcal, 420));
-    return {
-      title: String(r.title || r.name || 'Gericht').trim(), mhdNote: String(r.mhdNote || 'Frisch verarbeiten').trim(),
-      ingredients: Array.isArray(r.ingredients) ? r.ingredients.join(', ') : String(r.ingredients || ''),
-      steps: Array.isArray(r.steps) ? r.steps.join(' ') : String(r.steps || ''),
-      kcal, p: Math.round(numOr(r.p, 30) * 10) / 10, c: Math.round(numOr(r.c, 28) * 10) / 10, f: Math.round(numOr(r.f, 16) * 10) / 10,
-      confidence: Math.min(99, Math.max(75, Math.round(numOr(r.confidence, 93)))),
-      volCm3: Math.round(numOr(r.volCm3, 400)), errKcal: Math.round(numOr(r.errKcal, Math.max(8, Math.round(kcal * 0.05)))),
-      icon: String(r.icon || '🧊').trim()
-    };
-  });
+  if (!list?.length) list = [{ title: 'Kühlschrank-Rescue Gemüse-Ei-Pfanne (380g)', mhdNote: 'Geöffnete Milchprodukte zuerst verbrauchen.', ingredients: '3 Eier, 150g Gemüse, 50g Hüttenkäse', steps: 'Gemüse anbraten, Eier und Hüttenkäse stocken lassen.', kcal: 410, p: 32, c: 12, f: 24, icon: '🧊' }];
+  cachedFridgeRecipes = list.map(r => ({
+    title: String(r.title || r.name || 'Gericht').trim(), mhdNote: String(r.mhdNote || 'Frisch verarbeiten').trim(),
+    ingredients: Array.isArray(r.ingredients) ? r.ingredients.join(', ') : String(r.ingredients || ''),
+    steps: Array.isArray(r.steps) ? r.steps.join(' ') : String(r.steps || ''),
+    kcal: Math.round(numOr(r.kcal, 420)), p: Math.round(numOr(r.p, 30) * 10) / 10, c: Math.round(numOr(r.c, 28) * 10) / 10, f: Math.round(numOr(r.f, 16) * 10) / 10,
+    icon: String(r.icon || '🧊').trim()
+  }));
   $('fridgeResultBox').classList.remove('hidden');
   $('fridgeRecipesList').innerHTML = cachedFridgeRecipes.map((r, idx) => `
     <div class="glass-subcard p-3.5 space-y-2 border border-sky-500/35">
-      <div class="flex items-start justify-between gap-2"><h4 class="item-title-full text-xs font-extrabold text-white">${escapeHtml(r.icon)} ${escapeHtml(r.title)}</h4><span class="text-xs font-extrabold text-sky-400 shrink-0">${r.kcal} <span class="text-[10px] text-slate-400">±${r.errKcal}</span> kcal</span></div>
-      <div class="flex flex-wrap gap-1.5">
-        <span class="metric-badge text-emerald-300">🎯 Konfidenz: ${r.confidence}%</span>
-        <span class="metric-badge text-sky-300">📐 Vol.: ~${r.volCm3} cm³</span>
-        <span class="metric-badge text-amber-300">⚖️ ±${r.errKcal} kcal</span>
-      </div>
+      <div class="flex items-start justify-between gap-2"><h4 class="item-title-full text-xs font-extrabold text-white">${escapeHtml(r.icon)} ${escapeHtml(r.title)}</h4><span class="text-xs font-extrabold text-sky-400 shrink-0">${r.kcal} kcal</span></div>
       <p class="text-[11px] text-amber-300 font-medium">⏱️ ${escapeHtml(r.mhdNote)}</p>
       <p class="text-[11px] text-emerald-300 font-semibold">E:${r.p}g • K:${r.c}g • F:${r.f}g</p>
       <p class="text-[11px] text-slate-300"><strong>Zutaten:</strong> ${escapeHtml(r.ingredients)}</p>
@@ -1131,7 +1129,7 @@ async function runFridgeLeftoverAI(textVal, base64Img) {
     </div>`).join('');
 }
 
-function commitFridgeRecipe(idx) { const r = cachedFridgeRecipes[idx]; if (r) openPendingPreview([validateAtwater({ name: r.title, kcal: r.kcal, p: r.p, c: r.c, f: r.f, confidence: r.confidence, volCm3: r.volCm3, icon: r.icon })]); }
+function commitFridgeRecipe(idx) { const r = cachedFridgeRecipes[idx]; if (r) openPendingPreview([validateAtwater({ name: r.title, kcal: r.kcal, p: r.p, c: r.c, f: r.f, icon: r.icon })]); }
 
 async function runMenuScannerAI(textVal, base64Img) {
   const { remKcal, remProt } = getRemainingMacros(), langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
@@ -1189,7 +1187,7 @@ function commitPotPortion() {
   if (!cachedPotResult) return;
   const fr = 1 / Math.max(1, currentPotPortions), pW = Math.round(cachedPotResult.totalWeightG * fr);
   const pP = Math.round(cachedPotResult.totalP * fr * 10) / 10, pC = Math.round(cachedPotResult.totalC * fr * 10) / 10, pF = Math.round(cachedPotResult.totalF * fr * 10) / 10;
-  openPendingPreview([validateAtwater({ name: `${cachedPotResult.title} (1/${currentPotPortions}, ~${pW}g)`, kcal: Math.round(4 * pP + 4 * pC + 9 * pF), p: pP, c: pC, f: pF, volCm3: pW, icon: '🍲' })]);
+  openPendingPreview([validateAtwater({ name: `${cachedPotResult.title} (1/${currentPotPortions}, ~${pW}g)`, kcal: Math.round(4 * pP + 4 * pC + 9 * pF), p: pP, c: pC, f: pF, icon: '🍲' })]);
 }
 
 function openRestBudgetSuggestions() { switchTab('ideas'); generateBudgetClosingIdeas(); }
@@ -1228,7 +1226,7 @@ function normalizeRecipeList(p) {
 
 async function generateAIMealIdeas() {
   const cr = $('wishCravingInput').value.trim(), { remKcal, remProt } = getRemainingMacros(), btn = $('btnGenerateIdeas'), orig = btn ? btn.innerHTML : '';
-  if (btn) { btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Turbo-Speed...</span>`; }
+  if (btn) { btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Zaubere in Turbo-Speed...</span>`; }
   const fb = [
     { title: 'Cremige High-Protein Gnocchi-Pfanne (420g)', ingredients: '200g Gnocchi, 140g Hähnchenbrust, 50g Frischkäse light, Spinat', steps: 'Gnocchi und Hähnchen anbraten, Frischkäse und Spinat unterheben.', kcal: Math.min(540, remKcal), p: 44, c: 54, f: 11, icon: '🍝' },
     { title: 'Quark-Protein-Pfannkuchen mit Beeren (350g)', ingredients: '150g Magerquark, 2 Eier, 40g Haferflocken, 80g Beeren', steps: 'Mixen, in der Pfanne backen und mit Beeren servieren.', kcal: Math.min(460, remKcal), p: 38, c: 42, f: 13, icon: '🥞' }
@@ -1375,60 +1373,102 @@ function renderInviteCodes() {
   el.innerHTML = state.inviteCodes.length ? state.inviteCodes.map((c, i) => `<div class="glass-subcard p-2.5 flex items-center justify-between gap-2"><div class="min-w-0"><span class="font-extrabold text-white text-xs block truncate">${escapeHtml(c.name)}</span><code class="text-emerald-400 font-bold text-xs">${escapeHtml(c.code)}</code></div><div class="flex items-center gap-1.5"><button onclick="shareViaWhatsApp(${i})" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button><button onclick="copyInviteText(${i})" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 text-xs"><i class="fa-solid fa-copy"></i></button><button onclick="deleteInviteCode(${i})" class="w-7 h-7 rounded-lg bg-rose-950 text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button></div></div>`).join('') : `<p class="text-xs text-slate-500">Keine Codes.</p>`;
 }
 
+// ORIGINAL HIGH-SPEED IMAGE PRE-PROCESSING (0.72 + SUB-SAMPLED LUMINANCE)
 async function compressImageFile(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader(); r.onerror = () => rej(new Error('Lesefehler'));
-    r.onload = e => {
-      const img = new Image(); img.onerror = () => rej(new Error('Bildfehler'));
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Datei-Lesefehler'));
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Bildformat ungültig'));
       img.onload = () => {
-        const maxD = scannerMode === 'menu' ? 1080 : 720; let w = img.width, h = img.height;
-        if (w > maxD || h > maxD) { if (w > h) { h = Math.round((h * maxD) / w); w = maxD; } else { w = Math.round((w * maxD) / h); h = maxD; } }
-        const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
-        const dataUrl = cv.toDataURL('image/jpeg', 0.74), tc = document.createElement('canvas'); tc.width = 96; tc.height = 96;
-        const m = Math.min(img.width, img.height); tc.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, 96, 96);
-        res({ base64: dataUrl.split(',')[1], dataUrl, thumbUrl: tc.toDataURL('image/jpeg', 0.65) });
+        const isMenu = scannerMode === 'menu', maxDim = isMenu ? 1080 : 720, quality = isMenu ? 0.78 : 0.72;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) { if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; } else { w = Math.round((w * maxDim) / h); h = maxDim; } }
+        const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true }); ctx.drawImage(img, 0, 0, w, h);
+        try {
+          const imgData = ctx.getImageData(0, 0, w, h).data;
+          let lumSum = 0, count = 0;
+          for (let i = 0; i < imgData.length; i += 64) { lumSum += 0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2]; count++; }
+          if ((count > 0 ? lumSum / count : 128) < 68) { ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = 'rgba(45,45,45,0.35)'; ctx.fillRect(0, 0, w, h); ctx.restore(); }
+        } catch (_) {}
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const thumbCanvas = document.createElement('canvas'); thumbCanvas.width = 96; thumbCanvas.height = 96;
+        const minSide = Math.min(img.width, img.height);
+        thumbCanvas.getContext('2d').drawImage(img, (img.width - minSide) / 2, (img.height - minSide) / 2, minSide, minSide, 0, 0, 96, 96);
+        resolve({ base64: dataUrl.split(',')[1], dataUrl, thumbUrl: thumbCanvas.toDataURL('image/jpeg', 0.65) });
       };
       img.src = e.target.result;
     };
-    r.readAsDataURL(file);
+    reader.readAsDataURL(file);
   });
 }
 
-async function handlePhotoSelect(e) {
-  const f = e.target.files?.[0]; if (!f) return;
-  try { const r = await compressImageFile(f); selectedPhotoBase64 = r.base64; selectedPhotoThumb = r.thumbUrl; $('photoPreviewImg').src = r.dataUrl; $('photoPreviewContainer').classList.remove('hidden'); triggerUnifiedScanner(); }
-  catch (err) { showToast(err.message, 'error'); } finally { e.target.value = ''; }
+async function handlePhotoSelect(event) {
+  const file = event.target.files?.[0]; if (!file) return;
+  try {
+    const res = await compressImageFile(file);
+    selectedPhotoBase64 = res.base64; selectedPhotoThumb = res.thumbUrl;
+    $('photoPreviewImg').src = res.dataUrl; $('photoPreviewContainer').classList.remove('hidden');
+    showToast('⚡ Foto geladen — starte Turbo-Scan...', 'info');
+    triggerUnifiedScanner();
+  } catch (err) { showToast(err.message, 'error'); } finally { event.target.value = ''; }
 }
 
 function clearSelectedPhoto() { selectedPhotoBase64 = null; selectedPhotoThumb = null; $('photoPreviewContainer')?.classList.add('hidden'); $('photoPreviewImg').src = ''; }
 
+// ORIGINAL HIGH-SPEED GEMINI ENGINE (FAST_MODEL_KEY + FAST_HOST_KEY CACHE + THINKING ZERO)
 async function callGeminiRequest(promptText, base64Image = null) {
   let apiKey = cleanApiKey(state.geminiApiKey || $('apiKeyInput')?.value || recoverApiKey(''));
   if (apiKey && apiKey !== state.geminiApiKey) { persistApiKeyEverywhere(apiKey); saveState(); }
-  if (!apiKey) { openSettingsModal(); throw new Error('Bitte zuerst deinen Google Gemini API-Key in den Einstellungen (⚙️) speichern.'); }
-  const models = [localStorage.getItem(FAST_MODEL_KEY), 'gemini-3.8-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash'].filter((v, i, a) => v && !/2\.0|3\.0/i.test(v) && a.indexOf(v) === i);
-  const hosts = apiKey.startsWith('AQ.') ? ['https://aiplatform.googleapis.com', 'https://generativelanguage.googleapis.com'] : ['https://generativelanguage.googleapis.com', 'https://aiplatform.googleapis.com'];
-  const parts = [{ text: promptText }]; if (base64Image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Image } });
-  let lastErr = 'Netzwerkfehler';
-  for (const m of models) {
-    for (const h of hosts) {
-      const ep = h.includes('aiplatform') ? `${h}/v1beta1/publishers/google/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}` : `${h}/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`;
-      for (const tz of [true, false]) {
-        const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 10000);
+  if (!apiKey) { openSettingsModal(); throw new Error('Bitte zuerst deinen Google Gemini API-Key in den Einstellungen hinterlegen.'); }
+
+  const baseModels = ['gemini-3.8-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  const cachedFastModel = localStorage.getItem(FAST_MODEL_KEY), cachedFastHost = localStorage.getItem(FAST_HOST_KEY);
+  const modelQueue = [];
+  if (cachedFastModel && !/2\.0|3\.0/i.test(cachedFastModel)) modelQueue.push(cachedFastModel);
+  for (const m of baseModels) if (!/2\.0|3\.0/i.test(m) && !modelQueue.includes(m)) modelQueue.push(m);
+
+  const defaultHosts = apiKey.startsWith('AQ.') ? ['https://aiplatform.googleapis.com', 'https://generativelanguage.googleapis.com'] : ['https://generativelanguage.googleapis.com', 'https://aiplatform.googleapis.com'];
+  const hostList = [];
+  if (cachedFastHost && defaultHosts.includes(cachedFastHost)) hostList.push(cachedFastHost);
+  for (const h of defaultHosts) if (!hostList.includes(h)) hostList.push(h);
+
+  const parts = [{ text: promptText }];
+  if (base64Image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Image } });
+
+  let lastError = 'Keine Antwort vom KI-Endpunkt.';
+  for (let i = 0; i < modelQueue.length; i++) {
+    const model = modelQueue[i];
+    if (/2\.0|3\.0/i.test(model)) continue;
+    for (const host of hostList) {
+      const endpoint = host.includes('aiplatform') ? `${host}/v1beta1/publishers/google/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}` : `${host}/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      for (const useThinkingZero of [true, false]) {
+        const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 10000);
         try {
-          const resp = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: tz ? { temperature: 0.2, thinkingConfig: { thinkingBudget: 0 } } : { temperature: 0.2 } }), signal: ctrl.signal });
-          clearTimeout(tm);
-          if (!resp.ok) { const et = await resp.text(); lastErr = `HTTP ${resp.status}`; if (tz && resp.status === 400 && /thinking/i.test(et)) continue; break; }
-          const data = await resp.json(), txt = (data?.candidates?.[0]?.content?.parts || []).filter(p => !p.thought && p.text).map(p => p.text).join('\n').trim();
-          if (!txt) break;
-          localStorage.setItem(FAST_MODEL_KEY, m); localStorage.setItem(FAST_HOST_KEY, h);
-          if ($('fastModelBadge')) $('fastModelBadge').textContent = `⚡ ${m.replace('gemini-', '')}`;
-          return txt;
-        } catch (e) { clearTimeout(tm); lastErr = e.message; break; }
+          const resp = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: useThinkingZero ? { temperature: 0.2, thinkingConfig: { thinkingBudget: 0 } } : { temperature: 0.2 } }), signal: ctrl.signal });
+          clearTimeout(timer);
+          if (!resp.ok) {
+            const errText = await resp.text();
+            lastError = `HTTP ${resp.status}: ${errText.slice(0, 120)}`;
+            if (useThinkingZero && resp.status === 400 && /thinking/i.test(errText)) continue;
+            for (const dModel of (errText.match(/gemini-[a-zA-Z0-9._-]+/gi) || [])) {
+              const cleanM = dModel.toLowerCase();
+              if (!/2\.0|3\.0/i.test(cleanM) && !modelQueue.includes(cleanM)) modelQueue.splice(i + 1, 0, cleanM);
+            }
+            break;
+          }
+          const data = await resp.json(), cleanText = (data?.candidates?.[0]?.content?.parts || []).filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('\n').trim();
+          if (!cleanText) break;
+          localStorage.setItem(FAST_MODEL_KEY, model); localStorage.setItem(FAST_HOST_KEY, host);
+          if ($('fastModelBadge')) $('fastModelBadge').textContent = `⚡ ${model.replace('gemini-', '')}`;
+          return cleanText;
+        } catch (err) { clearTimeout(timer); lastError = err.name === 'AbortError' ? `Timeout (${model})` : err.message; break; }
       }
     }
   }
-  throw new Error(`KI-Fehler: ${lastErr}`);
+  throw new Error(`KI-Analyse fehlgeschlagen: ${lastError}`);
 }
 
 function extractJSON(raw) {
@@ -1438,18 +1478,18 @@ function extractJSON(raw) {
 }
 
 const FOOD_LEXICON = [
-  { keys: ['milchkaffee', 'cappuccino', 'latte macchiato'], name: 'Milchkaffee (250ml)', kcal: 75, p: 4.0, c: 6.0, f: 3.8, sugar: 6.0, fiber: 0, waterMl: 250, volCm3: 250, icon: '☕' },
-  { keys: ['schwarzer kaffee', 'espresso', 'americano'], name: 'Schwarzer Kaffee (200ml)', kcal: 4, p: 0.3, c: 0.5, f: 0, sugar: 0, fiber: 0, waterMl: 200, volCm3: 200, icon: '☕' },
-  { keys: ['würfel zucker', 'zuckerwürfel', 'stück zucker', 'tl zucker'], name: 'Zucker (3g)', kcal: 12, p: 0, c: 3.0, f: 0, sugar: 3.0, fiber: 0, waterMl: 0, volCm3: 4, icon: '🍬' },
-  { keys: ['gemischter salat mit dressing', 'salat mit dressing'], name: 'Gemischter Salat mit Dressing (250g)', kcal: 165, p: 2.5, c: 9.0, f: 13.0, sugar: 4.5, fiber: 3.5, vitC: 28, mag: 24, waterMl: 180, volCm3: 320, icon: '🥗' },
-  { keys: ['gemischter salat', 'beilagensalat'], name: 'Gemischter Salat (200g)', kcal: 55, p: 2.0, c: 6.5, f: 2.0, sugar: 3.5, fiber: 3.2, vitC: 25, mag: 22, waterMl: 170, volCm3: 280, icon: '🥗' },
-  { keys: ['brötchen', 'semmel', 'kaiserbrötchen'], name: 'Brötchen (1 Stück, 65g)', kcal: 175, p: 5.8, c: 34.0, f: 1.2, sugar: 1.5, fiber: 2.1, mag: 16, waterMl: 15, volCm3: 140, icon: '🥖' },
-  { keys: ['cola zero', 'coke zero', 'cola light'], name: 'Cola Zero (330ml)', kcal: 1, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, waterMl: 330, volCm3: 330, icon: '🥤' },
-  { keys: ['cola', 'coca cola', 'pepsi'], name: 'Cola (1 Glas, 250ml)', kcal: 105, p: 0, c: 26.5, f: 0, sugar: 26.5, fiber: 0, waterMl: 250, volCm3: 250, warn: 'Hoher Flüssigzucker (26.5g)', icon: '🥤' },
-  { keys: ['orangensaft', 'apfelsaft', 'saft'], name: 'Fruchtsaft (1 Glas, 250ml)', kcal: 112, p: 1.2, c: 25.5, f: 0.3, sugar: 23.0, fiber: 0.5, vitC: 65, mag: 20, waterMl: 240, volCm3: 250, warn: 'Hoher Fruchtzuckergehalt (23g)', icon: '🧃' },
-  { keys: ['ei', 'eier', 'spiegelei'], name: 'Hühnerei (Gr. M, 60g)', kcal: 93, p: 7.5, c: 0.6, f: 6.8, sugar: 0.4, fiber: 0, mag: 7, waterMl: 40, volCm3: 60, icon: '🥚' },
-  { keys: ['apfel'], name: 'Apfel (180g)', kcal: 94, p: 0.5, c: 21.0, f: 0.3, sugar: 18.5, fiber: 3.6, vitC: 18, mag: 9, waterMl: 150, volCm3: 210, icon: '🍎' },
-  { keys: ['banane'], name: 'Banane (120g)', kcal: 107, p: 1.3, c: 24.0, f: 0.4, sugar: 17.0, fiber: 2.4, vitC: 12, mag: 36, waterMl: 90, volCm3: 135, icon: '🍌' }
+  { keys: ['milchkaffee', 'cappuccino', 'latte macchiato', 'kaffee mit milch'], name: 'Milchkaffee (250ml)', kcal: 75, p: 4.0, c: 6.0, f: 3.8, sugar: 6.0, fiber: 0, waterMl: 250, icon: '☕' },
+  { keys: ['schwarzer kaffee', 'espresso', 'americano'], name: 'Schwarzer Kaffee (200ml)', kcal: 4, p: 0.3, c: 0.5, f: 0, sugar: 0, fiber: 0, waterMl: 200, icon: '☕' },
+  { keys: ['würfel zucker', 'zuckerwürfel', 'stück zucker', 'löffel zucker', 'tl zucker'], name: 'Zucker (3g)', kcal: 12, p: 0, c: 3.0, f: 0, sugar: 3.0, fiber: 0, waterMl: 0, icon: '🍬' },
+  { keys: ['gemischter salat mit dressing', 'salat mit dressing'], name: 'Gemischter Salat mit Dressing (250g)', kcal: 165, p: 2.5, c: 9.0, f: 13.0, sugar: 4.5, fiber: 3.5, vitC: 28, mag: 24, waterMl: 180, icon: '🥗' },
+  { keys: ['gemischter salat', 'beilagensalat', 'grüner salat'], name: 'Gemischter Salat (200g)', kcal: 55, p: 2.0, c: 6.5, f: 2.0, sugar: 3.5, fiber: 3.2, vitC: 25, mag: 22, waterMl: 170, icon: '🥗' },
+  { keys: ['brötchen', 'semmel', 'weizenbrötchen', 'kaiserbrötchen'], name: 'Brötchen (1 Stück, 65g)', kcal: 175, p: 5.8, c: 34.0, f: 1.2, sugar: 1.5, fiber: 2.1, mag: 16, waterMl: 15, icon: '🥖' },
+  { keys: ['cola zero', 'coke zero', 'cola light'], name: 'Cola Zero (330ml)', kcal: 1, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, waterMl: 330, icon: '🥤' },
+  { keys: ['cola', 'coca cola', 'pepsi'], name: 'Cola (1 Glas, 250ml)', kcal: 105, p: 0, c: 26.5, f: 0, sugar: 26.5, fiber: 0, waterMl: 250, warn: 'Hoher Flüssigzucker (26.5g)', icon: '🥤' },
+  { keys: ['orangensaft', 'apfelsaft', 'saft', 'fruchtsaft'], name: 'Fruchtsaft (1 Glas, 250ml)', kcal: 112, p: 1.2, c: 25.5, f: 0.3, sugar: 23.0, fiber: 0.5, vitC: 65, mag: 20, waterMl: 240, warn: 'Hoher Fruchtzuckergehalt (23g)', icon: '🧃' },
+  { keys: ['ei', 'eier', 'spiegelei', 'gekochtes ei'], name: 'Hühnerei (Gr. M, 60g)', kcal: 93, p: 7.5, c: 0.6, f: 6.8, sugar: 0.4, fiber: 0, mag: 7, waterMl: 40, icon: '🥚' },
+  { keys: ['apfel'], name: 'Apfel (180g)', kcal: 94, p: 0.5, c: 21.0, f: 0.3, sugar: 18.5, fiber: 3.6, vitC: 18, mag: 9, waterMl: 150, icon: '🍎' },
+  { keys: ['banane'], name: 'Banane (120g)', kcal: 107, p: 1.3, c: 24.0, f: 0.4, sugar: 17.0, fiber: 2.4, vitC: 12, mag: 36, waterMl: 90, icon: '🍌' }
 ];
 
 function validateAtwater(item) {
@@ -1458,10 +1498,7 @@ function validateAtwater(item) {
   const kcal = (atw > 0 && Math.abs(rawK - atw) / Math.max(1, atw) > 0.15) ? atw : Math.round(rawK);
   let warn = String(item.warn || '').trim();
   if (!warn && sugar >= 15) warn = state.lang === 'pl' ? `Wysoka zawartość cukru (${sugar}g)` : `Hoher Zuckergehalt (${sugar}g)`;
-  const conf = Math.min(99, Math.max(78, Math.round(numOr(item.confidence, 94))));
-  const volCm3 = Math.max(10, Math.round(numOr(item.volCm3, Math.round((p + c + f) * 3.2 + numOr(item.waterMl, 120)))));
-  const errKcal = Math.max(4, Math.round(numOr(item.errKcal, Math.round(kcal * (1 - conf / 100)))));
-  return { name: String(item.name || 'Mahlzeit').trim(), kcal, p: Math.round(p * 10) / 10, c: Math.round(c * 10) / 10, f: Math.round(f * 10) / 10, sugar, fiber: Math.round(fiber * 10) / 10, vitC: Math.round(numOr(item.vitC)), mag: Math.round(numOr(item.mag)), waterMl: Math.round(numOr(item.waterMl)), confidence: conf, volCm3, errKcal, warn, icon: String(item.icon || '🍽️').trim() };
+  return { name: String(item.name || 'Mahlzeit').trim(), kcal, p: Math.round(p * 10) / 10, c: Math.round(c * 10) / 10, f: Math.round(f * 10) / 10, sugar, fiber: Math.round(fiber * 10) / 10, vitC: Math.round(numOr(item.vitC)), mag: Math.round(numOr(item.mag)), waterMl: Math.round(numOr(item.waterMl)), warn, icon: String(item.icon || '🍽️').trim() };
 }
 
 function parseNaturalText(text) {
@@ -1471,7 +1508,7 @@ function parseNaturalText(text) {
     const n = numOr(dm[1], 1), bHit = FOOD_LEXICON.find(f => f.keys.some(k => dm[2].includes(k))), m = numOr(dm[3], 1), mHit = FOOD_LEXICON.find(f => f.keys.some(k => dm[4].includes(k)));
     if (bHit && mHit) {
       const tm = n * m;
-      return [validateAtwater({ name: `${n}x ${bHit.name} + ${tm}x ${mHit.name}`, kcal: n * bHit.kcal + tm * mHit.kcal, p: n * bHit.p + tm * mHit.p, c: n * bHit.c + tm * mHit.c, f: n * bHit.f + tm * mHit.f, sugar: n * bHit.sugar + tm * mHit.sugar, fiber: n * bHit.fiber + tm * mHit.fiber, waterMl: n * numOr(bHit.waterMl) + tm * numOr(mHit.waterMl), volCm3: n * numOr(bHit.volCm3, 200) + tm * numOr(mHit.volCm3, 5), confidence: 98, icon: bHit.icon })];
+      return [validateAtwater({ name: `${n}x ${bHit.name} + ${tm}x ${mHit.name}`, kcal: n * bHit.kcal + tm * mHit.kcal, p: n * bHit.p + tm * mHit.p, c: n * bHit.c + tm * mHit.c, f: n * bHit.f + tm * mHit.f, sugar: n * bHit.sugar + tm * mHit.sugar, fiber: n * bHit.fiber + tm * mHit.fiber, waterMl: n * numOr(bHit.waterMl) + tm * numOr(mHit.waterMl), icon: bHit.icon })];
     }
   }
   const segs = lower.replace(/salat\s+mit\s+dressing/g, 'salat_mit_dressing').split(/(?:,|;|\+|\bund\b|\bsowie\b)/i).map(s => s.replace(/salat_mit_dressing/g, 'salat mit dressing').trim()).filter(Boolean);
@@ -1481,37 +1518,62 @@ function parseNaturalText(text) {
     const mm = s.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|stück|gläser|glas|becher|tassen)?\s*(.+)$/i);
     const cnt = mm ? numOr(mm[1], 1) : 1, phr = mm ? mm[2].trim() : s, hit = FOOD_LEXICON.find(f => f.keys.some(k => phr.includes(k)));
     if (!hit) return null;
-    out.push(validateAtwater({ name: cnt !== 1 ? `${cnt}x ${hit.name}` : hit.name, kcal: cnt * hit.kcal, p: cnt * hit.p, c: cnt * hit.c, f: cnt * hit.f, sugar: cnt * hit.sugar, fiber: cnt * hit.fiber, vitC: cnt * numOr(hit.vitC), mag: cnt * numOr(hit.mag), waterMl: cnt * numOr(hit.waterMl), volCm3: cnt * numOr(hit.volCm3, 180), confidence: 97, warn: hit.warn || '', icon: hit.icon }));
+    out.push(validateAtwater({ name: cnt !== 1 ? `${cnt}x ${hit.name}` : hit.name, kcal: cnt * hit.kcal, p: cnt * hit.p, c: cnt * hit.c, f: cnt * hit.f, sugar: cnt * hit.sugar, fiber: cnt * hit.fiber, vitC: cnt * numOr(hit.vitC), mag: cnt * numOr(hit.mag), waterMl: cnt * numOr(hit.waterMl), warn: hit.warn || '', icon: hit.icon }));
   }
   return out.length ? out : null;
 }
 
+// ORIGINAL LEAN & FAST VISION PROMPT
 async function callGeminiVisionAPI(userText, base64Img) {
-  const prompt = `Antworte auf ${state.lang === 'pl' ? 'Polnisch' : 'Deutsch'} AUSSCHLIESSLICH als JSON-Array. Jede Komponente einzeln aufschlüsseln inkl. Volumetrie ("volCm3" in cm³), Konfidenz ("confidence" 80-99) und Fehlertoleranz ("errKcal"). ATWATER: kcal = round(4*p + 4*c + 9*f + 2*fiber). Eingabe: "${userText || 'Analysiere alle Speisen und Getränke einzeln.'}" Schema: [{"name":"Name + Menge (g/ml)","kcal":165,"p":2.5,"c":9.0,"f":13.0,"sugar":4.5,"fiber":3.5,"vitC":25,"mag":20,"waterMl":180,"confidence":94,"volCm3":280,"errKcal":10,"warn":"","icon":"🥗"}]`;
+  const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
+  const prompt = `Du bist ein präziser Ernährungswissenschaftler. Antworte auf ${langName} AUSSCHLIESSLICH als valides JSON-Array.
+WICHTIGSTE REGEL (EINZEL-AUFSCHLÜSSELUNG):
+Wenn der Nutzer mehrere Speisen, Beilagen oder Getränke nennt oder fotografiert, MUSST du JEDE Komponente als EIGENES Objekt im JSON-Array ausgeben! Schreibe den vollständigen Namen inkl. geschätzter Menge (g oder ml) in "name".
+DISTRIBUTIVE MATHEMATIK: Bei "N x Basis mit jeweils M x Zusatz" rechne N*Basis + (N*M)*Zusatz.
+ATWATER-PHYSIK: kcal = round(4*p + 4*c + 9*f + 2*fiber).
+Eingabe/Hinweis: "${userText || 'Analysiere alle sichtbaren Speisen und Getränke auf dem Foto einzeln.'}"
+JSON-Schema:
+[{"name":"Vollständiger Name + Menge (z.B. Gemischter Salat mit Dressing, 250g)","kcal":165,"p":2.5,"c":9.0,"f":13.0,"sugar":4.5,"fiber":3.5,"vitC":25,"mag":20,"waterMl":180,"warn":"Kurzer Hinweis falls viel Zucker/Fett, sonst leer","icon":"🥗"}]`;
   const arr = extractJSON(await callGeminiRequest(prompt, base64Img));
   return (Array.isArray(arr) ? arr : [arr]).map(validateAtwater);
 }
 
 async function triggerUnifiedScanner() {
   const textVal = $('foodInput').value.trim(), btn = $('aiScanBtn');
-  if (!textVal && !selectedPhotoBase64) { showToast('Bitte Text eingeben oder Foto aufnehmen!', 'warn'); return; }
-  if (scannerMode === 'meal' && !selectedPhotoBase64 && textVal) {
+  if (!textVal && !selectedPhotoBase64) { showToast(state.lang === 'pl' ? 'Wpisz tekst lub zrób zdjęcie!' : 'Bitte Text eingeben oder ein Foto aufnehmen!', 'warn'); return; }
+  if (scannerMode === 'meal' && !selectedPhotoBase64 && textVal && !state.geminiApiKey) {
     const loc = parseNaturalText(textVal);
     if (loc) { openPendingPreview(loc); return; }
   }
-  const orig = btn.innerHTML, t0 = performance.now();
-  btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Scan...</span>`;
+  const origHtml = btn.innerHTML, startTime = performance.now();
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Turbo-Scan...</span>`;
   try {
-    if (scannerMode === 'meal') openPendingPreview(await callGeminiVisionAPI(textVal, selectedPhotoBase64));
-    else if (scannerMode === 'fridge') await runFridgeLeftoverAI(textVal, selectedPhotoBase64);
+    if (scannerMode === 'meal') {
+      if (!selectedPhotoBase64 && textVal) {
+        const fastLocal = parseNaturalText(textVal);
+        if (fastLocal && fastLocal.length >= 1) {
+          openPendingPreview(fastLocal);
+          $('scanTimerHint').textContent = `⚡ Direkt-Analyse in ${((performance.now() - startTime) / 1000).toFixed(1)}s • ${fastLocal.length} Posten`;
+          return;
+        }
+      }
+      openPendingPreview(await callGeminiVisionAPI(textVal, selectedPhotoBase64));
+    } else if (scannerMode === 'fridge') await runFridgeLeftoverAI(textVal, selectedPhotoBase64);
     else if (scannerMode === 'menu') await runMenuScannerAI(textVal, selectedPhotoBase64);
     else if (scannerMode === 'pot') await runPotScannerAI(textVal, selectedPhotoBase64);
-    $('scanTimerHint').textContent = `⚡ KI-Analyse in ${((performance.now() - t0) / 1000).toFixed(1)}s`;
-  } catch (err) { showToast(err.message, 'error'); } finally { btn.disabled = false; btn.innerHTML = orig; }
+    $('scanTimerHint').textContent = `⚡ KI-Analyse abgeschlossen in ${((performance.now() - startTime) / 1000).toFixed(1)}s`;
+  } catch (err) {
+    if (scannerMode === 'meal' && textVal) {
+      const fb = parseNaturalText(textVal);
+      if (fb) { openPendingPreview(fb); showToast('Offline-Physik-Parser verwendet', 'info'); return; }
+    }
+    showToast(err.message, 'error');
+  } finally { btn.disabled = false; btn.innerHTML = origHtml; }
 }
 
 function openPendingPreview(items) {
-  pendingItems = items.map(it => ({ ...it, baseKcal: it.kcal, baseP: it.p, baseC: it.c, baseF: it.f, baseSugar: it.sugar, baseFiber: it.fiber, baseVitC: it.vitC, baseMag: it.mag, baseWaterMl: it.waterMl, baseVol: it.volCm3, thumb: selectedPhotoThumb || null }));
+  pendingItems = items.map(it => ({ ...it, baseKcal: it.kcal, baseP: it.p, baseC: it.c, baseF: it.f, baseSugar: it.sugar, baseFiber: it.fiber, baseVitC: it.vitC, baseMag: it.mag, baseWaterMl: it.waterMl, thumb: selectedPhotoThumb || null }));
   currentPortionScale = 100; $('portionSlider').value = 100; $('portionScaleLabel').textContent = '100%';
   $('pendingPreviewBox').classList.remove('hidden'); renderPendingPreview();
 }
@@ -1522,7 +1584,7 @@ function updatePortionScale(val) {
   pendingItems = pendingItems.map(it => {
     const p = Math.round(it.baseP * r * 10) / 10, c = Math.round(it.baseC * r * 10) / 10, f = Math.round(it.baseF * r * 10) / 10, fib = Math.round(it.baseFiber * r * 10) / 10, sug = Math.round(it.baseSugar * r * 10) / 10;
     const atw = Math.round(4 * p + 4 * c + 9 * f + 2 * fib), sK = Math.round(it.baseKcal * r), kcal = (atw > 0 && Math.abs(sK - atw) / Math.max(1, atw) > 0.15) ? atw : sK;
-    return { ...it, kcal, p, c, f, sugar: sug, fiber: fib, vitC: Math.round(it.baseVitC * r), mag: Math.round(it.baseMag * r), waterMl: Math.round(it.baseWaterMl * r), volCm3: Math.round(numOr(it.baseVol, 200) * r), errKcal: Math.max(4, Math.round(kcal * (1 - numOr(it.confidence, 94) / 100))), warn: sug >= 15 ? `Hoher Zuckergehalt (${sug}g)` : (it.warn || '') };
+    return { ...it, kcal, p, c, f, sugar: sug, fiber: fib, vitC: Math.round(it.baseVitC * r), mag: Math.round(it.baseMag * r), waterMl: Math.round(it.baseWaterMl * r), warn: sug >= 15 ? `Hoher Zuckergehalt (${sug}g)` : (it.warn || '') };
   });
   renderPendingPreview();
 }
@@ -1538,26 +1600,21 @@ function renderPendingPreview() {
           ${it.thumb ? `<img src="${it.thumb}" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5" />` : `<div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-lg shrink-0 mt-0.5">${escapeHtml(it.icon || '🍽️')}</div>`}
           <div class="flex-1 min-w-0">
             <p class="item-title-full text-sm font-extrabold text-white">${escapeHtml(it.name)}</p>
-            <p class="text-xs text-slate-300 font-medium mt-1">E:${it.p}g • K:${it.c}g • F:${it.f}g • <span class="${it.sugar >= 15 ? 'text-amber-300 font-bold' : ''}">🍬${it.sugar}g</span> ${it.fiber > 0 ? `• 🌾${it.fiber}g` : ''}</p>
-            <div class="flex flex-wrap gap-1 mt-1.5">
-              <span class="metric-badge text-emerald-300">🎯 ${numOr(it.confidence, 94)}%</span>
-              <span class="metric-badge text-sky-300">📐 ~${numOr(it.volCm3, 220)} cm³</span>
-              <span class="metric-badge text-amber-300">⚖️ ±${numOr(it.errKcal, 8)} kcal</span>
-            </div>
+            <p class="text-xs text-slate-300 font-medium mt-1 leading-relaxed">E:${it.p}g • K:${it.c}g • F:${it.f}g • <span class="${it.sugar >= 15 ? 'text-amber-300 font-bold' : ''}">🍬${it.sugar}g</span> ${it.fiber > 0 ? `• 🌾${it.fiber}g` : ''}</p>
           </div>
         </div>
         <div class="flex flex-col items-end gap-1.5 shrink-0">
           <span class="text-sm font-extrabold text-emerald-400 whitespace-nowrap">${it.kcal} kcal</span>
           <div class="flex items-center gap-1">
-            <button onclick="openEditModal('pending', ${idx})" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 text-xs"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="removePendingItem(${idx})" class="w-7 h-7 rounded-lg bg-rose-950 text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+            <button onclick="openEditModal('pending', ${idx})" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="removePendingItem(${idx})" class="w-7 h-7 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-400 text-xs flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
           </div>
         </div>
       </div>
-      ${it.warn ? `<div class="bg-amber-500/15 border border-amber-500/30 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 font-medium">⚠️ ${escapeHtml(it.warn)}</div>` : ''}
+      ${it.warn ? `<div class="bg-amber-500/15 border border-amber-500/30 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 font-medium leading-snug">⚠️ ${escapeHtml(it.warn)}</div>` : ''}
     </div>`;
   }).join('');
-  $('commitPendingBtn').textContent = state.lang === 'pl' ? `Zapisz (${tot} kcal)` : `Übernehmen (${tot} kcal)`;
+  $('commitPendingBtn').textContent = state.lang === 'pl' ? `Zapisz do dziennika (${tot} kcal)` : `Übernehmen (${tot} kcal)`;
 }
 
 function removePendingItem(i) { pendingItems.splice(i, 1); renderPendingPreview(); }
@@ -1569,7 +1626,7 @@ function commitPendingItems() {
   let wL = 0;
   for (const it of pendingItems) { state.todayLog.unshift({ ...it, time: tm }); if (numOr(it.waterMl) > 0) wL += it.waterMl / 1000; }
   if (wL > 0) state.waterLiters = Math.round((state.waterLiters + wL) * 100) / 100;
-  $('foodInput').value = ''; clearSelectedPhoto(); cancelPendingPreview(); saveState(); updateUI(); showToast('✅ Mahlzeit übernommen!', 'info');
+  $('foodInput').value = ''; clearSelectedPhoto(); cancelPendingPreview(); saveState(); updateUI(); showToast('✅ Mahlzeit vollständig ins Tagebuch übernommen!', 'info');
 }
 
 function logEnergy(l) { state.energyLog.unshift({ date: new Date().toISOString().slice(0, 10), level: l }); saveState(); updateUI(); }
@@ -1604,7 +1661,7 @@ function closeSettingsModal() {
 function saveSettings() {
   const k = cleanApiKey($('apiKeyInput').value); state.geminiApiKey = k; if (k) persistApiKeyEverywhere(k);
   state.goals = { kcal: Math.max(1000, Math.round(numOr($('goalKcalInput').value, 2425))), protein: Math.max(30, Math.round(numOr($('goalProtInput').value, 260))), carbs: Math.max(20, Math.round(numOr($('goalCarbInput').value, 85))), fat: Math.max(20, Math.round(numOr($('goalFatInput').value, 116))), targetWeight: numOr($('goalWeightInput').value, 80) };
-  saveState(); closeSettingsModal(); updateUI(); showToast('⚙️ Einstellungen & API-Key gesichert!', 'info');
+  saveState(); closeSettingsModal(); updateUI(); showToast('⚙️ Einstellungen & Ziele gespeichert!', 'info');
 }
 
 function isValidAccessCode(raw) {
