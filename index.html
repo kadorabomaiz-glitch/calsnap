@@ -724,7 +724,7 @@
       </button>
     </div>
   </nav>
- <script>
+<script>
 const STORAGE_KEY = 'calsnap_ai_state_v2';
 const LEGACY_KEY = 'calsnap_ai_state_v1';
 const API_BACKUP_KEY = 'calsnap_api_key_backup';
@@ -742,6 +742,13 @@ const DEFAULT_STATE = {
   waterLiters: 0.0, todayLog: [], pastDaysLog: [], weightLog: [], energyLog: [], shoppingList: []
 };
 
+function numOr(val, fb = 0) {
+  if (val === 0 || val === '0') return 0;
+  const n = typeof val === 'number' ? val : parseFloat(String(val ?? '').replace(',', '.'));
+  return Number.isFinite(n) ? n : fb;
+}
+
+function escapeHtml(str) { return String(str ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
 function cleanApiKey(raw) { return String(raw || '').replace(/[\s\u200B-\u200D\uFEFF"']+/g, '').trim(); }
 
 function decodeKeyParam(val) {
@@ -776,17 +783,56 @@ function recoverApiKey(cand = '') {
   return '';
 }
 
-function persistApiKeyEverywhere(rawKey) {
+function persistApiKeyBackup(rawKey, updateUrl = false) {
   const c = cleanApiKey(rawKey);
   if (!c) return;
-  if (typeof state === 'object' && state) state.geminiApiKey = c;
   try { localStorage.setItem(API_BACKUP_KEY, c); } catch (_) {}
   try { document.cookie = `calsnap_k=${encodeURIComponent(c)}; max-age=31536000; path=/; SameSite=Lax`; } catch (_) {}
+  if (updateUrl) {
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set('k', btoa(c));
+      window.history.replaceState(null, '', u.toString());
+    } catch (_) {}
+  }
+}
+
+function loadState() {
   try {
-    const u = new URL(window.location.href);
-    u.searchParams.set('k', btoa(c));
-    window.history.replaceState(null, '', u.toString());
-  } catch (_) {}
+    if (/2\.0|3\.0/i.test(localStorage.getItem(FAST_MODEL_KEY) || '')) localStorage.removeItem(FAST_MODEL_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    const rk = recoverApiKey(parsed.geminiApiKey || parsed.apiKey);
+    const merged = {
+      ...structuredClone(DEFAULT_STATE),
+      ...parsed,
+      geminiApiKey: rk || cleanApiKey(parsed.geminiApiKey),
+      goals: { ...DEFAULT_STATE.goals, ...(parsed.goals || {}) },
+      userProfile: { ...DEFAULT_STATE.userProfile, ...(parsed.userProfile || {}) },
+      cheatRescue: { ...DEFAULT_STATE.cheatRescue, ...(parsed.cheatRescue || {}) },
+      todayLog: Array.isArray(parsed.todayLog) ? parsed.todayLog : [],
+      pastDaysLog: Array.isArray(parsed.pastDaysLog) ? parsed.pastDaysLog : [],
+      weightLog: Array.isArray(parsed.weightLog) ? parsed.weightLog : [],
+      energyLog: Array.isArray(parsed.energyLog) ? parsed.energyLog : [],
+      shoppingList: Array.isArray(parsed.shoppingList) ? parsed.shoppingList : [],
+      inviteCodes: Array.isArray(parsed.inviteCodes) ? parsed.inviteCodes : []
+    };
+    if (merged.geminiApiKey) persistApiKeyBackup(merged.geminiApiKey, false);
+    return merged;
+  } catch (e) {
+    const fb = structuredClone(DEFAULT_STATE);
+    fb.geminiApiKey = recoverApiKey('');
+    return fb;
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (state.geminiApiKey) persistApiKeyBackup(state.geminiApiKey, false);
+  } catch (e) {
+    console.error('State save error:', e);
+  }
 }
 
 let state = loadState();
@@ -848,49 +894,6 @@ const I18N = {
   }
 };
 
-function numOr(val, fb = 0) {
-  if (val === 0 || val === '0') return 0;
-  const n = typeof val === 'number' ? val : parseFloat(String(val ?? '').replace(',', '.'));
-  return Number.isFinite(n) ? n : fb;
-}
-
-function escapeHtml(str) { return String(str ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
-
-function loadState() {
-  try {
-    if (/2\.0|3\.0/i.test(localStorage.getItem(FAST_MODEL_KEY) || '')) localStorage.removeItem(FAST_MODEL_KEY);
-    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    const rk = recoverApiKey(parsed.geminiApiKey || parsed.apiKey);
-    const merged = {
-      ...structuredClone(DEFAULT_STATE), ...parsed,
-      geminiApiKey: rk || cleanApiKey(parsed.geminiApiKey),
-      goals: { ...DEFAULT_STATE.goals, ...(parsed.goals || {}) },
-      userProfile: { ...DEFAULT_STATE.userProfile, ...(parsed.userProfile || {}) },
-      cheatRescue: { ...DEFAULT_STATE.cheatRescue, ...(parsed.cheatRescue || {}) },
-      todayLog: Array.isArray(parsed.todayLog) ? parsed.todayLog : [],
-      pastDaysLog: Array.isArray(parsed.pastDaysLog) ? parsed.pastDaysLog : [],
-      weightLog: Array.isArray(parsed.weightLog) ? parsed.weightLog : [],
-      energyLog: Array.isArray(parsed.energyLog) ? parsed.energyLog : [],
-      shoppingList: Array.isArray(parsed.shoppingList) ? parsed.shoppingList : [],
-      inviteCodes: Array.isArray(parsed.inviteCodes) ? parsed.inviteCodes : []
-    };
-    if (merged.geminiApiKey) persistApiKeyEverywhere(merged.geminiApiKey);
-    return merged;
-  } catch (e) {
-    const fb = structuredClone(DEFAULT_STATE);
-    fb.geminiApiKey = recoverApiKey('');
-    return fb;
-  }
-}
-
-function saveState() {
-  try {
-    if (state.geminiApiKey) persistApiKeyEverywhere(state.geminiApiKey);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) {}
-}
-
 function checkDayRollover() {
   const today = new Date().toISOString().slice(0, 10);
   if (state.lastActiveDate && state.lastActiveDate !== today) {
@@ -937,6 +940,16 @@ function styleMicroPill(pillEl, mode) {
   else if (mode === 'warn') { box.className = 'bg-amber-950/50 border border-amber-500/70 rounded-lg py-1 px-1.5 transition-all'; pillEl.className = 'text-xs font-extrabold text-amber-300'; }
   else if (mode === 'good') { box.className = 'bg-emerald-950/40 border border-emerald-500/50 rounded-lg py-1 px-1.5 transition-all'; pillEl.className = 'text-xs font-extrabold text-emerald-300'; }
   else { box.className = 'bg-slate-900/70 border border-slate-800 rounded-lg py-1 px-1.5 transition-all'; pillEl.className = 'text-xs font-bold text-slate-200'; }
+}
+
+function syncProfileInputs() {
+  if (!state.userProfile) return;
+  if ($('calcGender')) $('calcGender').value = state.userProfile.gender || 'm';
+  if ($('calcAge')) $('calcAge').value = numOr(state.userProfile.age, 35);
+  if ($('calcHeight')) $('calcHeight').value = numOr(state.userProfile.height, 178);
+  if ($('calcWeight')) $('calcWeight').value = numOr(state.userProfile.weight, 86.0);
+  if ($('calcActivity')) $('calcActivity').value = String(numOr(state.userProfile.activity, 1.375));
+  if ($('calcTargetWeight')) $('calcTargetWeight').value = numOr(state.goals.targetWeight, 80.0);
 }
 
 function updateUI() {
@@ -1322,9 +1335,15 @@ function renderPastDays() {
   el.innerHTML = state.pastDaysLog.map(d => `<div class="glass-subcard p-3 flex items-center justify-between text-xs"><div><p class="font-bold text-white">${escapeHtml(d.date)}</p><p class="text-[11px] text-slate-400">E:${d.p}g • K:${d.c}g • F:${d.f}g (${d.itemsCount || 0})</p></div><span class="font-extrabold text-emerald-400">${d.kcal} kcal</span></div>`).join('');
 }
 
+// PERSISTENT BMR / TDEE MACRO CALCULATOR (FIXED ORDER & AUTO-SAVE)
 function saveUserProfile() {
-  state.userProfile = { gender: $('calcGender').value, age: numOr($('calcAge').value, 35), height: numOr($('calcHeight').value, 178), weight: numOr($('calcWeight').value, 86.0), activity: numOr($('calcActivity').value, 1.375) };
-  state.goals.targetWeight = numOr($('calcTargetWeight').value, 80.0); saveState();
+  if ($('calcGender')) state.userProfile.gender = $('calcGender').value || 'm';
+  if ($('calcAge')) state.userProfile.age = numOr($('calcAge').value, state.userProfile.age || 35);
+  if ($('calcHeight')) state.userProfile.height = numOr($('calcHeight').value, state.userProfile.height || 178);
+  if ($('calcWeight')) state.userProfile.weight = numOr($('calcWeight').value, state.userProfile.weight || 86.0);
+  if ($('calcActivity')) state.userProfile.activity = numOr($('calcActivity').value, state.userProfile.activity || 1.375);
+  if ($('calcTargetWeight')) state.goals.targetWeight = numOr($('calcTargetWeight').value, state.goals.targetWeight || 80.0);
+  saveState();
 }
 
 function calculatePersonalGoal() {
@@ -1346,8 +1365,32 @@ function calculatePersonalGoal() {
 }
 
 function applyCustomizedGoals() {
-  state.goals = { kcal: Math.max(1000, Math.round(numOr($('resGoalKcal').value, 2425))), protein: Math.max(20, Math.round(numOr($('resGoalProt').value, 260))), carbs: Math.max(10, Math.round(numOr($('resGoalCarb').value, 85))), fat: Math.max(10, Math.round(numOr($('resGoalFat').value, 116))), targetWeight: numOr($('resGoalTargetWeight').value, 80.0) };
-  saveUserProfile(); saveState(); updateUI(); showToast('🎯 Ziele übernommen!', 'info'); setTimeout(() => switchTab('tracker'), 350);
+  saveUserProfile();
+  const kcal = Math.max(1000, Math.round(numOr($('resGoalKcal')?.value, state.goals.kcal)));
+  const p = Math.max(20, Math.round(numOr($('resGoalProt')?.value, state.goals.protein)));
+  const c = Math.max(10, Math.round(numOr($('resGoalCarb')?.value, state.goals.carbs)));
+  const f = Math.max(10, Math.round(numOr($('resGoalFat')?.value, state.goals.fat)));
+  const tw = numOr($('resGoalTargetWeight')?.value, state.goals.targetWeight);
+  const curW = numOr($('calcWeight')?.value, state.userProfile.weight);
+
+  state.goals.kcal = kcal;
+  state.goals.protein = p;
+  state.goals.carbs = c;
+  state.goals.fat = f;
+  state.goals.targetWeight = tw;
+  state.userProfile.weight = curW;
+  if ($('calcTargetWeight')) $('calcTargetWeight').value = tw;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const exIdx = state.weightLog.findIndex(w => w.date === today);
+  if (exIdx >= 0) state.weightLog[exIdx].weight = curW; else state.weightLog.push({ date: today, weight: curW });
+  state.weightLog.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+
+  saveState();
+  syncProfileInputs();
+  updateUI();
+  showToast(`🎯 Dauerhaft gespeichert: ${kcal} kcal • ${p}g E • ${c}g K • ${f}g F`, 'info');
+  setTimeout(() => switchTab('tracker'), 350);
 }
 
 function generateInviteCode() {
@@ -1373,7 +1416,6 @@ function renderInviteCodes() {
   el.innerHTML = state.inviteCodes.length ? state.inviteCodes.map((c, i) => `<div class="glass-subcard p-2.5 flex items-center justify-between gap-2"><div class="min-w-0"><span class="font-extrabold text-white text-xs block truncate">${escapeHtml(c.name)}</span><code class="text-emerald-400 font-bold text-xs">${escapeHtml(c.code)}</code></div><div class="flex items-center gap-1.5"><button onclick="shareViaWhatsApp(${i})" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button><button onclick="copyInviteText(${i})" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 text-xs"><i class="fa-solid fa-copy"></i></button><button onclick="deleteInviteCode(${i})" class="w-7 h-7 rounded-lg bg-rose-950 text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button></div></div>`).join('') : `<p class="text-xs text-slate-500">Keine Codes.</p>`;
 }
 
-// ORIGINAL HIGH-SPEED IMAGE PRE-PROCESSING (0.72 + SUB-SAMPLED LUMINANCE)
 async function compressImageFile(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1418,10 +1460,9 @@ async function handlePhotoSelect(event) {
 
 function clearSelectedPhoto() { selectedPhotoBase64 = null; selectedPhotoThumb = null; $('photoPreviewContainer')?.classList.add('hidden'); $('photoPreviewImg').src = ''; }
 
-// ORIGINAL HIGH-SPEED GEMINI ENGINE (FAST_MODEL_KEY + FAST_HOST_KEY CACHE + THINKING ZERO)
 async function callGeminiRequest(promptText, base64Image = null) {
   let apiKey = cleanApiKey(state.geminiApiKey || $('apiKeyInput')?.value || recoverApiKey(''));
-  if (apiKey && apiKey !== state.geminiApiKey) { persistApiKeyEverywhere(apiKey); saveState(); }
+  if (apiKey && apiKey !== state.geminiApiKey) { state.geminiApiKey = apiKey; saveState(); }
   if (!apiKey) { openSettingsModal(); throw new Error('Bitte zuerst deinen Google Gemini API-Key in den Einstellungen hinterlegen.'); }
 
   const baseModels = ['gemini-3.8-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
@@ -1523,7 +1564,6 @@ function parseNaturalText(text) {
   return out.length ? out : null;
 }
 
-// ORIGINAL LEAN & FAST VISION PROMPT
 async function callGeminiVisionAPI(userText, base64Img) {
   const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
   const prompt = `Du bist ein präziser Ernährungswissenschaftler. Antworte auf ${langName} AUSSCHLIESSLICH als valides JSON-Array.
@@ -1622,11 +1662,19 @@ function cancelPendingPreview() { pendingItems = []; $('pendingPreviewBox').clas
 
 function commitPendingItems() {
   if (!pendingItems.length) return;
-  const tm = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  let wL = 0;
-  for (const it of pendingItems) { state.todayLog.unshift({ ...it, time: tm }); if (numOr(it.waterMl) > 0) wL += it.waterMl / 1000; }
-  if (wL > 0) state.waterLiters = Math.round((state.waterLiters + wL) * 100) / 100;
-  $('foodInput').value = ''; clearSelectedPhoto(); cancelPendingPreview(); saveState(); updateUI(); showToast('✅ Mahlzeit vollständig ins Tagebuch übernommen!', 'info');
+  const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  let addedWaterL = 0;
+  for (const it of pendingItems) {
+    state.todayLog.unshift({
+      name: it.name, kcal: it.kcal, p: it.p, c: it.c, f: it.f,
+      sugar: it.sugar, fiber: it.fiber, vitC: it.vitC, mag: it.mag,
+      waterMl: it.waterMl, warn: it.warn, icon: it.icon, thumb: it.thumb || null, time: nowTime
+    });
+    if (numOr(it.waterMl) > 0) addedWaterL += it.waterMl / 1000;
+  }
+  if (addedWaterL > 0) state.waterLiters = Math.round((state.waterLiters + addedWaterL) * 100) / 100;
+  $('foodInput').value = ''; clearSelectedPhoto(); cancelPendingPreview(); saveState(); updateUI();
+  showToast('✅ Mahlzeit vollständig ins Tagebuch übernommen!', 'info');
 }
 
 function logEnergy(l) { state.energyLog.unshift({ date: new Date().toISOString().slice(0, 10), level: l }); saveState(); updateUI(); }
@@ -1654,14 +1702,17 @@ function openSettingsModal() {
 
 function closeSettingsModal() {
   const k = cleanApiKey($('apiKeyInput')?.value);
-  if (k && k !== state.geminiApiKey) { persistApiKeyEverywhere(k); saveState(); }
+  if (k && k !== state.geminiApiKey) { state.geminiApiKey = k; persistApiKeyBackup(k, true); saveState(); }
   $('settingsModal').classList.add('hidden');
 }
 
 function saveSettings() {
-  const k = cleanApiKey($('apiKeyInput').value); state.geminiApiKey = k; if (k) persistApiKeyEverywhere(k);
+  const k = cleanApiKey($('apiKeyInput').value);
+  state.geminiApiKey = k;
+  if (k) persistApiKeyBackup(k, true);
   state.goals = { kcal: Math.max(1000, Math.round(numOr($('goalKcalInput').value, 2425))), protein: Math.max(30, Math.round(numOr($('goalProtInput').value, 260))), carbs: Math.max(20, Math.round(numOr($('goalCarbInput').value, 85))), fat: Math.max(20, Math.round(numOr($('goalFatInput').value, 116))), targetWeight: numOr($('goalWeightInput').value, 80) };
-  saveState(); closeSettingsModal(); updateUI(); showToast('⚙️ Einstellungen & Ziele gespeichert!', 'info');
+  saveState(); syncProfileInputs(); closeSettingsModal(); updateUI();
+  showToast('⚙️ Einstellungen & Ziele gespeichert!', 'info');
 }
 
 function isValidAccessCode(raw) {
@@ -1682,25 +1733,25 @@ function exportDataBackup() {
   a.download = `calsnap_backup_${new Date().toISOString().slice(0, 10)}.json`; a.click();
 }
 
+window.addEventListener('pagehide', () => saveState());
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveState(); });
+
 window.addEventListener('DOMContentLoaded', () => {
   checkDayRollover();
   try {
     const p = new URLSearchParams(window.location.search), uk = p.get('k') || p.get('key') || p.get('apiKey'), ui = p.get('invite') || p.get('code');
-    if (uk) { const d = decodeKeyParam(uk); if (d) persistApiKeyEverywhere(d); }
+    if (uk) { const d = decodeKeyParam(uk); if (d) { state.geminiApiKey = d; persistApiKeyBackup(d, false); } }
     if (ui && isValidAccessCode(ui)) state.unlocked = true;
     saveState();
   } catch (_) {}
   const ki = $('apiKeyInput');
-  if (ki) { ki.value = state.geminiApiKey || ''; ki.addEventListener('input', e => { const v = cleanApiKey(e.target.value); if (v.length >= 15) { persistApiKeyEverywhere(v); saveState(); } }); }
+  if (ki) { ki.value = state.geminiApiKey || ''; ki.addEventListener('input', e => { const v = cleanApiKey(e.target.value); if (v.length >= 15) { state.geminiApiKey = v; persistApiKeyBackup(v, true); saveState(); } }); }
+  ['calcGender', 'calcAge', 'calcHeight', 'calcWeight', 'calcTargetWeight', 'calcActivity'].forEach(id => {
+    $(id)?.addEventListener('input', () => saveUserProfile());
+    $(id)?.addEventListener('change', () => saveUserProfile());
+  });
   if (!state.unlocked) $('lockScreen').classList.remove('hidden');
-  if (state.userProfile) {
-    if ($('calcGender')) $('calcGender').value = state.userProfile.gender || 'm';
-    if ($('calcAge')) $('calcAge').value = state.userProfile.age || 35;
-    if ($('calcHeight')) $('calcHeight').value = state.userProfile.height || 178;
-    if ($('calcWeight')) $('calcWeight').value = state.userProfile.weight || 86.0;
-    if ($('calcActivity')) $('calcActivity').value = state.userProfile.activity || 1.375;
-  }
-  if ($('calcTargetWeight')) $('calcTargetWeight').value = numOr(state.goals.targetWeight, 80.0);
+  syncProfileInputs();
   updateUI();
 });
 </script>
