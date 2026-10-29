@@ -471,11 +471,11 @@
 
         <!-- 1-KLICK AUTO-REZEPTE FÜR DAS REST-BUDGET -->
         <button onclick="generateBudgetClosingIdeas()" id="btnAutoBudgetMeals" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-teal-500/25 via-emerald-500/20 to-sky-500/25 hover:from-teal-500/35 hover:to-sky-500/35 border border-emerald-500/40 text-xs font-bold text-emerald-300 flex items-center justify-center gap-2 shadow-md transition">
-          <i class="fa-solid fa-sparkles text-emerald-400"></i>
+          <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i>
           <span>🎯 Rezepte passend zu meinen offenen Restkalorien zaubern</span>
         </button>
 
-        <!-- WIEDERHERGESTELLTE KI-KAMERA FÜR ZUTATEN IN ZAUBERN -->
+        <!-- KI-KAMERA FÜR ZUTATEN IN ZAUBERN -->
         <div class="space-y-2">
           <div class="flex gap-2">
             <input id="wishCravingInput" type="text" placeholder="Wunsch (z. B. Pasta, Süßes, Pfanne) oder Zutaten fotografieren..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
@@ -790,13 +790,15 @@
     let scannerMode = 'meal';
     let selectedPhotoBase64 = null;
     let selectedPhotoThumb = null;
-    let zaubernPhotoBase64 = null; // Separate Kamera für Tab 2 (Zaubern)
+    let zaubernPhotoBase64 = null;
     let pendingItems = [];
     let currentPortionScale = 100;
     let editingTarget = { source: null, index: -1 };
+    let cachedFridgeRecipes = [];
     let cachedMenuResults = [];
     let cachedPotResult = null;
-    let generatedRecipesCache = []; // Sichere In-Memory Speicherung zur Vermeidung von Quotes-Bugs
+    let currentPotPortions = 4;
+    let generatedRecipesCache = [];
     let recognition = null;
     let isRecording = false;
 
@@ -849,7 +851,7 @@
       try {
         const cachedModel = localStorage.getItem(FAST_MODEL_KEY);
         if (cachedModel && /2\.0|3\.0/i.test(cachedModel)) localStorage.removeItem(FAST_MODEL_KEY);
-        let raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
         if (!raw) return structuredClone(DEFAULT_STATE);
         const parsed = JSON.parse(raw);
         return {
@@ -889,7 +891,6 @@
             acc.f += numOr(it.f, 0);
             return acc;
           }, { kcal: 0, p: 0, c: 0, f: 0 });
-
           state.pastDaysLog.unshift({
             date: state.lastActiveDate,
             kcal: Math.round(totals.kcal),
@@ -900,7 +901,6 @@
           });
           if (state.pastDaysLog.length > 30) state.pastDaysLog.length = 30;
         }
-
         state.todayLog = [];
         state.waterLiters = 0.0;
         state.lastActiveDate = today;
@@ -923,9 +923,518 @@
       setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 3200);
     }
 
-    // =========================================================================
-    // FEATURE 1: RESTKALORIEN-KOMPASS („WAS KANN ICH NOCH ESSEN?“)
-    // =========================================================================
+    function getRemainingMacros() {
+      const consumed = state.todayLog.reduce((acc, it) => {
+        acc.kcal += numOr(it.kcal, 0);
+        acc.p += numOr(it.p, 0);
+        acc.c += numOr(it.c, 0);
+        acc.f += numOr(it.f, 0);
+        acc.sugar += numOr(it.sugar, 0);
+        acc.fiber += numOr(it.fiber, 0);
+        acc.vitC += numOr(it.vitC, 0);
+        acc.mag += numOr(it.mag, 0);
+        return acc;
+      }, { kcal: 0, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0 });
+
+      const baseGoalKcal = numOr(state.goals.kcal, 2425);
+      const cut = state.cheatRescue?.active ? numOr(state.cheatRescue.dailyCut, 200) : 0;
+      const effectiveGoalKcal = Math.max(1000, baseGoalKcal - cut);
+
+      return {
+        remKcal: Math.max(0, Math.round(effectiveGoalKcal - consumed.kcal)),
+        remProt: Math.max(0, Math.round(numOr(state.goals.protein, 260) - consumed.p)),
+        remCarb: Math.max(0, Math.round(numOr(state.goals.carbs, 85) - consumed.c)),
+        remFat: Math.max(0, Math.round(numOr(state.goals.fat, 116) - consumed.f)),
+        effectiveGoalKcal,
+        consumed
+      };
+    }
+
+    function updateUI() {
+      checkDayRollover();
+      const t = I18N[state.lang] || I18N.de;
+
+      const btnDe = document.getElementById('langBtnDe');
+      const btnPl = document.getElementById('langBtnPl');
+      if (btnDe && btnPl) {
+        btnDe.className = state.lang === 'de'
+          ? 'px-2 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+          : 'px-2 py-1.5 rounded-lg text-xs font-bold bg-slate-800/80 text-slate-400 border border-slate-700';
+        btnPl.className = state.lang === 'pl'
+          ? 'px-2 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+          : 'px-2 py-1.5 rounded-lg text-xs font-bold bg-slate-800/80 text-slate-400 border border-slate-700';
+      }
+
+      const bindText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      bindText('lblRemainingTitle', t.remTitle);
+      bindText('lblGoalWord', t.goalWord);
+      bindText('lblEatenWord', t.eatenWord);
+      bindText('lblMacroP', t.macroP);
+      bindText('lblMacroC', t.macroC);
+      bindText('lblMacroF', t.macroF);
+      bindText('lblSugar', t.sugar);
+      bindText('lblFiber', t.fiber);
+      bindText('lblWaterTitle', t.waterTitle);
+      bindText('lblScannerTitle', t.scannerTitle);
+      bindText('lblModeMeal', t.modeMeal);
+      bindText('lblModeFridge', t.modeFridge);
+      bindText('lblModeMenu', t.modeMenu);
+      bindText('lblModePot', t.modePot);
+      bindText('lblBtnPhoto', t.btnPhoto);
+      bindText('lblBtnVoice', t.btnVoice);
+      bindText('lblBtnScan', t.btnScan);
+      bindText('lblPreviewTitle', t.previewTitle);
+      bindText('lblPreviewCancel', t.previewCancel);
+      bindText('lblPortionScale', t.portionScale);
+      bindText('lblTodayLogTitle', t.todayLogTitle);
+      bindText('lblZaubernTitle', t.zaubernTitle);
+      bindText('lblZaubernSub', t.zaubernSub);
+      bindText('lblBtnZaubern', t.btnZaubern);
+      bindText('lblShopTitle', t.shopTitle);
+      bindText('lblWeightTitle', t.weightTitle);
+      bindText('lblNavTracker', t.navTracker);
+      bindText('lblNavIdeas', t.navIdeas);
+      bindText('lblNavWeight', t.navWeight);
+
+      const hintMap = { meal: t.hintMeal, fridge: t.hintFridge, menu: t.hintMenu, pot: t.hintPot };
+      bindText('scannerModeHint', hintMap[scannerMode] || t.hintMeal);
+
+      const cheatBanner = document.getElementById('cheatRescueBanner');
+      if (cheatBanner) cheatBanner.classList.toggle('hidden', !state.cheatRescue?.active);
+
+      const { remKcal, remProt, effectiveGoalKcal, consumed } = getRemainingMacros();
+      const eatenKcal = Math.round(consumed.kcal);
+      bindText('kcalRemaining', remKcal);
+      bindText('kcalGoalLabel', effectiveGoalKcal);
+      bindText('kcalConsumedLabel', eatenKcal);
+
+      const pct = Math.min(100, Math.round((eatenKcal / Math.max(1, effectiveGoalKcal)) * 100));
+      bindText('kcalPercentLabel', `${pct}%`);
+      const ring = document.getElementById('kcalRing');
+      if (ring) {
+        const circumference = 201.06;
+        ring.style.strokeDashoffset = String(circumference - (pct / 100) * circumference);
+        ring.setAttribute('stroke', eatenKcal > effectiveGoalKcal ? '#ef4444' : '#10b981');
+      }
+
+      const goalP = Math.max(1, numOr(state.goals.protein, 260));
+      const goalC = Math.max(1, numOr(state.goals.carbs, 85));
+      const goalF = Math.max(1, numOr(state.goals.fat, 116));
+
+      bindText('protText', `${Math.round(consumed.p)}/${goalP}g`);
+      bindText('carbText', `${Math.round(consumed.c)}/${goalC}g`);
+      bindText('fatText', `${Math.round(consumed.f)}/${goalF}g`);
+
+      const protBar = document.getElementById('protBar');
+      const carbBar = document.getElementById('carbBar');
+      const fatBar = document.getElementById('fatBar');
+      if (protBar) protBar.style.width = `${Math.min(100, Math.round((consumed.p / goalP) * 100))}%`;
+      if (carbBar) carbBar.style.width = `${Math.min(100, Math.round((consumed.c / goalC) * 100))}%`;
+      if (fatBar) fatBar.style.width = `${Math.min(100, Math.round((consumed.f / goalF) * 100))}%`;
+
+      bindText('sugarPill', `${Math.round(consumed.sugar * 10) / 10}g`);
+      bindText('fiberPill', `${Math.round(consumed.fiber * 10) / 10}g`);
+      bindText('vitCPill', `${Math.round(consumed.vitC)}mg`);
+      bindText('magPill', `${Math.round(consumed.mag)}mg`);
+
+      bindText('compassKcalText', `${remKcal} kcal`);
+      bindText('compassProtText', `${remProt}g ${t.macroP}`);
+      bindText('ideasRemKcal', `${remKcal} kcal`);
+      bindText('ideasRemProt', `${remProt}g ${t.macroP} offen`);
+
+      const wLiters = Math.max(0, Math.round(numOr(state.waterLiters, 0) * 100) / 100);
+      bindText('waterText', `${wLiters.toFixed(2).replace(/\.00$/, '.0')} / 2.5 L`);
+      const glassesFilled = Math.min(8, Math.round(wLiters / 0.25));
+      bindText('waterGlasses', '🔵'.repeat(glassesFilled) + '⚪'.repeat(Math.max(0, 8 - glassesFilled)));
+
+      bindText('todayTotalKcal', `${eatenKcal} kcal`);
+      renderTodayLog();
+      renderShoppingList();
+      renderWeightEngine();
+      renderPastDays();
+
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const todayEnergy = state.energyLog.find(e => e.date === todayIso);
+      if (todayEnergy) bindText('energyStatusText', `Heute: Level ${todayEnergy.level}/5 gespeichert`);
+    }
+
+    function renderTodayLog() {
+      const listEl = document.getElementById('todayLogList');
+      if (!listEl) return;
+      if (!state.todayLog.length) {
+        listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Noch keine Mahlzeiten heute eingetragen.</p>`;
+        return;
+      }
+      listEl.innerHTML = state.todayLog.map((it, idx) => `
+        <div class="glass-subcard p-3 flex items-start justify-between gap-2.5 border border-slate-800">
+          <div class="flex items-start gap-2.5 flex-1 min-w-0">
+            ${it.thumb
+              ? `<img src="${it.thumb}" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5" />`
+              : `<div class="w-9 h-9 rounded-xl bg-slate-800/90 flex items-center justify-center text-base shrink-0 mt-0.5">${escapeHtml(it.icon || '🍽️')}</div>`
+            }
+            <div class="flex-1 min-w-0">
+              <span class="text-[10px] text-slate-500 font-semibold block">${escapeHtml(it.time || '')}</span>
+              <p class="item-title-full text-xs font-bold text-white">${escapeHtml(it.name)}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                E:${numOr(it.p, 0)}g • K:${numOr(it.c, 0)}g • F:${numOr(it.f, 0)}g ${numOr(it.sugar, 0) > 0 ? `• 🍬${numOr(it.sugar, 0)}g` : ''}
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-1.5 shrink-0">
+            <span class="text-xs font-extrabold text-emerald-400 whitespace-nowrap">${Math.round(numOr(it.kcal, 0))} kcal</span>
+            <div class="flex items-center gap-1">
+              <button onclick="openEditModal('today', ${idx})" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] flex items-center justify-center" title="Bearbeiten">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button onclick="deleteLogItem(${idx})" class="w-6 h-6 rounded-lg bg-rose-950/70 hover:bg-rose-900 text-rose-400 text-[10px] flex items-center justify-center" title="Löschen">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteLogItem(idx) {
+      if (idx < 0 || idx >= state.todayLog.length) return;
+      state.todayLog.splice(idx, 1);
+      saveState();
+      updateUI();
+      showToast('Eintrag gelöscht', 'info');
+    }
+
+    function addWater(delta) {
+      state.waterLiters = Math.max(0, Math.min(12, Math.round((numOr(state.waterLiters, 0) + numOr(delta, 0)) * 100) / 100));
+      saveState();
+      updateUI();
+    }
+
+    function openEditModal(source, idx) {
+      const list = source === 'pending' ? pendingItems : state.todayLog;
+      const item = list[idx];
+      if (!item) return;
+      editingTarget = { source, index: idx };
+      document.getElementById('editItemName').value = item.name || '';
+      document.getElementById('editItemKcal').value = Math.round(numOr(item.kcal, 0));
+      document.getElementById('editItemSugar').value = numOr(item.sugar, 0);
+      document.getElementById('editItemP').value = numOr(item.p, 0);
+      document.getElementById('editItemC').value = numOr(item.c, 0);
+      document.getElementById('editItemF').value = numOr(item.f, 0);
+      document.getElementById('editItemModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      editingTarget = { source: null, index: -1 };
+      document.getElementById('editItemModal').classList.add('hidden');
+    }
+
+    function saveEditedItem() {
+      const { source, index } = editingTarget;
+      const list = source === 'pending' ? pendingItems : state.todayLog;
+      if (!list || !list[index]) {
+        closeEditModal();
+        return;
+      }
+      const orig = list[index];
+      const name = document.getElementById('editItemName').value.trim() || orig.name;
+      const inputKcal = Math.max(0, Math.round(numOr(document.getElementById('editItemKcal').value, orig.kcal)));
+      const sugar = Math.max(0, Math.round(numOr(document.getElementById('editItemSugar').value, orig.sugar) * 10) / 10);
+      const p = Math.max(0, Math.round(numOr(document.getElementById('editItemP').value, orig.p) * 10) / 10);
+      const c = Math.max(0, Math.round(numOr(document.getElementById('editItemC').value, orig.c) * 10) / 10);
+      const f = Math.max(0, Math.round(numOr(document.getElementById('editItemF').value, orig.f) * 10) / 10);
+
+      const macrosChanged = p !== orig.p || c !== orig.c || f !== orig.f;
+      const kcalChanged = inputKcal !== Math.round(numOr(orig.kcal, 0));
+      const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * numOr(orig.fiber, 0));
+
+      let finalKcal = inputKcal;
+      if (macrosChanged && !kcalChanged && atwaterKcal > 0) {
+        finalKcal = atwaterKcal;
+      } else if (atwaterKcal > 0 && Math.abs(inputKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15 && macrosChanged) {
+        finalKcal = atwaterKcal;
+      }
+
+      const updated = { ...orig, name, kcal: finalKcal, sugar, p, c, f };
+
+      if (source === 'pending') {
+        const ratio = (currentPortionScale || 100) / 100;
+        updated.baseKcal = Math.round(finalKcal / ratio);
+        updated.baseP = Math.round((p / ratio) * 10) / 10;
+        updated.baseC = Math.round((c / ratio) * 10) / 10;
+        updated.baseF = Math.round((f / ratio) * 10) / 10;
+        updated.baseSugar = Math.round((sugar / ratio) * 10) / 10;
+        pendingItems[index] = updated;
+        renderPendingPreview();
+      } else {
+        state.todayLog[index] = updated;
+        saveState();
+        updateUI();
+      }
+      closeEditModal();
+      showToast('✏️ Eintrag aktualisiert', 'info');
+    }
+
+    function setScannerMode(mode) {
+      scannerMode = ['meal', 'fridge', 'menu', 'pot'].includes(mode) ? mode : 'meal';
+      const modes = { meal: 'modeBtnMeal', fridge: 'modeBtnFridge', menu: 'modeBtnMenu', pot: 'modeBtnPot' };
+      for (const [m, btnId] of Object.entries(modes)) {
+        document.getElementById(btnId)?.classList.toggle('active', m === scannerMode);
+      }
+      const t = I18N[state.lang] || I18N.de;
+      const hintMap = { meal: t.hintMeal, fridge: t.hintFridge, menu: t.hintMenu, pot: t.hintPot };
+      const hintEl = document.getElementById('scannerModeHint');
+      if (hintEl) hintEl.textContent = hintMap[scannerMode];
+    }
+
+    function toggleVoiceInput() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        showToast('Spracheingabe wird von diesem Browser nicht unterstützt.', 'warn');
+        return;
+      }
+      const voiceBtn = document.getElementById('voiceBtn');
+      if (isRecording && recognition) {
+        recognition.stop();
+        return;
+      }
+      recognition = new SpeechRec();
+      recognition.lang = state.lang === 'pl' ? 'pl-PL' : 'de-DE';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        isRecording = true;
+        voiceBtn?.classList.add('pulse-ring', 'border-rose-500');
+        showToast('🎙️ Bitte jetzt sprechen...', 'info');
+      };
+      recognition.onresult = (event) => {
+        const transcript = event.results?.[0]?.[0]?.transcript || '';
+        if (transcript) {
+          const input = document.getElementById('foodInput');
+          input.value = input.value ? `${input.value.trim()}, ${transcript}` : transcript;
+          triggerUnifiedScanner();
+        }
+      };
+      recognition.onerror = () => showToast('Spracheingabe beendet.', 'warn');
+      recognition.onend = () => {
+        isRecording = false;
+        voiceBtn?.classList.remove('pulse-ring', 'border-rose-500');
+      };
+      recognition.start();
+    }
+
+    async function runFridgeLeftoverAI(textVal, base64Img) {
+      const { remKcal, remProt } = getRemainingMacros();
+      const prompt = `Du bist ein KI-Küchenchef und Lebensmittelprüfer. Analysiere das Foto des Kühlschranks/Vorrats bzw. den Hinweis ("${textVal || 'Kühlschrank-Check'}").
+Erkenne die vorhandenen Zutaten, gib bei empfindlichen Lebensmitteln einen kurzen MHD-/Frische-Hinweis und erstelle 2 bis 3 Rezepte passend für maximal ${remKcal} kcal und ${remProt}g Eiweiß.
+Antworte AUSSCHLIESSLICH als valides JSON-Array:
+[{"title":"Rezeptname inkl. Menge","mhdNote":"Frische-/MHD-Hinweis","ingredients":"Zutat 1 (g), Zutat 2 (g)","steps":"Kurze Zubereitung","kcal":480,"p":42,"c":35,"f":16,"icon":"🧊"}]`;
+
+      let list = null;
+      try {
+        const raw = await callGeminiRequest(prompt, base64Img);
+        list = normalizeRecipeList(extractJSON(raw));
+      } catch (err) {
+        if (!textVal && !base64Img) throw err;
+      }
+
+      if (!list || !list.length) {
+        list = [{
+          title: 'Kühlschrank-Rescue Gemüse-Ei-Pfanne (380g)',
+          mhdNote: 'Geöffnete Milchprodukte & frisches Gemüse zuerst verbrauchen.',
+          ingredients: '3 Eier, 150g Restgemüse, 50g Hüttenkäse, Kräuter',
+          steps: 'Gemüse kurz anbraten, verquirlte Eier und Hüttenkäse darübergeben und stocken lassen.',
+          kcal: 410, p: 32, c: 12, f: 24, icon: '🧊'
+        }];
+      }
+
+      cachedFridgeRecipes = list.map(r => ({
+        title: String(r.title || r.name || 'Kühlschrank-Gericht').trim(),
+        mhdNote: String(r.mhdNote || r.warn || 'Zutaten frisch verarbeiten').trim(),
+        ingredients: Array.isArray(r.ingredients) ? r.ingredients.join(', ') : String(r.ingredients || ''),
+        steps: Array.isArray(r.steps) ? r.steps.join(' ') : String(r.steps || ''),
+        kcal: Math.round(numOr(r.kcal, 420)),
+        p: Math.round(numOr(r.p, 30) * 10) / 10,
+        c: Math.round(numOr(r.c, 28) * 10) / 10,
+        f: Math.round(numOr(r.f, 16) * 10) / 10,
+        icon: String(r.icon || '🧊').trim()
+      }));
+
+      const box = document.getElementById('fridgeResultBox');
+      const container = document.getElementById('fridgeRecipesList');
+      box.classList.remove('hidden');
+      container.innerHTML = cachedFridgeRecipes.map((r, idx) => `
+        <div class="glass-subcard p-3.5 space-y-2 border border-sky-500/35">
+          <div class="flex items-start justify-between gap-2">
+            <h4 class="item-title-full text-xs font-extrabold text-white">${escapeHtml(r.icon)} ${escapeHtml(r.title)}</h4>
+            <span class="text-xs font-extrabold text-sky-400 shrink-0">${r.kcal} kcal</span>
+          </div>
+          <p class="text-[11px] text-amber-300 font-medium">⏱️ ${escapeHtml(r.mhdNote)}</p>
+          <p class="text-[11px] text-emerald-300 font-semibold">E:${r.p}g • K:${r.c}g • F:${r.f}g</p>
+          <p class="text-[11px] text-slate-300"><strong>Zutaten:</strong> ${escapeHtml(r.ingredients)}</p>
+          <p class="text-[11px] text-slate-400">${escapeHtml(r.steps)}</p>
+          <button onclick="commitFridgeRecipe(${idx})" class="w-full py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-xs font-bold text-sky-300">
+            ✅ Als Mahlzeit übernehmen
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function commitFridgeRecipe(idx) {
+      const r = cachedFridgeRecipes[idx];
+      if (!r) return;
+      openPendingPreview([validateAtwater({ name: r.title, kcal: r.kcal, p: r.p, c: r.c, f: r.f, icon: r.icon })]);
+    }
+
+    async function runMenuScannerAI(textVal, base64Img) {
+      const { remKcal, remProt } = getRemainingMacros();
+      const prompt = `Du bist ein Ernährungs-Coach im Restaurant. Analysiere die Speisekarte (Foto/Text: "${textVal || 'Speisekarte'}") passend zum Restbudget (${remKcal} kcal, ${remProt}g Eiweiß).
+Bewerte alle erkennbaren Gerichte per Ampel ("green" = ideal/proteinreich, "yellow" = moderat, "red" = Kalorien-/Fettbombe) und gib einen konkreten Spar-Tipp ("swapTip").
+Antworte AUSSCHLIESSLICH als valides JSON-Array:
+[{"name":"Name des Gerichts","kcal":580,"p":42,"c":45,"f":22,"traffic":"green","swapTip":"Beilage durch Salat ersetzen spart 180 kcal"}]`;
+
+      const raw = await callGeminiRequest(prompt, base64Img);
+      const parsed = extractJSON(raw);
+      const arr = Array.isArray(parsed) ? parsed : (parsed.items || parsed.dishes || [parsed]);
+
+      cachedMenuResults = arr.map(d => {
+        const v = validateAtwater(d);
+        const tr = String(d.traffic || 'yellow').toLowerCase();
+        return {
+          ...v,
+          traffic: ['green', 'yellow', 'red'].includes(tr) ? tr : (v.kcal <= 600 ? 'green' : v.kcal <= 900 ? 'yellow' : 'red'),
+          swapTip: String(d.swapTip || d.tip || 'Dressing oder Sauce separat bestellen').trim()
+        };
+      });
+
+      document.getElementById('menuResultBox').classList.remove('hidden');
+      filterMenuItems('all');
+    }
+
+    function filterMenuItems(filter) {
+      const container = document.getElementById('menuItemsList');
+      if (!container) return;
+      const filtered = filter === 'all' ? cachedMenuResults : cachedMenuResults.filter(d => d.traffic === filter);
+      if (!filtered.length) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-2">Keine Gerichte in dieser Kategorie.</p>`;
+        return;
+      }
+      container.innerHTML = filtered.map((d) => {
+        const origIdx = cachedMenuResults.indexOf(d);
+        const badge = d.traffic === 'green' ? '🟢 Top-Wahl' : d.traffic === 'yellow' ? '🟡 Okay' : '🔴 Kalorienbombe';
+        const borderCls = d.traffic === 'green' ? 'traffic-green' : d.traffic === 'yellow' ? 'traffic-yellow' : 'traffic-red';
+        return `
+          <div class="glass-subcard p-3 space-y-1.5 ${borderCls}">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-[10px] font-bold uppercase text-slate-400">${badge}</span>
+                <h4 class="item-title-full text-xs font-extrabold text-white">${escapeHtml(d.name)}</h4>
+              </div>
+              <span class="text-xs font-extrabold text-emerald-400 shrink-0">${d.kcal} kcal</span>
+            </div>
+            <p class="text-[11px] text-slate-300">E:${d.p}g • K:${d.c}g • F:${d.f}g</p>
+            <p class="text-[11px] text-amber-300">💡 Spar-Tipp: ${escapeHtml(d.swapTip)}</p>
+            <button onclick="commitMenuItem(${origIdx})" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-300 mt-1">
+              Auswählen & Prüfen
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function commitMenuItem(idx) {
+      const d = cachedMenuResults[idx];
+      if (!d) return;
+      openPendingPreview([validateAtwater(d)]);
+    }
+
+    async function runPotScannerAI(textVal, base64Img) {
+      const prompt = `Du bist ein präziser Küchen-Physiker. Analysiere den abgebildeten oder beschriebenen Topf/Auflauf ("${textVal || 'Familien-Topf / Auflauf'}").
+Schätze das Gesamtgewicht und die Gesamtnährwerte des KOMPLETTEN Topfes/Auflaufs.
+Antworte AUSSCHLIESSLICH als valides JSON-Objekt:
+{"title":"Name des Topfgerichts/Auflaufs","totalWeightG":1600,"totalKcal":2200,"totalP":140,"totalC":180,"totalF":95,"defaultPortions":4}`;
+
+      const raw = await callGeminiRequest(prompt, base64Img);
+      const obj = extractJSON(raw);
+      const item = Array.isArray(obj) ? obj[0] : obj;
+
+      const totalP = Math.max(1, numOr(item.totalP || item.p, 120));
+      const totalC = Math.max(1, numOr(item.totalC || item.c, 160));
+      const totalF = Math.max(1, numOr(item.totalF || item.f, 80));
+      const atwaterTotal = Math.round(4 * totalP + 4 * totalC + 9 * totalF);
+      const rawTotalKcal = numOr(item.totalKcal || item.kcal, atwaterTotal);
+
+      cachedPotResult = {
+        title: String(item.title || item.name || 'Topfgericht / Auflauf').trim(),
+        totalWeightG: Math.round(numOr(item.totalWeightG, 1400)),
+        totalKcal: Math.abs(rawTotalKcal - atwaterTotal) / Math.max(1, atwaterTotal) > 0.15 ? atwaterTotal : Math.round(rawTotalKcal),
+        totalP: Math.round(totalP * 10) / 10,
+        totalC: Math.round(totalC * 10) / 10,
+        totalF: Math.round(totalF * 10) / 10
+      };
+      currentPotPortions = Math.max(1, Math.round(numOr(item.defaultPortions, 4)));
+
+      document.getElementById('potResultBox').classList.remove('hidden');
+      renderPotCalculator();
+    }
+
+    function renderPotCalculator() {
+      if (!cachedPotResult) return;
+      const box = document.getElementById('potCalcContent');
+      const frac = 1 / Math.max(1, currentPotPortions);
+      const partWeight = Math.round(cachedPotResult.totalWeightG * frac);
+      const partP = Math.round(cachedPotResult.totalP * frac * 10) / 10;
+      const partC = Math.round(cachedPotResult.totalC * frac * 10) / 10;
+      const partF = Math.round(cachedPotResult.totalF * frac * 10) / 10;
+      const partKcal = Math.round(4 * partP + 4 * partC + 9 * partF);
+
+      box.innerHTML = `
+        <div class="glass-subcard p-3.5 space-y-2.5 border border-purple-500/35">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="item-title-full text-xs font-extrabold text-white">🍲 ${escapeHtml(cachedPotResult.title)}</h4>
+              <p class="text-[11px] text-slate-400">Gesamter Topf (~${cachedPotResult.totalWeightG}g): ${cachedPotResult.totalKcal} kcal</p>
+            </div>
+            <span class="text-xs font-extrabold text-purple-300">1/${currentPotPortions} Topf</span>
+          </div>
+          <div class="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800">
+            <p class="text-xs font-bold text-emerald-400">Deine Portion (~${partWeight}g): ${partKcal} kcal</p>
+            <p class="text-[11px] text-slate-300 mt-0.5">Eiweiß: ${partP}g • Kohlenh.: ${partC}g • Fett: ${partF}g</p>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[11px] text-slate-400 font-semibold">Auf wie viele Portionen ist der Topf aufgeteilt?</label>
+            <div class="grid grid-cols-5 gap-1.5">
+              ${[2, 3, 4, 5, 6].map(n => `
+                <button onclick="setPotPortions(${n})" class="py-1.5 rounded-lg text-xs font-bold ${currentPotPortions === n ? 'bg-purple-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">1/${n}</button>
+              `).join('')}
+            </div>
+          </div>
+          <button onclick="commitPotPortion()" class="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-extrabold text-xs">
+            Diese Portion (1/${currentPotPortions}) übernehmen
+          </button>
+        </div>
+      `;
+    }
+
+    function setPotPortions(n) {
+      currentPotPortions = Math.max(1, numOr(n, 4));
+      renderPotCalculator();
+    }
+
+    function commitPotPortion() {
+      if (!cachedPotResult) return;
+      const frac = 1 / Math.max(1, currentPotPortions);
+      const partWeight = Math.round(cachedPotResult.totalWeightG * frac);
+      const partP = Math.round(cachedPotResult.totalP * frac * 10) / 10;
+      const partC = Math.round(cachedPotResult.totalC * frac * 10) / 10;
+      const partF = Math.round(cachedPotResult.totalF * frac * 10) / 10;
+      openPendingPreview([validateAtwater({
+        name: `${cachedPotResult.title} (1/${currentPotPortions} Topf, ~${partWeight}g)`,
+        kcal: Math.round(4 * partP + 4 * partC + 9 * partF),
+        p: partP, c: partC, f: partF, icon: '🍲'
+      })]);
+    }
+
     function openRestBudgetSuggestions() {
       switchTab('ideas');
       generateBudgetClosingIdeas();
@@ -933,7 +1442,6 @@
 
     async function generateBudgetClosingIdeas() {
       const { remKcal, remProt } = getRemainingMacros();
-      const container = document.getElementById('aiIdeasContainer');
       const btn = document.getElementById('btnAutoBudgetMeals');
       const origHtml = btn ? btn.innerHTML : '';
 
@@ -946,44 +1454,31 @@
         {
           title: `Protein-Quark-Bowl mit Beeren (${Math.round(remKcal * 0.45)} kcal)`,
           ingredients: `250g Magerquark, 100g Beeren, 20g Mandeln, Prise Zimt`,
-          steps: `Quark mit etwas Wasser cremig rühren, Beeren und Mandeln als Topping anrichten. Füllt dein Eiweißkonto perfekt!`,
-          kcal: Math.round(remKcal * 0.45),
-          p: Math.round(remProt * 0.5),
-          c: 24,
-          f: 8,
-          icon: '🥣'
+          steps: `Quark mit etwas Wasser cremig rühren, Beeren und Mandeln als Topping anrichten.`,
+          kcal: Math.round(remKcal * 0.45), p: Math.round(remProt * 0.5), c: 24, f: 8, icon: '🥣'
         },
         {
           title: `Schnelle Hähnchen-Gemüse-Pfanne (${Math.round(remKcal * 0.85)} kcal)`,
           ingredients: `200g Hähnchenbrust, 250g Brokkoli und Paprika, 1 TL Olivenöl, Kräuter`,
-          steps: `Hähnchen in Streifen scharf anbraten, Gemüse dazugeben, 6 Minuten knackig dünsten und würzen.`,
-          kcal: Math.round(remKcal * 0.85),
-          p: Math.round(remProt * 0.85),
-          c: 14,
-          f: 9,
-          icon: '🍳'
+          steps: `Hähnchen in Streifen scharf anbraten, Gemüse dazugeben, 6 Minuten knackig dünsten.`,
+          kcal: Math.round(remKcal * 0.85), p: Math.round(remProt * 0.85), c: 14, f: 9, icon: '🍳'
         },
         {
           title: `Thunfisch-Ei-Vollkorn-Wrap (${remKcal} kcal Punktlandung)`,
           ingredients: `1 Dose Thunfisch im eigenen Saft, 2 gekochte Eier, 1 Vollkornwrap, 2 EL Naturjoghurt`,
           steps: `Thunfisch und Eier mit Joghurt und Kräutern zerdrücken, im Wrap einrollen und genießen.`,
-          kcal: remKcal,
-          p: remProt,
-          c: 32,
-          f: 14,
-          icon: '🌯'
+          kcal: remKcal, p: remProt, c: 32, f: 14, icon: '🌯'
         }
       ];
 
       try {
         const prompt = `Du bist ein präziser Ernährungswissenschaftler. Der Nutzer hat heute noch exakt ${remKcal} kcal und ${remProt}g Eiweiß offen.
-Erstelle genau 3 geniale, praxistaugliche Rezept-Vorschläge (1. Schneller Snack, 2. Leichtes Gericht, 3. Hauptmahlzeit zur Punktlandung), die diese Makros optimal ausschöpfen.
+Erstelle genau 3 praxistaugliche Rezept-Vorschläge (1. Schneller Snack, 2. Leichtes Gericht, 3. Hauptmahlzeit zur Punktlandung), die diese Makros optimal ausschöpfen.
 Antworte AUSSCHLIESSLICH als valides JSON-Array:
 [{"title":"Name des Gerichts inkl. Gramm","ingredients":"Zutat 1, Zutat 2","steps":"Kurze 1-Satz Anleitung","kcal":${remKcal},"p":${remProt},"c":30,"f":12,"icon":"🥗"}]`;
 
         const raw = await callGeminiRequest(prompt, null);
-        const parsed = extractJSON(raw);
-        const list = normalizeRecipeList(parsed);
+        const list = normalizeRecipeList(extractJSON(raw));
         renderGeneratedIdeas(list || fallbackBudgetIdeas);
         showToast(`🎯 3 Vorschläge für dein Restbudget (${remKcal} kcal) bereit!`, 'info');
       } catch (err) {
@@ -997,9 +1492,6 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       }
     }
 
-    // =========================================================================
-    // FEATURE 2: KI-KAMERA IM TAB „ZAUBERN“ & KONSISTENTE REZEPT-ENGINE
-    // =========================================================================
     async function handleZaubernPhoto(event) {
       const file = event.target.files?.[0];
       if (!file) return;
@@ -1032,8 +1524,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
     function normalizeRecipeList(parsed) {
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       if (parsed && typeof parsed === 'object') {
-        const candidateKeys = ['rezepte', 'recipes', 'ideas', 'meals', 'dishes', 'data'];
-        for (const k of candidateKeys) {
+        for (const k of ['rezepte', 'recipes', 'ideas', 'meals', 'dishes', 'data']) {
           if (Array.isArray(parsed[k]) && parsed[k].length > 0) return parsed[k];
         }
         for (const val of Object.values(parsed)) {
@@ -1060,21 +1551,13 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
           title: 'Cremige High-Protein Gnocchi-Pfanne (420g)',
           ingredients: '200g Gnocchi, 140g Hähnchenbrustfilet, 50g Frischkäse light, Spinat, Knoblauch',
           steps: 'Gnocchi und Hähnchenstreifen goldbraun anbraten, Frischkäse und Spinat unterheben, 3 Min. köcheln.',
-          kcal: Math.min(540, remKcal),
-          p: 44,
-          c: 54,
-          f: 11,
-          icon: '🍝'
+          kcal: Math.min(540, remKcal), p: 44, c: 54, f: 11, icon: '🍝'
         },
         {
           title: 'Schnelle Quark-Protein-Pfannkuchen mit Beeren (350g)',
           ingredients: '150g Magerquark, 2 Eier, 40g Haferflocken, 80g Beeren, Prise Zimt',
           steps: 'Zutaten cremig mixen, in beschichteter Pfanne backen und mit warmen Beeren servieren.',
-          kcal: Math.min(460, remKcal),
-          p: 38,
-          c: 42,
-          f: 13,
-          icon: '🥞'
+          kcal: Math.min(460, remKcal), p: 38, c: 42, f: 13, icon: '🥞'
         }
       ];
 
@@ -1089,8 +1572,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
 [{"title":"Vollständiger Rezeptname inkl. Portionsangabe","ingredients":"Zutat 1 (Gramm), Zutat 2 (Gramm)","steps":"Kurze 1-2 Satz Zubereitung","kcal":520,"p":42,"c":48,"f":14,"icon":"🍝"}]`;
 
         const raw = await callGeminiRequest(prompt, zaubernPhotoBase64);
-        const parsed = extractJSON(raw);
-        const list = normalizeRecipeList(parsed);
+        const list = normalizeRecipeList(extractJSON(raw));
         renderGeneratedIdeas(list || fallbackIdeas);
         showToast('✨ Rezepte erfolgreich gezaubert!', 'info');
       } catch (err) {
@@ -1104,26 +1586,28 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       }
     }
 
-    // SICHERE RENDERING-ENGINE OHNE INLINE-QUOTES-BUGS
     function renderGeneratedIdeas(list) {
       const container = document.getElementById('aiIdeasContainer');
       if (!container) return;
 
-      // Bereinige & speichere Rezepte im sicheren Array-Cache
       generatedRecipesCache = list.map(r => {
         let ingStr = r.ingredients || r.zutaten || '';
         if (Array.isArray(ingStr)) ingStr = ingStr.join(', ');
         let stepStr = r.steps || r.zubereitung || r.anleitung || '';
         if (Array.isArray(stepStr)) stepStr = stepStr.join(' ');
 
+        const p = Math.round(numOr(r.p, 35) * 10) / 10;
+        const c = Math.round(numOr(r.c, 45) * 10) / 10;
+        const f = Math.round(numOr(r.f, 12) * 10) / 10;
+        const rawKcal = Math.round(numOr(r.kcal, 480));
+        const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f);
+
         return {
           title: String(r.title || r.name || 'Leckeres Rezept').trim(),
           ingredients: String(ingStr).trim(),
           steps: String(stepStr).trim(),
-          kcal: Math.round(numOr(r.kcal, 480)),
-          p: Math.round(numOr(r.p, 35) * 10) / 10,
-          c: Math.round(numOr(r.c, 45) * 10) / 10,
-          f: Math.round(numOr(r.f, 12) * 10) / 10,
+          kcal: Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15 ? atwaterKcal : rawKcal,
+          p, c, f,
           icon: String(r.icon || '✨').trim()
         };
       });
@@ -1134,36 +1618,22 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
             <h4 class="item-title-full text-sm font-extrabold text-white">${escapeHtml(r.icon)} ${escapeHtml(r.title)}</h4>
             <span class="text-xs font-extrabold text-emerald-400 shrink-0">${r.kcal} kcal</span>
           </div>
-          <p class="text-xs text-emerald-300 font-semibold">
-            Eiweiß: ${r.p}g • Kohlenh.: ${r.c}g • Fett: ${r.f}g
-          </p>
-          <p class="text-xs text-slate-300 leading-snug">
-            <strong>Zutaten:</strong> ${escapeHtml(r.ingredients)}
-          </p>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            ${escapeHtml(r.steps)}
-          </p>
+          <p class="text-xs text-emerald-300 font-semibold">Eiweiß: ${r.p}g • Kohlenh.: ${r.c}g • Fett: ${r.f}g</p>
+          <p class="text-xs text-slate-300 leading-snug"><strong>Zutaten:</strong> ${escapeHtml(r.ingredients)}</p>
+          <p class="text-xs text-slate-400 leading-relaxed">${escapeHtml(r.steps)}</p>
           <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="addGeneratedIngredientsToShop(${idx})" class="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition">
-              🛒 Auf Einkaufsliste
-            </button>
-            <button onclick="commitGeneratedRecipe(${idx})" class="py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-bold text-emerald-300 transition">
-              ✅ Essen & Loggen
-            </button>
+            <button onclick="addGeneratedIngredientsToShop(${idx})" class="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition">🛒 Auf Einkaufsliste</button>
+            <button onclick="commitGeneratedRecipe(${idx})" class="py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-bold text-emerald-300 transition">✅ Essen & Loggen</button>
           </div>
         </div>
       `).join('');
 
-      // Automatischer Smooth-Scroll direkt zu den fertigen Rezeptkarten
-      setTimeout(() => {
-        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 80);
+      setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
     }
 
     function addGeneratedIngredientsToShop(idx) {
       const recipe = generatedRecipesCache[idx];
-      if (!recipe || !recipe.ingredients) return;
-      addRecipeIngredientsToShop(recipe.ingredients);
+      if (recipe?.ingredients) addRecipeIngredientsToShop(recipe.ingredients);
     }
 
     function commitGeneratedRecipe(idx) {
@@ -1171,18 +1641,175 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       if (!recipe) return;
       switchTab('tracker');
       openPendingPreview([validateAtwater({
-        name: recipe.title,
-        kcal: recipe.kcal,
-        p: recipe.p,
-        c: recipe.c,
-        f: recipe.f,
-        icon: recipe.icon
+        name: recipe.title, kcal: recipe.kcal, p: recipe.p, c: recipe.c, f: recipe.f, icon: recipe.icon
       })]);
     }
 
-    // =========================================================================
-    // MAKRO-RECHNER (TAB 3): FRISCHE BERECHNUNG & 1-KLICK DASHBOARD-ÜBERNAHME
-    // =========================================================================
+    function addRecipeIngredientsToShop(ingStr) {
+      const parts = String(ingStr || '').split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+      if (!parts.length) return;
+      let added = 0;
+      for (const p of parts) {
+        if (!state.shoppingList.some(it => it.text.toLowerCase() === p.toLowerCase())) {
+          state.shoppingList.push({ text: p, done: false });
+          added++;
+        }
+      }
+      saveState();
+      renderShoppingList();
+      showToast(`🛒 ${added} Zutat(en) auf die Einkaufsliste gesetzt!`, 'info');
+    }
+
+    function addShoppingItem() {
+      const input = document.getElementById('customShopInput');
+      const val = (input?.value || '').trim();
+      if (!val) return;
+      state.shoppingList.push({ text: val, done: false });
+      input.value = '';
+      saveState();
+      renderShoppingList();
+    }
+
+    function toggleShopItem(idx) {
+      if (!state.shoppingList[idx]) return;
+      state.shoppingList[idx].done = !state.shoppingList[idx].done;
+      saveState();
+      renderShoppingList();
+    }
+
+    function deleteShopItem(idx) {
+      state.shoppingList.splice(idx, 1);
+      saveState();
+      renderShoppingList();
+    }
+
+    function clearCheckedShopping() {
+      state.shoppingList = state.shoppingList.filter(it => !it.done);
+      saveState();
+      renderShoppingList();
+      showToast('Erledigte Einkäufe entfernt', 'info');
+    }
+
+    function renderShoppingList() {
+      const container = document.getElementById('shoppingListContainer');
+      if (!container) return;
+      if (!state.shoppingList.length) {
+        container.innerHTML = `<p class="text-xs text-slate-500 py-2">Deine Einkaufsliste ist leer.</p>`;
+        return;
+      }
+      container.innerHTML = state.shoppingList.map((it, idx) => `
+        <div class="glass-subcard px-3 py-2 flex items-center justify-between gap-2">
+          <label class="flex items-center gap-2.5 flex-1 cursor-pointer min-w-0">
+            <input type="checkbox" ${it.done ? 'checked' : ''} onchange="toggleShopItem(${idx})" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer shrink-0" />
+            <span class="text-xs ${it.done ? 'line-through text-slate-500' : 'text-slate-200 font-medium'} break-words">${escapeHtml(it.text)}</span>
+          </label>
+          <button onclick="deleteShopItem(${idx})" class="text-slate-500 hover:text-rose-400 text-xs px-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function logWeight() {
+      const input = document.getElementById('weightInput');
+      const val = numOr(input?.value, 0);
+      if (val < 30 || val > 300) {
+        showToast('Bitte gültiges Gewicht (30 - 300 kg) eingeben.', 'warn');
+        return;
+      }
+      const today = new Date().toISOString().slice(0, 10);
+      const idx = state.weightLog.findIndex(w => w.date === today);
+      if (idx >= 0) state.weightLog[idx].weight = val;
+      else state.weightLog.push({ date: today, weight: val });
+      state.weightLog.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+      state.userProfile.weight = val;
+      if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = val;
+      if (input) input.value = '';
+      saveState();
+      updateUI();
+      showToast(`⚖️ Gewicht (${val.toFixed(1)} kg) gespeichert!`, 'info');
+    }
+
+    function renderWeightEngine() {
+      const curEl = document.getElementById('currentWeightVal');
+      const trendEl = document.getElementById('trendWeightVal');
+      const chartEl = document.getElementById('weightChartContainer');
+      const projEl = document.getElementById('weightProjectionBox');
+      if (!chartEl || !projEl) return;
+
+      const sorted = [...state.weightLog].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+      const latestW = sorted.length ? numOr(sorted[sorted.length - 1].weight, state.userProfile.weight) : numOr(state.userProfile.weight, 86.0);
+      const targetW = numOr(state.goals.targetWeight, 80.0);
+
+      let ewma = sorted.length ? numOr(sorted[0].weight, latestW) : latestW;
+      const alpha = 0.25;
+      const trendSeries = sorted.map(pt => {
+        const w = numOr(pt.weight, ewma);
+        ewma = alpha * w + (1 - alpha) * ewma;
+        return { date: pt.date, weight: w, trend: Math.round(ewma * 10) / 10 };
+      });
+
+      if (curEl) curEl.textContent = `${latestW.toFixed(1)} kg`;
+      if (trendEl) trendEl.textContent = `Trend: ${ewma.toFixed(1)} kg`;
+
+      if (trendSeries.length < 2) {
+        chartEl.innerHTML = `<span class="text-xs text-slate-500">Trage mindestens 2 Tage Gewicht ein, um die Trend-Kurve zu sehen (Aktuell: ${latestW.toFixed(1)} kg).</span>`;
+      } else {
+        const recent = trendSeries.slice(-14);
+        const weights = recent.flatMap(d => [d.weight, d.trend]);
+        const minW = Math.min(...weights, targetW) - 0.5;
+        const maxW = Math.max(...weights, targetW) + 0.5;
+        const span = Math.max(1, maxW - minW);
+        const W = 320, H = 110, pad = 14;
+        const toX = (i) => pad + (i / (recent.length - 1)) * (W - 2 * pad);
+        const toY = (val) => H - pad - ((val - minW) / span) * (H - 2 * pad);
+
+        const rawPts = recent.map((d, i) => `${toX(i).toFixed(1)},${toY(d.weight).toFixed(1)}`).join(' ');
+        const trendPts = recent.map((d, i) => `${toX(i).toFixed(1)},${toY(d.trend).toFixed(1)}`).join(' ');
+        const targetY = toY(targetW).toFixed(1);
+
+        chartEl.innerHTML = `
+          <svg viewBox="0 0 ${W} ${H}" class="w-full h-full overflow-visible">
+            <line x1="${pad}" y1="${targetY}" x2="${W - pad}" y2="${targetY}" stroke="#38bdf8" stroke-dasharray="4 4" stroke-width="1" />
+            <polyline fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="2 2" points="${rawPts}" />
+            <polyline fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" points="${trendPts}" />
+            ${recent.map((d, i) => `<circle cx="${toX(i).toFixed(1)}" cy="${toY(d.weight).toFixed(1)}" r="2.8" fill="#10b981" />`).join('')}
+          </svg>
+        `;
+      }
+
+      const diff = Math.round((latestW - targetW) * 10) / 10;
+      if (Math.abs(diff) <= 0.2) {
+        projEl.innerHTML = `🎉 <strong class="text-emerald-400">Zielgewicht erreicht!</strong> Du liegst exakt bei deinem Ziel von <strong>${targetW.toFixed(1)} kg</strong>.`;
+      } else {
+        const p = state.userProfile;
+        const bmr = 10 * latestW + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
+        const tdee = Math.round(bmr * p.activity);
+        const dailyDelta = Math.max(200, Math.abs(tdee - numOr(state.goals.kcal, 2425)));
+        const daysNeeded = Math.max(1, Math.round((Math.abs(diff) * 7700) / dailyDelta));
+        const targetDate = new Date(Date.now() + daysNeeded * 86400000).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' });
+        projEl.innerHTML = `Noch <strong>${Math.abs(diff).toFixed(1)} kg</strong> bis zum Zielgewicht (<strong>${targetW.toFixed(1)} kg</strong>). Bei deinem aktuellen Kalorienziel erreichst du es voraussichtlich um den <strong class="text-emerald-400">${targetDate}</strong> (~${daysNeeded} Tage).`;
+      }
+    }
+
+    function renderPastDays() {
+      const el = document.getElementById('pastDaysContainer');
+      if (!el) return;
+      if (!state.pastDaysLog.length) {
+        el.innerHTML = `<p class="text-xs text-slate-500 py-2">Noch keine abgeschlossenen Tage im Archiv.</p>`;
+        return;
+      }
+      el.innerHTML = state.pastDaysLog.map(d => `
+        <div class="glass-subcard p-3 flex items-center justify-between text-xs">
+          <div>
+            <p class="font-bold text-white">${escapeHtml(d.date)}</p>
+            <p class="text-[11px] text-slate-400">E:${d.p}g • K:${d.c}g • F:${d.f}g (${d.itemsCount || 0} Einträge)</p>
+          </div>
+          <span class="font-extrabold text-emerald-400">${d.kcal} kcal</span>
+        </div>
+      `).join('');
+    }
+
     function saveUserProfile() {
       state.userProfile = {
         gender: document.getElementById('calcGender').value,
@@ -1200,22 +1827,29 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       const p = state.userProfile;
       const targetW = numOr(state.goals.targetWeight, 80.0);
 
-      // Mifflin-St Jeor Grundumsatz & Gesamtumsatz
       const bmr = 10 * p.weight + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
       const tdee = Math.round(bmr * p.activity);
 
-      // Ziel-Kalorien nach wissenschaftlichem Defizit / Überschuss
       let calcKcal = tdee;
-      if (targetW < p.weight - 0.5) {
-        calcKcal = Math.max(1200, tdee - 500); // 500 kcal Defizit zum gesunden Fettabbau
-      } else if (targetW > p.weight + 0.5) {
-        calcKcal = tdee + 300; // 300 kcal kontrollierter Aufbau
-      }
+      if (targetW < p.weight - 0.5) calcKcal = Math.max(1200, tdee - 500);
+      else if (targetW > p.weight + 0.5) calcKcal = tdee + 300;
 
-      // Wissenschaftliche Makroverteilung (2.0g Protein/kg, 0.9g Fett/kg, Rest Kohlenhydrate)
-      const calcP = Math.round(p.weight * 2.0);
-      const calcF = Math.round(p.weight * 0.9);
-      const calcC = Math.max(50, Math.round((calcKcal - calcP * 4 - calcF * 9) / 4));
+      let calcP = Math.round(p.weight * 2.0);
+      let calcF = Math.round(p.weight * 0.9);
+      let remForCarbs = calcKcal - (calcP * 4 + calcF * 9);
+
+      if (remForCarbs < 200) {
+        const minCarbKcal = 200;
+        const minFat = Math.max(30, Math.round(p.weight * 0.6));
+        calcF = Math.max(minFat, Math.round((calcKcal - calcP * 4 - minCarbKcal) / 9));
+        remForCarbs = calcKcal - (calcP * 4 + calcF * 9);
+        if (remForCarbs < 200) {
+          calcP = Math.max(60, Math.round((calcKcal - calcF * 9 - minCarbKcal) / 4));
+          remForCarbs = Math.max(200, calcKcal - (calcP * 4 + calcF * 9));
+        }
+      }
+      const calcC = Math.round(remForCarbs / 4);
+      calcKcal = calcP * 4 + calcC * 4 + calcF * 9;
 
       const box = document.getElementById('calcResultBox');
       box.classList.remove('hidden');
@@ -1260,41 +1894,33 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       const tw = numOr(document.getElementById('resGoalTargetWeight').value, 80.0);
       const curW = numOr(document.getElementById('calcWeight').value, 86.0);
 
-      // 1. Speichere neue Ziele im State
       state.goals.kcal = kcal;
       state.goals.protein = p;
       state.goals.carbs = c;
       state.goals.fat = f;
       state.goals.targetWeight = tw;
 
-      // 2. Synchronisiere aktuelles Gewicht für heute in die Trend-Engine
       const today = new Date().toISOString().slice(0, 10);
       const exIdx = state.weightLog.findIndex(w => w.date === today);
       if (exIdx >= 0) state.weightLog[exIdx].weight = curW;
       else state.weightLog.push({ date: today, weight: curW });
+      state.weightLog.sort((a, b) => String(a.date).localeCompare(String(b.date)));
 
       saveUserProfile();
       saveState();
-
-      // 3. UI-Synchronisation & Wechsel zum Dashboard
       updateUI();
       showToast(`🎯 Übernommen: ${kcal} kcal • ${p}g E • ${c}g K • ${f}g F`, 'info');
-
-      setTimeout(() => {
-        switchTab('tracker');
-      }, 400);
+      setTimeout(() => switchTab('tracker'), 400);
     }
 
-    // =========================================================================
-    // WHATSAPP INVITE ENGINE & GUEST ACCESS
-    // =========================================================================
     function generateInviteCode() {
       const name = document.getElementById('newGuestName').value.trim();
       if (!name) {
         showToast('Bitte Namen für den Gast eingeben.', 'warn');
         return;
       }
-      const code = `FIT-${name.slice(0, 5).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+      const cleanPrefix = name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase() || 'GAST';
+      const code = `FIT-${cleanPrefix}-${Math.floor(100 + Math.random() * 900)}`;
       state.inviteCodes.push({ name, code });
       document.getElementById('newGuestName').value = '';
       saveState();
@@ -1313,35 +1939,35 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       return `Hallo ${name}! 👋\n\nHier ist dein persönlicher Einladungscode für CalSnap AI:\n🔑 Code: *${code}*\n\nÖffne einfach den Link und gib deinen Code ein:\n👉 ${appUrl}\n\nViel Erfolg beim Tracken! 🥗🔥`;
     }
 
-    function shareViaWhatsApp(code, name) {
-      const msg = buildInviteMessage(code, name);
-      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-      window.open(waUrl, '_blank');
+    function shareViaWhatsApp(idx) {
+      const entry = state.inviteCodes[idx];
+      if (!entry) return;
+      const msg = buildInviteMessage(entry.code, entry.name);
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    async function shareViaWebShare(code, name) {
-      const msg = buildInviteMessage(code, name);
+    async function shareViaWebShare(idx) {
+      const entry = state.inviteCodes[idx];
+      if (!entry) return;
+      const msg = buildInviteMessage(entry.code, entry.name);
       if (navigator.share) {
         try {
-          await navigator.share({
-            title: 'CalSnap AI Einladung',
-            text: msg
-          });
+          await navigator.share({ title: 'CalSnap AI Einladung', text: msg });
           showToast('Einladung geteilt!', 'info');
         } catch (_) {}
       } else {
-        copyInviteText(code, name);
+        copyInviteText(idx);
       }
     }
 
-    function copyInviteText(code, name) {
-      const msg = buildInviteMessage(code, name);
+    function copyInviteText(idx) {
+      const entry = state.inviteCodes[idx];
+      if (!entry) return;
+      const msg = buildInviteMessage(entry.code, entry.name);
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(msg).then(() => {
-          showToast('📋 Einladungstext in die Zwischenablage kopiert!', 'info');
-        });
+        navigator.clipboard.writeText(msg).then(() => showToast('📋 Einladungstext in die Zwischenablage kopiert!', 'info'));
       } else {
-        showToast(`Code: ${code}`, 'info');
+        showToast(`Code: ${entry.code}`, 'info');
       }
     }
 
@@ -1359,14 +1985,13 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
             <code class="text-emerald-400 font-bold text-xs tracking-wider">${escapeHtml(c.code)}</code>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
-            <button onclick="shareViaWhatsApp('${escapeHtml(c.code)}', '${escapeHtml(c.name)}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-emerald-600/30" title="Per WhatsApp senden">
-              <i class="fa-brands fa-whatsapp text-sm"></i>
-              <span>WhatsApp</span>
+            <button onclick="shareViaWhatsApp(${idx})" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-emerald-600/30" title="Per WhatsApp senden">
+              <i class="fa-brands fa-whatsapp text-sm"></i><span>WhatsApp</span>
             </button>
-            <button onclick="shareViaWebShare('${escapeHtml(c.code)}', '${escapeHtml(c.name)}')" class="w-7 h-7 rounded-lg bg-sky-600/80 hover:bg-sky-500 text-white text-xs flex items-center justify-center" title="Teilen">
+            <button onclick="shareViaWebShare(${idx})" class="w-7 h-7 rounded-lg bg-sky-600/80 hover:bg-sky-500 text-white text-xs flex items-center justify-center" title="Teilen">
               <i class="fa-solid fa-share-nodes"></i>
             </button>
-            <button onclick="copyInviteText('${escapeHtml(c.code)}', '${escapeHtml(c.name)}')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center justify-center" title="Kopieren">
+            <button onclick="copyInviteText(${idx})" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center justify-center" title="Kopieren">
               <i class="fa-solid fa-copy"></i>
             </button>
             <button onclick="deleteInviteCode(${idx})" class="w-7 h-7 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-400 text-xs flex items-center justify-center" title="Löschen">
@@ -1377,9 +2002,6 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       `).join('');
     }
 
-    // =========================================================================
-    // HIGH-SPEED IMAGE PRE-PROCESSING (94% FASTER SUB-SAMPLED LUMINANCE)
-    // =========================================================================
     async function compressImageFile(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1391,8 +2013,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
             const isMenu = scannerMode === 'menu';
             const maxDim = isMenu ? 1080 : 720;
             const quality = isMenu ? 0.78 : 0.72;
-            let w = img.width;
-            let h = img.height;
+            let w = img.width, h = img.height;
             if (w > maxDim || h > maxDim) {
               if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
               else { w = Math.round((w * maxDim) / h); h = maxDim; }
@@ -1405,14 +2026,12 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
 
             try {
               const imgData = ctx.getImageData(0, 0, w, h).data;
-              let lumSum = 0;
-              let count = 0;
+              let lumSum = 0, count = 0;
               for (let i = 0; i < imgData.length; i += 64) {
                 lumSum += 0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2];
                 count++;
               }
-              const meanLum = count > 0 ? lumSum / count : 128;
-              if (meanLum < 68) {
+              if ((count > 0 ? lumSum / count : 128) < 68) {
                 ctx.save();
                 ctx.globalCompositeOperation = 'screen';
                 ctx.fillStyle = 'rgba(45,45,45,0.35)';
@@ -1423,18 +2042,13 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
 
             const dataUrl = canvas.toDataURL('image/jpeg', quality);
             const base64 = dataUrl.split(',')[1];
-
             const thumbCanvas = document.createElement('canvas');
             thumbCanvas.width = 96;
             thumbCanvas.height = 96;
             const tCtx = thumbCanvas.getContext('2d');
             const minSide = Math.min(img.width, img.height);
-            const sx = (img.width - minSide) / 2;
-            const sy = (img.height - minSide) / 2;
-            tCtx.drawImage(img, sx, sy, minSide, minSide, 0, 0, 96, 96);
-            const thumbUrl = thumbCanvas.toDataURL('image/jpeg', 0.65);
-
-            resolve({ base64, dataUrl, thumbUrl });
+            tCtx.drawImage(img, (img.width - minSide) / 2, (img.height - minSide) / 2, minSide, minSide, 0, 0, 96, 96);
+            resolve({ base64, dataUrl, thumbUrl: thumbCanvas.toDataURL('image/jpeg', 0.65) });
           };
           img.src = e.target.result;
         };
@@ -1449,10 +2063,8 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
         const res = await compressImageFile(file);
         selectedPhotoBase64 = res.base64;
         selectedPhotoThumb = res.thumbUrl;
-        const prevContainer = document.getElementById('photoPreviewContainer');
-        const prevImg = document.getElementById('photoPreviewImg');
-        prevImg.src = res.dataUrl;
-        prevContainer.classList.remove('hidden');
+        document.getElementById('photoPreviewImg').src = res.dataUrl;
+        document.getElementById('photoPreviewContainer').classList.remove('hidden');
         showToast('⚡ Foto geladen — starte Turbo-Scan...', 'info');
         triggerUnifiedScanner();
       } catch (err) {
@@ -1469,9 +2081,6 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       document.getElementById('photoPreviewImg').src = '';
     }
 
-    // =========================================================================
-    // HIGH-SPEED GEMINI ENGINE (MINIMUM 3.8-FLASH + THINKING-BUDGET ZERO)
-    // =========================================================================
     async function callGeminiRequest(promptText, base64Image = null) {
       const apiKey = (state.geminiApiKey || '').trim();
       if (!apiKey) {
@@ -1479,52 +2088,34 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
         throw new Error('Bitte zuerst deinen Google Gemini API-Key in den Einstellungen hinterlegen.');
       }
 
-      const baseModels = [
-        'gemini-3.8-flash',
-        'gemini-3-flash-preview',
-        'gemini-flash-latest',
-        'gemini-2.5-flash',
-        'gemini-2.5-flash-lite'
-      ];
-
+      const baseModels = ['gemini-3.8-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
       const cachedFastModel = localStorage.getItem(FAST_MODEL_KEY);
       const cachedFastHost = localStorage.getItem(FAST_HOST_KEY);
 
       const modelQueue = [];
-      if (cachedFastModel && !/2\.0|3\.0/i.test(cachedFastModel)) {
-        modelQueue.push(cachedFastModel);
-      }
+      if (cachedFastModel && !/2\.0|3\.0/i.test(cachedFastModel)) modelQueue.push(cachedFastModel);
       for (const m of baseModels) {
         if (!/2\.0|3\.0/i.test(m) && !modelQueue.includes(m)) modelQueue.push(m);
       }
 
-      const isVertexKey = apiKey.startsWith('AQ.');
-      const defaultHosts = isVertexKey
+      const defaultHosts = apiKey.startsWith('AQ.')
         ? ['https://aiplatform.googleapis.com', 'https://generativelanguage.googleapis.com']
         : ['https://generativelanguage.googleapis.com', 'https://aiplatform.googleapis.com'];
 
       const hostList = [];
       if (cachedFastHost && defaultHosts.includes(cachedFastHost)) hostList.push(cachedFastHost);
-      for (const h of defaultHosts) {
-        if (!hostList.includes(h)) hostList.push(h);
-      }
+      for (const h of defaultHosts) if (!hostList.includes(h)) hostList.push(h);
 
       const parts = [{ text: promptText }];
-      if (base64Image) {
-        parts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Image } });
-      }
+      if (base64Image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Image } });
 
       const buildPayload = (useThinkingZero) => {
         const genConfig = { temperature: 0.2 };
         if (useThinkingZero) genConfig.thinkingConfig = { thinkingBudget: 0 };
-        return {
-          contents: [{ role: 'user', parts }],
-          generationConfig: genConfig
-        };
+        return { contents: [{ role: 'user', parts }], generationConfig: genConfig };
       };
 
       let lastError = 'Keine Antwort vom KI-Endpunkt.';
-
       for (let i = 0; i < modelQueue.length; i++) {
         const model = modelQueue[i];
         if (/2\.0|3\.0/i.test(model)) continue;
@@ -1549,15 +2140,11 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
               if (!resp.ok) {
                 const errText = await resp.text();
                 lastError = `HTTP ${resp.status}: ${errText.slice(0, 140)}`;
-                if (useThinkingZero && resp.status === 400 && /thinking/i.test(errText)) {
-                  continue;
-                }
+                if (useThinkingZero && resp.status === 400 && /thinking/i.test(errText)) continue;
                 const discovered = errText.match(/gemini-[a-zA-Z0-9._-]+/gi) || [];
                 for (const dModel of discovered) {
                   const cleanM = dModel.toLowerCase();
-                  if (!/2\.0|3\.0/i.test(cleanM) && !modelQueue.includes(cleanM)) {
-                    modelQueue.splice(i + 1, 0, cleanM);
-                  }
+                  if (!/2\.0|3\.0/i.test(cleanM) && !modelQueue.includes(cleanM)) modelQueue.splice(i + 1, 0, cleanM);
                 }
                 break;
               }
@@ -1590,8 +2177,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
       const firstArr = cleaned.indexOf('[');
       const firstObj = cleaned.indexOf('{');
-      let start = -1;
-      let end = -1;
+      let start = -1, end = -1;
       if (firstArr !== -1 && (firstObj === -1 || firstArr < firstObj)) {
         start = firstArr;
         end = cleaned.lastIndexOf(']');
@@ -1599,15 +2185,10 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
         start = firstObj;
         end = cleaned.lastIndexOf('}');
       }
-      if (start !== -1 && end !== -1 && end > start) {
-        return JSON.parse(cleaned.slice(start, end + 1));
-      }
+      if (start !== -1 && end !== -1 && end > start) return JSON.parse(cleaned.slice(start, end + 1));
       return JSON.parse(cleaned);
     }
 
-    // =========================================================================
-    // NATURAL TEXT PARSER & ATWATER VALIDATION
-    // =========================================================================
     const FOOD_LEXICON = [
       { keys: ['milchkaffee', 'cappuccino', 'latte macchiato', 'kaffee mit milch'], name: 'Milchkaffee (250ml)', kcal: 75, p: 4.0, c: 6.0, f: 3.8, sugar: 6.0, fiber: 0, waterMl: 250, icon: '☕' },
       { keys: ['schwarzer kaffee', 'espresso', 'americano'], name: 'Schwarzer Kaffee (200ml)', kcal: 4, p: 0.3, c: 0.5, f: 0, sugar: 0, fiber: 0, waterMl: 200, icon: '☕' },
@@ -1631,9 +2212,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       const rawKcal = Math.max(0, numOr(item.kcal, 0));
       const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * fiber);
       let finalKcal = Math.round(rawKcal);
-      if (atwaterKcal > 0 && Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15) {
-        finalKcal = atwaterKcal;
-      }
+      if (atwaterKcal > 0 && Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15) finalKcal = atwaterKcal;
       return {
         name: String(item.name || 'Mahlzeit').trim(),
         kcal: finalKcal,
@@ -1652,7 +2231,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
 
     function parseNaturalText(text) {
       const lower = text.toLowerCase().trim();
-      const distRegex = /(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-zäöüß\s]+?)\s+mit\s+(?:jeweils|je|pro|po)\s+(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-zäöüß\s]+)/i;
+      const distRegex = /(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-z0-9äöüßąęćłńóśźż\s-]+?)\s+(?:mit|z)\s+(?:jeweils|je|pro|po)\s+(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-z0-9äöüßąęćłńóśźż\s-]+)/i;
       const dMatch = lower.match(distRegex);
       if (dMatch) {
         const n = numOr(dMatch[1], 1);
@@ -1682,7 +2261,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
 
       const protectedText = lower.replace(/salat\s+mit\s+dressing/g, 'salat_mit_dressing');
       const segments = protectedText.split(/(?:,|;|\+|\bund\b|\bsowie\b)/i).map(s => s.replace(/salat_mit_dressing/g, 'salat mit dressing').trim()).filter(Boolean);
-      if (segments.length === 0) return null;
+      if (!segments.length) return null;
 
       const matchedItems = [];
       for (const seg of segments) {
@@ -1709,14 +2288,11 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array:
       return matchedItems.length > 0 ? matchedItems : null;
     }
 
-    // =========================================================================
-    // MULTIMODAL AI VISION SCANNER (ATOMIC SPLIT & FULL VISIBILITY)
-    // =========================================================================
     async function callGeminiVisionAPI(userText, base64Img) {
       const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
       const prompt = `Du bist ein präziser Ernährungswissenschaftler. Antworte auf ${langName} AUSSCHLIESSLICH als valides JSON-Array.
 WICHTIGSTE REGEL (EINZEL-AUFSCHLÜSSELUNG):
-Wenn der Nutzer mehrere Speisen, Beilagen oder Getränke nennt oder fotografiert (z.B. "Gemischter Salat mit Dressing und Brötchen, eine Cola und Saft"), MUSST du JEDE Komponente als EIGENES Objekt im JSON-Array ausgeben! Fasse niemals verschiedene Speisen und Getränke in einer einzigen Zeile zusammen! Schreibe den vollständigen Namen inkl. geschätzter Menge (g oder ml) in "name".
+Wenn der Nutzer mehrere Speisen, Beilagen oder Getränke nennt oder fotografiert, MUSST du JEDE Komponente als EIGENES Objekt im JSON-Array ausgeben! Schreibe den vollständigen Namen inkl. geschätzter Menge (g oder ml) in "name".
 DISTRIBUTIVE MATHEMATIK: Bei "N x Basis mit jeweils M x Zusatz" rechne N*Basis + (N*M)*Zusatz.
 ATWATER-PHYSIK: kcal = round(4*p + 4*c + 9*f + 2*fiber).
 Eingabe/Hinweis: "${userText || 'Analysiere alle sichtbaren Speisen und Getränke auf dem Foto einzeln.'}"
@@ -1725,8 +2301,7 @@ JSON-Schema:
 
       const raw = await callGeminiRequest(prompt, base64Img);
       const arr = extractJSON(raw);
-      const list = Array.isArray(arr) ? arr : [arr];
-      return list.map(validateAtwater);
+      return (Array.isArray(arr) ? arr : [arr]).map(validateAtwater);
     }
 
     async function triggerUnifiedScanner() {
@@ -1815,18 +2390,26 @@ JSON-Schema:
       document.getElementById('portionSlider').value = currentPortionScale;
       document.getElementById('portionScaleLabel').textContent = `${currentPortionScale}%`;
       const ratio = currentPortionScale / 100;
-      pendingItems = pendingItems.map(it => ({
-        ...it,
-        kcal: Math.round(it.baseKcal * ratio),
-        p: Math.round(it.baseP * ratio * 10) / 10,
-        c: Math.round(it.baseC * ratio * 10) / 10,
-        f: Math.round(it.baseF * ratio * 10) / 10,
-        sugar: Math.round(it.baseSugar * ratio * 10) / 10,
-        fiber: Math.round(it.baseFiber * ratio * 10) / 10,
-        vitC: Math.round(it.baseVitC * ratio),
-        mag: Math.round(it.baseMag * ratio),
-        waterMl: Math.round(it.baseWaterMl * ratio)
-      }));
+      pendingItems = pendingItems.map(it => {
+        const p = Math.round(it.baseP * ratio * 10) / 10;
+        const c = Math.round(it.baseC * ratio * 10) / 10;
+        const f = Math.round(it.baseF * ratio * 10) / 10;
+        const fiber = Math.round(it.baseFiber * ratio * 10) / 10;
+        const scaledRawKcal = Math.round(it.baseKcal * ratio);
+        const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * fiber);
+        return {
+          ...it,
+          kcal: atwaterKcal > 0 && Math.abs(scaledRawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15 ? atwaterKcal : scaledRawKcal,
+          p,
+          c,
+          f,
+          sugar: Math.round(it.baseSugar * ratio * 10) / 10,
+          fiber,
+          vitC: Math.round(it.baseVitC * ratio),
+          mag: Math.round(it.baseMag * ratio),
+          waterMl: Math.round(it.baseWaterMl * ratio)
+        };
+      });
       renderPendingPreview();
     }
 
@@ -1909,9 +2492,7 @@ JSON-Schema:
         });
         if (numOr(it.waterMl, 0) > 0) addedWaterL += it.waterMl / 1000;
       }
-      if (addedWaterL > 0) {
-        state.waterLiters = Math.round((state.waterLiters + addedWaterL) * 100) / 100;
-      }
+      if (addedWaterL > 0) state.waterLiters = Math.round((state.waterLiters + addedWaterL) * 100) / 100;
       document.getElementById('foodInput').value = '';
       clearSelectedPhoto();
       cancelPendingPreview();
@@ -2007,6 +2588,7 @@ JSON-Schema:
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      checkDayRollover();
       document.getElementById('currentDateLabel').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short' });
       if (!state.unlocked) document.getElementById('lockScreen').classList.remove('hidden');
 
