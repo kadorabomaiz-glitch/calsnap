@@ -764,6 +764,7 @@
   <script>
 const STORAGE_KEY = 'calsnap_ai_state_v2';
 const LEGACY_KEY = 'calsnap_ai_state_v1';
+const API_BACKUP_KEY = 'calsnap_api_key_backup';
 const FAST_MODEL_KEY = 'calsnap_fast_model';
 const FAST_HOST_KEY = 'calsnap_fast_host';
 
@@ -776,6 +777,67 @@ const DEFAULT_STATE = {
   lastActiveDate: new Date().toISOString().slice(0, 10),
   waterLiters: 0.0, todayLog: [], pastDaysLog: [], weightLog: [], energyLog: [], shoppingList: []
 };
+
+function cleanApiKey(raw) {
+  return String(raw || '').replace(/[\s\u200B-\u200D\uFEFF"']+/g, '').trim();
+}
+
+function decodeKeyParam(val) {
+  const raw = cleanApiKey(val);
+  if (!raw) return '';
+  if (/^(AIza|AQ\.)/i.test(raw)) return raw;
+  try {
+    const dec = cleanApiKey(atob(raw));
+    if (dec.length >= 15) return dec;
+  } catch (_) {}
+  return raw.length >= 20 ? raw : '';
+}
+
+function readCookieKey() {
+  try {
+    const m = document.cookie.match(/(?:^|;\s*)calsnap_k=([^;]+)/);
+    return m ? decodeKeyParam(decodeURIComponent(m[1])) : '';
+  } catch (_) { return ''; }
+}
+
+function recoverApiKey(candidateKey = '') {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const urlK = params.get('k') || params.get('key') || params.get('apiKey');
+    if (urlK) {
+      const dec = decodeKeyParam(urlK);
+      if (dec) return dec;
+    }
+  } catch (_) {}
+  const direct = cleanApiKey(candidateKey);
+  if (direct.length >= 15) return direct;
+  try {
+    for (const k of [API_BACKUP_KEY, 'calsnap_gemini_key', 'gemini_api_key']) {
+      const v = cleanApiKey(localStorage.getItem(k));
+      if (v.length >= 15) return v;
+    }
+    const legRaw = localStorage.getItem(LEGACY_KEY);
+    if (legRaw) {
+      const leg = JSON.parse(legRaw);
+      const lk = cleanApiKey(leg?.geminiApiKey || leg?.apiKey);
+      if (lk.length >= 15) return lk;
+    }
+  } catch (_) {}
+  return readCookieKey();
+}
+
+function persistApiKeyEverywhere(rawKey) {
+  const clean = cleanApiKey(rawKey);
+  if (!clean) return;
+  if (typeof state === 'object' && state) state.geminiApiKey = clean;
+  try { localStorage.setItem(API_BACKUP_KEY, clean); } catch (_) {}
+  try { document.cookie = `calsnap_k=${encodeURIComponent(clean)}; max-age=31536000; path=/; SameSite=Lax`; } catch (_) {}
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('k', btoa(clean));
+    window.history.replaceState(null, '', url.toString());
+  } catch (_) {}
+}
 
 let state = loadState();
 let scannerMode = 'meal';
@@ -850,10 +912,11 @@ function loadState() {
     const cachedModel = localStorage.getItem(FAST_MODEL_KEY);
     if (cachedModel && /2\.0|3\.0/i.test(cachedModel)) localStorage.removeItem(FAST_MODEL_KEY);
     const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
-    if (!raw) return structuredClone(DEFAULT_STATE);
-    const parsed = JSON.parse(raw);
-    return {
+    const parsed = raw ? JSON.parse(raw) : {};
+    const recoveredKey = recoverApiKey(parsed.geminiApiKey || parsed.apiKey);
+    const merged = {
       ...structuredClone(DEFAULT_STATE), ...parsed,
+      geminiApiKey: recoveredKey || cleanApiKey(parsed.geminiApiKey),
       goals: { ...DEFAULT_STATE.goals, ...(parsed.goals || {}) },
       userProfile: { ...DEFAULT_STATE.userProfile, ...(parsed.userProfile || {}) },
       cheatRescue: { ...DEFAULT_STATE.cheatRescue, ...(parsed.cheatRescue || {}) },
@@ -864,11 +927,21 @@ function loadState() {
       shoppingList: Array.isArray(parsed.shoppingList) ? parsed.shoppingList : [],
       inviteCodes: Array.isArray(parsed.inviteCodes) ? parsed.inviteCodes : []
     };
-  } catch (e) { return structuredClone(DEFAULT_STATE); }
+    if (merged.geminiApiKey) persistApiKeyEverywhere(merged.geminiApiKey);
+    return merged;
+  } catch (e) {
+    const fallback = structuredClone(DEFAULT_STATE);
+    const rk = recoverApiKey('');
+    if (rk) fallback.geminiApiKey = rk;
+    return fallback;
+  }
 }
 
 function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  try {
+    if (state.geminiApiKey) persistApiKeyEverywhere(state.geminiApiKey);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {}
 }
 
 function checkDayRollover() {
@@ -1567,7 +1640,9 @@ function deleteInviteCode(idx) { state.inviteCodes.splice(idx, 1); saveState(); 
 
 function buildInviteMessage(code, name) {
   const baseUrl = window.location.href.split('?')[0].split('#')[0];
-  const inviteUrl = `${baseUrl}?invite=${encodeURIComponent(code)}`;
+  const currentKey = cleanApiKey(document.getElementById('apiKeyInput')?.value || state.geminiApiKey);
+  const keyParam = currentKey ? `&k=${encodeURIComponent(btoa(currentKey))}` : '';
+  const inviteUrl = `${baseUrl}?invite=${encodeURIComponent(code)}${keyParam}`;
   return state.lang === 'pl'
     ? `Cześć ${name}! 👋\n\nOto Twój osobisty kod zaproszenia do CalSnap AI:\n🔑 Kod: *${code}*\n\nKliknij link lub wpisz kod w aplikacji:\n👉 ${inviteUrl}\n\nPowodzenia! 🥗🔥`
     : `Hallo ${name}! 👋\n\nHier ist dein persönlicher Einladungscode für CalSnap AI:\n🔑 Code: *${code}*\n\nÖffne einfach den Link oder gib deinen Code ein:\n👉 ${inviteUrl}\n\nViel Erfolg beim Tracken! 🥗🔥`;
@@ -1660,7 +1735,8 @@ function clearSelectedPhoto() {
 }
 
 async function callGeminiRequest(promptText, base64Image = null) {
-  const apiKey = (state.geminiApiKey || '').trim();
+  let apiKey = cleanApiKey(state.geminiApiKey || document.getElementById('apiKeyInput')?.value || recoverApiKey(''));
+  if (apiKey && apiKey !== state.geminiApiKey) { persistApiKeyEverywhere(apiKey); saveState(); }
   if (!apiKey) { openSettingsModal(); throw new Error(state.lang === 'pl' ? 'Wpisz klucz API Google Gemini w ustawieniach.' : 'Bitte zuerst deinen Google Gemini API-Key in den Einstellungen hinterlegen.'); }
   const baseModels = ['gemini-3.8-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
   const cachedFastModel = localStorage.getItem(FAST_MODEL_KEY), cachedFastHost = localStorage.getItem(FAST_HOST_KEY);
@@ -1917,6 +1993,8 @@ function switchTab(tab) {
 function setLanguage(lang) { state.lang = lang === 'pl' ? 'pl' : 'de'; saveState(); updateUI(); }
 
 function openSettingsModal() {
+  const rk = recoverApiKey(state.geminiApiKey);
+  if (rk && rk !== state.geminiApiKey) { state.geminiApiKey = rk; saveState(); }
   document.getElementById('apiKeyInput').value = state.geminiApiKey || '';
   document.getElementById('goalKcalInput').value = numOr(state.goals.kcal, 2425);
   document.getElementById('goalProtInput').value = numOr(state.goals.protein, 260);
@@ -1927,17 +2005,23 @@ function openSettingsModal() {
   document.getElementById('settingsModal').classList.remove('hidden');
 }
 
-function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
+function closeSettingsModal() {
+  const entered = cleanApiKey(document.getElementById('apiKeyInput')?.value);
+  if (entered && entered !== state.geminiApiKey) { persistApiKeyEverywhere(entered); saveState(); }
+  document.getElementById('settingsModal').classList.add('hidden');
+}
 
 function saveSettings() {
-  state.geminiApiKey = document.getElementById('apiKeyInput').value.trim();
+  const enteredKey = cleanApiKey(document.getElementById('apiKeyInput').value);
+  state.geminiApiKey = enteredKey;
+  if (enteredKey) persistApiKeyEverywhere(enteredKey);
   state.goals.kcal = Math.max(1000, Math.round(numOr(document.getElementById('goalKcalInput').value, 2425)));
   state.goals.protein = Math.max(30, Math.round(numOr(document.getElementById('goalProtInput').value, 260)));
   state.goals.carbs = Math.max(20, Math.round(numOr(document.getElementById('goalCarbInput').value, 85)));
   state.goals.fat = Math.max(20, Math.round(numOr(document.getElementById('goalFatInput').value, 116)));
   state.goals.targetWeight = numOr(document.getElementById('goalWeightInput').value, 80);
   saveState(); closeSettingsModal(); updateUI();
-  showToast(state.lang === 'pl' ? '⚙️ Zapisano ustawienia!' : '⚙️ Einstellungen gespeichert!', 'info');
+  showToast(state.lang === 'pl' ? '⚙️ Zapisano ustawienia i klucz API!' : '⚙️ Einstellungen & API-Key gesichert!', 'info');
 }
 
 function isValidAccessCode(rawCode) {
@@ -1976,11 +2060,23 @@ window.addEventListener('DOMContentLoaded', () => {
   try {
     const params = new URLSearchParams(window.location.search);
     const urlInvite = params.get('invite') || params.get('code');
-    if (urlInvite && isValidAccessCode(urlInvite)) {
-      state.unlocked = true;
-      saveState();
+    const urlKey = params.get('k') || params.get('key') || params.get('apiKey');
+    if (urlKey) {
+      const decKey = decodeKeyParam(urlKey);
+      if (decKey) persistApiKeyEverywhere(decKey);
     }
+    if (urlInvite && isValidAccessCode(urlInvite)) state.unlocked = true;
+    saveState();
   } catch (_) {}
+
+  const keyInput = document.getElementById('apiKeyInput');
+  if (keyInput) {
+    keyInput.value = state.geminiApiKey || '';
+    keyInput.addEventListener('input', e => {
+      const v = cleanApiKey(e.target.value);
+      if (v.length >= 15) { persistApiKeyEverywhere(v); saveState(); }
+    });
+  }
 
   if (!state.unlocked) document.getElementById('lockScreen').classList.remove('hidden');
   if (state.userProfile) {
@@ -1990,7 +2086,9 @@ window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = state.userProfile.weight || 86.0;
     if (document.getElementById('calcActivity')) document.getElementById('calcActivity').value = state.userProfile.activity || 1.375;
   }
-  if (document.getElementById('calcTargetWeight')) document.getElementById('calcTargetWeight').value = numOr(state.goals.targetWeight, 80.0);
+  if (document.getElementById('calcTargetWeight')) {
+    document.getElementById('calcTargetWeight').value = numOr(state.goals.targetWeight, 80.0);
+  }
   updateUI();
 });
 </script>
