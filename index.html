@@ -762,1849 +762,1237 @@
     </div>
   </nav>
   <script>
-    const STORAGE_KEY = 'calsnap_ai_state_v2';
-    const LEGACY_KEY = 'calsnap_ai_state_v1';
-    const FAST_MODEL_KEY = 'calsnap_fast_model';
-    const FAST_HOST_KEY = 'calsnap_fast_host';
+const STORAGE_KEY = 'calsnap_ai_state_v2';
+const LEGACY_KEY = 'calsnap_ai_state_v1';
+const FAST_MODEL_KEY = 'calsnap_fast_model';
+const FAST_HOST_KEY = 'calsnap_fast_host';
 
-    const DEFAULT_STATE = {
-      lang: 'de',
-      unlocked: true,
-      userRole: 'admin',
-      masterCode: 'START-2026',
-      geminiApiKey: '',
-      inviteCodes: [],
-      goals: { kcal: 2425, protein: 260, carbs: 85, fat: 116, targetWeight: 80.0 },
-      userProfile: { gender: 'm', age: 35, height: 178, activity: 1.375, weight: 86.0 },
-      cheatRescue: { active: false, dailyCut: 0 },
-      lastActiveDate: new Date().toISOString().slice(0, 10),
-      waterLiters: 0.0,
-      todayLog: [],
-      pastDaysLog: [],
-      weightLog: [],
-      energyLog: [],
-      shoppingList: []
+const DEFAULT_STATE = {
+  lang: 'de', unlocked: true, userRole: 'admin', masterCode: 'START-2026', geminiApiKey: '',
+  inviteCodes: [],
+  goals: { kcal: 2425, protein: 260, carbs: 85, fat: 116, targetWeight: 80.0 },
+  userProfile: { gender: 'm', age: 35, height: 178, activity: 1.375, weight: 86.0 },
+  cheatRescue: { active: false, dailyCut: 0 },
+  lastActiveDate: new Date().toISOString().slice(0, 10),
+  waterLiters: 0.0, todayLog: [], pastDaysLog: [], weightLog: [], energyLog: [], shoppingList: []
+};
+
+let state = loadState();
+let scannerMode = 'meal';
+let selectedPhotoBase64 = null, selectedPhotoThumb = null, zaubernPhotoBase64 = null;
+let pendingItems = [], currentPortionScale = 100;
+let editingTarget = { source: null, index: -1 };
+let cachedFridgeRecipes = [], cachedMenuResults = [], cachedPotResult = null, currentPotPortions = 4;
+let generatedRecipesCache = [];
+let recognition = null, isRecording = false;
+
+const I18N = {
+  de: {
+    lockSub: 'Bitte Zugangs- oder Einladungscode eingeben', lockPlaceholder: 'Code z.B. FIT-JUSTY-442', unlockBtn: 'Freischalten',
+    remTitle: 'Verbleibend heute', goalWord: 'Ziel', eatenWord: 'Gegessen',
+    macroP: 'Eiweiß', macroC: 'Kohlenh.', macroF: 'Fett', sugar: 'Zucker', fiber: 'Ballastst.',
+    compassTitle: 'Was kann ich noch essen?',
+    compassSub: (k, p) => `Noch <strong id="compassKcalText">${k} kcal</strong> &amp; <strong id="compassProtText">${p}g Eiweiß</strong> passgenau füllen`,
+    waterTitle: 'Wasser-Bilanz', scannerTitle: 'Smart KI-Scanner & Text',
+    modeMeal: 'Mahlzeit', modeFridge: 'Kühlschr.', modeMenu: 'Menü-Karte', modePot: 'Topf/Auflauf',
+    foodPlaceholder: "Was hast du gegessen? Oder Hinweis zum Foto (z. B. 'Gemischter Salat mit Dressing und Brötchen, eine Cola und Saft')...",
+    galleryBtn: 'Aus Galerie wählen', btnPhoto: 'Foto', btnVoice: 'Sprache', btnScan: 'KI-Scan',
+    previewTitle: 'Mahlzeit & Physik-Check', previewCancel: 'Abbrechen', portionScale: 'Portions-/Bechergröße:',
+    todayLogTitle: 'Heutiges Tagebuch', emptyLog: 'Noch keine Mahlzeiten heute eingetragen.',
+    zaubernTitle: 'KI-Wunsch-Koch („Zaubern“)', zaubernSub: 'Maßgeschneidert auf dein offenes Tagesbudget',
+    protOpenWord: 'Eiweiß offen', autoBudgetBtn: '🎯 Rezepte passend zu meinen offenen Restkalorien zaubern',
+    wishPlaceholder: 'Wunsch (z. B. Pasta, Süßes, Pfanne) oder Zutaten fotografieren...',
+    btnZaubern: 'Rezepte jetzt zaubern', shopTitle: 'Einkaufsliste', shopPlaceholder: 'Zutat hinzufügen...', emptyShop: 'Deine Einkaufsliste ist leer.',
+    weightTitle: 'Gewichts- & Trend-Engine', weightPlaceholder: 'Heutiges Gewicht in kg (z. B. 86.0)', energyUnrated: 'Noch nicht bewertet',
+    navTracker: 'Scanner & Log', navIdeas: 'Zaubern & Liste', navWeight: 'Gewicht & Ziel',
+    hintMeal: 'Tippe oder diktiere dein Essen (z. B. „Gemischter Salat mit Dressing, Brötchen, Cola und Saft“) oder mach ein Foto. Jede Komponente wird einzeln & vollständig aufgeschlüsselt!',
+    hintFridge: 'Fotografiere deinen offenen Kühlschrank: Die KI erkennt Zutaten, prüft das MHD und zaubert passende Rezepte.',
+    hintMenu: 'Fotografiere eine Speisekarte: Die KI bewertet alle Gerichte per Ampel (Grün / Gelb / Rot) inkl. Spar-Tipps.',
+    hintPot: 'Fotografiere einen Topf oder Auflauf: Die KI berechnet das Gesamtgewicht und deine exakte Einzelportion.'
+  },
+  pl: {
+    lockSub: 'Wpisz kod dostępu lub zaproszenia', lockPlaceholder: 'Kod np. FIT-JUSTY-442', unlockBtn: 'Odblokuj',
+    remTitle: 'Pozostało dzisiaj', goalWord: 'Cel', eatenWord: 'Zjedzono',
+    macroP: 'Białko', macroC: 'Węglow.', macroF: 'Tłuszcz', sugar: 'Cukier', fiber: 'Błonnik',
+    compassTitle: 'Co mogę jeszcze zjeść?',
+    compassSub: (k, p) => `Uzupełnij dokładnie jeszcze <strong id="compassKcalText">${k} kcal</strong> i <strong id="compassProtText">${p}g białka</strong>`,
+    waterTitle: 'Bilans wody', scannerTitle: 'Skaner AI i Tekst',
+    modeMeal: 'Posiłek', modeFridge: 'Lodówka', modeMenu: 'Karta dań', modePot: 'Garnek',
+    foodPlaceholder: "Co zjadłeś/aś? Lub wskazówka do zdjęcia (np. 'Sałatka z sosem i bułką, cola i sok')...",
+    galleryBtn: 'Wybierz z galerii', btnPhoto: 'Zdjęcie', btnVoice: 'Głos', btnScan: 'Skan AI',
+    previewTitle: 'Kontrola Posiłku i Fizyki', previewCancel: 'Anuluj', portionScale: 'Wielkość porcji / kubka:',
+    todayLogTitle: 'Dzisiejszy dziennik', emptyLog: 'Brak zapisanych posiłków na dziś.',
+    zaubernTitle: 'Kucharz AI („Czaruj”)', zaubernSub: 'Dopasowane do Twojego otwartego budżetu kalorii',
+    protOpenWord: 'białka pozostało', autoBudgetBtn: '🎯 Wyczaruj przepisy dopasowane do pozostałych kalorii',
+    wishPlaceholder: 'Życzenie (np. makaron, coś słodkiego) lub zrób zdjęcie składników...',
+    btnZaubern: 'Wyczaruj przepisy', shopTitle: 'Lista zakupów', shopPlaceholder: 'Dodaj składnik...', emptyShop: 'Twoja lista zakupów jest pusta.',
+    weightTitle: 'Waga i Trend 7-dniowy', weightPlaceholder: 'Dzisiejsza waga w kg (np. 86.0)', energyUnrated: 'Jeszcze nie oceniono',
+    navTracker: 'Skaner i Dziennik', navIdeas: 'Przepisy', navWeight: 'Waga i Cel',
+    hintMeal: 'Wpisz lub podyktuj posiłek albo zrób zdjęcie. Każdy składnik zostanie rozpisany osobno w pełnym tekście!',
+    hintFridge: 'Zrób zdjęcie wnętrza lodówki: AI rozpozna składniki i stworzy przepisy.',
+    hintMenu: 'Zrób zdjęcie karty dań w restauracji: AI oceni dania (Zielone / Żółte / Czerwone).',
+    hintPot: 'Zrób zdjęcie garnka lub zapiekanki: AI wyliczy kalorie dla Twojej porcji.'
+  }
+};
+
+function numOr(val, fallback = 0) {
+  if (val === 0 || val === '0') return 0;
+  const n = typeof val === 'number' ? val : parseFloat(String(val ?? '').replace(',', '.'));
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+
+function loadState() {
+  try {
+    const cachedModel = localStorage.getItem(FAST_MODEL_KEY);
+    if (cachedModel && /2\.0|3\.0/i.test(cachedModel)) localStorage.removeItem(FAST_MODEL_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
+    if (!raw) return structuredClone(DEFAULT_STATE);
+    const parsed = JSON.parse(raw);
+    return {
+      ...structuredClone(DEFAULT_STATE), ...parsed,
+      goals: { ...DEFAULT_STATE.goals, ...(parsed.goals || {}) },
+      userProfile: { ...DEFAULT_STATE.userProfile, ...(parsed.userProfile || {}) },
+      cheatRescue: { ...DEFAULT_STATE.cheatRescue, ...(parsed.cheatRescue || {}) },
+      todayLog: Array.isArray(parsed.todayLog) ? parsed.todayLog : [],
+      pastDaysLog: Array.isArray(parsed.pastDaysLog) ? parsed.pastDaysLog : [],
+      weightLog: Array.isArray(parsed.weightLog) ? parsed.weightLog : [],
+      energyLog: Array.isArray(parsed.energyLog) ? parsed.energyLog : [],
+      shoppingList: Array.isArray(parsed.shoppingList) ? parsed.shoppingList : [],
+      inviteCodes: Array.isArray(parsed.inviteCodes) ? parsed.inviteCodes : []
     };
+  } catch (e) { return structuredClone(DEFAULT_STATE); }
+}
 
-    let state = loadState();
-    let scannerMode = 'meal';
-    let selectedPhotoBase64 = null;
-    let selectedPhotoThumb = null;
-    let zaubernPhotoBase64 = null;
-    let pendingItems = [];
-    let currentPortionScale = 100;
-    let editingTarget = { source: null, index: -1 };
-    let cachedFridgeRecipes = [];
-    let cachedMenuResults = [];
-    let cachedPotResult = null;
-    let currentPotPortions = 4;
-    let generatedRecipesCache = [];
-    let recognition = null;
-    let isRecording = false;
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
 
-    const I18N = {
-      de: {
-        remTitle: 'Verbleibend heute', goalWord: 'Ziel', eatenWord: 'Gegessen',
-        macroP: 'Eiweiß', macroC: 'Kohlenh.', macroF: 'Fett', sugar: 'Zucker', fiber: 'Ballastst.',
-        waterTitle: 'Wasser-Bilanz', scannerTitle: 'Smart KI-Scanner & Text',
-        modeMeal: 'Mahlzeit', modeFridge: 'Kühlschr.', modeMenu: 'Menü-Karte', modePot: 'Topf/Auflauf',
-        btnPhoto: 'Foto', btnVoice: 'Sprache', btnScan: 'KI-Scan',
-        previewTitle: 'Mahlzeit & Physik-Check', previewCancel: 'Abbrechen',
-        portionScale: 'Portions-/Bechergröße:', todayLogTitle: 'Heutiges Tagebuch',
-        zaubernTitle: 'KI-Wunsch-Koch („Zaubern“)', zaubernSub: 'Maßgeschneidert auf dein offenes Tagesbudget',
-        btnZaubern: 'Rezepte jetzt zaubern', shopTitle: 'Einkaufsliste',
-        weightTitle: 'Gewichts- & Trend-Engine', navTracker: 'Scanner & Log', navIdeas: 'Zaubern & Liste', navWeight: 'Gewicht & Ziel',
-        hintMeal: 'Tippe oder diktiere dein Essen (z. B. „Gemischter Salat mit Dressing, Brötchen, Cola und Saft“) oder mach ein Foto. Jede Komponente wird einzeln & vollständig aufgeschlüsselt!',
-        hintFridge: 'Fotografiere deinen offenen Kühlschrank: Die KI erkennt Zutaten, prüft das MHD und zaubert passende Rezepte.',
-        hintMenu: 'Fotografiere eine Speisekarte: Die KI bewertet alle Gerichte per Ampel (Grün / Gelb / Rot) inkl. Spar-Tipps.',
-        hintPot: 'Fotografiere einen Topf oder Auflauf: Die KI berechnet das Gesamtgewicht und deine exakte Einzelportion.'
-      },
-      pl: {
-        remTitle: 'Pozostało dzisiaj', goalWord: 'Cel', eatenWord: 'Zjedzono',
-        macroP: 'Białko', macroC: 'Węglow.', macroF: 'Tłuszcz', sugar: 'Cukier', fiber: 'Błonnik',
-        waterTitle: 'Bilans wody', scannerTitle: 'Skaner AI i Tekst',
-        modeMeal: 'Posiłek', modeFridge: 'Lodówka', modeMenu: 'Karta dań', modePot: 'Garnek',
-        btnPhoto: 'Zdjęcie', btnVoice: 'Głos', btnScan: 'Skan AI',
-        previewTitle: 'Kontrola Posiłku i Fizyki', previewCancel: 'Anuluj',
-        portionScale: 'Wielkość porcji / kubka:', todayLogTitle: 'Dzisiejszy dziennik',
-        zaubernTitle: 'Kucharz AI („Czaruj”)', zaubernSub: 'Dopasowane do Twojego budżetu kalorii',
-        btnZaubern: 'Wyczaruj przepisy', shopTitle: 'Lista zakupów',
-        weightTitle: 'Waga i Trend 7-dniowy', navTracker: 'Skaner i Dziennik', navIdeas: 'Przepisy', navWeight: 'Waga i Cel',
-        hintMeal: 'Wpisz lub podyktuj posiłek albo zrób zdjęcie. Każdy składnik zostanie rozpisany osobno w pełnym tekście!',
-        hintFridge: 'Zrób zdjęcie wnętrza lodówki: AI rozpozna składniki i stworzy przepisy.',
-        hintMenu: 'Zrób zdjęcie karty dań w restauracji: AI oceni dania (Zielone / Żółte / Czerwone).',
-        hintPot: 'Zrób zdjęcie garnka lub zapiekanki: AI wyliczy kalorie dla Twojej porcji.'
-      }
-    };
-
-    function numOr(val, fallback = 0) {
-      if (val === 0 || val === '0') return 0;
-      const n = typeof val === 'number' ? val : parseFloat(String(val ?? '').replace(',', '.'));
-      return Number.isFinite(n) ? n : fallback;
-    }
-
-    function escapeHtml(str) {
-      return String(str ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-    }
-
-    function loadState() {
-      try {
-        const cachedModel = localStorage.getItem(FAST_MODEL_KEY);
-        if (cachedModel && /2\.0|3\.0/i.test(cachedModel)) localStorage.removeItem(FAST_MODEL_KEY);
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
-        if (!raw) return structuredClone(DEFAULT_STATE);
-        const parsed = JSON.parse(raw);
-        return {
-          ...structuredClone(DEFAULT_STATE),
-          ...parsed,
-          goals: { ...DEFAULT_STATE.goals, ...(parsed.goals || {}) },
-          userProfile: { ...DEFAULT_STATE.userProfile, ...(parsed.userProfile || {}) },
-          cheatRescue: { ...DEFAULT_STATE.cheatRescue, ...(parsed.cheatRescue || {}) },
-          todayLog: Array.isArray(parsed.todayLog) ? parsed.todayLog : [],
-          pastDaysLog: Array.isArray(parsed.pastDaysLog) ? parsed.pastDaysLog : [],
-          weightLog: Array.isArray(parsed.weightLog) ? parsed.weightLog : [],
-          energyLog: Array.isArray(parsed.energyLog) ? parsed.energyLog : [],
-          shoppingList: Array.isArray(parsed.shoppingList) ? parsed.shoppingList : [],
-          inviteCodes: Array.isArray(parsed.inviteCodes) ? parsed.inviteCodes : []
-        };
-      } catch (e) {
-        return structuredClone(DEFAULT_STATE);
-      }
-    }
-
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {
-        console.error('State save error:', e);
-      }
-    }
-
-    function checkDayRollover() {
-      const today = new Date().toISOString().slice(0, 10);
-      if (state.lastActiveDate && state.lastActiveDate !== today) {
-        if (state.todayLog.length > 0) {
-          const totals = state.todayLog.reduce((acc, it) => {
-            acc.kcal += numOr(it.kcal, 0);
-            acc.p += numOr(it.p, 0);
-            acc.c += numOr(it.c, 0);
-            acc.f += numOr(it.f, 0);
-            return acc;
-          }, { kcal: 0, p: 0, c: 0, f: 0 });
-          state.pastDaysLog.unshift({
-            date: state.lastActiveDate,
-            kcal: Math.round(totals.kcal),
-            p: Math.round(totals.p),
-            c: Math.round(totals.c),
-            f: Math.round(totals.f),
-            itemsCount: state.todayLog.length
-          });
-          if (state.pastDaysLog.length > 30) state.pastDaysLog.length = 30;
-        }
-        state.todayLog = [];
-        state.waterLiters = 0.0;
-        state.lastActiveDate = today;
-        saveState();
-      }
-    }
-
-    function showToast(msg, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      if (!container) return;
-      const el = document.createElement('div');
-      const colors = type === 'error'
-        ? 'bg-rose-950/95 border-rose-500 text-rose-200'
-        : type === 'warn'
-        ? 'bg-amber-950/95 border-amber-500 text-amber-200'
-        : 'bg-emerald-950/95 border-emerald-500 text-emerald-200';
-      el.className = `pointer-events-auto border px-4 py-2.5 rounded-xl text-xs font-bold shadow-xl flex items-center justify-between transition-all ${colors}`;
-      el.innerHTML = `<span class="break-words leading-snug">${escapeHtml(msg)}</span>`;
-      container.appendChild(el);
-      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 3200);
-    }
-
-    function getRemainingMacros() {
-      const consumed = state.todayLog.reduce((acc, it) => {
-        acc.kcal += numOr(it.kcal, 0);
-        acc.p += numOr(it.p, 0);
-        acc.c += numOr(it.c, 0);
-        acc.f += numOr(it.f, 0);
-        acc.sugar += numOr(it.sugar, 0);
-        acc.fiber += numOr(it.fiber, 0);
-        acc.vitC += numOr(it.vitC, 0);
-        acc.mag += numOr(it.mag, 0);
+function checkDayRollover() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (state.lastActiveDate && state.lastActiveDate !== today) {
+    if (state.todayLog.length > 0) {
+      const totals = state.todayLog.reduce((acc, it) => {
+        acc.kcal += numOr(it.kcal, 0); acc.p += numOr(it.p, 0); acc.c += numOr(it.c, 0); acc.f += numOr(it.f, 0);
         return acc;
-      }, { kcal: 0, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0 });
-
-      const baseGoalKcal = numOr(state.goals.kcal, 2425);
-      const cut = state.cheatRescue?.active ? numOr(state.cheatRescue.dailyCut, 200) : 0;
-      const effectiveGoalKcal = Math.max(1000, baseGoalKcal - cut);
-
-      return {
-        remKcal: Math.max(0, Math.round(effectiveGoalKcal - consumed.kcal)),
-        remProt: Math.max(0, Math.round(numOr(state.goals.protein, 260) - consumed.p)),
-        remCarb: Math.max(0, Math.round(numOr(state.goals.carbs, 85) - consumed.c)),
-        remFat: Math.max(0, Math.round(numOr(state.goals.fat, 116) - consumed.f)),
-        effectiveGoalKcal,
-        consumed
-      };
-    }
-
-    function updateUI() {
-      checkDayRollover();
-      const t = I18N[state.lang] || I18N.de;
-
-      const btnDe = document.getElementById('langBtnDe');
-      const btnPl = document.getElementById('langBtnPl');
-      if (btnDe && btnPl) {
-        btnDe.className = state.lang === 'de'
-          ? 'px-2 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-          : 'px-2 py-1.5 rounded-lg text-xs font-bold bg-slate-800/80 text-slate-400 border border-slate-700';
-        btnPl.className = state.lang === 'pl'
-          ? 'px-2 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-          : 'px-2 py-1.5 rounded-lg text-xs font-bold bg-slate-800/80 text-slate-400 border border-slate-700';
-      }
-
-      const bindText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-      bindText('lblRemainingTitle', t.remTitle);
-      bindText('lblGoalWord', t.goalWord);
-      bindText('lblEatenWord', t.eatenWord);
-      bindText('lblMacroP', t.macroP);
-      bindText('lblMacroC', t.macroC);
-      bindText('lblMacroF', t.macroF);
-      bindText('lblSugar', t.sugar);
-      bindText('lblFiber', t.fiber);
-      bindText('lblWaterTitle', t.waterTitle);
-      bindText('lblScannerTitle', t.scannerTitle);
-      bindText('lblModeMeal', t.modeMeal);
-      bindText('lblModeFridge', t.modeFridge);
-      bindText('lblModeMenu', t.modeMenu);
-      bindText('lblModePot', t.modePot);
-      bindText('lblBtnPhoto', t.btnPhoto);
-      bindText('lblBtnVoice', t.btnVoice);
-      bindText('lblBtnScan', t.btnScan);
-      bindText('lblPreviewTitle', t.previewTitle);
-      bindText('lblPreviewCancel', t.previewCancel);
-      bindText('lblPortionScale', t.portionScale);
-      bindText('lblTodayLogTitle', t.todayLogTitle);
-      bindText('lblZaubernTitle', t.zaubernTitle);
-      bindText('lblZaubernSub', t.zaubernSub);
-      bindText('lblBtnZaubern', t.btnZaubern);
-      bindText('lblShopTitle', t.shopTitle);
-      bindText('lblWeightTitle', t.weightTitle);
-      bindText('lblNavTracker', t.navTracker);
-      bindText('lblNavIdeas', t.navIdeas);
-      bindText('lblNavWeight', t.navWeight);
-
-      const hintMap = { meal: t.hintMeal, fridge: t.hintFridge, menu: t.hintMenu, pot: t.hintPot };
-      bindText('scannerModeHint', hintMap[scannerMode] || t.hintMeal);
-
-      const cheatBanner = document.getElementById('cheatRescueBanner');
-      if (cheatBanner) cheatBanner.classList.toggle('hidden', !state.cheatRescue?.active);
-
-      const { remKcal, remProt, effectiveGoalKcal, consumed } = getRemainingMacros();
-      const eatenKcal = Math.round(consumed.kcal);
-      bindText('kcalRemaining', remKcal);
-      bindText('kcalGoalLabel', effectiveGoalKcal);
-      bindText('kcalConsumedLabel', eatenKcal);
-
-      const pct = Math.min(100, Math.round((eatenKcal / Math.max(1, effectiveGoalKcal)) * 100));
-      bindText('kcalPercentLabel', `${pct}%`);
-      const ring = document.getElementById('kcalRing');
-      if (ring) {
-        const circumference = 201.06;
-        ring.style.strokeDashoffset = String(circumference - (pct / 100) * circumference);
-        ring.setAttribute('stroke', eatenKcal > effectiveGoalKcal ? '#ef4444' : '#10b981');
-      }
-
-      const goalP = Math.max(1, numOr(state.goals.protein, 260));
-      const goalC = Math.max(1, numOr(state.goals.carbs, 85));
-      const goalF = Math.max(1, numOr(state.goals.fat, 116));
-
-      bindText('protText', `${Math.round(consumed.p)}/${goalP}g`);
-      bindText('carbText', `${Math.round(consumed.c)}/${goalC}g`);
-      bindText('fatText', `${Math.round(consumed.f)}/${goalF}g`);
-
-      const protBar = document.getElementById('protBar');
-      const carbBar = document.getElementById('carbBar');
-      const fatBar = document.getElementById('fatBar');
-      if (protBar) protBar.style.width = `${Math.min(100, Math.round((consumed.p / goalP) * 100))}%`;
-      if (carbBar) carbBar.style.width = `${Math.min(100, Math.round((consumed.c / goalC) * 100))}%`;
-      if (fatBar) fatBar.style.width = `${Math.min(100, Math.round((consumed.f / goalF) * 100))}%`;
-
-      bindText('sugarPill', `${Math.round(consumed.sugar * 10) / 10}g`);
-      bindText('fiberPill', `${Math.round(consumed.fiber * 10) / 10}g`);
-      bindText('vitCPill', `${Math.round(consumed.vitC)}mg`);
-      bindText('magPill', `${Math.round(consumed.mag)}mg`);
-
-      bindText('compassKcalText', `${remKcal} kcal`);
-      bindText('compassProtText', `${remProt}g ${t.macroP}`);
-      bindText('ideasRemKcal', `${remKcal} kcal`);
-      bindText('ideasRemProt', `${remProt}g ${t.macroP} offen`);
-
-      const wLiters = Math.max(0, Math.round(numOr(state.waterLiters, 0) * 100) / 100);
-      bindText('waterText', `${wLiters.toFixed(2).replace(/\.00$/, '.0')} / 2.5 L`);
-      const glassesFilled = Math.min(8, Math.round(wLiters / 0.25));
-      bindText('waterGlasses', '🔵'.repeat(glassesFilled) + '⚪'.repeat(Math.max(0, 8 - glassesFilled)));
-
-      bindText('todayTotalKcal', `${eatenKcal} kcal`);
-      renderTodayLog();
-      renderShoppingList();
-      renderWeightEngine();
-      renderPastDays();
-
-      const todayIso = new Date().toISOString().slice(0, 10);
-      const todayEnergy = state.energyLog.find(e => e.date === todayIso);
-      if (todayEnergy) bindText('energyStatusText', `Heute: Level ${todayEnergy.level}/5 gespeichert`);
-    }
-
-    function renderTodayLog() {
-      const listEl = document.getElementById('todayLogList');
-      if (!listEl) return;
-      if (!state.todayLog.length) {
-        listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Noch keine Mahlzeiten heute eingetragen.</p>`;
-        return;
-      }
-      listEl.innerHTML = state.todayLog.map((it, idx) => `
-        <div class="glass-subcard p-3 flex items-start justify-between gap-2.5 border border-slate-800">
-          <div class="flex items-start gap-2.5 flex-1 min-w-0">
-            ${it.thumb
-              ? `<img src="${it.thumb}" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5" />`
-              : `<div class="w-9 h-9 rounded-xl bg-slate-800/90 flex items-center justify-center text-base shrink-0 mt-0.5">${escapeHtml(it.icon || '🍽️')}</div>`
-            }
-            <div class="flex-1 min-w-0">
-              <span class="text-[10px] text-slate-500 font-semibold block">${escapeHtml(it.time || '')}</span>
-              <p class="item-title-full text-xs font-bold text-white">${escapeHtml(it.name)}</p>
-              <p class="text-[11px] text-slate-400 mt-0.5">
-                E:${numOr(it.p, 0)}g • K:${numOr(it.c, 0)}g • F:${numOr(it.f, 0)}g ${numOr(it.sugar, 0) > 0 ? `• 🍬${numOr(it.sugar, 0)}g` : ''}
-              </p>
-            </div>
-          </div>
-          <div class="flex flex-col items-end gap-1.5 shrink-0">
-            <span class="text-xs font-extrabold text-emerald-400 whitespace-nowrap">${Math.round(numOr(it.kcal, 0))} kcal</span>
-            <div class="flex items-center gap-1">
-              <button onclick="openEditModal('today', ${idx})" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] flex items-center justify-center" title="Bearbeiten">
-                <i class="fa-solid fa-pen"></i>
-              </button>
-              <button onclick="deleteLogItem(${idx})" class="w-6 h-6 rounded-lg bg-rose-950/70 hover:bg-rose-900 text-rose-400 text-[10px] flex items-center justify-center" title="Löschen">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function deleteLogItem(idx) {
-      if (idx < 0 || idx >= state.todayLog.length) return;
-      state.todayLog.splice(idx, 1);
-      saveState();
-      updateUI();
-      showToast('Eintrag gelöscht', 'info');
-    }
-
-    function addWater(delta) {
-      state.waterLiters = Math.max(0, Math.min(12, Math.round((numOr(state.waterLiters, 0) + numOr(delta, 0)) * 100) / 100));
-      saveState();
-      updateUI();
-    }
-
-    function openEditModal(source, idx) {
-      const list = source === 'pending' ? pendingItems : state.todayLog;
-      const item = list[idx];
-      if (!item) return;
-      editingTarget = { source, index: idx };
-      document.getElementById('editItemName').value = item.name || '';
-      document.getElementById('editItemKcal').value = Math.round(numOr(item.kcal, 0));
-      document.getElementById('editItemSugar').value = numOr(item.sugar, 0);
-      document.getElementById('editItemP').value = numOr(item.p, 0);
-      document.getElementById('editItemC').value = numOr(item.c, 0);
-      document.getElementById('editItemF').value = numOr(item.f, 0);
-      document.getElementById('editItemModal').classList.remove('hidden');
-    }
-
-    function closeEditModal() {
-      editingTarget = { source: null, index: -1 };
-      document.getElementById('editItemModal').classList.add('hidden');
-    }
-
-    function saveEditedItem() {
-      const { source, index } = editingTarget;
-      const list = source === 'pending' ? pendingItems : state.todayLog;
-      if (!list || !list[index]) {
-        closeEditModal();
-        return;
-      }
-      const orig = list[index];
-      const name = document.getElementById('editItemName').value.trim() || orig.name;
-      const inputKcal = Math.max(0, Math.round(numOr(document.getElementById('editItemKcal').value, orig.kcal)));
-      const sugar = Math.max(0, Math.round(numOr(document.getElementById('editItemSugar').value, orig.sugar) * 10) / 10);
-      const p = Math.max(0, Math.round(numOr(document.getElementById('editItemP').value, orig.p) * 10) / 10);
-      const c = Math.max(0, Math.round(numOr(document.getElementById('editItemC').value, orig.c) * 10) / 10);
-      const f = Math.max(0, Math.round(numOr(document.getElementById('editItemF').value, orig.f) * 10) / 10);
-
-      const macrosChanged = p !== orig.p || c !== orig.c || f !== orig.f;
-      const kcalChanged = inputKcal !== Math.round(numOr(orig.kcal, 0));
-      const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * numOr(orig.fiber, 0));
-
-      let finalKcal = inputKcal;
-      if (macrosChanged && !kcalChanged && atwaterKcal > 0) {
-        finalKcal = atwaterKcal;
-      } else if (atwaterKcal > 0 && Math.abs(inputKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15 && macrosChanged) {
-        finalKcal = atwaterKcal;
-      }
-
-      const updated = { ...orig, name, kcal: finalKcal, sugar, p, c, f };
-
-      if (source === 'pending') {
-        const ratio = (currentPortionScale || 100) / 100;
-        updated.baseKcal = Math.round(finalKcal / ratio);
-        updated.baseP = Math.round((p / ratio) * 10) / 10;
-        updated.baseC = Math.round((c / ratio) * 10) / 10;
-        updated.baseF = Math.round((f / ratio) * 10) / 10;
-        updated.baseSugar = Math.round((sugar / ratio) * 10) / 10;
-        pendingItems[index] = updated;
-        renderPendingPreview();
-      } else {
-        state.todayLog[index] = updated;
-        saveState();
-        updateUI();
-      }
-      closeEditModal();
-      showToast('✏️ Eintrag aktualisiert', 'info');
-    }
-
-    function setScannerMode(mode) {
-      scannerMode = ['meal', 'fridge', 'menu', 'pot'].includes(mode) ? mode : 'meal';
-      const modes = { meal: 'modeBtnMeal', fridge: 'modeBtnFridge', menu: 'modeBtnMenu', pot: 'modeBtnPot' };
-      for (const [m, btnId] of Object.entries(modes)) {
-        document.getElementById(btnId)?.classList.toggle('active', m === scannerMode);
-      }
-      const t = I18N[state.lang] || I18N.de;
-      const hintMap = { meal: t.hintMeal, fridge: t.hintFridge, menu: t.hintMenu, pot: t.hintPot };
-      const hintEl = document.getElementById('scannerModeHint');
-      if (hintEl) hintEl.textContent = hintMap[scannerMode];
-    }
-
-    function toggleVoiceInput() {
-      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRec) {
-        showToast('Spracheingabe wird von diesem Browser nicht unterstützt.', 'warn');
-        return;
-      }
-      const voiceBtn = document.getElementById('voiceBtn');
-      if (isRecording && recognition) {
-        recognition.stop();
-        return;
-      }
-      recognition = new SpeechRec();
-      recognition.lang = state.lang === 'pl' ? 'pl-PL' : 'de-DE';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => {
-        isRecording = true;
-        voiceBtn?.classList.add('pulse-ring', 'border-rose-500');
-        showToast('🎙️ Bitte jetzt sprechen...', 'info');
-      };
-      recognition.onresult = (event) => {
-        const transcript = event.results?.[0]?.[0]?.transcript || '';
-        if (transcript) {
-          const input = document.getElementById('foodInput');
-          input.value = input.value ? `${input.value.trim()}, ${transcript}` : transcript;
-          triggerUnifiedScanner();
-        }
-      };
-      recognition.onerror = () => showToast('Spracheingabe beendet.', 'warn');
-      recognition.onend = () => {
-        isRecording = false;
-        voiceBtn?.classList.remove('pulse-ring', 'border-rose-500');
-      };
-      recognition.start();
-    }
-
-    async function runFridgeLeftoverAI(textVal, base64Img) {
-      const { remKcal, remProt } = getRemainingMacros();
-      const prompt = `Du bist ein KI-Küchenchef und Lebensmittelprüfer. Analysiere das Foto des Kühlschranks/Vorrats bzw. den Hinweis ("${textVal || 'Kühlschrank-Check'}").
-Erkenne die vorhandenen Zutaten, gib bei empfindlichen Lebensmitteln einen kurzen MHD-/Frische-Hinweis und erstelle 2 bis 3 Rezepte passend für maximal ${remKcal} kcal und ${remProt}g Eiweiß.
-Antworte AUSSCHLIESSLICH als valides JSON-Array:
-[{"title":"Rezeptname inkl. Menge","mhdNote":"Frische-/MHD-Hinweis","ingredients":"Zutat 1 (g), Zutat 2 (g)","steps":"Kurze Zubereitung","kcal":480,"p":42,"c":35,"f":16,"icon":"🧊"}]`;
-
-      let list = null;
-      try {
-        const raw = await callGeminiRequest(prompt, base64Img);
-        list = normalizeRecipeList(extractJSON(raw));
-      } catch (err) {
-        if (!textVal && !base64Img) throw err;
-      }
-
-      if (!list || !list.length) {
-        list = [{
-          title: 'Kühlschrank-Rescue Gemüse-Ei-Pfanne (380g)',
-          mhdNote: 'Geöffnete Milchprodukte & frisches Gemüse zuerst verbrauchen.',
-          ingredients: '3 Eier, 150g Restgemüse, 50g Hüttenkäse, Kräuter',
-          steps: 'Gemüse kurz anbraten, verquirlte Eier und Hüttenkäse darübergeben und stocken lassen.',
-          kcal: 410, p: 32, c: 12, f: 24, icon: '🧊'
-        }];
-      }
-
-      cachedFridgeRecipes = list.map(r => ({
-        title: String(r.title || r.name || 'Kühlschrank-Gericht').trim(),
-        mhdNote: String(r.mhdNote || r.warn || 'Zutaten frisch verarbeiten').trim(),
-        ingredients: Array.isArray(r.ingredients) ? r.ingredients.join(', ') : String(r.ingredients || ''),
-        steps: Array.isArray(r.steps) ? r.steps.join(' ') : String(r.steps || ''),
-        kcal: Math.round(numOr(r.kcal, 420)),
-        p: Math.round(numOr(r.p, 30) * 10) / 10,
-        c: Math.round(numOr(r.c, 28) * 10) / 10,
-        f: Math.round(numOr(r.f, 16) * 10) / 10,
-        icon: String(r.icon || '🧊').trim()
-      }));
-
-      const box = document.getElementById('fridgeResultBox');
-      const container = document.getElementById('fridgeRecipesList');
-      box.classList.remove('hidden');
-      container.innerHTML = cachedFridgeRecipes.map((r, idx) => `
-        <div class="glass-subcard p-3.5 space-y-2 border border-sky-500/35">
-          <div class="flex items-start justify-between gap-2">
-            <h4 class="item-title-full text-xs font-extrabold text-white">${escapeHtml(r.icon)} ${escapeHtml(r.title)}</h4>
-            <span class="text-xs font-extrabold text-sky-400 shrink-0">${r.kcal} kcal</span>
-          </div>
-          <p class="text-[11px] text-amber-300 font-medium">⏱️ ${escapeHtml(r.mhdNote)}</p>
-          <p class="text-[11px] text-emerald-300 font-semibold">E:${r.p}g • K:${r.c}g • F:${r.f}g</p>
-          <p class="text-[11px] text-slate-300"><strong>Zutaten:</strong> ${escapeHtml(r.ingredients)}</p>
-          <p class="text-[11px] text-slate-400">${escapeHtml(r.steps)}</p>
-          <button onclick="commitFridgeRecipe(${idx})" class="w-full py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-xs font-bold text-sky-300">
-            ✅ Als Mahlzeit übernehmen
-          </button>
-        </div>
-      `).join('');
-    }
-
-    function commitFridgeRecipe(idx) {
-      const r = cachedFridgeRecipes[idx];
-      if (!r) return;
-      openPendingPreview([validateAtwater({ name: r.title, kcal: r.kcal, p: r.p, c: r.c, f: r.f, icon: r.icon })]);
-    }
-
-    async function runMenuScannerAI(textVal, base64Img) {
-      const { remKcal, remProt } = getRemainingMacros();
-      const prompt = `Du bist ein Ernährungs-Coach im Restaurant. Analysiere die Speisekarte (Foto/Text: "${textVal || 'Speisekarte'}") passend zum Restbudget (${remKcal} kcal, ${remProt}g Eiweiß).
-Bewerte alle erkennbaren Gerichte per Ampel ("green" = ideal/proteinreich, "yellow" = moderat, "red" = Kalorien-/Fettbombe) und gib einen konkreten Spar-Tipp ("swapTip").
-Antworte AUSSCHLIESSLICH als valides JSON-Array:
-[{"name":"Name des Gerichts","kcal":580,"p":42,"c":45,"f":22,"traffic":"green","swapTip":"Beilage durch Salat ersetzen spart 180 kcal"}]`;
-
-      const raw = await callGeminiRequest(prompt, base64Img);
-      const parsed = extractJSON(raw);
-      const arr = Array.isArray(parsed) ? parsed : (parsed.items || parsed.dishes || [parsed]);
-
-      cachedMenuResults = arr.map(d => {
-        const v = validateAtwater(d);
-        const tr = String(d.traffic || 'yellow').toLowerCase();
-        return {
-          ...v,
-          traffic: ['green', 'yellow', 'red'].includes(tr) ? tr : (v.kcal <= 600 ? 'green' : v.kcal <= 900 ? 'yellow' : 'red'),
-          swapTip: String(d.swapTip || d.tip || 'Dressing oder Sauce separat bestellen').trim()
-        };
+      }, { kcal: 0, p: 0, c: 0, f: 0 });
+      state.pastDaysLog.unshift({
+        date: state.lastActiveDate, kcal: Math.round(totals.kcal), p: Math.round(totals.p),
+        c: Math.round(totals.c), f: Math.round(totals.f), itemsCount: state.todayLog.length
       });
-
-      document.getElementById('menuResultBox').classList.remove('hidden');
-      filterMenuItems('all');
+      if (state.pastDaysLog.length > 30) state.pastDaysLog.length = 30;
     }
+    state.todayLog = []; state.waterLiters = 0.0; state.lastActiveDate = today;
+    saveState();
+  }
+}
 
-    function filterMenuItems(filter) {
-      const container = document.getElementById('menuItemsList');
-      if (!container) return;
-      const filtered = filter === 'all' ? cachedMenuResults : cachedMenuResults.filter(d => d.traffic === filter);
-      if (!filtered.length) {
-        container.innerHTML = `<p class="text-xs text-slate-400 py-2">Keine Gerichte in dieser Kategorie.</p>`;
-        return;
-      }
-      container.innerHTML = filtered.map((d) => {
-        const origIdx = cachedMenuResults.indexOf(d);
-        const badge = d.traffic === 'green' ? '🟢 Top-Wahl' : d.traffic === 'yellow' ? '🟡 Okay' : '🔴 Kalorienbombe';
-        const borderCls = d.traffic === 'green' ? 'traffic-green' : d.traffic === 'yellow' ? 'traffic-yellow' : 'traffic-red';
-        return `
-          <div class="glass-subcard p-3 space-y-1.5 ${borderCls}">
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <span class="text-[10px] font-bold uppercase text-slate-400">${badge}</span>
-                <h4 class="item-title-full text-xs font-extrabold text-white">${escapeHtml(d.name)}</h4>
-              </div>
-              <span class="text-xs font-extrabold text-emerald-400 shrink-0">${d.kcal} kcal</span>
-            </div>
-            <p class="text-[11px] text-slate-300">E:${d.p}g • K:${d.c}g • F:${d.f}g</p>
-            <p class="text-[11px] text-amber-300">💡 Spar-Tipp: ${escapeHtml(d.swapTip)}</p>
-            <button onclick="commitMenuItem(${origIdx})" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-300 mt-1">
-              Auswählen & Prüfen
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const el = document.createElement('div');
+  const colors = type === 'error' ? 'bg-rose-950/95 border-rose-500 text-rose-200'
+    : type === 'warn' ? 'bg-amber-950/95 border-amber-500 text-amber-200'
+    : 'bg-emerald-950/95 border-emerald-500 text-emerald-200';
+  el.className = `pointer-events-auto border px-4 py-2.5 rounded-xl text-xs font-bold shadow-xl flex items-center justify-between transition-all ${colors}`;
+  el.innerHTML = `<span class="break-words leading-snug">${escapeHtml(msg)}</span>`;
+  container.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 3200);
+}
 
-    function commitMenuItem(idx) {
-      const d = cachedMenuResults[idx];
-      if (!d) return;
-      openPendingPreview([validateAtwater(d)]);
-    }
+function getRemainingMacros() {
+  const consumed = state.todayLog.reduce((acc, it) => {
+    acc.kcal += numOr(it.kcal, 0); acc.p += numOr(it.p, 0); acc.c += numOr(it.c, 0); acc.f += numOr(it.f, 0);
+    acc.sugar += numOr(it.sugar, 0); acc.fiber += numOr(it.fiber, 0); acc.vitC += numOr(it.vitC, 0); acc.mag += numOr(it.mag, 0);
+    return acc;
+  }, { kcal: 0, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0 });
+  const baseGoalKcal = numOr(state.goals.kcal, 2425);
+  const cut = state.cheatRescue?.active ? numOr(state.cheatRescue.dailyCut, 200) : 0;
+  const effectiveGoalKcal = Math.max(1000, baseGoalKcal - cut);
+  return {
+    remKcal: Math.max(0, Math.round(effectiveGoalKcal - consumed.kcal)),
+    remProt: Math.max(0, Math.round(numOr(state.goals.protein, 260) - consumed.p)),
+    remCarb: Math.max(0, Math.round(numOr(state.goals.carbs, 85) - consumed.c)),
+    remFat: Math.max(0, Math.round(numOr(state.goals.fat, 116) - consumed.f)),
+    effectiveGoalKcal, consumed
+  };
+}
 
-    async function runPotScannerAI(textVal, base64Img) {
-      const prompt = `Du bist ein präziser Küchen-Physiker. Analysiere den abgebildeten oder beschriebenen Topf/Auflauf ("${textVal || 'Familien-Topf / Auflauf'}").
-Schätze das Gesamtgewicht und die Gesamtnährwerte des KOMPLETTEN Topfes/Auflaufs.
-Antworte AUSSCHLIESSLICH als valides JSON-Objekt:
-{"title":"Name des Topfgerichts/Auflaufs","totalWeightG":1600,"totalKcal":2200,"totalP":140,"totalC":180,"totalF":95,"defaultPortions":4}`;
+function updateUI() {
+  checkDayRollover();
+  const t = I18N[state.lang] || I18N.de;
+  const locale = state.lang === 'pl' ? 'pl-PL' : 'de-DE';
 
-      const raw = await callGeminiRequest(prompt, base64Img);
-      const obj = extractJSON(raw);
-      const item = Array.isArray(obj) ? obj[0] : obj;
+  const dateEl = document.getElementById('currentDateLabel');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString(locale, { weekday: 'short', day: '2-digit', month: 'short' });
 
-      const totalP = Math.max(1, numOr(item.totalP || item.p, 120));
-      const totalC = Math.max(1, numOr(item.totalC || item.c, 160));
-      const totalF = Math.max(1, numOr(item.totalF || item.f, 80));
-      const atwaterTotal = Math.round(4 * totalP + 4 * totalC + 9 * totalF);
-      const rawTotalKcal = numOr(item.totalKcal || item.kcal, atwaterTotal);
+  const btnDe = document.getElementById('langBtnDe'), btnPl = document.getElementById('langBtnPl');
+  if (btnDe && btnPl) {
+    btnDe.className = state.lang === 'de' ? 'px-2 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'px-2 py-1.5 rounded-lg text-xs font-bold bg-slate-800/80 text-slate-400 border border-slate-700';
+    btnPl.className = state.lang === 'pl' ? 'px-2 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'px-2 py-1.5 rounded-lg text-xs font-bold bg-slate-800/80 text-slate-400 border border-slate-700';
+  }
 
-      cachedPotResult = {
-        title: String(item.title || item.name || 'Topfgericht / Auflauf').trim(),
-        totalWeightG: Math.round(numOr(item.totalWeightG, 1400)),
-        totalKcal: Math.abs(rawTotalKcal - atwaterTotal) / Math.max(1, atwaterTotal) > 0.15 ? atwaterTotal : Math.round(rawTotalKcal),
-        totalP: Math.round(totalP * 10) / 10,
-        totalC: Math.round(totalC * 10) / 10,
-        totalF: Math.round(totalF * 10) / 10
-      };
-      currentPotPortions = Math.max(1, Math.round(numOr(item.defaultPortions, 4)));
+  const bindText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const bindPlaceholder = (id, val) => { const el = document.getElementById(id); if (el) el.placeholder = val; };
 
-      document.getElementById('potResultBox').classList.remove('hidden');
-      renderPotCalculator();
-    }
+  bindText('lockSubText', t.lockSub); bindPlaceholder('unlockCodeInput', t.lockPlaceholder); bindText('unlockBtnText', t.unlockBtn);
+  bindText('lblRemainingTitle', t.remTitle); bindText('lblGoalWord', t.goalWord); bindText('lblEatenWord', t.eatenWord);
+  bindText('lblMacroP', t.macroP); bindText('lblMacroC', t.macroC); bindText('lblMacroF', t.macroF);
+  bindText('lblSugar', t.sugar); bindText('lblFiber', t.fiber); bindText('lblWaterTitle', t.waterTitle);
+  bindText('lblScannerTitle', t.scannerTitle); bindText('lblModeMeal', t.modeMeal); bindText('lblModeFridge', t.modeFridge);
+  bindText('lblModeMenu', t.modeMenu); bindText('lblModePot', t.modePot); bindPlaceholder('foodInput', t.foodPlaceholder);
+  bindText('lblBtnPhoto', t.btnPhoto); bindText('lblBtnVoice', t.btnVoice); bindText('lblBtnScan', t.btnScan);
+  bindText('lblPreviewTitle', t.previewTitle); bindText('lblPreviewCancel', t.previewCancel); bindText('lblPortionScale', t.portionScale);
+  bindText('lblTodayLogTitle', t.todayLogTitle); bindText('lblZaubernTitle', t.zaubernTitle); bindText('lblZaubernSub', t.zaubernSub);
+  bindPlaceholder('wishCravingInput', t.wishPlaceholder); bindText('lblBtnZaubern', t.btnZaubern);
+  bindText('lblShopTitle', t.shopTitle); bindPlaceholder('customShopInput', t.shopPlaceholder);
+  bindText('lblWeightTitle', t.weightTitle); bindPlaceholder('weightInput', t.weightPlaceholder);
+  bindText('lblNavTracker', t.navTracker); bindText('lblNavIdeas', t.navIdeas); bindText('lblNavWeight', t.navWeight);
 
-    function renderPotCalculator() {
-      if (!cachedPotResult) return;
-      const box = document.getElementById('potCalcContent');
-      const frac = 1 / Math.max(1, currentPotPortions);
-      const partWeight = Math.round(cachedPotResult.totalWeightG * frac);
-      const partP = Math.round(cachedPotResult.totalP * frac * 10) / 10;
-      const partC = Math.round(cachedPotResult.totalC * frac * 10) / 10;
-      const partF = Math.round(cachedPotResult.totalF * frac * 10) / 10;
-      const partKcal = Math.round(4 * partP + 4 * partC + 9 * partF);
+  const galBtn = document.querySelector('button[onclick*="galleryInput"]');
+  if (galBtn) galBtn.innerHTML = `<i class="fa-regular fa-image mr-1"></i>${escapeHtml(t.galleryBtn)}`;
 
-      box.innerHTML = `
-        <div class="glass-subcard p-3.5 space-y-2.5 border border-purple-500/35">
-          <div class="flex justify-between items-start">
-            <div>
-              <h4 class="item-title-full text-xs font-extrabold text-white">🍲 ${escapeHtml(cachedPotResult.title)}</h4>
-              <p class="text-[11px] text-slate-400">Gesamter Topf (~${cachedPotResult.totalWeightG}g): ${cachedPotResult.totalKcal} kcal</p>
-            </div>
-            <span class="text-xs font-extrabold text-purple-300">1/${currentPotPortions} Topf</span>
-          </div>
-          <div class="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800">
-            <p class="text-xs font-bold text-emerald-400">Deine Portion (~${partWeight}g): ${partKcal} kcal</p>
-            <p class="text-[11px] text-slate-300 mt-0.5">Eiweiß: ${partP}g • Kohlenh.: ${partC}g • Fett: ${partF}g</p>
-          </div>
-          <div class="space-y-1">
-            <label class="text-[11px] text-slate-400 font-semibold">Auf wie viele Portionen ist der Topf aufgeteilt?</label>
-            <div class="grid grid-cols-5 gap-1.5">
-              ${[2, 3, 4, 5, 6].map(n => `
-                <button onclick="setPotPortions(${n})" class="py-1.5 rounded-lg text-xs font-bold ${currentPotPortions === n ? 'bg-purple-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">1/${n}</button>
-              `).join('')}
-            </div>
-          </div>
-          <button onclick="commitPotPortion()" class="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-extrabold text-xs">
-            Diese Portion (1/${currentPotPortions}) übernehmen
-          </button>
+  const autoBudgetBtn = document.getElementById('btnAutoBudgetMeals');
+  if (autoBudgetBtn && !autoBudgetBtn.disabled) {
+    autoBudgetBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i><span>${escapeHtml(t.autoBudgetBtn)}</span>`;
+  }
+
+  const hintMap = { meal: t.hintMeal, fridge: t.hintFridge, menu: t.hintMenu, pot: t.hintPot };
+  bindText('scannerModeHint', hintMap[scannerMode] || t.hintMeal);
+
+  const cheatBanner = document.getElementById('cheatRescueBanner');
+  if (cheatBanner) cheatBanner.classList.toggle('hidden', !state.cheatRescue?.active);
+
+  const { remKcal, remProt, effectiveGoalKcal, consumed } = getRemainingMacros();
+  const eatenKcal = Math.round(consumed.kcal);
+  bindText('kcalRemaining', remKcal); bindText('kcalGoalLabel', effectiveGoalKcal); bindText('kcalConsumedLabel', eatenKcal);
+
+  const pct = Math.min(100, Math.round((eatenKcal / Math.max(1, effectiveGoalKcal)) * 100));
+  bindText('kcalPercentLabel', `${pct}%`);
+  const ring = document.getElementById('kcalRing');
+  if (ring) {
+    const circumference = 201.06;
+    ring.style.strokeDashoffset = String(circumference - (pct / 100) * circumference);
+    ring.setAttribute('stroke', eatenKcal > effectiveGoalKcal ? '#ef4444' : '#10b981');
+  }
+
+  const goalP = Math.max(1, numOr(state.goals.protein, 260));
+  const goalC = Math.max(1, numOr(state.goals.carbs, 85));
+  const goalF = Math.max(1, numOr(state.goals.fat, 116));
+
+  bindText('protText', `${Math.round(consumed.p)}/${goalP}g`);
+  bindText('carbText', `${Math.round(consumed.c)}/${goalC}g`);
+  bindText('fatText', `${Math.round(consumed.f)}/${goalF}g`);
+
+  const protBar = document.getElementById('protBar'), carbBar = document.getElementById('carbBar'), fatBar = document.getElementById('fatBar');
+  if (protBar) protBar.style.width = `${Math.min(100, Math.round((consumed.p / goalP) * 100))}%`;
+  if (carbBar) carbBar.style.width = `${Math.min(100, Math.round((consumed.c / goalC) * 100))}%`;
+  if (fatBar) fatBar.style.width = `${Math.min(100, Math.round((consumed.f / goalF) * 100))}%`;
+
+  bindText('sugarPill', `${Math.round(consumed.sugar * 10) / 10}g`);
+  bindText('fiberPill', `${Math.round(consumed.fiber * 10) / 10}g`);
+  bindText('vitCPill', `${Math.round(consumed.vitC)}mg`);
+  bindText('magPill', `${Math.round(consumed.mag)}mg`);
+
+  const compassBtn = document.getElementById('btnRestBudgetCompass');
+  if (compassBtn) {
+    compassBtn.innerHTML = `<div class="flex items-center gap-2"><span class="text-base">💡</span><div><p class="text-xs font-extrabold text-white">${escapeHtml(t.compassTitle)}</p><p class="text-[11px] text-emerald-300">${t.compassSub(remKcal, remProt)}</p></div></div><i class="fa-solid fa-chevron-right text-emerald-400 text-xs"></i>`;
+  }
+
+  bindText('ideasRemKcal', `${remKcal} kcal`);
+  bindText('ideasRemProt', `${remProt}g ${t.protOpenWord}`);
+
+  const wLiters = Math.max(0, Math.round(numOr(state.waterLiters, 0) * 100) / 100);
+  bindText('waterText', `${wLiters.toFixed(2).replace(/\.00$/, '.0')} / 2.5 L`);
+  const glassesFilled = Math.min(8, Math.round(wLiters / 0.25));
+  bindText('waterGlasses', '🔵'.repeat(glassesFilled) + '⚪'.repeat(Math.max(0, 8 - glassesFilled)));
+
+  bindText('todayTotalKcal', `${eatenKcal} kcal`);
+  renderTodayLog(); renderShoppingList(); renderWeightEngine(); renderPastDays();
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayEnergy = state.energyLog.find(e => e.date === todayIso);
+  bindText('energyStatusText', todayEnergy ? (state.lang === 'pl' ? `Dziś: Poziom ${todayEnergy.level}/5` : `Heute: Level ${todayEnergy.level}/5 gespeichert`) : t.energyUnrated);
+}
+
+function renderTodayLog() {
+  const listEl = document.getElementById('todayLogList');
+  if (!listEl) return;
+  const t = I18N[state.lang] || I18N.de;
+  if (!state.todayLog.length) {
+    listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">${escapeHtml(t.emptyLog)}</p>`;
+    return;
+  }
+  listEl.innerHTML = state.todayLog.map((it, idx) => `
+    <div class="glass-subcard p-3 flex items-start justify-between gap-2.5 border border-slate-800">
+      <div class="flex items-start gap-2.5 flex-1 min-w-0">
+        ${it.thumb ? `<img src="${it.thumb}" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5" />` : `<div class="w-9 h-9 rounded-xl bg-slate-800/90 flex items-center justify-center text-base shrink-0 mt-0.5">${escapeHtml(it.icon || '🍽️')}</div>`}
+        <div class="flex-1 min-w-0">
+          <span class="text-[10px] text-slate-500 font-semibold block">${escapeHtml(it.time || '')}</span>
+          <p class="item-title-full text-xs font-bold text-white">${escapeHtml(it.name)}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">E:${numOr(it.p, 0)}g • K:${numOr(it.c, 0)}g • F:${numOr(it.f, 0)}g ${numOr(it.sugar, 0) > 0 ? `• 🍬${numOr(it.sugar, 0)}g` : ''}</p>
         </div>
-      `;
-    }
-
-    function setPotPortions(n) {
-      currentPotPortions = Math.max(1, numOr(n, 4));
-      renderPotCalculator();
-    }
-
-    function commitPotPortion() {
-      if (!cachedPotResult) return;
-      const frac = 1 / Math.max(1, currentPotPortions);
-      const partWeight = Math.round(cachedPotResult.totalWeightG * frac);
-      const partP = Math.round(cachedPotResult.totalP * frac * 10) / 10;
-      const partC = Math.round(cachedPotResult.totalC * frac * 10) / 10;
-      const partF = Math.round(cachedPotResult.totalF * frac * 10) / 10;
-      openPendingPreview([validateAtwater({
-        name: `${cachedPotResult.title} (1/${currentPotPortions} Topf, ~${partWeight}g)`,
-        kcal: Math.round(4 * partP + 4 * partC + 9 * partF),
-        p: partP, c: partC, f: partF, icon: '🍲'
-      })]);
-    }
-
-    function openRestBudgetSuggestions() {
-      switchTab('ideas');
-      generateBudgetClosingIdeas();
-    }
-
-    async function generateBudgetClosingIdeas() {
-      const { remKcal, remProt } = getRemainingMacros();
-      const btn = document.getElementById('btnAutoBudgetMeals');
-      const origHtml = btn ? btn.innerHTML : '';
-
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-emerald-400"></i> <span>Berechne Rezepte für ${remKcal} kcal...</span>`;
-      }
-
-      const fallbackBudgetIdeas = [
-        {
-          title: `Protein-Quark-Bowl mit Beeren (${Math.round(remKcal * 0.45)} kcal)`,
-          ingredients: `250g Magerquark, 100g Beeren, 20g Mandeln, Prise Zimt`,
-          steps: `Quark mit etwas Wasser cremig rühren, Beeren und Mandeln als Topping anrichten.`,
-          kcal: Math.round(remKcal * 0.45), p: Math.round(remProt * 0.5), c: 24, f: 8, icon: '🥣'
-        },
-        {
-          title: `Schnelle Hähnchen-Gemüse-Pfanne (${Math.round(remKcal * 0.85)} kcal)`,
-          ingredients: `200g Hähnchenbrust, 250g Brokkoli und Paprika, 1 TL Olivenöl, Kräuter`,
-          steps: `Hähnchen in Streifen scharf anbraten, Gemüse dazugeben, 6 Minuten knackig dünsten.`,
-          kcal: Math.round(remKcal * 0.85), p: Math.round(remProt * 0.85), c: 14, f: 9, icon: '🍳'
-        },
-        {
-          title: `Thunfisch-Ei-Vollkorn-Wrap (${remKcal} kcal Punktlandung)`,
-          ingredients: `1 Dose Thunfisch im eigenen Saft, 2 gekochte Eier, 1 Vollkornwrap, 2 EL Naturjoghurt`,
-          steps: `Thunfisch und Eier mit Joghurt und Kräutern zerdrücken, im Wrap einrollen und genießen.`,
-          kcal: remKcal, p: remProt, c: 32, f: 14, icon: '🌯'
-        }
-      ];
-
-      try {
-        const prompt = `Du bist ein präziser Ernährungswissenschaftler. Der Nutzer hat heute noch exakt ${remKcal} kcal und ${remProt}g Eiweiß offen.
-Erstelle genau 3 praxistaugliche Rezept-Vorschläge (1. Schneller Snack, 2. Leichtes Gericht, 3. Hauptmahlzeit zur Punktlandung), die diese Makros optimal ausschöpfen.
-Antworte AUSSCHLIESSLICH als valides JSON-Array:
-[{"title":"Name des Gerichts inkl. Gramm","ingredients":"Zutat 1, Zutat 2","steps":"Kurze 1-Satz Anleitung","kcal":${remKcal},"p":${remProt},"c":30,"f":12,"icon":"🥗"}]`;
-
-        const raw = await callGeminiRequest(prompt, null);
-        const list = normalizeRecipeList(extractJSON(raw));
-        renderGeneratedIdeas(list || fallbackBudgetIdeas);
-        showToast(`🎯 3 Vorschläge für dein Restbudget (${remKcal} kcal) bereit!`, 'info');
-      } catch (err) {
-        renderGeneratedIdeas(fallbackBudgetIdeas);
-        showToast('Offline-Ideen für dein Restbudget geladen', 'info');
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = origHtml;
-        }
-      }
-    }
-
-    async function handleZaubernPhoto(event) {
-      const file = event.target.files?.[0];
-      if (!file) return;
-      try {
-        const res = await compressImageFile(file);
-        zaubernPhotoBase64 = res.base64;
-        const prevContainer = document.getElementById('zaubernPhotoPreview');
-        const prevImg = document.getElementById('zaubernPhotoImg');
-        prevImg.src = res.dataUrl;
-        prevContainer.classList.remove('hidden');
-        showToast('📸 Zutatenfoto geladen — klicke auf „Rezepte jetzt zaubern“!', 'info');
-      } catch (err) {
-        showToast(err.message || 'Fehler beim Laden des Fotos', 'error');
-      } finally {
-        event.target.value = '';
-      }
-    }
-
-    function clearZaubernPhoto() {
-      zaubernPhotoBase64 = null;
-      document.getElementById('zaubernPhotoPreview')?.classList.add('hidden');
-      document.getElementById('zaubernPhotoImg').src = '';
-    }
-
-    function quickWish(text) {
-      document.getElementById('wishCravingInput').value = text;
-      generateAIMealIdeas();
-    }
-
-    function normalizeRecipeList(parsed) {
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      if (parsed && typeof parsed === 'object') {
-        for (const k of ['rezepte', 'recipes', 'ideas', 'meals', 'dishes', 'data']) {
-          if (Array.isArray(parsed[k]) && parsed[k].length > 0) return parsed[k];
-        }
-        for (const val of Object.values(parsed)) {
-          if (Array.isArray(val) && val.length > 0) return val;
-        }
-        if (parsed.title || parsed.name) return [parsed];
-      }
-      return null;
-    }
-
-    async function generateAIMealIdeas() {
-      const craving = document.getElementById('wishCravingInput').value.trim();
-      const { remKcal, remProt } = getRemainingMacros();
-      const btn = document.getElementById('btnGenerateIdeas');
-      const origHtml = btn ? btn.innerHTML : '';
-
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Zaubere in Turbo-Speed...</span>`;
-      }
-
-      const fallbackIdeas = [
-        {
-          title: 'Cremige High-Protein Gnocchi-Pfanne (420g)',
-          ingredients: '200g Gnocchi, 140g Hähnchenbrustfilet, 50g Frischkäse light, Spinat, Knoblauch',
-          steps: 'Gnocchi und Hähnchenstreifen goldbraun anbraten, Frischkäse und Spinat unterheben, 3 Min. köcheln.',
-          kcal: Math.min(540, remKcal), p: 44, c: 54, f: 11, icon: '🍝'
-        },
-        {
-          title: 'Schnelle Quark-Protein-Pfannkuchen mit Beeren (350g)',
-          ingredients: '150g Magerquark, 2 Eier, 40g Haferflocken, 80g Beeren, Prise Zimt',
-          steps: 'Zutaten cremig mixen, in beschichteter Pfanne backen und mit warmen Beeren servieren.',
-          kcal: Math.min(460, remKcal), p: 38, c: 42, f: 13, icon: '🥞'
-        }
-      ];
-
-      try {
-        const photoInstruction = zaubernPhotoBase64
-          ? `Der Nutzer hat ein FOTO seiner vorhandenen Zutaten beigefügt. Analysiere die sichtbaren Zutaten und zaubere daraus 2 geniale Rezepte.`
-          : `Der Nutzer wünscht sich: "${craving || 'Ein schnelles, proteinreiches Gericht'}".`;
-
-        const prompt = `Du bist ein erfahrener KI-Spitzenkoch. ${photoInstruction}
-Erstelle genau 2 geniale Rezepte passend für maximal ${remKcal} kcal pro Rezept und ca. ${Math.min(65, remProt)}g Eiweiß.
-Antworte AUSSCHLIESSLICH als valides JSON-Array:
-[{"title":"Vollständiger Rezeptname inkl. Portionsangabe","ingredients":"Zutat 1 (Gramm), Zutat 2 (Gramm)","steps":"Kurze 1-2 Satz Zubereitung","kcal":520,"p":42,"c":48,"f":14,"icon":"🍝"}]`;
-
-        const raw = await callGeminiRequest(prompt, zaubernPhotoBase64);
-        const list = normalizeRecipeList(extractJSON(raw));
-        renderGeneratedIdeas(list || fallbackIdeas);
-        showToast('✨ Rezepte erfolgreich gezaubert!', 'info');
-      } catch (err) {
-        renderGeneratedIdeas(fallbackIdeas);
-        showToast('Offline-Turbo-Rezepte geladen', 'info');
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = origHtml;
-        }
-      }
-    }
-
-    function renderGeneratedIdeas(list) {
-      const container = document.getElementById('aiIdeasContainer');
-      if (!container) return;
-
-      generatedRecipesCache = list.map(r => {
-        let ingStr = r.ingredients || r.zutaten || '';
-        if (Array.isArray(ingStr)) ingStr = ingStr.join(', ');
-        let stepStr = r.steps || r.zubereitung || r.anleitung || '';
-        if (Array.isArray(stepStr)) stepStr = stepStr.join(' ');
-
-        const p = Math.round(numOr(r.p, 35) * 10) / 10;
-        const c = Math.round(numOr(r.c, 45) * 10) / 10;
-        const f = Math.round(numOr(r.f, 12) * 10) / 10;
-        const rawKcal = Math.round(numOr(r.kcal, 480));
-        const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f);
-
-        return {
-          title: String(r.title || r.name || 'Leckeres Rezept').trim(),
-          ingredients: String(ingStr).trim(),
-          steps: String(stepStr).trim(),
-          kcal: Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15 ? atwaterKcal : rawKcal,
-          p, c, f,
-          icon: String(r.icon || '✨').trim()
-        };
-      });
-
-      container.innerHTML = generatedRecipesCache.map((r, idx) => `
-        <div class="glass-subcard p-3.5 space-y-2.5 border border-emerald-500/35 shadow-md">
-          <div class="flex items-start justify-between gap-2">
-            <h4 class="item-title-full text-sm font-extrabold text-white">${escapeHtml(r.icon)} ${escapeHtml(r.title)}</h4>
-            <span class="text-xs font-extrabold text-emerald-400 shrink-0">${r.kcal} kcal</span>
-          </div>
-          <p class="text-xs text-emerald-300 font-semibold">Eiweiß: ${r.p}g • Kohlenh.: ${r.c}g • Fett: ${r.f}g</p>
-          <p class="text-xs text-slate-300 leading-snug"><strong>Zutaten:</strong> ${escapeHtml(r.ingredients)}</p>
-          <p class="text-xs text-slate-400 leading-relaxed">${escapeHtml(r.steps)}</p>
-          <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="addGeneratedIngredientsToShop(${idx})" class="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition">🛒 Auf Einkaufsliste</button>
-            <button onclick="commitGeneratedRecipe(${idx})" class="py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-bold text-emerald-300 transition">✅ Essen & Loggen</button>
-          </div>
+      </div>
+      <div class="flex flex-col items-end gap-1.5 shrink-0">
+        <span class="text-xs font-extrabold text-emerald-400 whitespace-nowrap">${Math.round(numOr(it.kcal, 0))} kcal</span>
+        <div class="flex items-center gap-1">
+          <button onclick="openEditModal('today', ${idx})" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+          <button onclick="deleteLogItem(${idx})" class="w-6 h-6 rounded-lg bg-rose-950/70 hover:bg-rose-900 text-rose-400 text-[10px] flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
         </div>
-      `).join('');
+      </div>
+    </div>`).join('');
+}
 
-      setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+function deleteLogItem(idx) {
+  if (idx < 0 || idx >= state.todayLog.length) return;
+  state.todayLog.splice(idx, 1); saveState(); updateUI();
+  showToast(state.lang === 'pl' ? 'Wpis usunięty' : 'Eintrag gelöscht', 'info');
+}
+
+function addWater(delta) {
+  state.waterLiters = Math.max(0, Math.min(12, Math.round((numOr(state.waterLiters, 0) + numOr(delta, 0)) * 100) / 100));
+  saveState(); updateUI();
+}
+
+function openEditModal(source, idx) {
+  const list = source === 'pending' ? pendingItems : state.todayLog;
+  const item = list[idx];
+  if (!item) return;
+  editingTarget = { source, index: idx };
+  document.getElementById('editItemName').value = item.name || '';
+  document.getElementById('editItemKcal').value = Math.round(numOr(item.kcal, 0));
+  document.getElementById('editItemSugar').value = numOr(item.sugar, 0);
+  document.getElementById('editItemP').value = numOr(item.p, 0);
+  document.getElementById('editItemC').value = numOr(item.c, 0);
+  document.getElementById('editItemF').value = numOr(item.f, 0);
+  document.getElementById('editItemModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+  editingTarget = { source: null, index: -1 };
+  document.getElementById('editItemModal').classList.add('hidden');
+}
+
+function saveEditedItem() {
+  const { source, index } = editingTarget;
+  const list = source === 'pending' ? pendingItems : state.todayLog;
+  if (!list || !list[index]) { closeEditModal(); return; }
+  const orig = list[index];
+  const name = document.getElementById('editItemName').value.trim() || orig.name;
+  const inputKcal = Math.max(0, Math.round(numOr(document.getElementById('editItemKcal').value, orig.kcal)));
+  const sugar = Math.max(0, Math.round(numOr(document.getElementById('editItemSugar').value, orig.sugar) * 10) / 10);
+  const p = Math.max(0, Math.round(numOr(document.getElementById('editItemP').value, orig.p) * 10) / 10);
+  const c = Math.max(0, Math.round(numOr(document.getElementById('editItemC').value, orig.c) * 10) / 10);
+  const f = Math.max(0, Math.round(numOr(document.getElementById('editItemF').value, orig.f) * 10) / 10);
+
+  const macrosChanged = p !== orig.p || c !== orig.c || f !== orig.f;
+  const kcalChanged = inputKcal !== Math.round(numOr(orig.kcal, 0));
+  const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * numOr(orig.fiber, 0));
+
+  let finalKcal = inputKcal;
+  if (macrosChanged && !kcalChanged && atwaterKcal > 0) finalKcal = atwaterKcal;
+  else if (atwaterKcal > 0 && Math.abs(inputKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15 && macrosChanged) finalKcal = atwaterKcal;
+
+  const updated = { ...orig, name, kcal: finalKcal, sugar, p, c, f };
+  if (source === 'pending') {
+    const ratio = (currentPortionScale || 100) / 100;
+    updated.baseKcal = Math.round(finalKcal / ratio);
+    updated.baseP = Math.round((p / ratio) * 10) / 10;
+    updated.baseC = Math.round((c / ratio) * 10) / 10;
+    updated.baseF = Math.round((f / ratio) * 10) / 10;
+    updated.baseSugar = Math.round((sugar / ratio) * 10) / 10;
+    pendingItems[index] = updated;
+    renderPendingPreview();
+  } else {
+    state.todayLog[index] = updated; saveState(); updateUI();
+  }
+  closeEditModal();
+  showToast(state.lang === 'pl' ? '✏️ Zaktualizowano wpis' : '✏️ Eintrag aktualisiert', 'info');
+}
+
+function setScannerMode(mode) {
+  scannerMode = ['meal', 'fridge', 'menu', 'pot'].includes(mode) ? mode : 'meal';
+  const modes = { meal: 'modeBtnMeal', fridge: 'modeBtnFridge', menu: 'modeBtnMenu', pot: 'modeBtnPot' };
+  for (const [m, btnId] of Object.entries(modes)) document.getElementById(btnId)?.classList.toggle('active', m === scannerMode);
+  const t = I18N[state.lang] || I18N.de;
+  const hintMap = { meal: t.hintMeal, fridge: t.hintFridge, menu: t.hintMenu, pot: t.hintPot };
+  const hintEl = document.getElementById('scannerModeHint');
+  if (hintEl) hintEl.textContent = hintMap[scannerMode];
+}
+
+function toggleVoiceInput() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) { showToast(state.lang === 'pl' ? 'Brak obsługi głosu.' : 'Spracheingabe nicht unterstützt.', 'warn'); return; }
+  const voiceBtn = document.getElementById('voiceBtn');
+  if (isRecording && recognition) { recognition.stop(); return; }
+  recognition = new SpeechRec();
+  recognition.lang = state.lang === 'pl' ? 'pl-PL' : 'de-DE';
+  recognition.interimResults = false; recognition.maxAlternatives = 1;
+  recognition.onstart = () => { isRecording = true; voiceBtn?.classList.add('pulse-ring', 'border-rose-500'); showToast(state.lang === 'pl' ? '🎙️ Mów teraz...' : '🎙️ Bitte jetzt sprechen...', 'info'); };
+  recognition.onresult = (event) => {
+    const transcript = event.results?.[0]?.[0]?.transcript || '';
+    if (transcript) {
+      const input = document.getElementById('foodInput');
+      input.value = input.value ? `${input.value.trim()}, ${transcript}` : transcript;
+      triggerUnifiedScanner();
     }
+  };
+  recognition.onerror = () => showToast(state.lang === 'pl' ? 'Zakończono nagrywanie.' : 'Spracheingabe beendet.', 'warn');
+  recognition.onend = () => { isRecording = false; voiceBtn?.classList.remove('pulse-ring', 'border-rose-500'); };
+  recognition.start();
+}
 
-    function addGeneratedIngredientsToShop(idx) {
-      const recipe = generatedRecipesCache[idx];
-      if (recipe?.ingredients) addRecipeIngredientsToShop(recipe.ingredients);
-    }
+async function runFridgeLeftoverAI(textVal, base64Img) {
+  const { remKcal, remProt } = getRemainingMacros();
+  const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
+  const prompt = `Du bist ein KI-Küchenchef. Antworte auf ${langName}. Analysiere das Foto des Kühlschranks/Vorrats bzw. den Hinweis ("${textVal || 'Kühlschrank-Check'}"). Erstelle 2 bis 3 Rezepte passend für maximal ${remKcal} kcal und ${remProt}g Eiweiß. Antworte AUSSCHLIESSLICH als valides JSON-Array: [{"title":"Rezeptname inkl. Menge","mhdNote":"Frische-/MHD-Hinweis","ingredients":"Zutat 1 (g), Zutat 2 (g)","steps":"Kurze Zubereitung","kcal":480,"p":42,"c":35,"f":16,"icon":"🧊"}]`;
+  let list = null;
+  try { list = normalizeRecipeList(extractJSON(await callGeminiRequest(prompt, base64Img))); } catch (err) { if (!textVal && !base64Img) throw err; }
+  if (!list || !list.length) {
+    list = [{
+      title: state.lang === 'pl' ? 'Patelnia jajeczno-warzywna z lodówki (380g)' : 'Kühlschrank-Rescue Gemüse-Ei-Pfanne (380g)',
+      mhdNote: state.lang === 'pl' ? 'Zużyj najpierw otwarte produkty mleczne.' : 'Geöffnete Milchprodukte zuerst verbrauchen.',
+      ingredients: '3 Eier, 150g Gemüse, 50g Hüttenkäse, Kräuter',
+      steps: 'Gemüse kurz anbraten, Eier und Hüttenkäse darübergeben und stocken lassen.',
+      kcal: 410, p: 32, c: 12, f: 24, icon: '🧊'
+    }];
+  }
+  cachedFridgeRecipes = list.map(r => ({
+    title: String(r.title || r.name || 'Gericht').trim(), mhdNote: String(r.mhdNote || r.warn || 'Frisch verarbeiten').trim(),
+    ingredients: Array.isArray(r.ingredients) ? r.ingredients.join(', ') : String(r.ingredients || ''),
+    steps: Array.isArray(r.steps) ? r.steps.join(' ') : String(r.steps || ''),
+    kcal: Math.round(numOr(r.kcal, 420)), p: Math.round(numOr(r.p, 30) * 10) / 10, c: Math.round(numOr(r.c, 28) * 10) / 10, f: Math.round(numOr(r.f, 16) * 10) / 10,
+    icon: String(r.icon || '🧊').trim()
+  }));
+  document.getElementById('fridgeResultBox').classList.remove('hidden');
+  document.getElementById('fridgeRecipesList').innerHTML = cachedFridgeRecipes.map((r, idx) => `
+    <div class="glass-subcard p-3.5 space-y-2 border border-sky-500/35">
+      <div class="flex items-start justify-between gap-2"><h4 class="item-title-full text-xs font-extrabold text-white">${escapeHtml(r.icon)} ${escapeHtml(r.title)}</h4><span class="text-xs font-extrabold text-sky-400 shrink-0">${r.kcal} kcal</span></div>
+      <p class="text-[11px] text-amber-300 font-medium">⏱️ ${escapeHtml(r.mhdNote)}</p>
+      <p class="text-[11px] text-emerald-300 font-semibold">E:${r.p}g • K:${r.c}g • F:${r.f}g</p>
+      <p class="text-[11px] text-slate-300"><strong>${state.lang === 'pl' ? 'Składniki:' : 'Zutaten:'}</strong> ${escapeHtml(r.ingredients)}</p>
+      <p class="text-[11px] text-slate-400">${escapeHtml(r.steps)}</p>
+      <button onclick="commitFridgeRecipe(${idx})" class="w-full py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-xs font-bold text-sky-300">✅ ${state.lang === 'pl' ? 'Zapisz jako posiłek' : 'Als Mahlzeit übernehmen'}</button>
+    </div>`).join('');
+}
 
-    function commitGeneratedRecipe(idx) {
-      const recipe = generatedRecipesCache[idx];
-      if (!recipe) return;
-      switchTab('tracker');
-      openPendingPreview([validateAtwater({
-        name: recipe.title, kcal: recipe.kcal, p: recipe.p, c: recipe.c, f: recipe.f, icon: recipe.icon
-      })]);
-    }
+function commitFridgeRecipe(idx) {
+  const r = cachedFridgeRecipes[idx];
+  if (r) openPendingPreview([validateAtwater({ name: r.title, kcal: r.kcal, p: r.p, c: r.c, f: r.f, icon: r.icon })]);
+}
 
-    function addRecipeIngredientsToShop(ingStr) {
-      const parts = String(ingStr || '').split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-      if (!parts.length) return;
-      let added = 0;
-      for (const p of parts) {
-        if (!state.shoppingList.some(it => it.text.toLowerCase() === p.toLowerCase())) {
-          state.shoppingList.push({ text: p, done: false });
-          added++;
-        }
-      }
-      saveState();
-      renderShoppingList();
-      showToast(`🛒 ${added} Zutat(en) auf die Einkaufsliste gesetzt!`, 'info');
-    }
+async function runMenuScannerAI(textVal, base64Img) {
+  const { remKcal, remProt } = getRemainingMacros();
+  const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
+  const prompt = `Du bist ein Ernährungs-Coach im Restaurant. Antworte auf ${langName}. Analysiere die Speisekarte ("${textVal || 'Speisekarte'}") passend zum Restbudget (${remKcal} kcal, ${remProt}g Eiweiß). Bewerte alle Gerichte per Ampel ("green", "yellow", "red") inkl. Spar-Tipp ("swapTip"). Antworte AUSSCHLIESSLICH als valides JSON-Array: [{"name":"Name","kcal":580,"p":42,"c":45,"f":22,"traffic":"green","swapTip":"Tipp"}]`;
+  const parsed = extractJSON(await callGeminiRequest(prompt, base64Img));
+  const arr = Array.isArray(parsed) ? parsed : (parsed.items || parsed.dishes || [parsed]);
+  cachedMenuResults = arr.map(d => {
+    const v = validateAtwater(d);
+    const tr = String(d.traffic || 'yellow').toLowerCase();
+    return { ...v, traffic: ['green', 'yellow', 'red'].includes(tr) ? tr : (v.kcal <= 600 ? 'green' : v.kcal <= 900 ? 'yellow' : 'red'), swapTip: String(d.swapTip || d.tip || 'Dressing separat bestellen').trim() };
+  });
+  document.getElementById('menuResultBox').classList.remove('hidden');
+  filterMenuItems('all');
+}
 
-    function addShoppingItem() {
-      const input = document.getElementById('customShopInput');
-      const val = (input?.value || '').trim();
-      if (!val) return;
-      state.shoppingList.push({ text: val, done: false });
-      input.value = '';
-      saveState();
-      renderShoppingList();
-    }
+function filterMenuItems(filter) {
+  const container = document.getElementById('menuItemsList');
+  if (!container) return;
+  const filtered = filter === 'all' ? cachedMenuResults : cachedMenuResults.filter(d => d.traffic === filter);
+  if (!filtered.length) { container.innerHTML = `<p class="text-xs text-slate-400 py-2">Keine Gerichte in dieser Kategorie.</p>`; return; }
+  container.innerHTML = filtered.map(d => {
+    const origIdx = cachedMenuResults.indexOf(d);
+    const badge = d.traffic === 'green' ? '🟢 Top' : d.traffic === 'yellow' ? '🟡 Okay' : '🔴 Bombe';
+    const borderCls = d.traffic === 'green' ? 'traffic-green' : d.traffic === 'yellow' ? 'traffic-yellow' : 'traffic-red';
+    return `<div class="glass-subcard p-3 space-y-1.5 ${borderCls}">
+      <div class="flex items-start justify-between gap-2"><div><span class="text-[10px] font-bold uppercase text-slate-400">${badge}</span><h4 class="item-title-full text-xs font-extrabold text-white">${escapeHtml(d.name)}</h4></div><span class="text-xs font-extrabold text-emerald-400 shrink-0">${d.kcal} kcal</span></div>
+      <p class="text-[11px] text-slate-300">E:${d.p}g • K:${d.c}g • F:${d.f}g</p>
+      <p class="text-[11px] text-amber-300">💡 ${escapeHtml(d.swapTip)}</p>
+      <button onclick="commitMenuItem(${origIdx})" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-300 mt-1">${state.lang === 'pl' ? 'Wybierz i sprawdź' : 'Auswählen & Prüfen'}</button>
+    </div>`;
+  }).join('');
+}
 
-    function toggleShopItem(idx) {
-      if (!state.shoppingList[idx]) return;
-      state.shoppingList[idx].done = !state.shoppingList[idx].done;
-      saveState();
-      renderShoppingList();
-    }
+function commitMenuItem(idx) {
+  const d = cachedMenuResults[idx];
+  if (d) openPendingPreview([validateAtwater(d)]);
+}
 
-    function deleteShopItem(idx) {
-      state.shoppingList.splice(idx, 1);
-      saveState();
-      renderShoppingList();
-    }
+async function runPotScannerAI(textVal, base64Img) {
+  const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
+  const prompt = `Du bist ein Küchen-Physiker. Antworte auf ${langName}. Analysiere den Topf/Auflauf ("${textVal || 'Topf/Auflauf'}"). Antworte AUSSCHLIESSLICH als valides JSON-Objekt: {"title":"Name","totalWeightG":1600,"totalKcal":2200,"totalP":140,"totalC":180,"totalF":95,"defaultPortions":4}`;
+  const obj = extractJSON(await callGeminiRequest(prompt, base64Img));
+  const item = Array.isArray(obj) ? obj[0] : obj;
+  const totalP = Math.max(1, numOr(item.totalP || item.p, 120));
+  const totalC = Math.max(1, numOr(item.totalC || item.c, 160));
+  const totalF = Math.max(1, numOr(item.totalF || item.f, 80));
+  const atwaterTotal = Math.round(4 * totalP + 4 * totalC + 9 * totalF);
+  const rawTotalKcal = numOr(item.totalKcal || item.kcal, atwaterTotal);
+  cachedPotResult = {
+    title: String(item.title || item.name || 'Topfgericht').trim(), totalWeightG: Math.round(numOr(item.totalWeightG, 1400)),
+    totalKcal: Math.abs(rawTotalKcal - atwaterTotal) / Math.max(1, atwaterTotal) > 0.15 ? atwaterTotal : Math.round(rawTotalKcal),
+    totalP: Math.round(totalP * 10) / 10, totalC: Math.round(totalC * 10) / 10, totalF: Math.round(totalF * 10) / 10
+  };
+  currentPotPortions = Math.max(1, Math.round(numOr(item.defaultPortions, 4)));
+  document.getElementById('potResultBox').classList.remove('hidden');
+  renderPotCalculator();
+}
 
-    function clearCheckedShopping() {
-      state.shoppingList = state.shoppingList.filter(it => !it.done);
-      saveState();
-      renderShoppingList();
-      showToast('Erledigte Einkäufe entfernt', 'info');
-    }
+function renderPotCalculator() {
+  if (!cachedPotResult) return;
+  const frac = 1 / Math.max(1, currentPotPortions);
+  const partWeight = Math.round(cachedPotResult.totalWeightG * frac);
+  const partP = Math.round(cachedPotResult.totalP * frac * 10) / 10;
+  const partC = Math.round(cachedPotResult.totalC * frac * 10) / 10;
+  const partF = Math.round(cachedPotResult.totalF * frac * 10) / 10;
+  const partKcal = Math.round(4 * partP + 4 * partC + 9 * partF);
+  document.getElementById('potCalcContent').innerHTML = `
+    <div class="glass-subcard p-3.5 space-y-2.5 border border-purple-500/35">
+      <div class="flex justify-between items-start"><div><h4 class="item-title-full text-xs font-extrabold text-white">🍲 ${escapeHtml(cachedPotResult.title)}</h4><p class="text-[11px] text-slate-400">Gesamt (~${cachedPotResult.totalWeightG}g): ${cachedPotResult.totalKcal} kcal</p></div><span class="text-xs font-extrabold text-purple-300">1/${currentPotPortions}</span></div>
+      <div class="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800"><p class="text-xs font-bold text-emerald-400">Portion (~${partWeight}g): ${partKcal} kcal</p><p class="text-[11px] text-slate-300 mt-0.5">E: ${partP}g • K: ${partC}g • F: ${partF}g</p></div>
+      <div class="grid grid-cols-5 gap-1.5">${[2, 3, 4, 5, 6].map(n => `<button onclick="setPotPortions(${n})" class="py-1.5 rounded-lg text-xs font-bold ${currentPotPortions === n ? 'bg-purple-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">1/${n}</button>`).join('')}</div>
+      <button onclick="commitPotPortion()" class="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-extrabold text-xs">Portion (1/${currentPotPortions}) übernehmen</button>
+    </div>`;
+}
 
-    function renderShoppingList() {
-      const container = document.getElementById('shoppingListContainer');
-      if (!container) return;
-      if (!state.shoppingList.length) {
-        container.innerHTML = `<p class="text-xs text-slate-500 py-2">Deine Einkaufsliste ist leer.</p>`;
-        return;
-      }
-      container.innerHTML = state.shoppingList.map((it, idx) => `
-        <div class="glass-subcard px-3 py-2 flex items-center justify-between gap-2">
-          <label class="flex items-center gap-2.5 flex-1 cursor-pointer min-w-0">
-            <input type="checkbox" ${it.done ? 'checked' : ''} onchange="toggleShopItem(${idx})" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer shrink-0" />
-            <span class="text-xs ${it.done ? 'line-through text-slate-500' : 'text-slate-200 font-medium'} break-words">${escapeHtml(it.text)}</span>
-          </label>
-          <button onclick="deleteShopItem(${idx})" class="text-slate-500 hover:text-rose-400 text-xs px-1">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-      `).join('');
-    }
+function setPotPortions(n) { currentPotPortions = Math.max(1, numOr(n, 4)); renderPotCalculator(); }
 
-    function logWeight() {
-      const input = document.getElementById('weightInput');
-      const val = numOr(input?.value, 0);
-      if (val < 30 || val > 300) {
-        showToast('Bitte gültiges Gewicht (30 - 300 kg) eingeben.', 'warn');
-        return;
-      }
-      const today = new Date().toISOString().slice(0, 10);
-      const idx = state.weightLog.findIndex(w => w.date === today);
-      if (idx >= 0) state.weightLog[idx].weight = val;
-      else state.weightLog.push({ date: today, weight: val });
-      state.weightLog.sort((a, b) => String(a.date).localeCompare(String(b.date)));
-      state.userProfile.weight = val;
-      if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = val;
-      if (input) input.value = '';
-      saveState();
-      updateUI();
-      showToast(`⚖️ Gewicht (${val.toFixed(1)} kg) gespeichert!`, 'info');
-    }
+function commitPotPortion() {
+  if (!cachedPotResult) return;
+  const frac = 1 / Math.max(1, currentPotPortions);
+  const partWeight = Math.round(cachedPotResult.totalWeightG * frac);
+  const partP = Math.round(cachedPotResult.totalP * frac * 10) / 10;
+  const partC = Math.round(cachedPotResult.totalC * frac * 10) / 10;
+  const partF = Math.round(cachedPotResult.totalF * frac * 10) / 10;
+  openPendingPreview([validateAtwater({ name: `${cachedPotResult.title} (1/${currentPotPortions}, ~${partWeight}g)`, kcal: Math.round(4 * partP + 4 * partC + 9 * partF), p: partP, c: partC, f: partF, icon: '🍲' })]);
+}
 
-    function renderWeightEngine() {
-      const curEl = document.getElementById('currentWeightVal');
-      const trendEl = document.getElementById('trendWeightVal');
-      const chartEl = document.getElementById('weightChartContainer');
-      const projEl = document.getElementById('weightProjectionBox');
-      if (!chartEl || !projEl) return;
+function openRestBudgetSuggestions() { switchTab('ideas'); generateBudgetClosingIdeas(); }
 
-      const sorted = [...state.weightLog].sort((a, b) => String(a.date).localeCompare(String(b.date)));
-      const latestW = sorted.length ? numOr(sorted[sorted.length - 1].weight, state.userProfile.weight) : numOr(state.userProfile.weight, 86.0);
-      const targetW = numOr(state.goals.targetWeight, 80.0);
+async function generateBudgetClosingIdeas() {
+  const { remKcal, remProt } = getRemainingMacros();
+  const btn = document.getElementById('btnAutoBudgetMeals');
+  const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-emerald-400"></i> <span>${state.lang === 'pl' ? 'Obliczam dla' : 'Berechne für'} ${remKcal} kcal...</span>`;
+  }
+  const fallbackBudgetIdeas = state.lang === 'pl' ? [
+    { title: `Miska twarogowa High-Protein z jagodami (${Math.round(remKcal * 0.45)} kcal)`, ingredients: `250g chudego twarogu, 100g jagód, 20g migdałów`, steps: `Twaróg wymieszaj z wodą na krem, dodaj owoce i migdały.`, kcal: Math.round(remKcal * 0.45), p: Math.round(remProt * 0.5), c: 24, f: 8, icon: '🥣' },
+    { title: `Szybka patelnia z kurczakiem i warzywami (${Math.round(remKcal * 0.85)} kcal)`, ingredients: `200g piersi z kurczaka, 250g brokułów i papryki, 1 łyżeczka oliwy`, steps: `Kurczaka podsmaż, dodaj warzywa i duś przez 6 minut.`, kcal: Math.round(remKcal * 0.85), p: Math.round(remProt * 0.85), c: 14, f: 9, icon: '🍳' },
+    { title: `Wrap pełnoziarnisty z tuńczykiem i jajkiem (${remKcal} kcal)`, ingredients: `1 puszka tuńczyka, 2 jajka, 1 wrap pełnoziarnisty, 2 łyżki jogurtu`, steps: `Wymieszaj składniki z jogurtem i zawiń w tortillę.`, kcal: remKcal, p: remProt, c: 32, f: 14, icon: '🌯' }
+  ] : [
+    { title: `Protein-Quark-Bowl mit Beeren (${Math.round(remKcal * 0.45)} kcal)`, ingredients: `250g Magerquark, 100g Beeren, 20g Mandeln, Zimt`, steps: `Quark cremig rühren, Beeren und Mandeln als Topping anrichten.`, kcal: Math.round(remKcal * 0.45), p: Math.round(remProt * 0.5), c: 24, f: 8, icon: '🥣' },
+    { title: `Schnelle Hähnchen-Gemüse-Pfanne (${Math.round(remKcal * 0.85)} kcal)`, ingredients: `200g Hähnchenbrust, 250g Brokkoli und Paprika, 1 TL Olivenöl`, steps: `Hähnchen scharf anbraten, Gemüse dazugeben, 6 Min. dünsten.`, kcal: Math.round(remKcal * 0.85), p: Math.round(remProt * 0.85), c: 14, f: 9, icon: '🍳' },
+    { title: `Thunfisch-Ei-Vollkorn-Wrap (${remKcal} kcal Punktlandung)`, ingredients: `1 Dose Thunfisch, 2 gekochte Eier, 1 Vollkornwrap, 2 EL Joghurt`, steps: `Thunfisch und Eier mit Joghurt mischen und im Wrap einrollen.`, kcal: remKcal, p: remProt, c: 32, f: 14, icon: '🌯' }
+  ];
+  try {
+    const prompt = `Du bist ein Ernährungswissenschaftler. Antworte auf ${langName}. Der Nutzer hat noch ${remKcal} kcal und ${remProt}g Eiweiß offen. Erstelle genau 3 Rezept-Vorschläge. Antworte AUSSCHLIESSLICH als valides JSON-Array: [{"title":"Name inkl. Gramm","ingredients":"Zutat 1, Zutat 2","steps":"Kurze 1-Satz Anleitung","kcal":${remKcal},"p":${remProt},"c":30,"f":12,"icon":"🥗"}]`;
+    const list = normalizeRecipeList(extractJSON(await callGeminiRequest(prompt, null)));
+    renderGeneratedIdeas(list || fallbackBudgetIdeas);
+    showToast(state.lang === 'pl' ? `🎯 Gotowe 3 propozycje (${remKcal} kcal)!` : `🎯 3 Vorschläge (${remKcal} kcal) bereit!`, 'info');
+  } catch (err) {
+    renderGeneratedIdeas(fallbackBudgetIdeas);
+    showToast(state.lang === 'pl' ? 'Załadowano propozycje offline' : 'Offline-Ideen geladen', 'info');
+  } finally {
+    if (btn) { btn.disabled = false; updateUI(); }
+  }
+}
 
-      let ewma = sorted.length ? numOr(sorted[0].weight, latestW) : latestW;
-      const alpha = 0.25;
-      const trendSeries = sorted.map(pt => {
-        const w = numOr(pt.weight, ewma);
-        ewma = alpha * w + (1 - alpha) * ewma;
-        return { date: pt.date, weight: w, trend: Math.round(ewma * 10) / 10 };
-      });
+async function handleZaubernPhoto(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    const res = await compressImageFile(file);
+    zaubernPhotoBase64 = res.base64;
+    document.getElementById('zaubernPhotoImg').src = res.dataUrl;
+    document.getElementById('zaubernPhotoPreview').classList.remove('hidden');
+    showToast(state.lang === 'pl' ? '📸 Zdjęcie składników gotowe!' : '📸 Zutatenfoto geladen!', 'info');
+  } catch (err) { showToast(err.message || 'Fehler', 'error'); } finally { event.target.value = ''; }
+}
 
-      if (curEl) curEl.textContent = `${latestW.toFixed(1)} kg`;
-      if (trendEl) trendEl.textContent = `Trend: ${ewma.toFixed(1)} kg`;
+function clearZaubernPhoto() {
+  zaubernPhotoBase64 = null;
+  document.getElementById('zaubernPhotoPreview')?.classList.add('hidden');
+  document.getElementById('zaubernPhotoImg').src = '';
+}
 
-      if (trendSeries.length < 2) {
-        chartEl.innerHTML = `<span class="text-xs text-slate-500">Trage mindestens 2 Tage Gewicht ein, um die Trend-Kurve zu sehen (Aktuell: ${latestW.toFixed(1)} kg).</span>`;
-      } else {
-        const recent = trendSeries.slice(-14);
-        const weights = recent.flatMap(d => [d.weight, d.trend]);
-        const minW = Math.min(...weights, targetW) - 0.5;
-        const maxW = Math.max(...weights, targetW) + 0.5;
-        const span = Math.max(1, maxW - minW);
-        const W = 320, H = 110, pad = 14;
-        const toX = (i) => pad + (i / (recent.length - 1)) * (W - 2 * pad);
-        const toY = (val) => H - pad - ((val - minW) / span) * (H - 2 * pad);
+function quickWish(text) { document.getElementById('wishCravingInput').value = text; generateAIMealIdeas(); }
 
-        const rawPts = recent.map((d, i) => `${toX(i).toFixed(1)},${toY(d.weight).toFixed(1)}`).join(' ');
-        const trendPts = recent.map((d, i) => `${toX(i).toFixed(1)},${toY(d.trend).toFixed(1)}`).join(' ');
-        const targetY = toY(targetW).toFixed(1);
+function normalizeRecipeList(parsed) {
+  if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+  if (parsed && typeof parsed === 'object') {
+    for (const k of ['rezepte', 'recipes', 'ideas', 'meals', 'dishes', 'data']) if (Array.isArray(parsed[k]) && parsed[k].length > 0) return parsed[k];
+    for (const val of Object.values(parsed)) if (Array.isArray(val) && val.length > 0) return val;
+    if (parsed.title || parsed.name) return [parsed];
+  }
+  return null;
+}
 
-        chartEl.innerHTML = `
-          <svg viewBox="0 0 ${W} ${H}" class="w-full h-full overflow-visible">
-            <line x1="${pad}" y1="${targetY}" x2="${W - pad}" y2="${targetY}" stroke="#38bdf8" stroke-dasharray="4 4" stroke-width="1" />
-            <polyline fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="2 2" points="${rawPts}" />
-            <polyline fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" points="${trendPts}" />
-            ${recent.map((d, i) => `<circle cx="${toX(i).toFixed(1)}" cy="${toY(d.weight).toFixed(1)}" r="2.8" fill="#10b981" />`).join('')}
-          </svg>
-        `;
-      }
+async function generateAIMealIdeas() {
+  const craving = document.getElementById('wishCravingInput').value.trim();
+  const { remKcal, remProt } = getRemainingMacros();
+  const btn = document.getElementById('btnGenerateIdeas');
+  const origHtml = btn ? btn.innerHTML : '';
+  const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
+  if (btn) { btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Turbo-Speed...</span>`; }
+  const fallbackIdeas = [
+    { title: 'Cremige High-Protein Gnocchi-Pfanne (420g)', ingredients: '200g Gnocchi, 140g Hähnchenbrustfilet, 50g Frischkäse light, Spinat', steps: 'Gnocchi und Hähnchen anbraten, Frischkäse und Spinat unterheben.', kcal: Math.min(540, remKcal), p: 44, c: 54, f: 11, icon: '🍝' },
+    { title: 'Schnelle Quark-Protein-Pfannkuchen mit Beeren (350g)', ingredients: '150g Magerquark, 2 Eier, 40g Haferflocken, 80g Beeren', steps: 'Zutaten mixen, in der Pfanne backen und mit Beeren servieren.', kcal: Math.min(460, remKcal), p: 38, c: 42, f: 13, icon: '🥞' }
+  ];
+  try {
+    const photoInstruction = zaubernPhotoBase64 ? `Analysiere die sichtbaren Zutaten auf dem FOTO und zaubere daraus 2 Rezepte.` : `Der Nutzer wünscht sich: "${craving || 'Ein schnelles, proteinreiches Gericht'}".`;
+    const prompt = `Du bist ein KI-Spitzenkoch. Antworte auf ${langName}. ${photoInstruction} Erstelle 2 Rezepte für maximal ${remKcal} kcal und ca. ${Math.min(65, remProt)}g Eiweiß. Antworte AUSSCHLIESSLICH als valides JSON-Array: [{"title":"Rezeptname inkl. g","ingredients":"Zutat 1 (g), Zutat 2 (g)","steps":"Kurze Zubereitung","kcal":520,"p":42,"c":48,"f":14,"icon":"🍝"}]`;
+    const list = normalizeRecipeList(extractJSON(await callGeminiRequest(prompt, zaubernPhotoBase64)));
+    renderGeneratedIdeas(list || fallbackIdeas);
+    showToast(state.lang === 'pl' ? '✨ Przepisy gotowe!' : '✨ Rezepte erfolgreich gezaubert!', 'info');
+  } catch (err) {
+    renderGeneratedIdeas(fallbackIdeas);
+    showToast('Offline-Turbo-Rezepte geladen', 'info');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = origHtml; updateUI(); }
+  }
+}
 
-      const diff = Math.round((latestW - targetW) * 10) / 10;
-      if (Math.abs(diff) <= 0.2) {
-        projEl.innerHTML = `🎉 <strong class="text-emerald-400">Zielgewicht erreicht!</strong> Du liegst exakt bei deinem Ziel von <strong>${targetW.toFixed(1)} kg</strong>.`;
-      } else {
-        const p = state.userProfile;
-        const bmr = 10 * latestW + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
-        const tdee = Math.round(bmr * p.activity);
-        const dailyDelta = Math.max(200, Math.abs(tdee - numOr(state.goals.kcal, 2425)));
-        const daysNeeded = Math.max(1, Math.round((Math.abs(diff) * 7700) / dailyDelta));
-        const targetDate = new Date(Date.now() + daysNeeded * 86400000).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' });
-        projEl.innerHTML = `Noch <strong>${Math.abs(diff).toFixed(1)} kg</strong> bis zum Zielgewicht (<strong>${targetW.toFixed(1)} kg</strong>). Bei deinem aktuellen Kalorienziel erreichst du es voraussichtlich um den <strong class="text-emerald-400">${targetDate}</strong> (~${daysNeeded} Tage).`;
-      }
-    }
+function renderGeneratedIdeas(list) {
+  const container = document.getElementById('aiIdeasContainer');
+  if (!container) return;
+  const t = I18N[state.lang] || I18N.de;
+  generatedRecipesCache = list.map(r => {
+    let ingStr = r.ingredients || r.zutaten || ''; if (Array.isArray(ingStr)) ingStr = ingStr.join(', ');
+    let stepStr = r.steps || r.zubereitung || r.anleitung || ''; if (Array.isArray(stepStr)) stepStr = stepStr.join(' ');
+    const p = Math.round(numOr(r.p, 35) * 10) / 10, c = Math.round(numOr(r.c, 45) * 10) / 10, f = Math.round(numOr(r.f, 12) * 10) / 10;
+    const rawKcal = Math.round(numOr(r.kcal, 480)), atwaterKcal = Math.round(4 * p + 4 * c + 9 * f);
+    return {
+      title: String(r.title || r.name || 'Rezept').trim(), ingredients: String(ingStr).trim(), steps: String(stepStr).trim(),
+      kcal: Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15 ? atwaterKcal : rawKcal, p, c, f, icon: String(r.icon || '✨').trim()
+    };
+  });
+  container.innerHTML = generatedRecipesCache.map((r, idx) => `
+    <div class="glass-subcard p-3.5 space-y-2.5 border border-emerald-500/35 shadow-md">
+      <div class="flex items-start justify-between gap-2"><h4 class="item-title-full text-sm font-extrabold text-white">${escapeHtml(r.icon)} ${escapeHtml(r.title)}</h4><span class="text-xs font-extrabold text-emerald-400 shrink-0">${r.kcal} kcal</span></div>
+      <p class="text-xs text-emerald-300 font-semibold">${t.macroP}: ${r.p}g • ${t.macroC}: ${r.c}g • ${t.macroF}: ${r.f}g</p>
+      <p class="text-xs text-slate-300 leading-snug"><strong>${state.lang === 'pl' ? 'Składniki:' : 'Zutaten:'}</strong> ${escapeHtml(r.ingredients)}</p>
+      <p class="text-xs text-slate-400 leading-relaxed">${escapeHtml(r.steps)}</p>
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button onclick="addGeneratedIngredientsToShop(${idx})" class="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition">🛒 ${state.lang === 'pl' ? 'Do listy zakupów' : 'Auf Einkaufsliste'}</button>
+        <button onclick="commitGeneratedRecipe(${idx})" class="py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-bold text-emerald-300 transition">✅ ${state.lang === 'pl' ? 'Zjedz i zapisz' : 'Essen & Loggen'}</button>
+      </div>
+    </div>`).join('');
+  setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+}
 
-    function renderPastDays() {
-      const el = document.getElementById('pastDaysContainer');
-      if (!el) return;
-      if (!state.pastDaysLog.length) {
-        el.innerHTML = `<p class="text-xs text-slate-500 py-2">Noch keine abgeschlossenen Tage im Archiv.</p>`;
-        return;
-      }
-      el.innerHTML = state.pastDaysLog.map(d => `
-        <div class="glass-subcard p-3 flex items-center justify-between text-xs">
-          <div>
-            <p class="font-bold text-white">${escapeHtml(d.date)}</p>
-            <p class="text-[11px] text-slate-400">E:${d.p}g • K:${d.c}g • F:${d.f}g (${d.itemsCount || 0} Einträge)</p>
-          </div>
-          <span class="font-extrabold text-emerald-400">${d.kcal} kcal</span>
-        </div>
-      `).join('');
-    }
+function addGeneratedIngredientsToShop(idx) { const r = generatedRecipesCache[idx]; if (r?.ingredients) addRecipeIngredientsToShop(r.ingredients); }
 
-    function saveUserProfile() {
-      state.userProfile = {
-        gender: document.getElementById('calcGender').value,
-        age: numOr(document.getElementById('calcAge').value, 35),
-        height: numOr(document.getElementById('calcHeight').value, 178),
-        weight: numOr(document.getElementById('calcWeight').value, 86.0),
-        activity: numOr(document.getElementById('calcActivity').value, 1.375)
-      };
-      state.goals.targetWeight = numOr(document.getElementById('calcTargetWeight').value, 80.0);
-      saveState();
-    }
+function commitGeneratedRecipe(idx) {
+  const r = generatedRecipesCache[idx];
+  if (!r) return;
+  switchTab('tracker');
+  openPendingPreview([validateAtwater({ name: r.title, kcal: r.kcal, p: r.p, c: r.c, f: r.f, icon: r.icon })]);
+}
 
-    function calculatePersonalGoal() {
-      saveUserProfile();
-      const p = state.userProfile;
-      const targetW = numOr(state.goals.targetWeight, 80.0);
+function addRecipeIngredientsToShop(ingStr) {
+  const parts = String(ingStr || '').split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+  if (!parts.length) return;
+  let added = 0;
+  for (const p of parts) {
+    if (!state.shoppingList.some(it => it.text.toLowerCase() === p.toLowerCase())) { state.shoppingList.push({ text: p, done: false }); added++; }
+  }
+  saveState(); renderShoppingList();
+  showToast(`🛒 ${added} ${state.lang === 'pl' ? 'dodano do listy!' : 'Zutat(en) hinzugefügt!'}`, 'info');
+}
 
-      const bmr = 10 * p.weight + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
-      const tdee = Math.round(bmr * p.activity);
+function addShoppingItem() {
+  const input = document.getElementById('customShopInput');
+  const val = (input?.value || '').trim();
+  if (!val) return;
+  state.shoppingList.push({ text: val, done: false }); input.value = '';
+  saveState(); renderShoppingList();
+}
 
-      let calcKcal = tdee;
-      if (targetW < p.weight - 0.5) calcKcal = Math.max(1200, tdee - 500);
-      else if (targetW > p.weight + 0.5) calcKcal = tdee + 300;
+function toggleShopItem(idx) { if (!state.shoppingList[idx]) return; state.shoppingList[idx].done = !state.shoppingList[idx].done; saveState(); renderShoppingList(); }
+function deleteShopItem(idx) { state.shoppingList.splice(idx, 1); saveState(); renderShoppingList(); }
+function clearCheckedShopping() { state.shoppingList = state.shoppingList.filter(it => !it.done); saveState(); renderShoppingList(); showToast(state.lang === 'pl' ? 'Usunięto kupione' : 'Erledigte entfernt', 'info'); }
 
-      let calcP = Math.round(p.weight * 2.0);
-      let calcF = Math.round(p.weight * 0.9);
-      let remForCarbs = calcKcal - (calcP * 4 + calcF * 9);
+function renderShoppingList() {
+  const container = document.getElementById('shoppingListContainer');
+  if (!container) return;
+  const t = I18N[state.lang] || I18N.de;
+  if (!state.shoppingList.length) { container.innerHTML = `<p class="text-xs text-slate-500 py-2">${escapeHtml(t.emptyShop)}</p>`; return; }
+  container.innerHTML = state.shoppingList.map((it, idx) => `
+    <div class="glass-subcard px-3 py-2 flex items-center justify-between gap-2">
+      <label class="flex items-center gap-2.5 flex-1 cursor-pointer min-w-0">
+        <input type="checkbox" ${it.done ? 'checked' : ''} onchange="toggleShopItem(${idx})" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer shrink-0" />
+        <span class="text-xs ${it.done ? 'line-through text-slate-500' : 'text-slate-200 font-medium'} break-words">${escapeHtml(it.text)}</span>
+      </label>
+      <button onclick="deleteShopItem(${idx})" class="text-slate-500 hover:text-rose-400 text-xs px-1"><i class="fa-solid fa-xmark"></i></button>
+    </div>`).join('');
+}
 
-      if (remForCarbs < 200) {
-        const minCarbKcal = 200;
-        const minFat = Math.max(30, Math.round(p.weight * 0.6));
-        calcF = Math.max(minFat, Math.round((calcKcal - calcP * 4 - minCarbKcal) / 9));
-        remForCarbs = calcKcal - (calcP * 4 + calcF * 9);
-        if (remForCarbs < 200) {
-          calcP = Math.max(60, Math.round((calcKcal - calcF * 9 - minCarbKcal) / 4));
-          remForCarbs = Math.max(200, calcKcal - (calcP * 4 + calcF * 9));
-        }
-      }
-      const calcC = Math.round(remForCarbs / 4);
-      calcKcal = calcP * 4 + calcC * 4 + calcF * 9;
+function logWeight() {
+  const input = document.getElementById('weightInput');
+  const val = numOr(input?.value, 0);
+  if (val < 30 || val > 300) { showToast(state.lang === 'pl' ? 'Wpisz prawidłową wagę (30-300 kg).' : 'Bitte gültiges Gewicht (30-300 kg) eingeben.', 'warn'); return; }
+  const today = new Date().toISOString().slice(0, 10);
+  const idx = state.weightLog.findIndex(w => w.date === today);
+  if (idx >= 0) state.weightLog[idx].weight = val; else state.weightLog.push({ date: today, weight: val });
+  state.weightLog.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  state.userProfile.weight = val;
+  if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = val;
+  if (input) input.value = '';
+  saveState(); updateUI(); showToast(`⚖️ ${val.toFixed(1)} kg!`, 'info');
+}
 
-      const box = document.getElementById('calcResultBox');
-      box.classList.remove('hidden');
-      box.innerHTML = `
-        <div class="space-y-1.5 border-b border-slate-800 pb-2.5">
-          <p class="text-slate-300">Grundumsatz: <strong>${Math.round(bmr)} kcal</strong> • Gesamtbedarf (TDEE): <strong>${tdee} kcal</strong></p>
-          <p class="text-[11px] text-emerald-400 font-semibold">Empfehlung frisch berechnet. Passe Werte bei Bedarf direkt an:</p>
-        </div>
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <label class="text-slate-400 block mb-0.5 font-semibold">Tagesziel (kcal)</label>
-            <input id="resGoalKcal" type="number" value="${calcKcal}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold" />
-          </div>
-          <div>
-            <label class="text-slate-400 block mb-0.5 font-semibold">Eiweiß (g)</label>
-            <input id="resGoalProt" type="number" value="${calcP}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
-          </div>
-          <div>
-            <label class="text-slate-400 block mb-0.5 font-semibold">Kohlenhydrate (g)</label>
-            <input id="resGoalCarb" type="number" value="${calcC}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
-          </div>
-          <div>
-            <label class="text-slate-400 block mb-0.5 font-semibold">Fett (g)</label>
-            <input id="resGoalFat" type="number" value="${calcF}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
-          </div>
-          <div class="col-span-2">
-            <label class="text-slate-400 block mb-0.5 font-semibold">Zielgewicht (kg)</label>
-            <input id="resGoalTargetWeight" type="number" step="0.1" value="${targetW}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" />
-          </div>
-        </div>
-        <button id="btnApplyCustomGoals" onclick="applyCustomizedGoals()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition">
-          Als Basis-Tagesziel übernehmen & speichern
-        </button>
-      `;
-    }
+function renderWeightEngine() {
+  const curEl = document.getElementById('currentWeightVal'), trendEl = document.getElementById('trendWeightVal');
+  const chartEl = document.getElementById('weightChartContainer'), projEl = document.getElementById('weightProjectionBox');
+  if (!chartEl || !projEl) return;
+  const sorted = [...state.weightLog].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const latestW = sorted.length ? numOr(sorted[sorted.length - 1].weight, state.userProfile.weight) : numOr(state.userProfile.weight, 86.0);
+  const targetW = numOr(state.goals.targetWeight, 80.0);
+  let ewma = sorted.length ? numOr(sorted[0].weight, latestW) : latestW;
+  const trendSeries = sorted.map(pt => { const w = numOr(pt.weight, ewma); ewma = 0.25 * w + 0.75 * ewma; return { date: pt.date, weight: w, trend: Math.round(ewma * 10) / 10 }; });
+  if (curEl) curEl.textContent = `${latestW.toFixed(1)} kg`;
+  if (trendEl) trendEl.textContent = `Trend: ${ewma.toFixed(1)} kg`;
+  if (trendSeries.length < 2) {
+    chartEl.innerHTML = `<span class="text-xs text-slate-500">${state.lang === 'pl' ? `Wpisz wagę przez min. 2 dni, aby zobaczyć wykres (Teraz: ${latestW.toFixed(1)} kg).` : `Trage mindestens 2 Tage Gewicht ein, um die Trend-Kurve zu sehen (Aktuell: ${latestW.toFixed(1)} kg).`}</span>`;
+  } else {
+    const recent = trendSeries.slice(-14);
+    const weights = recent.flatMap(d => [d.weight, d.trend]);
+    const minW = Math.min(...weights, targetW) - 0.5, maxW = Math.max(...weights, targetW) + 0.5, span = Math.max(1, maxW - minW);
+    const W = 320, H = 110, pad = 14;
+    const toX = i => pad + (i / (recent.length - 1)) * (W - 2 * pad);
+    const toY = val => H - pad - ((val - minW) / span) * (H - 2 * pad);
+    const rawPts = recent.map((d, i) => `${toX(i).toFixed(1)},${toY(d.weight).toFixed(1)}`).join(' ');
+    const trendPts = recent.map((d, i) => `${toX(i).toFixed(1)},${toY(d.trend).toFixed(1)}`).join(' ');
+    const targetY = toY(targetW).toFixed(1);
+    chartEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="w-full h-full overflow-visible"><line x1="${pad}" y1="${targetY}" x2="${W - pad}" y2="${targetY}" stroke="#38bdf8" stroke-dasharray="4 4" stroke-width="1" /><polyline fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="2 2" points="${rawPts}" /><polyline fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" points="${trendPts}" />${recent.map((d, i) => `<circle cx="${toX(i).toFixed(1)}" cy="${toY(d.weight).toFixed(1)}" r="2.8" fill="#10b981" />`).join('')}</svg>`;
+  }
+  const diff = Math.round((latestW - targetW) * 10) / 10;
+  if (Math.abs(diff) <= 0.2) {
+    projEl.innerHTML = state.lang === 'pl' ? `🎉 <strong class="text-emerald-400">Cel osiągnięty!</strong> (${targetW.toFixed(1)} kg).` : `🎉 <strong class="text-emerald-400">Zielgewicht erreicht!</strong> (${targetW.toFixed(1)} kg).`;
+  } else {
+    const p = state.userProfile;
+    const bmr = 10 * latestW + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
+    const tdee = Math.round(bmr * p.activity);
+    const dailyDelta = Math.max(200, Math.abs(tdee - numOr(state.goals.kcal, 2425)));
+    const daysNeeded = Math.max(1, Math.round((Math.abs(diff) * 7700) / dailyDelta));
+    const locale = state.lang === 'pl' ? 'pl-PL' : 'de-DE';
+    const targetDate = new Date(Date.now() + daysNeeded * 86400000).toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
+    projEl.innerHTML = state.lang === 'pl'
+      ? `Jeszcze <strong>${Math.abs(diff).toFixed(1)} kg</strong> do celu (<strong>${targetW.toFixed(1)} kg</strong>). Prognoza: <strong class="text-emerald-400">${targetDate}</strong> (~${daysNeeded} dni).`
+      : `Noch <strong>${Math.abs(diff).toFixed(1)} kg</strong> bis zum Zielgewicht (<strong>${targetW.toFixed(1)} kg</strong>). Voraussichtlich am <strong class="text-emerald-400">${targetDate}</strong> (~${daysNeeded} Tage).`;
+  }
+}
 
-    function applyCustomizedGoals() {
-      const kcal = Math.max(1000, Math.round(numOr(document.getElementById('resGoalKcal').value, 2425)));
-      const p = Math.max(20, Math.round(numOr(document.getElementById('resGoalProt').value, 260)));
-      const c = Math.max(10, Math.round(numOr(document.getElementById('resGoalCarb').value, 85)));
-      const f = Math.max(10, Math.round(numOr(document.getElementById('resGoalFat').value, 116)));
-      const tw = numOr(document.getElementById('resGoalTargetWeight').value, 80.0);
-      const curW = numOr(document.getElementById('calcWeight').value, 86.0);
+function renderPastDays() {
+  const el = document.getElementById('pastDaysContainer');
+  if (!el) return;
+  if (!state.pastDaysLog.length) { el.innerHTML = `<p class="text-xs text-slate-500 py-2">${state.lang === 'pl' ? 'Brak zakończonych dni w archiwum.' : 'Noch keine abgeschlossenen Tage im Archiv.'}</p>`; return; }
+  el.innerHTML = state.pastDaysLog.map(d => `<div class="glass-subcard p-3 flex items-center justify-between text-xs"><div><p class="font-bold text-white">${escapeHtml(d.date)}</p><p class="text-[11px] text-slate-400">E:${d.p}g • K:${d.c}g • F:${d.f}g (${d.itemsCount || 0})</p></div><span class="font-extrabold text-emerald-400">${d.kcal} kcal</span></div>`).join('');
+}
 
-      state.goals.kcal = kcal;
-      state.goals.protein = p;
-      state.goals.carbs = c;
-      state.goals.fat = f;
-      state.goals.targetWeight = tw;
+function saveUserProfile() {
+  state.userProfile = {
+    gender: document.getElementById('calcGender').value, age: numOr(document.getElementById('calcAge').value, 35),
+    height: numOr(document.getElementById('calcHeight').value, 178), weight: numOr(document.getElementById('calcWeight').value, 86.0),
+    activity: numOr(document.getElementById('calcActivity').value, 1.375)
+  };
+  state.goals.targetWeight = numOr(document.getElementById('calcTargetWeight').value, 80.0);
+  saveState();
+}
 
-      const today = new Date().toISOString().slice(0, 10);
-      const exIdx = state.weightLog.findIndex(w => w.date === today);
-      if (exIdx >= 0) state.weightLog[exIdx].weight = curW;
-      else state.weightLog.push({ date: today, weight: curW });
-      state.weightLog.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+function calculatePersonalGoal() {
+  saveUserProfile();
+  const p = state.userProfile, targetW = numOr(state.goals.targetWeight, 80.0);
+  const bmr = 10 * p.weight + 6.25 * p.height - 5 * p.age + (p.gender === 'm' ? 5 : -161);
+  const tdee = Math.round(bmr * p.activity);
+  let calcKcal = targetW < p.weight - 0.5 ? Math.max(1200, tdee - 500) : (targetW > p.weight + 0.5 ? tdee + 300 : tdee);
+  let calcP = Math.round(p.weight * 2.0), calcF = Math.round(p.weight * 0.9);
+  let remForCarbs = calcKcal - (calcP * 4 + calcF * 9);
+  if (remForCarbs < 200) {
+    calcF = Math.max(Math.max(30, Math.round(p.weight * 0.6)), Math.round((calcKcal - calcP * 4 - 200) / 9));
+    remForCarbs = calcKcal - (calcP * 4 + calcF * 9);
+    if (remForCarbs < 200) { calcP = Math.max(60, Math.round((calcKcal - calcF * 9 - 200) / 4)); remForCarbs = Math.max(200, calcKcal - (calcP * 4 + calcF * 9)); }
+  }
+  const calcC = Math.round(remForCarbs / 4);
+  calcKcal = calcP * 4 + calcC * 4 + calcF * 9;
+  const box = document.getElementById('calcResultBox');
+  box.classList.remove('hidden');
+  box.innerHTML = `
+    <div class="space-y-1.5 border-b border-slate-800 pb-2.5"><p class="text-slate-300">BMR: <strong>${Math.round(bmr)} kcal</strong> • TDEE: <strong>${tdee} kcal</strong></p><p class="text-[11px] text-emerald-400 font-semibold">${state.lang === 'pl' ? 'Dostosuj wartości przed zapisaniem:' : 'Empfehlung frisch berechnet:'}</p></div>
+    <div class="grid grid-cols-2 gap-2 text-xs">
+      <div><label class="text-slate-400 block mb-0.5 font-semibold">kcal</label><input id="resGoalKcal" type="number" value="${calcKcal}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold" /></div>
+      <div><label class="text-slate-400 block mb-0.5 font-semibold">${state.lang === 'pl' ? 'Białko (g)' : 'Eiweiß (g)'}</label><input id="resGoalProt" type="number" value="${calcP}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" /></div>
+      <div><label class="text-slate-400 block mb-0.5 font-semibold">${state.lang === 'pl' ? 'Węglowodany (g)' : 'Kohlenhydrate (g)'}</label><input id="resGoalCarb" type="number" value="${calcC}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" /></div>
+      <div><label class="text-slate-400 block mb-0.5 font-semibold">${state.lang === 'pl' ? 'Tłuszcz (g)' : 'Fett (g)'}</label><input id="resGoalFat" type="number" value="${calcF}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" /></div>
+      <div class="col-span-2"><label class="text-slate-400 block mb-0.5 font-semibold">${state.lang === 'pl' ? 'Waga docelowa (kg)' : 'Zielgewicht (kg)'}</label><input id="resGoalTargetWeight" type="number" step="0.1" value="${targetW}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold" /></div>
+    </div>
+    <button id="btnApplyCustomGoals" onclick="applyCustomizedGoals()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition">${state.lang === 'pl' ? 'Zastosuj i zapisz jako cel dzienny' : 'Als Basis-Tagesziel übernehmen & speichern'}</button>`;
+}
 
-      saveUserProfile();
-      saveState();
-      updateUI();
-      showToast(`🎯 Übernommen: ${kcal} kcal • ${p}g E • ${c}g K • ${f}g F`, 'info');
-      setTimeout(() => switchTab('tracker'), 400);
-    }
+function applyCustomizedGoals() {
+  const kcal = Math.max(1000, Math.round(numOr(document.getElementById('resGoalKcal').value, 2425)));
+  const p = Math.max(20, Math.round(numOr(document.getElementById('resGoalProt').value, 260)));
+  const c = Math.max(10, Math.round(numOr(document.getElementById('resGoalCarb').value, 85)));
+  const f = Math.max(10, Math.round(numOr(document.getElementById('resGoalFat').value, 116)));
+  const tw = numOr(document.getElementById('resGoalTargetWeight').value, 80.0);
+  const curW = numOr(document.getElementById('calcWeight').value, 86.0);
+  state.goals = { kcal, protein: p, carbs: c, fat: f, targetWeight: tw };
+  const today = new Date().toISOString().slice(0, 10);
+  const exIdx = state.weightLog.findIndex(w => w.date === today);
+  if (exIdx >= 0) state.weightLog[exIdx].weight = curW; else state.weightLog.push({ date: today, weight: curW });
+  state.weightLog.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  saveUserProfile(); saveState(); updateUI();
+  showToast(`🎯 ${kcal} kcal • ${p}g E • ${c}g K • ${f}g F`, 'info');
+  setTimeout(() => switchTab('tracker'), 400);
+}
 
-    function generateInviteCode() {
-      const name = document.getElementById('newGuestName').value.trim();
-      if (!name) {
-        showToast('Bitte Namen für den Gast eingeben.', 'warn');
-        return;
-      }
-      const cleanPrefix = name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase() || 'GAST';
-      const code = `FIT-${cleanPrefix}-${Math.floor(100 + Math.random() * 900)}`;
-      state.inviteCodes.push({ name, code });
-      document.getElementById('newGuestName').value = '';
-      saveState();
-      renderInviteCodes();
-      showToast(`Code für ${name} generiert!`, 'info');
-    }
+function generateInviteCode() {
+  const name = document.getElementById('newGuestName').value.trim();
+  if (!name) { showToast('Bitte Namen für den Gast eingeben.', 'warn'); return; }
+  const cleanPrefix = name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase() || 'GAST';
+  const code = `FIT-${cleanPrefix}-${Math.floor(100 + Math.random() * 900)}`;
+  state.inviteCodes.push({ name, code });
+  document.getElementById('newGuestName').value = '';
+  saveState(); renderInviteCodes();
+  showToast(`Code ${code} für ${name} generiert!`, 'info');
+}
 
-    function deleteInviteCode(idx) {
-      state.inviteCodes.splice(idx, 1);
-      saveState();
-      renderInviteCodes();
-    }
+function deleteInviteCode(idx) { state.inviteCodes.splice(idx, 1); saveState(); renderInviteCodes(); }
 
-    function buildInviteMessage(code, name) {
-      const appUrl = window.location.href.split('#')[0];
-      return `Hallo ${name}! 👋\n\nHier ist dein persönlicher Einladungscode für CalSnap AI:\n🔑 Code: *${code}*\n\nÖffne einfach den Link und gib deinen Code ein:\n👉 ${appUrl}\n\nViel Erfolg beim Tracken! 🥗🔥`;
-    }
+function buildInviteMessage(code, name) {
+  const baseUrl = window.location.href.split('?')[0].split('#')[0];
+  const inviteUrl = `${baseUrl}?invite=${encodeURIComponent(code)}`;
+  return state.lang === 'pl'
+    ? `Cześć ${name}! 👋\n\nOto Twój osobisty kod zaproszenia do CalSnap AI:\n🔑 Kod: *${code}*\n\nKliknij link lub wpisz kod w aplikacji:\n👉 ${inviteUrl}\n\nPowodzenia! 🥗🔥`
+    : `Hallo ${name}! 👋\n\nHier ist dein persönlicher Einladungscode für CalSnap AI:\n🔑 Code: *${code}*\n\nÖffne einfach den Link oder gib deinen Code ein:\n👉 ${inviteUrl}\n\nViel Erfolg beim Tracken! 🥗🔥`;
+}
 
-    function shareViaWhatsApp(idx) {
-      const entry = state.inviteCodes[idx];
-      if (!entry) return;
-      const msg = buildInviteMessage(entry.code, entry.name);
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
-    }
+function shareViaWhatsApp(idx) {
+  const entry = state.inviteCodes[idx];
+  if (entry) window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(buildInviteMessage(entry.code, entry.name))}`, '_blank');
+}
 
-    async function shareViaWebShare(idx) {
-      const entry = state.inviteCodes[idx];
-      if (!entry) return;
-      const msg = buildInviteMessage(entry.code, entry.name);
-      if (navigator.share) {
+async function shareViaWebShare(idx) {
+  const entry = state.inviteCodes[idx];
+  if (!entry) return;
+  const msg = buildInviteMessage(entry.code, entry.name);
+  if (navigator.share) { try { await navigator.share({ title: 'CalSnap AI', text: msg }); } catch (_) {} } else copyInviteText(idx);
+}
+
+function copyInviteText(idx) {
+  const entry = state.inviteCodes[idx];
+  if (!entry) return;
+  const msg = buildInviteMessage(entry.code, entry.name);
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(msg).then(() => showToast('📋 Einladungstext kopiert!', 'info'));
+  else showToast(`Code: ${entry.code}`, 'info');
+}
+
+function renderInviteCodes() {
+  const el = document.getElementById('inviteCodesList');
+  if (!el) return;
+  if (!state.inviteCodes.length) { el.innerHTML = `<p class="text-xs text-slate-500 py-1">Noch keine Gast-Codes angelegt.</p>`; return; }
+  el.innerHTML = state.inviteCodes.map((c, idx) => `
+    <div class="glass-subcard p-2.5 flex items-center justify-between gap-2 border border-slate-700/80">
+      <div class="min-w-0"><span class="font-extrabold text-white text-xs block truncate">${escapeHtml(c.name)}</span><code class="text-emerald-400 font-bold text-xs tracking-wider">${escapeHtml(c.code)}</code></div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button onclick="shareViaWhatsApp(${idx})" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md"><i class="fa-brands fa-whatsapp text-sm"></i><span>WhatsApp</span></button>
+        <button onclick="shareViaWebShare(${idx})" class="w-7 h-7 rounded-lg bg-sky-600/80 hover:bg-sky-500 text-white text-xs flex items-center justify-center"><i class="fa-solid fa-share-nodes"></i></button>
+        <button onclick="copyInviteText(${idx})" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center justify-center"><i class="fa-solid fa-copy"></i></button>
+        <button onclick="deleteInviteCode(${idx})" class="w-7 h-7 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-400 text-xs flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+async function compressImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Datei-Lesefehler'));
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Bildformat ungültig'));
+      img.onload = () => {
+        const isMenu = scannerMode === 'menu', maxDim = isMenu ? 1080 : 720, quality = isMenu ? 0.78 : 0.72;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) { if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; } else { w = Math.round((w * maxDim) / h); h = maxDim; } }
+        const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true }); ctx.drawImage(img, 0, 0, w, h);
         try {
-          await navigator.share({ title: 'CalSnap AI Einladung', text: msg });
-          showToast('Einladung geteilt!', 'info');
+          const imgData = ctx.getImageData(0, 0, w, h).data;
+          let lumSum = 0, count = 0;
+          for (let i = 0; i < imgData.length; i += 64) { lumSum += 0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2]; count++; }
+          if ((count > 0 ? lumSum / count : 128) < 68) { ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = 'rgba(45,45,45,0.35)'; ctx.fillRect(0, 0, w, h); ctx.restore(); }
         } catch (_) {}
-      } else {
-        copyInviteText(idx);
-      }
-    }
-
-    function copyInviteText(idx) {
-      const entry = state.inviteCodes[idx];
-      if (!entry) return;
-      const msg = buildInviteMessage(entry.code, entry.name);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(msg).then(() => showToast('📋 Einladungstext in die Zwischenablage kopiert!', 'info'));
-      } else {
-        showToast(`Code: ${entry.code}`, 'info');
-      }
-    }
-
-    function renderInviteCodes() {
-      const el = document.getElementById('inviteCodesList');
-      if (!el) return;
-      if (!state.inviteCodes.length) {
-        el.innerHTML = `<p class="text-xs text-slate-500 py-1">Noch keine Gast-Codes angelegt.</p>`;
-        return;
-      }
-      el.innerHTML = state.inviteCodes.map((c, idx) => `
-        <div class="glass-subcard p-2.5 flex items-center justify-between gap-2 border border-slate-700/80">
-          <div class="min-w-0">
-            <span class="font-extrabold text-white text-xs block truncate">${escapeHtml(c.name)}</span>
-            <code class="text-emerald-400 font-bold text-xs tracking-wider">${escapeHtml(c.code)}</code>
-          </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button onclick="shareViaWhatsApp(${idx})" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-emerald-600/30" title="Per WhatsApp senden">
-              <i class="fa-brands fa-whatsapp text-sm"></i><span>WhatsApp</span>
-            </button>
-            <button onclick="shareViaWebShare(${idx})" class="w-7 h-7 rounded-lg bg-sky-600/80 hover:bg-sky-500 text-white text-xs flex items-center justify-center" title="Teilen">
-              <i class="fa-solid fa-share-nodes"></i>
-            </button>
-            <button onclick="copyInviteText(${idx})" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center justify-center" title="Kopieren">
-              <i class="fa-solid fa-copy"></i>
-            </button>
-            <button onclick="deleteInviteCode(${idx})" class="w-7 h-7 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-400 text-xs flex items-center justify-center" title="Löschen">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    async function compressImageFile(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () => reject(new Error('Datei konnte nicht gelesen werden'));
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onerror = () => reject(new Error('Bildformat ungültig'));
-          img.onload = () => {
-            const isMenu = scannerMode === 'menu';
-            const maxDim = isMenu ? 1080 : 720;
-            const quality = isMenu ? 0.78 : 0.72;
-            let w = img.width, h = img.height;
-            if (w > maxDim || h > maxDim) {
-              if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
-              else { w = Math.round((w * maxDim) / h); h = maxDim; }
-            }
-            const canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            ctx.drawImage(img, 0, 0, w, h);
-
-            try {
-              const imgData = ctx.getImageData(0, 0, w, h).data;
-              let lumSum = 0, count = 0;
-              for (let i = 0; i < imgData.length; i += 64) {
-                lumSum += 0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2];
-                count++;
-              }
-              if ((count > 0 ? lumSum / count : 128) < 68) {
-                ctx.save();
-                ctx.globalCompositeOperation = 'screen';
-                ctx.fillStyle = 'rgba(45,45,45,0.35)';
-                ctx.fillRect(0, 0, w, h);
-                ctx.restore();
-              }
-            } catch (_) {}
-
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            const base64 = dataUrl.split(',')[1];
-            const thumbCanvas = document.createElement('canvas');
-            thumbCanvas.width = 96;
-            thumbCanvas.height = 96;
-            const tCtx = thumbCanvas.getContext('2d');
-            const minSide = Math.min(img.width, img.height);
-            tCtx.drawImage(img, (img.width - minSide) / 2, (img.height - minSide) / 2, minSide, minSide, 0, 0, 96, 96);
-            resolve({ base64, dataUrl, thumbUrl: thumbCanvas.toDataURL('image/jpeg', 0.65) });
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function handlePhotoSelect(event) {
-      const file = event.target.files?.[0];
-      if (!file) return;
-      try {
-        const res = await compressImageFile(file);
-        selectedPhotoBase64 = res.base64;
-        selectedPhotoThumb = res.thumbUrl;
-        document.getElementById('photoPreviewImg').src = res.dataUrl;
-        document.getElementById('photoPreviewContainer').classList.remove('hidden');
-        showToast('⚡ Foto geladen — starte Turbo-Scan...', 'info');
-        triggerUnifiedScanner();
-      } catch (err) {
-        showToast(err.message || 'Fehler beim Laden des Fotos', 'error');
-      } finally {
-        event.target.value = '';
-      }
-    }
-
-    function clearSelectedPhoto() {
-      selectedPhotoBase64 = null;
-      selectedPhotoThumb = null;
-      document.getElementById('photoPreviewContainer')?.classList.add('hidden');
-      document.getElementById('photoPreviewImg').src = '';
-    }
-
-    async function callGeminiRequest(promptText, base64Image = null) {
-      const apiKey = (state.geminiApiKey || '').trim();
-      if (!apiKey) {
-        openSettingsModal();
-        throw new Error('Bitte zuerst deinen Google Gemini API-Key in den Einstellungen hinterlegen.');
-      }
-
-      const baseModels = ['gemini-3.8-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
-      const cachedFastModel = localStorage.getItem(FAST_MODEL_KEY);
-      const cachedFastHost = localStorage.getItem(FAST_HOST_KEY);
-
-      const modelQueue = [];
-      if (cachedFastModel && !/2\.0|3\.0/i.test(cachedFastModel)) modelQueue.push(cachedFastModel);
-      for (const m of baseModels) {
-        if (!/2\.0|3\.0/i.test(m) && !modelQueue.includes(m)) modelQueue.push(m);
-      }
-
-      const defaultHosts = apiKey.startsWith('AQ.')
-        ? ['https://aiplatform.googleapis.com', 'https://generativelanguage.googleapis.com']
-        : ['https://generativelanguage.googleapis.com', 'https://aiplatform.googleapis.com'];
-
-      const hostList = [];
-      if (cachedFastHost && defaultHosts.includes(cachedFastHost)) hostList.push(cachedFastHost);
-      for (const h of defaultHosts) if (!hostList.includes(h)) hostList.push(h);
-
-      const parts = [{ text: promptText }];
-      if (base64Image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Image } });
-
-      const buildPayload = (useThinkingZero) => {
-        const genConfig = { temperature: 0.2 };
-        if (useThinkingZero) genConfig.thinkingConfig = { thinkingBudget: 0 };
-        return { contents: [{ role: 'user', parts }], generationConfig: genConfig };
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const thumbCanvas = document.createElement('canvas'); thumbCanvas.width = 96; thumbCanvas.height = 96;
+        const minSide = Math.min(img.width, img.height);
+        thumbCanvas.getContext('2d').drawImage(img, (img.width - minSide) / 2, (img.height - minSide) / 2, minSide, minSide, 0, 0, 96, 96);
+        resolve({ base64: dataUrl.split(',')[1], dataUrl, thumbUrl: thumbCanvas.toDataURL('image/jpeg', 0.65) });
       };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
-      let lastError = 'Keine Antwort vom KI-Endpunkt.';
-      for (let i = 0; i < modelQueue.length; i++) {
-        const model = modelQueue[i];
-        if (/2\.0|3\.0/i.test(model)) continue;
+async function handlePhotoSelect(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    const res = await compressImageFile(file);
+    selectedPhotoBase64 = res.base64; selectedPhotoThumb = res.thumbUrl;
+    document.getElementById('photoPreviewImg').src = res.dataUrl;
+    document.getElementById('photoPreviewContainer').classList.remove('hidden');
+    showToast('⚡ Foto geladen — starte Turbo-Scan...', 'info');
+    triggerUnifiedScanner();
+  } catch (err) { showToast(err.message || 'Fehler', 'error'); } finally { event.target.value = ''; }
+}
 
-        for (const host of hostList) {
-          const endpoint = host.includes('aiplatform')
-            ? `${host}/v1beta1/publishers/google/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`
-            : `${host}/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+function clearSelectedPhoto() {
+  selectedPhotoBase64 = null; selectedPhotoThumb = null;
+  document.getElementById('photoPreviewContainer')?.classList.add('hidden');
+  document.getElementById('photoPreviewImg').src = '';
+}
 
-          for (const useThinkingZero of [true, false]) {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 10000);
-            try {
-              const resp = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(buildPayload(useThinkingZero)),
-                signal: controller.signal
-              });
-              clearTimeout(timer);
-
-              if (!resp.ok) {
-                const errText = await resp.text();
-                lastError = `HTTP ${resp.status}: ${errText.slice(0, 140)}`;
-                if (useThinkingZero && resp.status === 400 && /thinking/i.test(errText)) continue;
-                const discovered = errText.match(/gemini-[a-zA-Z0-9._-]+/gi) || [];
-                for (const dModel of discovered) {
-                  const cleanM = dModel.toLowerCase();
-                  if (!/2\.0|3\.0/i.test(cleanM) && !modelQueue.includes(cleanM)) modelQueue.splice(i + 1, 0, cleanM);
-                }
-                break;
-              }
-
-              const data = await resp.json();
-              const pList = data?.candidates?.[0]?.content?.parts || [];
-              const cleanText = pList.filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('\n').trim();
-              if (!cleanText) {
-                lastError = 'Leere Antwort vom Modell.';
-                break;
-              }
-
-              localStorage.setItem(FAST_MODEL_KEY, model);
-              localStorage.setItem(FAST_HOST_KEY, host);
-              const badge = document.getElementById('fastModelBadge');
-              if (badge) badge.textContent = `⚡ ${model.replace('gemini-', '')}`;
-              return cleanText;
-            } catch (err) {
-              clearTimeout(timer);
-              lastError = err.name === 'AbortError' ? `Timeout (${model})` : err.message;
-              break;
+async function callGeminiRequest(promptText, base64Image = null) {
+  const apiKey = (state.geminiApiKey || '').trim();
+  if (!apiKey) { openSettingsModal(); throw new Error(state.lang === 'pl' ? 'Wpisz klucz API Google Gemini w ustawieniach.' : 'Bitte zuerst deinen Google Gemini API-Key in den Einstellungen hinterlegen.'); }
+  const baseModels = ['gemini-3.8-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  const cachedFastModel = localStorage.getItem(FAST_MODEL_KEY), cachedFastHost = localStorage.getItem(FAST_HOST_KEY);
+  const modelQueue = [];
+  if (cachedFastModel && !/2\.0|3\.0/i.test(cachedFastModel)) modelQueue.push(cachedFastModel);
+  for (const m of baseModels) if (!/2\.0|3\.0/i.test(m) && !modelQueue.includes(m)) modelQueue.push(m);
+  const defaultHosts = apiKey.startsWith('AQ.') ? ['https://aiplatform.googleapis.com', 'https://generativelanguage.googleapis.com'] : ['https://generativelanguage.googleapis.com', 'https://aiplatform.googleapis.com'];
+  const hostList = [];
+  if (cachedFastHost && defaultHosts.includes(cachedFastHost)) hostList.push(cachedFastHost);
+  for (const h of defaultHosts) if (!hostList.includes(h)) hostList.push(h);
+  const parts = [{ text: promptText }];
+  if (base64Image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Image } });
+  const buildPayload = useThinkingZero => ({ contents: [{ role: 'user', parts }], generationConfig: useThinkingZero ? { temperature: 0.2, thinkingConfig: { thinkingBudget: 0 } } : { temperature: 0.2 } });
+  let lastError = 'Keine Antwort vom KI-Endpunkt.';
+  for (let i = 0; i < modelQueue.length; i++) {
+    const model = modelQueue[i];
+    if (/2\.0|3\.0/i.test(model)) continue;
+    for (const host of hostList) {
+      const endpoint = host.includes('aiplatform') ? `${host}/v1beta1/publishers/google/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}` : `${host}/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      for (const useThinkingZero of [true, false]) {
+        const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 10000);
+        try {
+          const resp = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(buildPayload(useThinkingZero)), signal: controller.signal });
+          clearTimeout(timer);
+          if (!resp.ok) {
+            const errText = await resp.text();
+            lastError = `HTTP ${resp.status}: ${errText.slice(0, 140)}`;
+            if (useThinkingZero && resp.status === 400 && /thinking/i.test(errText)) continue;
+            for (const dModel of (errText.match(/gemini-[a-zA-Z0-9._-]+/gi) || [])) {
+              const cleanM = dModel.toLowerCase();
+              if (!/2\.0|3\.0/i.test(cleanM) && !modelQueue.includes(cleanM)) modelQueue.splice(i + 1, 0, cleanM);
             }
+            break;
           }
-        }
+          const data = await resp.json();
+          const cleanText = (data?.candidates?.[0]?.content?.parts || []).filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('\n').trim();
+          if (!cleanText) { lastError = 'Leere Antwort.'; break; }
+          localStorage.setItem(FAST_MODEL_KEY, model); localStorage.setItem(FAST_HOST_KEY, host);
+          const badge = document.getElementById('fastModelBadge');
+          if (badge) badge.textContent = `⚡ ${model.replace('gemini-', '')}`;
+          return cleanText;
+        } catch (err) { clearTimeout(timer); lastError = err.name === 'AbortError' ? `Timeout (${model})` : err.message; break; }
       }
-      throw new Error(`KI-Analyse fehlgeschlagen: ${lastError}`);
     }
+  }
+  throw new Error(`KI-Analyse fehlgeschlagen: ${lastError}`);
+}
 
-    function extractJSON(rawText) {
-      const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-      const firstArr = cleaned.indexOf('[');
-      const firstObj = cleaned.indexOf('{');
-      let start = -1, end = -1;
-      if (firstArr !== -1 && (firstObj === -1 || firstArr < firstObj)) {
-        start = firstArr;
-        end = cleaned.lastIndexOf(']');
-      } else if (firstObj !== -1) {
-        start = firstObj;
-        end = cleaned.lastIndexOf('}');
-      }
-      if (start !== -1 && end !== -1 && end > start) return JSON.parse(cleaned.slice(start, end + 1));
-      return JSON.parse(cleaned);
+function extractJSON(rawText) {
+  const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+  const firstArr = cleaned.indexOf('['), firstObj = cleaned.indexOf('{');
+  let start = -1, end = -1;
+  if (firstArr !== -1 && (firstObj === -1 || firstArr < firstObj)) { start = firstArr; end = cleaned.lastIndexOf(']'); }
+  else if (firstObj !== -1) { start = firstObj; end = cleaned.lastIndexOf('}'); }
+  return (start !== -1 && end !== -1 && end > start) ? JSON.parse(cleaned.slice(start, end + 1)) : JSON.parse(cleaned);
+}
+
+const FOOD_LEXICON = [
+  { keys: ['milchkaffee', 'cappuccino', 'latte macchiato', 'kaffee mit milch'], name: 'Milchkaffee (250ml)', kcal: 75, p: 4.0, c: 6.0, f: 3.8, sugar: 6.0, fiber: 0, waterMl: 250, icon: '☕' },
+  { keys: ['schwarzer kaffee', 'espresso', 'americano'], name: 'Schwarzer Kaffee (200ml)', kcal: 4, p: 0.3, c: 0.5, f: 0, sugar: 0, fiber: 0, waterMl: 200, icon: '☕' },
+  { keys: ['würfel zucker', 'zuckerwürfel', 'stück zucker', 'löffel zucker', 'tl zucker'], name: 'Zucker (3g)', kcal: 12, p: 0, c: 3.0, f: 0, sugar: 3.0, fiber: 0, waterMl: 0, icon: '🍬' },
+  { keys: ['gemischter salat mit dressing', 'salat mit dressing'], name: 'Gemischter Salat mit Dressing (250g)', kcal: 165, p: 2.5, c: 9.0, f: 13.0, sugar: 4.5, fiber: 3.5, vitC: 28, mag: 24, waterMl: 180, icon: '🥗' },
+  { keys: ['gemischter salat', 'beilagensalat', 'grüner salat'], name: 'Gemischter Salat (200g)', kcal: 55, p: 2.0, c: 6.5, f: 2.0, sugar: 3.5, fiber: 3.2, vitC: 25, mag: 22, waterMl: 170, icon: '🥗' },
+  { keys: ['brötchen', 'semmel', 'weizenbrötchen', 'kaiserbrötchen'], name: 'Brötchen (1 Stück, 65g)', kcal: 175, p: 5.8, c: 34.0, f: 1.2, sugar: 1.5, fiber: 2.1, vitC: 0, mag: 16, waterMl: 15, icon: '🥖' },
+  { keys: ['cola zero', 'coke zero', 'cola light'], name: 'Cola Zero (330ml)', kcal: 1, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, waterMl: 330, icon: '🥤' },
+  { keys: ['cola', 'coca cola', 'pepsi'], name: 'Cola (1 Glas, 250ml)', kcal: 105, p: 0, c: 26.5, f: 0, sugar: 26.5, fiber: 0, waterMl: 250, warn: 'Hoher Flüssigzucker (26.5g)', icon: '🥤' },
+  { keys: ['orangensaft', 'apfelsaft', 'saft', 'fruchtsaft'], name: 'Fruchtsaft (1 Glas, 250ml)', kcal: 112, p: 1.2, c: 25.5, f: 0.3, sugar: 23.0, fiber: 0.5, vitC: 65, mag: 20, waterMl: 240, warn: 'Hoher Fruchtzuckergehalt (23g)', icon: '🧃' },
+  { keys: ['ei', 'eier', 'spiegelei', 'gekochtes ei'], name: 'Hühnerei (Gr. M, 60g)', kcal: 93, p: 7.5, c: 0.6, f: 6.8, sugar: 0.4, fiber: 0, mag: 7, waterMl: 40, icon: '🥚' },
+  { keys: ['apfel'], name: 'Apfel (180g)', kcal: 94, p: 0.5, c: 21.0, f: 0.3, sugar: 18.5, fiber: 3.6, vitC: 18, mag: 9, waterMl: 150, icon: '🍎' },
+  { keys: ['banane'], name: 'Banane (120g)', kcal: 107, p: 1.3, c: 24.0, f: 0.4, sugar: 17.0, fiber: 2.4, vitC: 12, mag: 36, waterMl: 90, icon: '🍌' }
+];
+
+function validateAtwater(item) {
+  const p = Math.max(0, numOr(item.p, 0)), c = Math.max(0, numOr(item.c, 0)), f = Math.max(0, numOr(item.f, 0)), fiber = Math.max(0, numOr(item.fiber, 0));
+  const rawKcal = Math.max(0, numOr(item.kcal, 0)), atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * fiber);
+  let finalKcal = Math.round(rawKcal);
+  if (atwaterKcal > 0 && Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15) finalKcal = atwaterKcal;
+  return {
+    name: String(item.name || 'Mahlzeit').trim(), kcal: finalKcal,
+    p: Math.round(p * 10) / 10, c: Math.round(c * 10) / 10, f: Math.round(f * 10) / 10,
+    sugar: Math.round(Math.max(0, numOr(item.sugar, 0)) * 10) / 10, fiber: Math.round(fiber * 10) / 10,
+    vitC: Math.round(Math.max(0, numOr(item.vitC, 0))), mag: Math.round(Math.max(0, numOr(item.mag, 0))),
+    waterMl: Math.round(Math.max(0, numOr(item.waterMl, 0))), warn: String(item.warn || '').trim(), icon: String(item.icon || '🍽️').trim()
+  };
+}
+
+function parseNaturalText(text) {
+  const lower = text.toLowerCase().trim();
+  const distRegex = /(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-z0-9äöüßąęćłńóśźż\s-]+?)\s+(?:mit|z)\s+(?:jeweils|je|pro|po)\s+(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-z0-9äöüßąęćłńóśźż\s-]+)/i;
+  const dMatch = lower.match(distRegex);
+  if (dMatch) {
+    const n = numOr(dMatch[1], 1), basePhrase = dMatch[2].trim(), m = numOr(dMatch[3], 1), modPhrase = dMatch[4].trim();
+    const baseHit = FOOD_LEXICON.find(f => f.keys.some(k => basePhrase.includes(k)));
+    const modHit = FOOD_LEXICON.find(f => f.keys.some(k => modPhrase.includes(k)));
+    if (baseHit && modHit) {
+      const totalMod = n * m;
+      return [validateAtwater({
+        name: `${n}x ${baseHit.name} + ${totalMod}x ${modHit.name}`,
+        kcal: n * baseHit.kcal + totalMod * modHit.kcal, p: n * baseHit.p + totalMod * modHit.p,
+        c: n * baseHit.c + totalMod * modHit.c, f: n * baseHit.f + totalMod * modHit.f,
+        sugar: n * baseHit.sugar + totalMod * modHit.sugar, fiber: n * baseHit.fiber + totalMod * modHit.fiber,
+        vitC: n * numOr(baseHit.vitC, 0) + totalMod * numOr(modHit.vitC, 0), mag: n * numOr(baseHit.mag, 0) + totalMod * numOr(modHit.mag, 0),
+        waterMl: n * numOr(baseHit.waterMl, 0) + totalMod * numOr(modHit.waterMl, 0),
+        warn: (n * baseHit.sugar + totalMod * modHit.sugar) >= 25 ? `Hoher Zuckergehalt (${Math.round(n * baseHit.sugar + totalMod * modHit.sugar)}g)` : '', icon: baseHit.icon
+      })];
     }
+  }
+  const protectedText = lower.replace(/salat\s+mit\s+dressing/g, 'salat_mit_dressing');
+  const segments = protectedText.split(/(?:,|;|\+|\bund\b|\bsowie\b)/i).map(s => s.replace(/salat_mit_dressing/g, 'salat mit dressing').trim()).filter(Boolean);
+  if (!segments.length) return null;
+  const matchedItems = [];
+  for (const seg of segments) {
+    const multMatch = seg.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|stück|gläser|glas|becher|tassen)?\s*(.+)$/i);
+    const count = multMatch ? numOr(multMatch[1], 1) : 1, phrase = multMatch ? multMatch[2].trim() : seg;
+    const hit = FOOD_LEXICON.find(f => f.keys.some(k => phrase.includes(k)));
+    if (!hit) return null;
+    matchedItems.push(validateAtwater({
+      name: count !== 1 ? `${count}x ${hit.name}` : hit.name, kcal: count * hit.kcal, p: count * hit.p, c: count * hit.c, f: count * hit.f,
+      sugar: count * hit.sugar, fiber: count * hit.fiber, vitC: count * numOr(hit.vitC, 0), mag: count * numOr(hit.mag, 0), waterMl: count * numOr(hit.waterMl, 0), warn: hit.warn || '', icon: hit.icon
+    }));
+  }
+  return matchedItems.length > 0 ? matchedItems : null;
+}
 
-    const FOOD_LEXICON = [
-      { keys: ['milchkaffee', 'cappuccino', 'latte macchiato', 'kaffee mit milch'], name: 'Milchkaffee (250ml)', kcal: 75, p: 4.0, c: 6.0, f: 3.8, sugar: 6.0, fiber: 0, waterMl: 250, icon: '☕' },
-      { keys: ['schwarzer kaffee', 'espresso', 'americano'], name: 'Schwarzer Kaffee (200ml)', kcal: 4, p: 0.3, c: 0.5, f: 0, sugar: 0, fiber: 0, waterMl: 200, icon: '☕' },
-      { keys: ['würfel zucker', 'zuckerwürfel', 'stück zucker', 'löffel zucker', 'tl zucker'], name: 'Zucker (3g)', kcal: 12, p: 0, c: 3.0, f: 0, sugar: 3.0, fiber: 0, waterMl: 0, icon: '🍬' },
-      { keys: ['gemischter salat mit dressing', 'salat mit dressing'], name: 'Gemischter Salat mit Dressing (250g)', kcal: 165, p: 2.5, c: 9.0, f: 13.0, sugar: 4.5, fiber: 3.5, vitC: 28, mag: 24, waterMl: 180, icon: '🥗' },
-      { keys: ['gemischter salat', 'beilagensalat', 'grüner salat'], name: 'Gemischter Salat (200g)', kcal: 55, p: 2.0, c: 6.5, f: 2.0, sugar: 3.5, fiber: 3.2, vitC: 25, mag: 22, waterMl: 170, icon: '🥗' },
-      { keys: ['brötchen', 'semmel', 'weizenbrötchen', 'kaiserbrötchen'], name: 'Brötchen (1 Stück, 65g)', kcal: 175, p: 5.8, c: 34.0, f: 1.2, sugar: 1.5, fiber: 2.1, vitC: 0, mag: 16, waterMl: 15, icon: '🥖' },
-      { keys: ['cola zero', 'coke zero', 'cola light'], name: 'Cola Zero (330ml)', kcal: 1, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, waterMl: 330, icon: '🥤' },
-      { keys: ['cola', 'coca cola', 'pepsi'], name: 'Cola (1 Glas, 250ml)', kcal: 105, p: 0, c: 26.5, f: 0, sugar: 26.5, fiber: 0, waterMl: 250, warn: 'Hoher Flüssigzucker (26.5g)', icon: '🥤' },
-      { keys: ['orangensaft', 'apfelsaft', 'saft', 'fruchtsaft'], name: 'Fruchtsaft (1 Glas, 250ml)', kcal: 112, p: 1.2, c: 25.5, f: 0.3, sugar: 23.0, fiber: 0.5, vitC: 65, mag: 20, waterMl: 240, warn: 'Hoher Fruchtzuckergehalt (23g)', icon: '🧃' },
-      { keys: ['ei', 'eier', 'spiegelei', 'gekochtes ei'], name: 'Hühnerei (Gr. M, 60g)', kcal: 93, p: 7.5, c: 0.6, f: 6.8, sugar: 0.4, fiber: 0, mag: 7, waterMl: 40, icon: '🥚' },
-      { keys: ['apfel'], name: 'Apfel (180g)', kcal: 94, p: 0.5, c: 21.0, f: 0.3, sugar: 18.5, fiber: 3.6, vitC: 18, mag: 9, waterMl: 150, icon: '🍎' },
-      { keys: ['banane'], name: 'Banane (120g)', kcal: 107, p: 1.3, c: 24.0, f: 0.4, sugar: 17.0, fiber: 2.4, vitC: 12, mag: 36, waterMl: 90, icon: '🍌' }
-    ];
+async function callGeminiVisionAPI(userText, base64Img) {
+  const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
+  const prompt = `Du bist ein präziser Ernährungswissenschaftler. Antworte auf ${langName} AUSSCHLIESSLICH als valides JSON-Array. WICHTIGSTE REGEL: Jede Speise, Beilage und jedes Getränk als EIGENES Objekt im JSON-Array ausgeben! Schreibe den vollständigen Namen inkl. Menge (g oder ml) in "name". DISTRIBUTIVE MATHEMATIK: Bei "N x Basis mit jeweils M x Zusatz" rechne N*Basis + (N*M)*Zusatz. ATWATER-PHYSIK: kcal = round(4*p + 4*c + 9*f + 2*fiber). Eingabe: "${userText || 'Analysiere alle Speisen und Getränke auf dem Foto einzeln.'}" JSON-Schema: [{"name":"Name + Menge (g/ml)","kcal":165,"p":2.5,"c":9.0,"f":13.0,"sugar":4.5,"fiber":3.5,"vitC":25,"mag":20,"waterMl":180,"warn":"","icon":"🥗"}]`;
+  const arr = extractJSON(await callGeminiRequest(prompt, base64Img));
+  return (Array.isArray(arr) ? arr : [arr]).map(validateAtwater);
+}
 
-    function validateAtwater(item) {
-      const p = Math.max(0, numOr(item.p, 0));
-      const c = Math.max(0, numOr(item.c, 0));
-      const f = Math.max(0, numOr(item.f, 0));
-      const fiber = Math.max(0, numOr(item.fiber, 0));
-      const rawKcal = Math.max(0, numOr(item.kcal, 0));
-      const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * fiber);
-      let finalKcal = Math.round(rawKcal);
-      if (atwaterKcal > 0 && Math.abs(rawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15) finalKcal = atwaterKcal;
-      return {
-        name: String(item.name || 'Mahlzeit').trim(),
-        kcal: finalKcal,
-        p: Math.round(p * 10) / 10,
-        c: Math.round(c * 10) / 10,
-        f: Math.round(f * 10) / 10,
-        sugar: Math.round(Math.max(0, numOr(item.sugar, 0)) * 10) / 10,
-        fiber: Math.round(fiber * 10) / 10,
-        vitC: Math.round(Math.max(0, numOr(item.vitC, 0))),
-        mag: Math.round(Math.max(0, numOr(item.mag, 0))),
-        waterMl: Math.round(Math.max(0, numOr(item.waterMl, 0))),
-        warn: String(item.warn || '').trim(),
-        icon: String(item.icon || '🍽️').trim()
-      };
-    }
-
-    function parseNaturalText(text) {
-      const lower = text.toLowerCase().trim();
-      const distRegex = /(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-z0-9äöüßąęćłńóśźż\s-]+?)\s+(?:mit|z)\s+(?:jeweils|je|pro|po)\s+(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-z0-9äöüßąęćłńóśźż\s-]+)/i;
-      const dMatch = lower.match(distRegex);
-      if (dMatch) {
-        const n = numOr(dMatch[1], 1);
-        const basePhrase = dMatch[2].trim();
-        const m = numOr(dMatch[3], 1);
-        const modPhrase = dMatch[4].trim();
-        const baseHit = FOOD_LEXICON.find(f => f.keys.some(k => basePhrase.includes(k)));
-        const modHit = FOOD_LEXICON.find(f => f.keys.some(k => modPhrase.includes(k)));
-        if (baseHit && modHit) {
-          const totalMod = n * m;
-          return [validateAtwater({
-            name: `${n}x ${baseHit.name} + ${totalMod}x ${modHit.name}`,
-            kcal: n * baseHit.kcal + totalMod * modHit.kcal,
-            p: n * baseHit.p + totalMod * modHit.p,
-            c: n * baseHit.c + totalMod * modHit.c,
-            f: n * baseHit.f + totalMod * modHit.f,
-            sugar: n * baseHit.sugar + totalMod * modHit.sugar,
-            fiber: n * baseHit.fiber + totalMod * modHit.fiber,
-            vitC: n * numOr(baseHit.vitC, 0) + totalMod * numOr(modHit.vitC, 0),
-            mag: n * numOr(baseHit.mag, 0) + totalMod * numOr(modHit.mag, 0),
-            waterMl: n * numOr(baseHit.waterMl, 0) + totalMod * numOr(modHit.waterMl, 0),
-            warn: (n * baseHit.sugar + totalMod * modHit.sugar) >= 25 ? `Hoher Zuckergehalt (${Math.round(n * baseHit.sugar + totalMod * modHit.sugar)}g)` : '',
-            icon: baseHit.icon
-          })];
-        }
-      }
-
-      const protectedText = lower.replace(/salat\s+mit\s+dressing/g, 'salat_mit_dressing');
-      const segments = protectedText.split(/(?:,|;|\+|\bund\b|\bsowie\b)/i).map(s => s.replace(/salat_mit_dressing/g, 'salat mit dressing').trim()).filter(Boolean);
-      if (!segments.length) return null;
-
-      const matchedItems = [];
-      for (const seg of segments) {
-        const multMatch = seg.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|stück|gläser|glas|becher|tassen)?\s*(.+)$/i);
-        const count = multMatch ? numOr(multMatch[1], 1) : 1;
-        const phrase = multMatch ? multMatch[2].trim() : seg;
-        const hit = FOOD_LEXICON.find(f => f.keys.some(k => phrase.includes(k)));
-        if (!hit) return null;
-        matchedItems.push(validateAtwater({
-          name: count !== 1 ? `${count}x ${hit.name}` : hit.name,
-          kcal: count * hit.kcal,
-          p: count * hit.p,
-          c: count * hit.c,
-          f: count * hit.f,
-          sugar: count * hit.sugar,
-          fiber: count * hit.fiber,
-          vitC: count * numOr(hit.vitC, 0),
-          mag: count * numOr(hit.mag, 0),
-          waterMl: count * numOr(hit.waterMl, 0),
-          warn: hit.warn || '',
-          icon: hit.icon
-        }));
-      }
-      return matchedItems.length > 0 ? matchedItems : null;
-    }
-
-    async function callGeminiVisionAPI(userText, base64Img) {
-      const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
-      const prompt = `Du bist ein präziser Ernährungswissenschaftler. Antworte auf ${langName} AUSSCHLIESSLICH als valides JSON-Array.
-WICHTIGSTE REGEL (EINZEL-AUFSCHLÜSSELUNG):
-Wenn der Nutzer mehrere Speisen, Beilagen oder Getränke nennt oder fotografiert, MUSST du JEDE Komponente als EIGENES Objekt im JSON-Array ausgeben! Schreibe den vollständigen Namen inkl. geschätzter Menge (g oder ml) in "name".
-DISTRIBUTIVE MATHEMATIK: Bei "N x Basis mit jeweils M x Zusatz" rechne N*Basis + (N*M)*Zusatz.
-ATWATER-PHYSIK: kcal = round(4*p + 4*c + 9*f + 2*fiber).
-Eingabe/Hinweis: "${userText || 'Analysiere alle sichtbaren Speisen und Getränke auf dem Foto einzeln.'}"
-JSON-Schema:
-[{"name":"Vollständiger Name + Menge (z.B. Gemischter Salat mit Dressing, 250g)","kcal":165,"p":2.5,"c":9.0,"f":13.0,"sugar":4.5,"fiber":3.5,"vitC":25,"mag":20,"waterMl":180,"warn":"Kurzer Hinweis falls viel Zucker/Fett, sonst leer","icon":"🥗"}]`;
-
-      const raw = await callGeminiRequest(prompt, base64Img);
-      const arr = extractJSON(raw);
-      return (Array.isArray(arr) ? arr : [arr]).map(validateAtwater);
-    }
-
-    async function triggerUnifiedScanner() {
-      const textVal = document.getElementById('foodInput').value.trim();
-      const btn = document.getElementById('aiScanBtn');
-
-      if (!textVal && !selectedPhotoBase64) {
-        showToast(state.lang === 'pl' ? 'Wpisz tekst lub zrób zdjęcie!' : 'Bitte Text eingeben oder ein Foto aufnehmen!', 'warn');
-        return;
-      }
-
-      if (scannerMode === 'meal' && !selectedPhotoBase64 && textVal && !state.geminiApiKey) {
-        const localParsed = parseNaturalText(textVal);
-        if (localParsed) {
-          openPendingPreview(localParsed);
+async function triggerUnifiedScanner() {
+  const textVal = document.getElementById('foodInput').value.trim();
+  const btn = document.getElementById('aiScanBtn');
+  if (!textVal && !selectedPhotoBase64) { showToast(state.lang === 'pl' ? 'Wpisz tekst lub zrób zdjęcie!' : 'Bitte Text eingeben oder ein Foto aufnehmen!', 'warn'); return; }
+  if (scannerMode === 'meal' && !selectedPhotoBase64 && textVal && !state.geminiApiKey) {
+    const localParsed = parseNaturalText(textVal);
+    if (localParsed) { openPendingPreview(localParsed); return; }
+  }
+  const origHtml = btn.innerHTML, startTime = performance.now();
+  btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Turbo-Scan...</span>`;
+  try {
+    if (scannerMode === 'meal') {
+      if (!selectedPhotoBase64 && textVal) {
+        const fastLocal = parseNaturalText(textVal);
+        if (fastLocal && fastLocal.length >= 1) {
+          openPendingPreview(fastLocal);
+          document.getElementById('scanTimerHint').textContent = `⚡ Direkt-Analyse in ${((performance.now() - startTime) / 1000).toFixed(1)}s`;
           return;
         }
       }
-
-      const origHtml = btn.innerHTML;
-      const startTime = performance.now();
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Turbo-Scan...</span>`;
-
-      try {
-        if (scannerMode === 'meal') {
-          if (!selectedPhotoBase64 && textVal) {
-            const fastLocal = parseNaturalText(textVal);
-            if (fastLocal && fastLocal.length >= 1) {
-              openPendingPreview(fastLocal);
-              const ms = ((performance.now() - startTime) / 1000).toFixed(1);
-              document.getElementById('scanTimerHint').textContent = `⚡ Direkt-Analyse in ${ms}s • ${fastLocal.length} Posten`;
-              return;
-            }
-          }
-          const items = await callGeminiVisionAPI(textVal, selectedPhotoBase64);
-          openPendingPreview(items);
-        } else if (scannerMode === 'fridge') {
-          await runFridgeLeftoverAI(textVal, selectedPhotoBase64);
-        } else if (scannerMode === 'menu') {
-          await runMenuScannerAI(textVal, selectedPhotoBase64);
-        } else if (scannerMode === 'pot') {
-          await runPotScannerAI(textVal, selectedPhotoBase64);
-        }
-        const sec = ((performance.now() - startTime) / 1000).toFixed(1);
-        document.getElementById('scanTimerHint').textContent = `⚡ KI-Analyse abgeschlossen in ${sec}s`;
-      } catch (err) {
-        if (scannerMode === 'meal' && textVal) {
-          const fallbackLocal = parseNaturalText(textVal);
-          if (fallbackLocal) {
-            openPendingPreview(fallbackLocal);
-            showToast('Offline-Physik-Parser verwendet', 'info');
-            return;
-          }
-        }
-        showToast(err.message, 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = origHtml;
-      }
+      openPendingPreview(await callGeminiVisionAPI(textVal, selectedPhotoBase64));
+    } else if (scannerMode === 'fridge') await runFridgeLeftoverAI(textVal, selectedPhotoBase64);
+    else if (scannerMode === 'menu') await runMenuScannerAI(textVal, selectedPhotoBase64);
+    else if (scannerMode === 'pot') await runPotScannerAI(textVal, selectedPhotoBase64);
+    document.getElementById('scanTimerHint').textContent = `⚡ KI-Analyse in ${((performance.now() - startTime) / 1000).toFixed(1)}s`;
+  } catch (err) {
+    if (scannerMode === 'meal' && textVal) {
+      const fallbackLocal = parseNaturalText(textVal);
+      if (fallbackLocal) { openPendingPreview(fallbackLocal); showToast('Offline-Physik-Parser aktiv', 'info'); return; }
     }
+    showToast(err.message, 'error');
+  } finally { btn.disabled = false; btn.innerHTML = origHtml; }
+}
 
-    function openPendingPreview(items) {
-      pendingItems = items.map(it => ({
-        ...it,
-        baseKcal: it.kcal,
-        baseP: it.p,
-        baseC: it.c,
-        baseF: it.f,
-        baseSugar: it.sugar,
-        baseFiber: it.fiber,
-        baseVitC: it.vitC,
-        baseMag: it.mag,
-        baseWaterMl: it.waterMl,
-        thumb: selectedPhotoThumb || null
-      }));
-      currentPortionScale = 100;
-      document.getElementById('portionSlider').value = 100;
-      document.getElementById('portionScaleLabel').textContent = '100%';
-      document.getElementById('pendingPreviewBox').classList.remove('hidden');
-      renderPendingPreview();
-    }
+function openPendingPreview(items) {
+  pendingItems = items.map(it => ({ ...it, baseKcal: it.kcal, baseP: it.p, baseC: it.c, baseF: it.f, baseSugar: it.sugar, baseFiber: it.fiber, baseVitC: it.vitC, baseMag: it.mag, baseWaterMl: it.waterMl, thumb: selectedPhotoThumb || null }));
+  currentPortionScale = 100;
+  document.getElementById('portionSlider').value = 100;
+  document.getElementById('portionScaleLabel').textContent = '100%';
+  document.getElementById('pendingPreviewBox').classList.remove('hidden');
+  renderPendingPreview();
+}
 
-    function updatePortionScale(val) {
-      currentPortionScale = numOr(val, 100);
-      document.getElementById('portionSlider').value = currentPortionScale;
-      document.getElementById('portionScaleLabel').textContent = `${currentPortionScale}%`;
-      const ratio = currentPortionScale / 100;
-      pendingItems = pendingItems.map(it => {
-        const p = Math.round(it.baseP * ratio * 10) / 10;
-        const c = Math.round(it.baseC * ratio * 10) / 10;
-        const f = Math.round(it.baseF * ratio * 10) / 10;
-        const fiber = Math.round(it.baseFiber * ratio * 10) / 10;
-        const scaledRawKcal = Math.round(it.baseKcal * ratio);
-        const atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * fiber);
-        return {
-          ...it,
-          kcal: atwaterKcal > 0 && Math.abs(scaledRawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15 ? atwaterKcal : scaledRawKcal,
-          p,
-          c,
-          f,
-          sugar: Math.round(it.baseSugar * ratio * 10) / 10,
-          fiber,
-          vitC: Math.round(it.baseVitC * ratio),
-          mag: Math.round(it.baseMag * ratio),
-          waterMl: Math.round(it.baseWaterMl * ratio)
-        };
-      });
-      renderPendingPreview();
-    }
+function updatePortionScale(val) {
+  currentPortionScale = numOr(val, 100);
+  document.getElementById('portionSlider').value = currentPortionScale;
+  document.getElementById('portionScaleLabel').textContent = `${currentPortionScale}%`;
+  const ratio = currentPortionScale / 100;
+  pendingItems = pendingItems.map(it => {
+    const p = Math.round(it.baseP * ratio * 10) / 10, c = Math.round(it.baseC * ratio * 10) / 10, f = Math.round(it.baseF * ratio * 10) / 10, fiber = Math.round(it.baseFiber * ratio * 10) / 10;
+    const scaledRawKcal = Math.round(it.baseKcal * ratio), atwaterKcal = Math.round(4 * p + 4 * c + 9 * f + 2 * fiber);
+    return {
+      ...it, kcal: atwaterKcal > 0 && Math.abs(scaledRawKcal - atwaterKcal) / Math.max(1, atwaterKcal) > 0.15 ? atwaterKcal : scaledRawKcal,
+      p, c, f, sugar: Math.round(it.baseSugar * ratio * 10) / 10, fiber, vitC: Math.round(it.baseVitC * ratio), mag: Math.round(it.baseMag * ratio), waterMl: Math.round(it.baseWaterMl * ratio)
+    };
+  });
+  renderPendingPreview();
+}
 
-    function renderPendingPreview() {
-      const listEl = document.getElementById('pendingItemsList');
-      if (!pendingItems.length) {
-        cancelPendingPreview();
-        return;
-      }
-      let totalKcal = 0;
-      listEl.innerHTML = pendingItems.map((it, idx) => {
-        totalKcal += numOr(it.kcal, 0);
-        return `
-          <div class="glass-subcard p-3.5 border border-amber-500/35 space-y-2">
-            <div class="flex items-start justify-between gap-2.5">
-              <div class="flex items-start gap-2.5 flex-1 min-w-0">
-                ${it.thumb
-                  ? `<img src="${it.thumb}" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5" />`
-                  : `<div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-lg shrink-0 mt-0.5">${escapeHtml(it.icon || '🍽️')}</div>`
-                }
-                <div class="flex-1 min-w-0">
-                  <p class="item-title-full text-sm font-extrabold text-white">${escapeHtml(it.name)}</p>
-                  <p class="text-xs text-slate-300 font-medium mt-1 leading-relaxed">
-                    E:${it.p}g • K:${it.c}g • F:${it.f}g • 🍬${it.sugar}g ${it.fiber > 0 ? `• 🌾${it.fiber}g` : ''}
-                  </p>
-                </div>
-              </div>
-              <div class="flex flex-col items-end gap-1.5 shrink-0">
-                <span class="text-sm font-extrabold text-emerald-400 whitespace-nowrap">${it.kcal} kcal</span>
-                <div class="flex items-center gap-1">
-                  <button onclick="openEditModal('pending', ${idx})" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center justify-center" title="Bearbeiten">
-                    <i class="fa-solid fa-pen"></i>
-                  </button>
-                  <button onclick="removePendingItem(${idx})" class="w-7 h-7 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-400 text-xs flex items-center justify-center" title="Entfernen">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-            ${it.warn ? `<div class="bg-amber-500/15 border border-amber-500/30 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 font-medium leading-snug">⚠️ ${escapeHtml(it.warn)}</div>` : ''}
+function renderPendingPreview() {
+  const listEl = document.getElementById('pendingItemsList');
+  if (!pendingItems.length) { cancelPendingPreview(); return; }
+  let totalKcal = 0;
+  listEl.innerHTML = pendingItems.map((it, idx) => {
+    totalKcal += numOr(it.kcal, 0);
+    return `<div class="glass-subcard p-3.5 border border-amber-500/35 space-y-2">
+      <div class="flex items-start justify-between gap-2.5">
+        <div class="flex items-start gap-2.5 flex-1 min-w-0">
+          ${it.thumb ? `<img src="${it.thumb}" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5" />` : `<div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-lg shrink-0 mt-0.5">${escapeHtml(it.icon || '🍽️')}</div>`}
+          <div class="flex-1 min-w-0"><p class="item-title-full text-sm font-extrabold text-white">${escapeHtml(it.name)}</p><p class="text-xs text-slate-300 font-medium mt-1">E:${it.p}g • K:${it.c}g • F:${it.f}g • 🍬${it.sugar}g ${it.fiber > 0 ? `• 🌾${it.fiber}g` : ''}</p></div>
+        </div>
+        <div class="flex flex-col items-end gap-1.5 shrink-0">
+          <span class="text-sm font-extrabold text-emerald-400 whitespace-nowrap">${it.kcal} kcal</span>
+          <div class="flex items-center gap-1">
+            <button onclick="openEditModal('pending', ${idx})" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="removePendingItem(${idx})" class="w-7 h-7 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-400 text-xs flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
           </div>
-        `;
-      }).join('');
+        </div>
+      </div>
+      ${it.warn ? `<div class="bg-amber-500/15 border border-amber-500/30 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 font-medium">⚠️ ${escapeHtml(it.warn)}</div>` : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('commitPendingBtn').textContent = state.lang === 'pl' ? `Zapisz do dziennika (${totalKcal} kcal)` : `Übernehmen (${totalKcal} kcal)`;
+}
 
-      document.getElementById('commitPendingBtn').textContent = state.lang === 'pl'
-        ? `Zapisz do dziennika (${totalKcal} kcal)`
-        : `Übernehmen (${totalKcal} kcal)`;
-    }
+function removePendingItem(idx) { pendingItems.splice(idx, 1); renderPendingPreview(); }
+function cancelPendingPreview() { pendingItems = []; document.getElementById('pendingPreviewBox').classList.add('hidden'); }
 
-    function removePendingItem(idx) {
-      pendingItems.splice(idx, 1);
-      renderPendingPreview();
-    }
+function commitPendingItems() {
+  if (!pendingItems.length) return;
+  const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  let addedWaterL = 0;
+  for (const it of pendingItems) {
+    state.todayLog.unshift({ name: it.name, kcal: it.kcal, p: it.p, c: it.c, f: it.f, sugar: it.sugar, fiber: it.fiber, vitC: it.vitC, mag: it.mag, waterMl: it.waterMl, warn: it.warn, icon: it.icon, thumb: it.thumb || null, time: nowTime });
+    if (numOr(it.waterMl, 0) > 0) addedWaterL += it.waterMl / 1000;
+  }
+  if (addedWaterL > 0) state.waterLiters = Math.round((state.waterLiters + addedWaterL) * 100) / 100;
+  document.getElementById('foodInput').value = '';
+  clearSelectedPhoto(); cancelPendingPreview(); saveState(); updateUI();
+  showToast(state.lang === 'pl' ? '✅ Posiłek zapisany w dzienniku!' : '✅ Mahlzeit ins Tagebuch übernommen!', 'info');
+}
 
-    function cancelPendingPreview() {
-      pendingItems = [];
-      document.getElementById('pendingPreviewBox').classList.add('hidden');
-    }
+function logEnergy(lvl) {
+  state.energyLog.unshift({ date: new Date().toISOString().slice(0, 10), level: lvl });
+  saveState(); updateUI();
+}
 
-    function commitPendingItems() {
-      if (!pendingItems.length) return;
-      const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      let addedWaterL = 0;
-      for (const it of pendingItems) {
-        state.todayLog.unshift({
-          name: it.name,
-          kcal: it.kcal,
-          p: it.p,
-          c: it.c,
-          f: it.f,
-          sugar: it.sugar,
-          fiber: it.fiber,
-          vitC: it.vitC,
-          mag: it.mag,
-          waterMl: it.waterMl,
-          warn: it.warn,
-          icon: it.icon,
-          thumb: it.thumb || null,
-          time: nowTime
-        });
-        if (numOr(it.waterMl, 0) > 0) addedWaterL += it.waterMl / 1000;
-      }
-      if (addedWaterL > 0) state.waterLiters = Math.round((state.waterLiters + addedWaterL) * 100) / 100;
-      document.getElementById('foodInput').value = '';
-      clearSelectedPhoto();
-      cancelPendingPreview();
+function toggleCheatRescue() {
+  state.cheatRescue.active = !state.cheatRescue.active;
+  state.cheatRescue.dailyCut = state.cheatRescue.active ? 200 : 0;
+  saveState(); updateUI();
+  showToast(state.cheatRescue.active ? '🛟 Cheat-Rescue (-200 kcal)' : 'Cheat-Rescue off', 'info');
+}
+
+function switchTab(tab) {
+  ['tracker', 'ideas', 'weight'].forEach(t => {
+    document.getElementById('tab-' + t)?.classList.toggle('active', t === tab);
+    const btn = document.getElementById('navBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) { btn.classList.toggle('text-emerald-400', t === tab); btn.classList.toggle('text-slate-400', t !== tab); }
+  });
+}
+
+function setLanguage(lang) { state.lang = lang === 'pl' ? 'pl' : 'de'; saveState(); updateUI(); }
+
+function openSettingsModal() {
+  document.getElementById('apiKeyInput').value = state.geminiApiKey || '';
+  document.getElementById('goalKcalInput').value = numOr(state.goals.kcal, 2425);
+  document.getElementById('goalProtInput').value = numOr(state.goals.protein, 260);
+  document.getElementById('goalCarbInput').value = numOr(state.goals.carbs, 85);
+  document.getElementById('goalFatInput').value = numOr(state.goals.fat, 116);
+  document.getElementById('goalWeightInput').value = numOr(state.goals.targetWeight, 80);
+  renderInviteCodes();
+  document.getElementById('settingsModal').classList.remove('hidden');
+}
+
+function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
+
+function saveSettings() {
+  state.geminiApiKey = document.getElementById('apiKeyInput').value.trim();
+  state.goals.kcal = Math.max(1000, Math.round(numOr(document.getElementById('goalKcalInput').value, 2425)));
+  state.goals.protein = Math.max(30, Math.round(numOr(document.getElementById('goalProtInput').value, 260)));
+  state.goals.carbs = Math.max(20, Math.round(numOr(document.getElementById('goalCarbInput').value, 85)));
+  state.goals.fat = Math.max(20, Math.round(numOr(document.getElementById('goalFatInput').value, 116)));
+  state.goals.targetWeight = numOr(document.getElementById('goalWeightInput').value, 80);
+  saveState(); closeSettingsModal(); updateUI();
+  showToast(state.lang === 'pl' ? '⚙️ Zapisano ustawienia!' : '⚙️ Einstellungen gespeichert!', 'info');
+}
+
+function isValidAccessCode(rawCode) {
+  const code = String(rawCode || '').trim().toUpperCase();
+  if (!code) return false;
+  return code === state.masterCode || state.inviteCodes.some(c => String(c.code).toUpperCase() === code) || /^FIT-[A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]{1,12}-\d{2,6}$/i.test(code);
+}
+
+function unlockApp() {
+  const code = document.getElementById('unlockCodeInput').value.trim().toUpperCase();
+  if (isValidAccessCode(code)) {
+    state.unlocked = true;
+    saveState();
+    document.getElementById('lockScreen').classList.add('hidden');
+    showToast(state.lang === 'pl' ? '✅ Aplikacja odblokowana!' : '✅ App erfolgreich freigeschaltet!', 'info');
+  } else {
+    showToast(state.lang === 'pl' ? 'Nieprawidłowy kod dostępu!' : 'Ungültiger Zugangscode!', 'error');
+  }
+}
+
+function lockApp() {
+  state.unlocked = false; saveState(); closeSettingsModal();
+  document.getElementById('lockScreen').classList.remove('hidden');
+}
+
+function exportDataBackup() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `calsnap_backup_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  checkDayRollover();
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const urlInvite = params.get('invite') || params.get('code');
+    if (urlInvite && isValidAccessCode(urlInvite)) {
+      state.unlocked = true;
       saveState();
-      updateUI();
-      showToast('✅ Mahlzeit vollständig ins Tagebuch übernommen!', 'info');
     }
+  } catch (_) {}
 
-    function logEnergy(lvl) {
-      const today = new Date().toISOString().slice(0, 10);
-      state.energyLog.unshift({ date: today, level: lvl });
-      document.getElementById('energyStatusText').textContent = `Heute: Level ${lvl}/5 gespeichert`;
-      saveState();
-    }
-
-    function toggleCheatRescue() {
-      state.cheatRescue.active = !state.cheatRescue.active;
-      state.cheatRescue.dailyCut = state.cheatRescue.active ? 200 : 0;
-      saveState();
-      updateUI();
-      showToast(state.cheatRescue.active ? '🛟 Cheat-Rescue aktiv (-200 kcal/Tag)' : 'Cheat-Rescue deaktiviert', 'info');
-    }
-
-    function switchTab(tab) {
-      ['tracker', 'ideas', 'weight'].forEach(t => {
-        document.getElementById('tab-' + t)?.classList.toggle('active', t === tab);
-        const btn = document.getElementById('navBtn' + t.charAt(0).toUpperCase() + t.slice(1));
-        if (btn) {
-          btn.classList.toggle('text-emerald-400', t === tab);
-          btn.classList.toggle('text-slate-400', t !== tab);
-        }
-      });
-    }
-
-    function setLanguage(lang) {
-      state.lang = lang === 'pl' ? 'pl' : 'de';
-      saveState();
-      updateUI();
-    }
-
-    function openSettingsModal() {
-      document.getElementById('apiKeyInput').value = state.geminiApiKey || '';
-      document.getElementById('goalKcalInput').value = numOr(state.goals.kcal, 2425);
-      document.getElementById('goalProtInput').value = numOr(state.goals.protein, 260);
-      document.getElementById('goalCarbInput').value = numOr(state.goals.carbs, 85);
-      document.getElementById('goalFatInput').value = numOr(state.goals.fat, 116);
-      document.getElementById('goalWeightInput').value = numOr(state.goals.targetWeight, 80);
-      renderInviteCodes();
-      document.getElementById('settingsModal').classList.remove('hidden');
-    }
-
-    function closeSettingsModal() {
-      document.getElementById('settingsModal').classList.add('hidden');
-    }
-
-    function saveSettings() {
-      state.geminiApiKey = document.getElementById('apiKeyInput').value.trim();
-      state.goals.kcal = Math.max(1000, Math.round(numOr(document.getElementById('goalKcalInput').value, 2425)));
-      state.goals.protein = Math.max(30, Math.round(numOr(document.getElementById('goalProtInput').value, 260)));
-      state.goals.carbs = Math.max(20, Math.round(numOr(document.getElementById('goalCarbInput').value, 85)));
-      state.goals.fat = Math.max(20, Math.round(numOr(document.getElementById('goalFatInput').value, 116)));
-      state.goals.targetWeight = numOr(document.getElementById('goalWeightInput').value, 80);
-      saveState();
-      closeSettingsModal();
-      updateUI();
-      showToast('⚙️ Einstellungen & Ziele gespeichert!', 'info');
-    }
-
-    function unlockApp() {
-      const code = document.getElementById('unlockCodeInput').value.trim().toUpperCase();
-      if (code === state.masterCode || state.inviteCodes.some(c => c.code === code)) {
-        state.unlocked = true;
-        saveState();
-        document.getElementById('lockScreen').classList.add('hidden');
-      } else {
-        showToast('Ungültiger Zugangscode!', 'error');
-      }
-    }
-
-    function lockApp() {
-      state.unlocked = false;
-      saveState();
-      closeSettingsModal();
-      document.getElementById('lockScreen').classList.remove('hidden');
-    }
-
-    function exportDataBackup() {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `calsnap_backup_${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      checkDayRollover();
-      document.getElementById('currentDateLabel').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short' });
-      if (!state.unlocked) document.getElementById('lockScreen').classList.remove('hidden');
-
-      if (state.userProfile) {
-        if (document.getElementById('calcGender')) document.getElementById('calcGender').value = state.userProfile.gender || 'm';
-        if (document.getElementById('calcAge')) document.getElementById('calcAge').value = state.userProfile.age || 35;
-        if (document.getElementById('calcHeight')) document.getElementById('calcHeight').value = state.userProfile.height || 178;
-        if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = state.userProfile.weight || 86.0;
-        if (document.getElementById('calcActivity')) document.getElementById('calcActivity').value = state.userProfile.activity || 1.375;
-      }
-      if (document.getElementById('calcTargetWeight')) {
-        document.getElementById('calcTargetWeight').value = numOr(state.goals.targetWeight, 80.0);
-      }
-
-      updateUI();
-    });
-  </script>
+  if (!state.unlocked) document.getElementById('lockScreen').classList.remove('hidden');
+  if (state.userProfile) {
+    if (document.getElementById('calcGender')) document.getElementById('calcGender').value = state.userProfile.gender || 'm';
+    if (document.getElementById('calcAge')) document.getElementById('calcAge').value = state.userProfile.age || 35;
+    if (document.getElementById('calcHeight')) document.getElementById('calcHeight').value = state.userProfile.height || 178;
+    if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = state.userProfile.weight || 86.0;
+    if (document.getElementById('calcActivity')) document.getElementById('calcActivity').value = state.userProfile.activity || 1.375;
+  }
+  if (document.getElementById('calcTargetWeight')) document.getElementById('calcTargetWeight').value = numOr(state.goals.targetWeight, 80.0);
+  updateUI();
+});
+</script>
 </body>
 </html>
