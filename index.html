@@ -1453,21 +1453,21 @@
       return (s !== -1 && e > s) ? JSON.parse(c.slice(s, e + 1)) : JSON.parse(c);
     }
   // =========================================================================
-    // NATURAL LANGUAGE LEXICON & ATWATER VALIDATION
+    // ZWEISPRACHIGES SOFORT-LEXIKON (DE & PL) & ATWATER-VALIDIERUNG
     // =========================================================================
     const FOOD_LEXICON = [
-      { keys: ['milchkaffee', 'cappuccino', 'latte macchiato', 'kaffee mit milch'], name: 'Milchkaffee (250ml)', kcal: 75, p: 4.0, c: 6.0, f: 3.8, sugar: 6.0, fiber: 0, waterMl: 250, icon: '☕' },
-      { keys: ['schwarzer kaffee', 'espresso', 'americano'], name: 'Schwarzer Kaffee (200ml)', kcal: 4, p: 0.3, c: 0.5, f: 0, sugar: 0, fiber: 0, waterMl: 200, icon: '☕' },
-      { keys: ['würfel zucker', 'zuckerwürfel', 'stück zucker', 'tl zucker'], name: 'Zucker (3g)', kcal: 12, p: 0, c: 3.0, f: 0, sugar: 3.0, fiber: 0, waterMl: 0, icon: '🍬' },
-      { keys: ['gemischter salat mit dressing', 'salat mit dressing'], name: 'Gemischter Salat mit Dressing (250g)', kcal: 165, p: 2.5, c: 9.0, f: 13.0, sugar: 4.5, fiber: 3.5, vitC: 28, mag: 24, waterMl: 180, icon: '🥗' },
-      { keys: ['gemischter salat', 'beilagensalat', 'grüner salat'], name: 'Gemischter Salat (200g)', kcal: 55, p: 2.0, c: 6.5, f: 2.0, sugar: 3.5, fiber: 3.2, vitC: 25, mag: 22, waterMl: 170, icon: '🥗' },
-      { keys: ['brötchen', 'semmel', 'weizenbrötchen', 'kaiserbrötchen'], name: 'Brötchen (1 Stück, 65g)', kcal: 175, p: 5.8, c: 34.0, f: 1.2, sugar: 1.5, fiber: 2.1, mag: 16, waterMl: 15, icon: '🥖' },
-      { keys: ['cola zero', 'coke zero', 'cola light'], name: 'Cola Zero (330ml)', kcal: 1, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, waterMl: 330, icon: '🥤' },
-      { keys: ['cola', 'coca cola', 'pepsi'], name: 'Cola (1 Glas, 250ml)', kcal: 105, p: 0, c: 26.5, f: 0, sugar: 26.5, fiber: 0, waterMl: 250, warn: 'Hoher Flüssigzucker (26.5g)', icon: '🥤' },
-      { keys: ['orangensaft', 'apfelsaft', 'saft', 'fruchtsaft'], name: 'Fruchtsaft (1 Glas, 250ml)', kcal: 112, p: 1.2, c: 25.5, f: 0.3, sugar: 23.0, fiber: 0.5, vitC: 65, mag: 20, waterMl: 240, warn: 'Hoher Fruchtzuckergehalt (23g)', icon: '🧃' },
-      { keys: ['ei', 'eier', 'spiegelei', 'gekochtes ei'], name: 'Hühnerei (Gr. M, 60g)', kcal: 93, p: 7.5, c: 0.6, f: 6.8, sugar: 0.4, fiber: 0, mag: 7, waterMl: 40, icon: '🥚' },
-      { keys: ['apfel'], name: 'Apfel (180g)', kcal: 94, p: 0.5, c: 21.0, f: 0.3, sugar: 18.5, fiber: 3.6, vitC: 18, mag: 9, waterMl: 150, icon: '🍎' },
-      { keys: ['banane'], name: 'Banane (120g)', kcal: 107, p: 1.3, c: 24.0, f: 0.4, sugar: 17.0, fiber: 2.4, vitC: 12, mag: 36, waterMl: 90, icon: '🍌' }
+      { keys: ['milchkaffee', 'cappuccino', 'latte macchiato', 'kaffee mit milch', 'kawa z mlekiem', 'kawa biała'], name: 'Milchkaffee (250ml)', namePl: 'Kawa z mlekiem (250ml)', kcal: 75, p: 4.0, c: 6.0, f: 3.8, sugar: 6.0, fiber: 0, waterMl: 250, icon: '☕' },
+      { keys: ['schwarzer kaffee', 'espresso', 'americano', 'czarna kawa', 'kawa czarna'], name: 'Schwarzer Kaffee (200ml)', namePl: 'Czarna kawa (200ml)', kcal: 4, p: 0.3, c: 0.5, f: 0, sugar: 0, fiber: 0, waterMl: 200, icon: '☕' },
+      { keys: ['würfel zucker', 'zuckerwürfel', 'stück zucker', 'tl zucker', 'kostka cukru', 'łyżeczka cukru'], name: 'Zucker (3g)', namePl: 'Cukier (3g)', kcal: 12, p: 0, c: 3.0, f: 0, sugar: 3.0, fiber: 0, waterMl: 0, icon: '🍬' },
+      { keys: ['gemischter salat mit dressing', 'salat mit dressing', 'sałatka z sosem', 'sałatka z dressingiem'], name: 'Gemischter Salat mit Dressing (250g)', namePl: 'Sałatka mieszana z sosem (250g)', kcal: 165, p: 2.5, c: 9.0, f: 13.0, sugar: 4.5, fiber: 3.5, vitC: 28, mag: 24, waterMl: 180, icon: '🥗' },
+      { keys: ['gemischter salat', 'beilagensalat', 'grüner salat', 'sałatka mieszana', 'zielona sałatka'], name: 'Gemischter Salat (200g)', namePl: 'Sałatka mieszana (200g)', kcal: 55, p: 2.0, c: 6.5, f: 2.0, sugar: 3.5, fiber: 3.2, vitC: 25, mag: 22, waterMl: 170, icon: '🥗' },
+      { keys: ['brötchen', 'semmel', 'weizenbrötchen', 'kaiserbrötchen', 'bułka', 'kajzerka'], name: 'Brötchen (1 Stück, 65g)', namePl: 'Bułka (1 szt., 65g)', kcal: 175, p: 5.8, c: 34.0, f: 1.2, sugar: 1.5, fiber: 2.1, mag: 16, waterMl: 15, icon: '🥖' },
+      { keys: ['cola zero', 'coke zero', 'cola light'], name: 'Cola Zero (330ml)', namePl: 'Cola Zero (330ml)', kcal: 1, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, waterMl: 330, icon: '🥤' },
+      { keys: ['cola', 'coca cola', 'pepsi'], name: 'Cola (1 Glas, 250ml)', namePl: 'Cola (1 szklanka, 250ml)', kcal: 105, p: 0, c: 26.5, f: 0, sugar: 26.5, fiber: 0, waterMl: 250, warn: 'Hoher Flüssigzucker (26.5g)', icon: '🥤' },
+      { keys: ['orangensaft', 'apfelsaft', 'saft', 'fruchtsaft', 'sok pomarańczowy', 'sok jabłkowy', 'sok'], name: 'Fruchtsaft (1 Glas, 250ml)', namePl: 'Sok owocowy (1 szklanka, 250ml)', kcal: 112, p: 1.2, c: 25.5, f: 0.3, sugar: 23.0, fiber: 0.5, vitC: 65, mag: 20, waterMl: 240, warn: 'Hoher Fruchtzuckergehalt (23g)', icon: '🧃' },
+      { keys: ['ei', 'eier', 'spiegelei', 'gekochtes ei', 'jajko', 'jajka'], name: 'Hühnerei (Gr. M, 60g)', namePl: 'Jajko (rozm. M, 60g)', kcal: 93, p: 7.5, c: 0.6, f: 6.8, sugar: 0.4, fiber: 0, mag: 7, waterMl: 40, icon: '🥚' },
+      { keys: ['apfel', 'jabłko'], name: 'Apfel (180g)', namePl: 'Jabłko (180g)', kcal: 94, p: 0.5, c: 21.0, f: 0.3, sugar: 18.5, fiber: 3.6, vitC: 18, mag: 9, waterMl: 150, icon: '🍎' },
+      { keys: ['banane', 'banan'], name: 'Banane (120g)', namePl: 'Banan (120g)', kcal: 107, p: 1.3, c: 24.0, f: 0.4, sugar: 17.0, fiber: 2.4, vitC: 12, mag: 36, waterMl: 90, icon: '🍌' }
     ];
 
     function validateAtwater(item) {
@@ -1501,6 +1501,8 @@
 
     function parseNaturalText(text) {
       const lower = text.toLowerCase().trim();
+      const isPl = state.lang === 'pl';
+      const getName = h => (isPl && h.namePl) ? h.namePl : h.name;
       const dm = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-z0-9äöüßąęćłńóśźż\s-]+?)\s+(?:mit|z)\s+(?:jeweils|je|pro|po)\s+(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy)?\s*([a-z0-9äöüßąęćłńóśźż\s-]+)/i);
       if (dm) {
         const n = numOr(dm[1], 1);
@@ -1510,7 +1512,7 @@
         if (bHit && mHit) {
           const tm = n * m;
           return [validateAtwater({
-            name: `${n}x ${bHit.name} + ${tm}x ${mHit.name}`,
+            name: `${n}x ${getName(bHit)} + ${tm}x ${getName(mHit)}`,
             kcal: n * bHit.kcal + tm * mHit.kcal,
             p: n * bHit.p + tm * mHit.p,
             c: n * bHit.c + tm * mHit.c,
@@ -1522,17 +1524,17 @@
           })];
         }
       }
-      const segs = lower.replace(/salat\s+mit\s+dressing/g, 'salat_mit_dressing').split(/(?:,|;|\+|\bund\b|\bsowie\b)/i).map(s => s.replace(/salat_mit_dressing/g, 'salat mit dressing').trim()).filter(Boolean);
+      const segs = lower.replace(/salat\s+mit\s+dressing/g, 'salat_mit_dressing').replace(/sałatka\s+z\s+sosem/g, 'salatka_z_sosem').split(/(?:,|;|\+|\bund\b|\bsowie\b|\bi\b|\boraz\b)/i).map(s => s.replace(/salat_mit_dressing/g, 'salat mit dressing').replace(/salatka_z_sosem/g, 'sałatka z sosem').trim()).filter(Boolean);
       if (!segs.length) return null;
       const out = [];
       for (const s of segs) {
-        const mm = s.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|stück|gläser|glas|becher|tassen)?\s*(.+)$/i);
+        const mm = s.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|×|mal|razy|stück|szt|gläser|glas|szklanka|becher|tassen)?\s*(.+)$/i);
         const cnt = mm ? numOr(mm[1], 1) : 1;
         const phr = mm ? mm[2].trim() : s;
-        const hit = FOOD_LEXICON.find(f => f.keys.some(k => phr.includes(k)));
+        const hit = FOOD_LEXICON.find(f => f.keys.some(k => phr === k || phr.includes(k)));
         if (!hit) return null;
         out.push(validateAtwater({
-          name: cnt !== 1 ? `${cnt}x ${hit.name}` : hit.name,
+          name: cnt !== 1 ? `${cnt}x ${getName(hit)}` : getName(hit),
           kcal: cnt * hit.kcal,
           p: cnt * hit.p,
           c: cnt * hit.c,
@@ -1550,39 +1552,55 @@
     }
 
     // =========================================================================
-    // MULTIMODAL VISION WITH STRICT ZERO-SHOT VISUAL ANCHORING
+    // DUAL-MODE AI ANALYZER: BILD-VISION (MIT FOTO) VS. REINER TEXT (OHNE FOTO)
     // =========================================================================
     async function callGeminiVisionAPI(userText, base64Img) {
       const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
-      const prompt = `Du bist ein hochpräziser Ernährungswissenschaftler und Computer-Vision-Experte. Antworte auf ${langName} AUSSCHLIESSLICH als valides JSON-Array.
 
-REGEL 1 (GEFÄSS- & GEOMETRIE-CHECK - OBERSTE PRIORITÄT):
-Prüfe vor jeder Benennung zwingend das Behältnis, die Ränder und die Schichtung des Gerichts!
-- Eine Keramikform, Glasform, Auflaufform, Pfanne oder Schale mit gratiniertem oder geschmolzenem Käse ist IMMER ein Auflauf, Gratin, Casserole oder Pfannengericht und NIEMALS ein Käsebrötchen, Gebäck oder Sandwich!
-- Verwechsle niemals eine feste Backware mit einem warmen, geschichteten Ofengericht.
-- Achte auf Gefäßränder, Schichtungen (Nudeln, Kartoffeln, Gemüse, Fleisch) und Soßenglanz.
+      // MODUS A: REINE TEXT-EINGABE (KEIN FOTO VORHANDEN -> DIREKTE NÄHRWERT-ANALYSE)
+      const textOnlyPrompt = `Du bist ein präziser Ernährungswissenschaftler. Antworte auf ${langName} AUSSCHLIESSLICH als valides JSON-Array.
+Der Nutzer hat KEIN Foto hochgeladen, sondern seine Mahlzeit oder sein Getränk per Text beschrieben.
+WICHTIGSTE REGELN:
+1. Berechne SOFORT die realistischen Nährwerte und Standard-Portionsgrößen (g oder ml) für die Texteingabe! Fordere NIEMALS ein Foto oder weitere Daten an!
+2. EINZEL-AUFSCHLÜSSELUNG: Wenn mehrere Speisen oder Getränke genannt werden, gib JEDE Komponente als EIGENES Objekt im JSON-Array aus.
+3. DISTRIBUTIVE MATHEMATIK: Bei "N x Basis mit jeweils M x Zusatz" rechne N*Basis + (N*M)*Zusatz.
+4. ATWATER-PHYSIK: kcal = round(4*p + 4*c + 9*f + 2*fiber).
 
-REGEL 2 (GROUND-TRUTH BEI NUTZERHINWEIS):
-Wenn der Nutzer einen Text-Hinweis gibt ("${userText || ''}"), hat dieser Hinweis bindende Priorität bei der Klassifikation.
-
-REGEL 3 (KOMPONENTEN-AUFSCHLÜSSELUNG):
-Wenn mehrere Speisen, Beilagen oder Getränke erkennbar sind, gib JEDE Komponente als EIGENES Objekt im JSON-Array aus. Fasse niemals Speisen und Getränke zusammen!
-
-REGEL 4 (ATWATER-PHYSIK):
-kcal = round(4*p + 4*c + 9*f + 2*fiber).
+ZU ANALYSIERENDE TEXT-EINGABE DES NUTZERS: "${userText}"
 
 JSON-Schema:
-[{"name":"Vollständiger Name + geschätzte Portionsmenge (z.B. Nudel-Schinken-Auflauf mit Käse überbacken, 400g)","kcal":580,"p":34.0,"c":52.0,"f":26.0,"sugar":4.5,"fiber":3.8,"vitC":8,"mag":32,"waterMl":140,"warn":"Hinweis falls sehr fett- oder zuckerreich, sonst leer","icon":"🍲"}]`;
+[{"name":"Vollständiger Name + Menge (z.B. Czarna kawa, 200ml)","kcal":4,"p":0.3,"c":0.5,"f":0.0,"sugar":0.0,"fiber":0.0,"vitC":0,"mag":6,"waterMl":200,"warn":"","icon":"☕"}]`;
 
-      const arr = extractJSON(await callGeminiRequest(prompt, base64Img));
+      // MODUS B: FOTO-ANALYSE (MIT ZERO-SHOT GEFÄSS- & GEOMETRIE-ANKER)
+      const visionPrompt = `Du bist ein hochpräziser Ernährungswissenschaftler und Computer-Vision-Experte. Antworte auf ${langName} AUSSCHLIESSLICH als valides JSON-Array.
+
+REGEL 1 (GEFÄSS- & GEOMETRIE-CHECK - OBERSTE PRIORITÄT):
+Prüfe auf dem Foto vor jeder Benennung zwingend das Behältnis, die Ränder und die Schichtung des Gerichts!
+- Eine Keramikform, Glasform, Auflaufform, Pfanne oder Schale mit gratiniertem oder geschmolzenem Käse ist IMMER ein Auflauf, Gratin, Casserole oder Pfannengericht und NIEMALS ein Käsebrötchen, Gebäck oder Sandwich!
+- Verwechsle niemals eine feste Backware mit einem warmen, geschichteten Ofengericht.
+
+REGEL 2 (KOMPONENTEN-AUFSCHLÜSSELUNG):
+Wenn mehrere Speisen, Beilagen oder Getränke sichtbar sind, gib JEDE Komponente als EIGENES Objekt im JSON-Array aus.
+
+REGEL 3 (ATWATER-PHYSIK):
+kcal = round(4*p + 4*c + 9*f + 2*fiber).
+
+NUTZER-HINWEIS ZUM FOTO: "${userText || 'Analysiere alle sichtbaren Speisen und Getränke auf dem Foto einzeln.'}"
+
+JSON-Schema:
+[{"name":"Vollständiger Name + geschätzte Menge (z.B. Nudel-Schinken-Auflauf mit Käse überbacken, 400g)","kcal":580,"p":34.0,"c":52.0,"f":26.0,"sugar":4.5,"fiber":3.8,"vitC":8,"mag":32,"waterMl":140,"warn":"Hinweis falls sehr fett- oder zuckerreich, sonst leer","icon":"🍲"}]`;
+
+      const activePrompt = base64Img ? visionPrompt : textOnlyPrompt;
+      const arr = extractJSON(await callGeminiRequest(activePrompt, base64Img));
       return (Array.isArray(arr) ? arr : [arr]).map(validateAtwater);
     }
 
     async function triggerUnifiedScanner() {
       const textVal = $('foodInput').value.trim();
       const btn = $('aiScanBtn');
+      const isPl = state.lang === 'pl';
       if (!textVal && !selectedPhotoBase64) {
-        showToast(state.lang === 'pl' ? 'Wpisz tekst lub zrób zdjęcie!' : 'Bitte Text eingeben oder ein Foto aufnehmen!', 'warn');
+        showToast(isPl ? 'Wpisz tekst lub zrób zdjęcie!' : 'Bitte Text eingeben oder ein Foto aufnehmen!', 'warn');
         return;
       }
       if (scannerMode === 'meal' && !selectedPhotoBase64 && textVal && !state.geminiApiKey) {
@@ -1599,7 +1617,10 @@ JSON-Schema:
             const fastLocal = parseNaturalText(textVal);
             if (fastLocal && fastLocal.length >= 1) {
               openPendingPreview(fastLocal);
-              $('scanTimerHint').textContent = `⚡ Direkt-Analyse in ${((performance.now() - startTime) / 1000).toFixed(1)}s • ${fastLocal.length} Posten`;
+              const sec = ((performance.now() - startTime) / 1000).toFixed(1);
+              $('scanTimerHint').textContent = isPl
+                ? `⚡ Analiza bezpośrednia w ${sec}s • ${fastLocal.length} poz.`
+                : `⚡ Direkt-Analyse in ${sec}s • ${fastLocal.length} Posten`;
               return;
             }
           }
@@ -1611,11 +1632,14 @@ JSON-Schema:
         } else if (scannerMode === 'pot') {
           await runPotScannerAI(textVal, selectedPhotoBase64);
         }
-        $('scanTimerHint').textContent = `⚡ KI-Analyse abgeschlossen in ${((performance.now() - startTime) / 1000).toFixed(1)}s`;
+        const sec = ((performance.now() - startTime) / 1000).toFixed(1);
+        $('scanTimerHint').textContent = isPl
+          ? `⚡ Analiza AI zakończona w ${sec}s`
+          : `⚡ KI-Analyse abgeschlossen in ${sec}s`;
       } catch (err) {
         if (scannerMode === 'meal' && textVal) {
           const fb = parseNaturalText(textVal);
-          if (fb) { openPendingPreview(fb); showToast('Offline-Physik-Parser verwendet', 'info'); return; }
+          if (fb) { openPendingPreview(fb); showToast(isPl ? 'Użyto parsera offline' : 'Offline-Physik-Parser verwendet', 'info'); return; }
         }
         showToast(err.message, 'error');
       } finally {
@@ -1641,6 +1665,8 @@ JSON-Schema:
       currentPortionScale = 100;
       $('portionSlider').value = 100;
       $('portionScaleLabel').textContent = '100%';
+      const subHint = document.querySelector('#pendingPreviewBox h3 + p');
+      if (subHint) subHint.classList.add('hidden');
       $('pendingPreviewBox').classList.remove('hidden');
       renderPendingPreview();
     }
@@ -1660,17 +1686,11 @@ JSON-Schema:
         const sK = Math.round(it.baseKcal * r);
         const kcal = (atw > 0 && Math.abs(sK - atw) / Math.max(1, atw) > 0.15) ? atw : sK;
         return {
-          ...it,
-          kcal,
-          p,
-          c,
-          f,
-          sugar: sug,
-          fiber: fib,
+          ...it, kcal, p, c, f, sugar: sug, fiber: fib,
           vitC: Math.round(it.baseVitC * r),
           mag: Math.round(it.baseMag * r),
           waterMl: Math.round(it.baseWaterMl * r),
-          warn: sug >= 15 ? `Hoher Zuckergehalt (${sug}g)` : (it.warn || '')
+          warn: sug >= 15 ? (state.lang === 'pl' ? `Wysoka zawartość cukru (${sug}g)` : `Hoher Zuckergehalt (${sug}g)`) : (it.warn || '')
         };
       });
       renderPendingPreview();
@@ -1679,6 +1699,8 @@ JSON-Schema:
     function renderPendingPreview() {
       const el = $('pendingItemsList');
       if (!pendingItems.length) { cancelPendingPreview(); return; }
+      const isPl = state.lang === 'pl';
+      const pL = isPl ? 'B' : 'E', cL = isPl ? 'W' : 'K', fL = isPl ? 'T' : 'F';
       let tot = 0;
       el.innerHTML = pendingItems.map((it, idx) => {
         tot += numOr(it.kcal);
@@ -1688,7 +1710,7 @@ JSON-Schema:
               ${it.thumb ? `<img src="${it.thumb}" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5" />` : `<div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-lg shrink-0 mt-0.5">${escapeHtml(it.icon || '🍽️')}</div>`}
               <div class="flex-1 min-w-0">
                 <p class="item-title-full text-sm font-extrabold text-white">${escapeHtml(it.name)}</p>
-                <p class="text-xs text-slate-300 font-medium mt-1 leading-relaxed">E:${it.p}g • K:${it.c}g • F:${it.f}g • <span class="${it.sugar >= 15 ? 'text-amber-300 font-bold' : ''}">🍬${it.sugar}g</span> ${it.fiber > 0 ? `• 🌾${it.fiber}g` : ''}</p>
+                <p class="text-xs text-slate-300 font-medium mt-1 leading-relaxed">${pL}:${it.p}g • ${cL}:${it.c}g • ${fL}:${it.f}g • <span class="${it.sugar >= 15 ? 'text-amber-300 font-bold' : ''}">🍬${it.sugar}g</span> ${it.fiber > 0 ? `• 🌾${it.fiber}g` : ''}</p>
               </div>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
@@ -1702,7 +1724,7 @@ JSON-Schema:
           ${it.warn ? `<div class="bg-amber-500/15 border border-amber-500/30 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 font-medium leading-snug">⚠️ ${escapeHtml(it.warn)}</div>` : ''}
         </div>`;
       }).join('');
-      $('commitPendingBtn').textContent = state.lang === 'pl' ? `Zapisz do dziennika (${tot} kcal)` : `Übernehmen (${tot} kcal)`;
+      $('commitPendingBtn').textContent = isPl ? `Zapisz do dziennika (${tot} kcal)` : `Übernehmen (${tot} kcal)`;
     }
 
     function removePendingItem(i) { pendingItems.splice(i, 1); renderPendingPreview(); }
@@ -1726,20 +1748,20 @@ JSON-Schema:
       cancelPendingPreview();
       saveState();
       updateUI();
-      showToast('✅ Mahlzeit vollständig ins Tagebuch übernommen!', 'info');
+      showToast(state.lang === 'pl' ? '✅ Posiłek zapisany w dzienniku!' : '✅ Mahlzeit vollständig ins Tagebuch übernommen!', 'info');
     }
 
     // =========================================================================
-    // MULTIMODAL SPECIALIZED ENGINES (FRIDGE, MENU, POT WITH GEOMETRIC CHECK)
+    // MULTIMODAL SPECIALIZED ENGINES (FRIDGE, MENU, POT)
     // =========================================================================
     async function runFridgeLeftoverAI(textVal, base64Img) {
       const { remKcal, remProt } = getRemainingMacros();
       const langName = state.lang === 'pl' ? 'Polnisch' : 'Deutsch';
       const prompt = `Du bist ein präziser KI-Küchenchef. Antworte auf ${langName} AUSSCHLIESSLICH als valides JSON-Array.
-GEOMETRIE- & INVENTAR-CHECK: Erkenne alle real sichtbaren Zutaten im Kühlschrank/Vorrat präzise (Verpackungen, Frischezustand, MHD-Gefahr).
-Erstelle genau 2 bis 3 praxistaugliche Rezepte passend für maximal ${remKcal} kcal und ca. ${remProt}g Eiweiß.
+GEOMETRIE- & INVENTAR-CHECK: Erkenne alle sichtbaren Zutaten im Kühlschrank/Vorrat bzw. Hinweis ("${textVal || 'Kühlschrank-Check'}").
+Erstelle 2 bis 3 Rezepte passend für maximal ${remKcal} kcal und ca. ${remProt}g Eiweiß.
 JSON-Schema:
-[{"title":"Rezeptname inkl. Portionsangabe (g)","mhdNote":"Kurzer MHD-/Frische-Hinweis zu erkannten Zutaten","ingredients":"Zutat 1 (g), Zutat 2 (g)","steps":"Kurze 1-2 Satz Zubereitung","kcal":480,"p":42.0,"c":35.0,"f":16.0,"icon":"🧊"}]`;
+[{"title":"Rezeptname inkl. Portionsangabe (g)","mhdNote":"Kurzer MHD-/Frische-Hinweis","ingredients":"Zutat 1 (g), Zutat 2 (g)","steps":"Kurze 1-2 Satz Zubereitung","kcal":480,"p":42.0,"c":35.0,"f":16.0,"icon":"🧊"}]`;
 
       let list = null;
       try {
@@ -1749,8 +1771,8 @@ JSON-Schema:
       }
       if (!list?.length) {
         list = [{
-          title: 'Kühlschrank-Rescue Gemüse-Ei-Pfanne (380g)',
-          mhdNote: 'Geöffnete Milchprodukte zuerst verbrauchen.',
+          title: state.lang === 'pl' ? 'Patelnia jajeczno-warzywna z lodówki (380g)' : 'Kühlschrank-Rescue Gemüse-Ei-Pfanne (380g)',
+          mhdNote: state.lang === 'pl' ? 'Zużyj najpierw otwarte produkty mleczne.' : 'Geöffnete Milchprodukte zuerst verbrauchen.',
           ingredients: '3 Eier, 150g Gemüse, 50g Hüttenkäse, Kräuter',
           steps: 'Gemüse anbraten, Eier und Hüttenkäse stocken lassen.',
           kcal: 410, p: 32, c: 12, f: 24, icon: '🧊'
@@ -1776,9 +1798,9 @@ JSON-Schema:
           </div>
           <p class="text-[11px] text-amber-300 font-medium">⏱️ ${escapeHtml(r.mhdNote)}</p>
           <p class="text-[11px] text-emerald-300 font-semibold">E:${r.p}g • K:${r.c}g • F:${r.f}g</p>
-          <p class="text-[11px] text-slate-300"><strong>Zutaten:</strong> ${escapeHtml(r.ingredients)}</p>
+          <p class="text-[11px] text-slate-300"><strong>${state.lang === 'pl' ? 'Składniki:' : 'Zutaten:'}</strong> ${escapeHtml(r.ingredients)}</p>
           <p class="text-[11px] text-slate-400">${escapeHtml(r.steps)}</p>
-          <button onclick="commitFridgeRecipe(${idx})" class="w-full py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-xs font-bold text-sky-300">✅ Als Mahlzeit übernehmen</button>
+          <button onclick="commitFridgeRecipe(${idx})" class="w-full py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-xs font-bold text-sky-300">✅ ${state.lang === 'pl' ? 'Zapisz jako posiłek' : 'Als Mahlzeit übernehmen'}</button>
         </div>`).join('');
     }
 
@@ -1826,7 +1848,7 @@ JSON-Schema:
           </div>
           <p class="text-[11px] text-slate-300">E:${d.p}g • K:${d.c}g • F:${d.f}g</p>
           <p class="text-[11px] text-amber-300">💡 ${escapeHtml(d.swapTip)}</p>
-          <button onclick="commitMenuItem(${i})" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-300 mt-1">Auswählen & Prüfen</button>
+          <button onclick="commitMenuItem(${i})" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-300 mt-1">${state.lang === 'pl' ? 'Wybierz i sprawdź' : 'Auswählen & Prüfen'}</button>
         </div>`;
       }).join('');
     }
@@ -1905,7 +1927,7 @@ JSON-Schema:
     }
 
     // =========================================================================
-    // REST-BUDGET KOMPASS & ZAUBERN MIT ZERO-SHOT FOTO-CHECK
+    // REST-BUDGET KOMPASS & ZAUBERN
     // =========================================================================
     function openRestBudgetSuggestions() { switchTab('ideas'); generateBudgetClosingIdeas(); }
 
@@ -2010,11 +2032,11 @@ JSON-Array: [{"title":"Vollständiger Name inkl. Gramm","ingredients":"Zutaten m
             <span class="text-xs font-extrabold text-emerald-400 shrink-0">${r.kcal} kcal</span>
           </div>
           <p class="text-xs text-emerald-300 font-semibold">${t.macroP}: ${r.p}g • ${t.macroC}: ${r.c}g • ${t.macroF}: ${r.f}g</p>
-          <p class="text-xs text-slate-300 leading-snug"><strong>Zutaten:</strong> ${escapeHtml(r.ingredients)}</p>
+          <p class="text-xs text-slate-300 leading-snug"><strong>${state.lang === 'pl' ? 'Składniki:' : 'Zutaten:'}</strong> ${escapeHtml(r.ingredients)}</p>
           <p class="text-xs text-slate-400 leading-relaxed">${escapeHtml(r.steps)}</p>
           <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="addGeneratedIngredientsToShop(${i})" class="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200">🛒 Einkaufsliste</button>
-            <button onclick="commitGeneratedRecipe(${i})" class="py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-bold text-emerald-300">✅ Essen & Loggen</button>
+            <button onclick="addGeneratedIngredientsToShop(${i})" class="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200">🛒 ${state.lang === 'pl' ? 'Do listy zakupów' : 'Einkaufsliste'}</button>
+            <button onclick="commitGeneratedRecipe(${i})" class="py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-bold text-emerald-300">✅ ${state.lang === 'pl' ? 'Zjedz i zapisz' : 'Essen & Loggen'}</button>
           </div>
         </div>`).join('');
     }
