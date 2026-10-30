@@ -147,7 +147,7 @@
             <input id="accessCodeInput" type="text" placeholder="FIT-GAST-2025" autocomplete="off"
               onkeydown="if(event.key==='Enter') unlockWithCode()"
               class="w-full rounded-xl bg-slate-900/90 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono uppercase" />
-            <button onclick="unlockWithCode()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shrink-0">
+            <button type="button" onclick="unlockWithCode()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shrink-0">
               <i class="fa-solid fa-unlock-keyhole mr-1"></i> <span data-i18n="gateUnlockBtn">Start</span>
             </button>
           </div>
@@ -165,7 +165,7 @@
             <input id="gateApiKeyInput" type="password" placeholder="AIzaSy..." autocomplete="off"
               onkeydown="if(event.key==='Enter') unlockWithGateApiKey()"
               class="w-full rounded-xl bg-slate-900/90 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono" />
-            <button onclick="unlockWithGateApiKey()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold text-sm transition shrink-0">
+            <button type="button" onclick="unlockWithGateApiKey()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold text-sm transition shrink-0">
               <i class="fa-solid fa-key mr-1"></i> OK
             </button>
           </div>
@@ -177,7 +177,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- NEW: GUEST CODE & INVITE CENTER MODAL (#inviteModal)                  -->
+  <!-- GUEST CODE & INVITE CENTER MODAL (#inviteModal)                       -->
   <!-- ===================================================================== -->
   <div id="inviteModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
     <div class="glass-card w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/30 space-y-4">
@@ -191,25 +191,23 @@
             <p class="text-[11px] text-slate-400" data-i18n="inviteModalSubtitle">Code erstellen & mit Freunden teilen</p>
           </div>
         </div>
-        <button onclick="closeInviteModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <button type="button" onclick="closeInviteModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <!-- Custom Name Generator -->
       <div>
         <label class="block text-xs font-semibold text-slate-400 mb-1.5" data-i18n="inviteNameLabel">Name des Gastes (Optional für Wunsch-Code):</label>
         <div class="flex gap-2">
           <input id="inviteGuestNameInput" type="text" maxlength="12" placeholder="z.B. ANNA, MAREK, VIP"
             oninput="generateCustomGuestCode()"
             class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono uppercase" />
-          <button onclick="generateCustomGuestCode()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 text-xs font-bold shrink-0">
+          <button type="button" onclick="generateCustomGuestCode()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 text-xs font-bold shrink-0">
             <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Erzeugen
           </button>
         </div>
       </div>
 
-      <!-- Big Visible Access Code Display Box -->
       <div class="p-4 rounded-2xl bg-slate-950/90 border border-emerald-500/40 text-center space-y-1.5">
         <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" data-i18n="inviteActiveCodeLabel">Gültiger Freischalt-Code für deinen Gast:</span>
         <div id="inviteGeneratedCodeDisplay" class="text-2xl font-extrabold font-mono tracking-wider text-emerald-400 select-all">
@@ -220,15 +218,14 @@
         </p>
       </div>
 
-      <!-- Action Copy Buttons -->
       <div class="space-y-2.5 pt-1">
-        <button onclick="copyOnlyGuestCode()"
+        <button type="button" onclick="copyOnlyGuestCode()"
           class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-emerald-500/30 text-emerald-300 font-bold text-xs flex items-center justify-center gap-2 transition">
           <i class="fa-solid fa-copy"></i>
           <span>Nur Freischalt-Code kopieren (<span id="copyCodeBtnLabel" class="font-mono">FIT-GAST-2025</span>)</span>
         </button>
 
-        <button onclick="copyFullInvitePackage()"
+        <button type="button" onclick="copyFullInvitePackage()"
           class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition">
           <i class="fa-solid fa-share-nodes"></i>
           <span>Komplett-Einladung (Link + Code + KI-Zugang) kopieren</span>
@@ -247,7 +244,7 @@
           <i class="fa-solid fa-key text-emerald-400 text-lg"></i>
           <h3 class="text-base font-bold text-white" data-i18n="apiModalTitle">Gemini API-Key & iOS Persistenz</h3>
         </div>
-        <button onclick="closeApiModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <button type="button" onclick="closeApiModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -260,14 +257,14 @@
         class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono mb-3" />
 
       <div class="flex items-center justify-between gap-2">
-        <button onclick="clearSavedApiKey()" class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold transition">
+        <button type="button" onclick="clearSavedApiKey()" class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold transition">
           <i class="fa-solid fa-trash-can mr-1"></i> <span data-i18n="apiClearBtn">Key löschen</span>
         </button>
         <div class="flex gap-2">
-          <button onclick="closeApiModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+          <button type="button" onclick="closeApiModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
             <span data-i18n="cancelBtn">Abbrechen</span>
           </button>
-          <button onclick="saveApiKey()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition">
+          <button type="button" onclick="saveApiKey()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition">
             <i class="fa-solid fa-floppy-disk mr-1"></i> <span data-i18n="saveBtn">Speichern</span>
           </button>
         </div>
@@ -304,22 +301,19 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <!-- Bilingual Switcher (DE / PL) -->
-        <button id="langToggleBtn" onclick="toggleLanguage()" title="Sprache wechseln (DE/PL)"
+        <button id="langToggleBtn" type="button" onclick="toggleLanguage()" title="Sprache wechseln (DE/PL)"
           class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition flex items-center gap-1.5">
           <i class="fa-solid fa-globe text-emerald-400 text-xs"></i>
           <span id="langBadgeText">DE</span>
         </button>
 
-        <!-- Invite / Guest Code Center Button -->
-        <button onclick="openInviteModal()" title="Gast-Code anzeigen & teilen"
+        <button type="button" onclick="openInviteModal()" title="Gast-Code anzeigen & teilen"
           class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-emerald-400 flex items-center gap-1.5 transition">
           <i class="fa-solid fa-share-nodes text-xs"></i>
           <span class="hidden sm:inline text-[11px] font-bold">Gast-Code</span>
         </button>
 
-        <!-- API Key Status Button -->
-        <button onclick="openApiModal()" title="API-Key konfigurieren"
+        <button type="button" onclick="openApiModal()" title="API-Key konfigurieren"
           class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
           <span id="apiStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
           <i class="fa-solid fa-key text-xs text-slate-300"></i>
@@ -369,7 +363,6 @@
           </div>
         </div>
 
-        <!-- Main Calorie Progress -->
         <div class="flex items-baseline justify-between mb-2">
           <div class="flex items-baseline gap-1.5">
             <span id="kcalEaten" class="text-3xl font-extrabold tracking-tight text-white">0</span>
@@ -384,7 +377,6 @@
 
         <!-- 3 Core Macro Bars -->
         <div class="grid grid-cols-3 gap-3 mb-4">
-          <!-- Protein -->
           <div class="bg-slate-900/70 rounded-2xl p-3 border border-slate-800/80">
             <div class="flex items-center justify-between text-xs mb-1">
               <span class="font-bold text-sky-400" data-i18n="macroProtein">Protein</span>
@@ -395,7 +387,6 @@
             </div>
           </div>
 
-          <!-- Carbs -->
           <div class="bg-slate-900/70 rounded-2xl p-3 border border-slate-800/80">
             <div class="flex items-center justify-between text-xs mb-1">
               <span class="font-bold text-amber-400" data-i18n="macroCarbs">Kohlenh.</span>
@@ -406,7 +397,6 @@
             </div>
           </div>
 
-          <!-- Fat -->
           <div class="bg-slate-900/70 rounded-2xl p-3 border border-slate-800/80">
             <div class="flex items-center justify-between text-xs mb-1">
               <span class="font-bold text-rose-400" data-i18n="macroFat">Fett</span>
@@ -452,14 +442,14 @@
             </div>
           </div>
           <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">
-            <i class="fa-solid fa-bolt mr-1"></i>0.0s Ready
+            <i class="fa-solid fa-bolt mr-1"></i>3.8 Flash Ready
           </span>
         </div>
 
         <!-- Photo Preview Container -->
         <div id="mealPhotoPreviewContainer" class="hidden relative mb-3 rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
           <img id="mealPhotoPreview" src="" alt="Meal Preview" class="w-full max-h-60 object-cover" />
-          <button onclick="clearMealPhoto()" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-slate-950/80 text-white hover:bg-rose-500 flex items-center justify-center transition">
+          <button type="button" onclick="clearMealPhoto()" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-slate-950/80 text-white hover:bg-rose-500 flex items-center justify-center transition">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -492,10 +482,10 @@
           </div>
         </div>
 
-        <!-- 1-CLICK QUICK-ADD BUTTONS (WIE GEWOHNT IM TAGEBUCH!) -->
+        <!-- 1-CLICK QUICK-ADD BUTTONS -->
         <div class="mt-3 pt-3 border-t border-slate-800/80">
           <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2" data-i18n="quickAddLabel">
-            <i class="fa-solid fa-wand-sparkles text-emerald-400 mr-1"></i>1-Klick Schnellwahl (Sofort ins Tagebuch):
+            1-Klick Schnellwahl (Sofort ins Tagebuch):
           </span>
           <div class="flex flex-wrap gap-1.5">
             <button type="button" onclick="quickAddPreset('coffee_black')"
@@ -538,7 +528,7 @@
         <!-- Loading Indicator -->
         <div id="mealLoading" class="hidden mt-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center gap-3">
           <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-base"></i>
-          <span class="text-xs font-medium text-slate-300" data-i18n="analyzingText">Analysiere Geometrie, Portion & Nährwerte...</span>
+          <span class="text-xs font-medium text-slate-300" data-i18n="analyzingText">Analysiere mit Gemini 3.8 Flash Vision...</span>
         </div>
 
         <!-- Analysis Result Preview Card -->
@@ -603,7 +593,6 @@
           </div>
         </div>
 
-        <!-- Fridge Photo Preview -->
         <div id="fridgePhotoPreviewContainer" class="hidden relative mb-3 rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
           <img id="fridgePhotoPreview" src="" alt="Fridge Preview" class="w-full max-h-60 object-cover" />
           <button type="button" onclick="clearFridgePhoto()" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-slate-950/80 text-white hover:bg-rose-500 flex items-center justify-center">
@@ -673,7 +662,6 @@
           </div>
         </div>
 
-        <!-- Live Remaining Macro Vector Context Banner -->
         <div id="menuMacroContextBanner" class="mb-3 p-3 rounded-2xl bg-slate-900/95 border border-slate-800 flex flex-wrap items-center justify-between gap-2">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-bullseye text-emerald-400 text-xs"></i>
@@ -687,7 +675,6 @@
           </div>
         </div>
 
-        <!-- Menu Photo Preview -->
         <div id="menuPhotoPreviewContainer" class="hidden relative mb-3 rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
           <img id="menuPhotoPreview" src="" alt="Menu Preview" class="w-full max-h-64 object-cover" />
           <button type="button" onclick="clearMenuPhoto()" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-slate-950/80 text-white hover:bg-rose-500 flex items-center justify-center">
@@ -835,7 +822,6 @@
     <!-- =================================================================== -->
     <section id="tab-profile" class="tab-section space-y-4">
 
-      <!-- Mifflin-St Jeor Scientific Calorie & Macro Calculator -->
       <div class="glass-card rounded-3xl p-5 shadow-xl">
         <div class="flex items-center gap-2.5 mb-4">
           <div class="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
@@ -911,7 +897,6 @@
         </button>
       </div>
 
-      <!-- Manual Macro Goal Override Card -->
       <div class="glass-card rounded-3xl p-5 shadow-xl">
         <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
           <i class="fa-solid fa-pen-to-square text-emerald-400"></i>
@@ -940,11 +925,10 @@
         </button>
       </div>
 
-      <!-- System Diagnostics, Guest Code Generator & Data Management -->
       <div class="glass-card rounded-3xl p-5 shadow-xl space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-slate-300">Aktives KI-Routing & Modell-Cache:</span>
-          <span id="fastModelBadge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">gemini-2.5-flash</span>
+          <span id="fastModelBadge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">gemini-3.8-flash</span>
         </div>
 
         <button type="button" onclick="openInviteModal()"
@@ -1003,8 +987,6 @@
     </div>
   </nav>
   <script>
-    <script>
-<script>
     // =========================================================================
     // 1. CORE BASELINE, CONSTANTS & 4-LAYER PERSISTENCE BRIDGE
     // =========================================================================
@@ -1016,7 +998,7 @@
     const FAST_HOST_KEY = 'calsnap_fast_host';
     const GUEST_UNLOCK_KEY = 'calsnap_guest_code';
 
-    // Anti-Degradation Filter: Purge deprecated/weak models on boot
+    // Anti-Degradation Filter: Purge weak/deprecated models on boot
     (function purgeDegradedModelsOnBoot() {
       try {
         const cachedModel = localStorage.getItem(FAST_MODEL_KEY);
@@ -1105,11 +1087,21 @@
         }
 
         const backupKey = (() => {
-          try { return (localStorage.getItem(API_BACKUP_KEY) || '').trim(); } catch (_) { return ''; }
+          try {
+            return (
+              localStorage.getItem(API_BACKUP_KEY) ||
+              localStorage.getItem('calsnap_api_key') ||
+              localStorage.getItem('gemini_api_key') ||
+              ''
+            ).trim();
+          } catch (_) {
+            return '';
+          }
         })();
         const cookieKey = (getCookie(COOKIE_KEY) || '').trim();
+        const legacyStateKey = (targetState.apiKey || '').trim();
 
-        const resolvedKey = urlKey || targetState.geminiApiKey || backupKey || cookieKey || '';
+        const resolvedKey = urlKey || targetState.geminiApiKey || legacyStateKey || backupKey || cookieKey || '';
         if (resolvedKey) {
           targetState.geminiApiKey = resolvedKey;
           try { localStorage.setItem(API_BACKUP_KEY, resolvedKey); } catch (_) {}
@@ -1213,7 +1205,7 @@
         const fastBadge = document.getElementById('fastModelBadge');
         if (fastBadge) {
           const cached = localStorage.getItem(FAST_MODEL_KEY);
-          fastBadge.textContent = (cached && !/2\.0|3\.0|lite/i.test(cached)) ? cached : 'gemini-2.5-flash';
+          fastBadge.textContent = (cached && !/2\.0|3\.0|lite/i.test(cached)) ? cached : 'gemini-3.8-flash';
         }
       } catch (_) {}
     }
@@ -1256,7 +1248,7 @@
         qaEggs: '2 Eier',
         qaQuark: '250g Quark',
         qaWhey: 'Protein-Shake',
-        analyzingText: 'Analysiere Geometrie, Portion & Nährwerte...',
+        analyzingText: 'Analysiere mit Gemini 3.8 Flash Vision (Geometrie, Etikett & Nährwerte)...',
         waterTitle: 'Wasser-Haushalt',
         todayLogTitle: 'Heutiges Ernährungstagebuch',
         resetDayBtn: 'Tag leeren',
@@ -1341,7 +1333,7 @@
         qaEggs: '2 Jajka',
         qaQuark: '250g Twaróg',
         qaWhey: 'Shake Białkowy',
-        analyzingText: 'Analizuję geometrię naczynia, porcję i makro...',
+        analyzingText: 'Analizuję za pomocą Gemini 3.8 Flash Vision (naczynie, etykieta i makro)...',
         waterTitle: 'Nawodnienie',
         todayLogTitle: 'Dzisiejszy Dziennik Posiłków',
         resetDayBtn: 'Wyczyść dzień',
@@ -1453,7 +1445,7 @@
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(-6px)';
         setTimeout(() => toast.remove(), 260);
-      }, 3400);
+      }, 3600);
     }
 
     function updateNetworkBadge() {
@@ -1471,20 +1463,22 @@
     }
 
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-section').forEach((sec) => sec.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach((btn) => btn.classList.remove('active'));
+      try {
+        document.querySelectorAll('.tab-section').forEach((sec) => sec.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach((btn) => btn.classList.remove('active'));
 
-      const targetSec = document.getElementById(`tab-${tabId}`);
-      const targetNav = document.getElementById(`nav-${tabId}`);
-      if (targetSec) targetSec.classList.add('active');
-      if (targetNav) targetNav.classList.add('active');
+        const targetSec = document.getElementById(`tab-${tabId}`);
+        const targetNav = document.getElementById(`nav-${tabId}`);
+        if (targetSec) targetSec.classList.add('active');
+        if (targetNav) targetNav.classList.add('active');
 
-      if (tabId === 'menu') {
-        updateMenuMacroContextUI();
-      } else if (tabId === 'profile') {
-        syncProfileInputs();
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (tabId === 'menu') {
+          updateMenuMacroContextUI();
+        } else if (tabId === 'profile') {
+          syncProfileInputs();
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (_) {}
     }
 
     function updateApiStatusUI() {
@@ -1555,7 +1549,6 @@
       showToast('Google Gemini API-Key gespeichert (4-Layer-Bridge aktiv).', 'success');
     }
 
-    // NEW: Visible Guest Code Generator & Invite Modal Functions
     function getActiveOrDefaultGuestCode() {
       if (isValidAccessCode(state.guestAccessCode)) {
         return state.guestAccessCode.toUpperCase();
@@ -1695,8 +1688,8 @@
           return;
         }
 
-        const maxDim = mode === 'menu' ? 1080 : 800;
-        const quality = mode === 'menu' ? 0.78 : 0.76;
+        const maxDim = (mode === 'menu' || mode === 'label') ? 1080 : 800;
+        const quality = (mode === 'menu' || mode === 'label') ? 0.78 : 0.76;
 
         const processImageElement = (img, cleanupFn) => {
           try {
@@ -1737,7 +1730,6 @@
           }
         };
 
-        // Primary zero-overhead objectURL pipeline with automatic FileReader fallback
         try {
           const objectUrl = URL.createObjectURL(file);
           const img = new Image();
@@ -1768,20 +1760,17 @@
       const file = inputEl && inputEl.files && inputEl.files[0];
       if (!file) return;
       try {
-        const res = await compressImageFile(file, 'standard');
+        const res = await compressImageFile(file, 'label');
         currentMealImageBase64 = res.base64;
         const preview = document.getElementById('mealPhotoPreview');
         const container = document.getElementById('mealPhotoPreviewContainer');
         if (preview) preview.src = res.dataUrl;
         if (container) container.classList.remove('hidden');
 
-        // Reset input value so the exact same photo can be chosen again
         inputEl.value = '';
-
-        // Automatically start meal analysis right after photo capture!
-        showToast('Foto geladen — starte KI-Analyse...', 'info');
+        showToast('Foto geladen — starte Gemini 3.8 Flash Vision...', 'info');
         if (typeof analyzeMeal === 'function') {
-          setTimeout(() => analyzeMeal(), 100);
+          setTimeout(() => analyzeMeal(), 80);
         }
       } catch (err) {
         inputEl.value = '';
@@ -1812,7 +1801,7 @@
 
         showToast('Kühlschrank-Foto geladen — starte Smart Expiry Guard...', 'info');
         if (typeof runFridgeLeftoverAI === 'function') {
-          setTimeout(() => runFridgeLeftoverAI(), 100);
+          setTimeout(() => runFridgeLeftoverAI(), 80);
         }
       } catch (err) {
         inputEl.value = '';
@@ -1843,7 +1832,7 @@
 
         showToast('Speisekarte geladen — starte Makro-Abgleich...', 'info');
         if (typeof runMenuScannerAI === 'function') {
-          setTimeout(() => runMenuScannerAI(), 100);
+          setTimeout(() => runMenuScannerAI(), 80);
         }
       } catch (err) {
         inputEl.value = '';
@@ -1874,7 +1863,7 @@
 
         showToast('Topf-/Auflauf-Foto geladen — berechne Portionsanteil...', 'info');
         if (typeof runPotCalculatorAI === 'function') {
-          setTimeout(() => runPotCalculatorAI(), 100);
+          setTimeout(() => runPotCalculatorAI(), 80);
         }
       } catch (err) {
         inputEl.value = '';
@@ -1905,10 +1894,7 @@
       const key = todayKey();
       const todayLogs = Array.isArray(state.logs[key]) ? state.logs[key] : [];
 
-      let eatenKcal = 0;
-      let eatenProt = 0;
-      let eatenCarbs = 0;
-      let eatenFat = 0;
+      let eatenKcal = 0, eatenProt = 0, eatenCarbs = 0, eatenFat = 0;
 
       for (let i = 0; i < todayLogs.length; i++) {
         const item = todayLogs[i];
@@ -1959,10 +1945,10 @@
     // 6. GEMINI ROUTING & MODEL QUEUE ENGINE (`callGeminiRequest`)
     // =========================================================================
     const BASE_MODEL_QUEUE = [
-      'gemini-2.5-flash',
-      'gemini-flash-latest',
+      'gemini-3.8-flash',
       'gemini-3-flash-preview',
-      'gemini-3.8-flash'
+      'gemini-2.5-flash',
+      'gemini-flash-latest'
     ];
 
     function getModelQueue() {
@@ -1985,35 +1971,41 @@
     }
 
     function getHostQueue(apiKey) {
-      if (apiKey && apiKey.startsWith('AQ')) {
-        return [
-          'https://aiplatform.googleapis.com',
-          'https://generativelanguage.googleapis.com'
-        ];
-      }
-      return ['https://generativelanguage.googleapis.com'];
-    }
+      const defaultHosts = [
+        'https://generativelanguage.googleapis.com',
+        'https://aiplatform.googleapis.com'
+      ];
+      const hosts = [];
 
-    async function fetchWithTimeout(url, options, timeoutMs = 11000) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        const res = await fetch(url, Object.assign({}, options, { signal: controller.signal }));
-        clearTimeout(timer);
-        return res;
-      } catch (err) {
-        clearTimeout(timer);
-        throw err;
+        const cachedHost = (localStorage.getItem(FAST_HOST_KEY) || '').trim();
+        if (cachedHost && defaultHosts.includes(cachedHost)) {
+          hosts.push(cachedHost);
+        }
+      } catch (_) {}
+
+      if (apiKey && apiKey.startsWith('AQ') && !hosts.includes('https://aiplatform.googleapis.com')) {
+        hosts.push('https://aiplatform.googleapis.com');
+      } else if (!hosts.includes('https://generativelanguage.googleapis.com')) {
+        hosts.push('https://generativelanguage.googleapis.com');
       }
+
+      for (const h of defaultHosts) {
+        if (!hosts.includes(h)) hosts.push(h);
+      }
+      return hosts;
     }
 
     async function callGeminiRequest(contentsPayload) {
+      if (!state.geminiApiKey) {
+        extractAuthFromRuntime(state);
+      }
       const apiKey = (state.geminiApiKey || '').trim();
       if (!apiKey) {
         openApiModal();
         throw new Error(state.lang === 'pl'
-          ? 'Brak klucza API Gemini dla skanera zdjęć. Wprowadź klucz API lub wpisz tekst (np. Jabłko).'
-          : 'Für die KI-Fotoanalyse wird ein Gemini API-Key benötigt. Bitte Key eingeben oder Text/Schnellwahl nutzen.');
+          ? 'Brak klucza API Gemini. Kliknij ikonę klucza u góry i wklej swój klucz API.'
+          : 'Kein Gemini API-Key hinterlegt! Bitte oben rechts auf das Schlüssel-Symbol klicken und API-Key speichern.');
       }
 
       const models = getModelQueue();
@@ -2025,43 +2017,68 @@
 
         for (let hIdx = 0; hIdx < hosts.length; hIdx++) {
           const host = hosts[hIdx];
+          if (host.includes('aiplatform.googleapis.com') && apiKey.startsWith('AIza')) {
+            continue;
+          }
+
           const endpoint = `${host}/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-          const requestBody = {
+          const requestBodyWithThinking = {
             contents: contentsPayload,
             generationConfig: {
               temperature: 0.1,
               topP: 0.85,
-              maxOutputTokens: 2048
+              maxOutputTokens: 2048,
+              thinkingConfig: { thinkingBudget: 0 }
             }
           };
 
           try {
-            const response = await fetchWithTimeout(endpoint, {
+            let response = await fetch(endpoint, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(requestBody)
-            }, 11000);
+              body: JSON.stringify(requestBodyWithThinking)
+            });
 
-            if (response.status === 404 || response.status === 400) {
-              lastError = new Error(`Model ${model} skipped (${response.status})`);
+            if (response.status === 400) {
+              const fallbackBody = {
+                contents: contentsPayload,
+                generationConfig: {
+                  temperature: 0.1,
+                  topP: 0.85,
+                  maxOutputTokens: 2048
+                }
+              };
+              response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fallbackBody)
+              });
+            }
+
+            if (response.status === 404) {
+              lastError = new Error(`Model ${model} not found (404)`);
               break;
             }
 
             if (!response.ok) {
               const errText = await response.text().catch(() => '');
-              lastError = new Error(`API Fehler (${response.status}): ${errText.slice(0, 100)}`);
+              lastError = new Error(`HTTP ${response.status}: ${errText.slice(0, 120)}`);
               continue;
             }
 
             const data = await response.json();
-            const textOut = data &&
+            const rawParts = (data &&
               data.candidates &&
               data.candidates[0] &&
               data.candidates[0].content &&
-              Array.isArray(data.candidates[0].content.parts)
-                ? data.candidates[0].content.parts.map((p) => p.text || '').join('\n').trim()
-                : '';
+              Array.isArray(data.candidates[0].content.parts))
+                ? data.candidates[0].content.parts
+                : [];
+
+            const cleanParts = rawParts.filter((p) => !p.thought && typeof p.text === 'string');
+            const activeParts = cleanParts.length > 0 ? cleanParts : rawParts;
+            const textOut = activeParts.map((p) => p.text || '').join('\n').trim();
 
             if (!textOut) {
               lastError = new Error('Leere Antwort vom KI-Modell.');
@@ -2084,7 +2101,7 @@
         }
       }
 
-      throw lastError || new Error('KI-Endpunkt aktuell nicht erreichbar.');
+      throw lastError || new Error('KI-Analyse fehlgeschlagen. Bitte API-Key oder Internetverbindung prüfen.');
     }
 
     async function callGeminiVisionAPI(visionPrompt, base64Img, textOnlyPrompt = null) {
@@ -2159,8 +2176,6 @@
 
       throw new Error('JSON-Struktur konnte nicht extrahiert werden.');
     }
-  </script>
-  <script>
     // =========================================================================
     // 7. DETERMINISTIC OFFLINE-FALLBACK TRACKER & TOP-100 BILINGUAL LEXICON
     // =========================================================================
@@ -2170,7 +2185,7 @@
       { keys: ['kaffee mit milch', 'kaffee+milch', 'milchkaffee', 'cappuccino', 'latte macchiato', 'kawa z mlekiem'], nameDe: 'Kaffee mit Milch / Cappuccino', namePl: 'Kawa z mlekiem', unitG: 250, p: 1.5, c: 2.2, f: 1.3, sugar: 2.2, fiber: 0, vitC: 0, mag: 6 },
       { keys: ['grüner tee', 'schwarzer tee', 'kräutertee', 'tee', 'zielona herbata', 'czarna herbata', 'herbata'], nameDe: 'Ungesüßter Tee', namePl: 'Herbata bez cukru', unitG: 250, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 2, zeroCal: true },
       { keys: ['wasser', 'mineralwasser', 'woda'], nameDe: 'Mineralwasser', namePl: 'Woda mineralna', unitG: 300, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 10, zeroCal: true },
-      { keys: ['cola zero', 'pepsi max', 'zero limo', 'cola light'], nameDe: 'Cola Zero / Light', namePl: 'Cola Zero', unitG: 330, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0, zeroCal: true },
+      { keys: ['cola zero', 'pepsi max', 'zero limo', 'erfrischungsgetränk', 'cola light'], nameDe: 'Zero-Erfrischungsgetränk / Cola Zero', namePl: 'Napój Zero / Cola Zero', unitG: 330, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0, zeroCal: true },
 
       // Dairy, Eggs & Protein
       { keys: ['magerquark', 'quark', 'speisequark', 'twaróg chudy', 'twaróg'], nameDe: 'Magerquark', namePl: 'Twaróg chudy', unitG: 250, p: 12.0, c: 4.0, f: 0.3, sugar: 4.0, fiber: 0, vitC: 1, mag: 11 },
@@ -2284,13 +2299,11 @@
         .trim();
     }
 
-    // Safe Multi-Item & Gram/Piece Quantifier Parser
     function resolveFromLexicon(rawInput) {
       if (!rawInput || typeof rawInput !== 'string') return null;
       const trimmed = rawInput.trim();
       if (trimmed.length < 2) return null;
 
-      // Safe split: DO NOT split on single letters 'i' or 'z'!
       const segments = trimmed
         .split(/\s*(?:,|\+|&|\bund\b|\bmit\b|\boraz\b)\s*/i)
         .map((s) => s.trim())
@@ -2379,37 +2392,8 @@
       };
     }
 
-    // Universal Deterministic Offline Fallback Estimator (Never leaves user without a result!)
-    function estimateUnknownFoodOffline(rawInput) {
-      const cleanName = (rawInput || 'Mahlzeit').trim();
-      const gramMatch = cleanName.match(/(\d+)\s*(g|ml)\b/i);
-      const grams = gramMatch ? Math.max(20, Math.min(1200, parseInt(gramMatch[1], 10))) : 250;
-      const factor = grams / 100;
-
-      // Balanced standard meal macro density fallback (~145 kcal / 100g)
-      const p = Math.round(9 * factor);
-      const c = Math.round(15 * factor);
-      const f = Math.round(5 * factor);
-      const fiber = Math.round(2 * factor);
-      const kcal = enforceAtwater(p, c, f, fiber);
-
-      return {
-        name: `${cleanName} (~${grams}g)`,
-        kcal,
-        p,
-        c,
-        f,
-        sugar: Math.round(3 * factor),
-        fiber,
-        vitC: 10,
-        mag: 25,
-        notes: 'Lokale Offline-Schätzung (Kein API-Key oder Offline-Modus).',
-        isLocalLexicon: true
-      };
-    }
-
     // =========================================================================
-    // 8. DUAL-MODE MEAL SCANNER WITH ZERO-SHOT VISUAL ANCHORING
+    // 8. DUAL-MODE MEAL SCANNER WITH ZERO-SHOT VISUAL ANCHORING & LABEL OCR
     // =========================================================================
     async function analyzeMeal() {
       const textInputEl = document.getElementById('foodTextInput');
@@ -2447,24 +2431,29 @@
 
       const langName = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
 
-      const visionPrompt = `Du bist ein hochpräzises Ernährungswissenschafts- und Computer-Vision-System.
-Analysiere das Foto der Mahlzeit deterministisch. Antworte auf ${langName}.
-VERBINDLICHE ZERO-SHOT VISUAL ANCHORING REGELN:
-1. GEFÄSS- & SCHICHTUNGS-PRÜFUNG: Prüfe zuerst das Gefäß und den Rand! Befindet sich das Essen in einer Keramik-/Glas-Auflaufform, Kasserolle oder Pfanne mit geschmolzenem/überbackenem Käse, klassifiziere es ZWINGEND als "Auflauf / Gratin / Pfannengericht" und NIEMALS als Backware oder Käsebrötchen!
-2. GROUND-TRUTH VORRANG: Benutzereingabe = "${userText || 'Keine Textangabe'}". Falls der Nutzer Text angegeben hat, gilt dieser als unumstößliche Ground-Truth für Zutaten und Mengen!
-3. ATWATER-PHYSIK: Berechne Makros realistisch für die sichtbare Gesamtportion.
+      const visionPrompt = `Du bist ein hochpräzises Ernährungswissenschafts-, OCR- und Computer-Vision-System.
+Analysiere das Foto deterministisch. Antworte auf ${langName}.
+VERBINDLICHE ZERO-SHOT VISUAL ANCHORING & OCR-ETIKETTEN-REGELN:
+1. NÄHRWERTTABELLEN / ETIKETTEN / FLASCHEN (OCR-PRIORITÄT):
+   - Wenn das Foto eine Nährwerttabelle, ein Flaschen-Etikett oder eine Verpackung zeigt (z.B. "0,33L", "100ml = 2 kcal", "330ml = 7 kcal", "Kohlenhydrate 0g", "Zucker 0g"), lies EXAKT die aufgedruckten Werte für die gesamte Flasche/Portion (z.B. 330ml = 7 kcal) ab! Setze in diesem Fall "isNutritionLabel": true.
+2. GEFÄSS- & SCHICHTUNGS-PRÜFUNG FÜR TELLER/AUFLAUF:
+   - Befindet sich das Essen in einer Keramik-/Glas-Auflaufform, Kasserolle oder Pfanne mit geschmolzenem/überbackenem Käse, klassifiziere es ZWINGEND als "Auflauf / Gratin / Pfannengericht" und NIEMALS als Backware oder Käsebrötchen!
+3. GROUND-TRUTH VORRANG:
+   - Benutzereingabe = "${userText || 'Keine Textangabe'}". Falls der Nutzer Text angegeben hat, gilt dieser als unumstößliche Ground-Truth!
+
 Gib AUSSCHLIESSLICH valides JSON im folgenden Schema zurück:
 {
-  "name": "Präziser Name des Gerichts inkl. geschätzter Menge in g",
-  "kcal": 550,
-  "p": 35,
-  "c": 45,
-  "f": 22,
-  "sugar": 6,
-  "fiber": 5,
-  "vitC": 25,
-  "mag": 65,
-  "notes": "Kurze Begründung zur Portions- & Gefäßerkennung"
+  "name": "Präziser Name des Produkts/Gerichts inkl. Menge (z.B. Erfrischungsgetränk Zero 330ml)",
+  "isNutritionLabel": true,
+  "kcal": 7,
+  "p": 0,
+  "c": 0,
+  "f": 0,
+  "sugar": 0,
+  "fiber": 0,
+  "vitC": 0,
+  "mag": 0,
+  "notes": "Kurze Bestätigung der abgelesenen Etiketten- oder Portionswerte"
 }`;
 
       const textOnlyPrompt = `Du bist ein deterministischer Ernährungsrechner.
@@ -2473,6 +2462,7 @@ Sprache für "name" und "notes": ${langName}.
 Gib AUSSCHLIESSLICH valides JSON zurück:
 {
   "name": "Präziser Name inkl. Grammzahl",
+  "isNutritionLabel": false,
   "kcal": 400,
   "p": 30,
   "c": 40,
@@ -2495,8 +2485,12 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
         const sugar = Math.max(0, Math.round(Number(data.sugar) || 0));
         const vitC = Math.max(0, Math.round(Number(data.vitC) || 0));
         const mag = Math.max(0, Math.round(Number(data.mag) || 0));
+        const rawKcal = Math.max(0, Math.round(Number(data.kcal) || 0));
 
-        const computedKcal = (p === 0 && c === 0 && f === 0) ? 0 : enforceAtwater(p, c, f, fiber);
+        // Preserve exact printed label kcal (e.g. 7 kcal on 0,33L Zero-Drink) when macros are 0g
+        const computedKcal = (data.isNutritionLabel === true || (p === 0 && c === 0 && f === 0 && fiber === 0))
+          ? rawKcal
+          : enforceAtwater(p, c, f, fiber);
 
         pendingMealEntry = {
           name: data.name || userText || 'Erkannte Mahlzeit',
@@ -2508,25 +2502,23 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
           fiber,
           vitC,
           mag,
-          notes: data.notes || 'KI-Vision & Atwater-Physik verifiziert.',
+          notes: data.notes || 'Mit Gemini 3.8 Flash Vision analysiert.',
           isLocalLexicon: false
         };
 
         renderMealPreview(pendingMealEntry);
       } catch (err) {
-        // STAGE B: Bulletproof Fallback — ALWAYS produces a result!
-        const fallbackEntry = userText
-          ? (resolveFromLexicon(userText) || estimateUnknownFoodOffline(userText))
-          : estimateUnknownFoodOffline('Fotografierte Mahlzeit (Standardportion)');
-
-        pendingMealEntry = fallbackEntry;
-        renderMealPreview(fallbackEntry);
-
-        if (!state.geminiApiKey) {
-          showToast('Gast-/Offline-Modus: Mahlzeit lokal berechnet! (Für KI-Fotoerkennung API-Key hinterlegen)', 'info');
-        } else {
-          showToast('Offline-Fallback aktiv: Mahlzeit sofort lokal berechnet!', 'info');
+        // Offline-Fallback ONLY if user entered text matching the lexicon (NEVER invent 371 kcal for photos!)
+        if (userText) {
+          const fallbackMatch = resolveFromLexicon(userText);
+          if (fallbackMatch) {
+            pendingMealEntry = fallbackMatch;
+            renderMealPreview(fallbackMatch);
+            showToast('Per lokalem Top-100 Lexikon berechnet!', 'success');
+            return;
+          }
         }
+        showToast(err.message || 'KI-Analyse fehlgeschlagen. Bitte API-Key prüfen.', 'error');
       } finally {
         if (loadingEl) loadingEl.classList.add('hidden');
         if (btnEl) btnEl.disabled = false;
@@ -2540,7 +2532,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
 
       const sourceBadge = entry.isLocalLexicon
         ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">${t('offlineResolvedBadge')}</span>`
-        : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30"><i class="fa-solid fa-microchip mr-1"></i>KI-Vision + Atwater</span>`;
+        : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30"><i class="fa-solid fa-microchip mr-1"></i>Gemini 3.8 Flash Vision</span>`;
 
       const sugarWarnHtml = entry.sugar >= 15
         ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${entry.sugar}g Zucker</span>`
@@ -2678,36 +2670,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
 }`;
 
       try {
-        let data;
-        try {
-          const raw = await callGeminiVisionAPI(prompt, currentFridgeImageBase64, prompt);
-          data = extractJSON(raw);
-        } catch (_) {
-          // Offline / Guest Fallback Recipes
-          const baseIng = userText || 'Kühlschrank-Zutaten (Gemüse, Ei & Protein)';
-          data = {
-            detectedExpiringItems: [`${baseIng} (Priorisiert)`],
-            recipes: [
-              {
-                title: `Schnelle High-Protein Pfanne (${baseIng})`,
-                urgency: 'high',
-                expiringUsed: [baseIng],
-                prepTime: '12 Min',
-                p: 42, c: 24, f: 14, sugar: 4, fiber: 6,
-                steps: 'Frische Zutaten scharf in der Pfanne anbraten, mit Proteinquelle (Ei/Hähnchen/Quark) kombinieren und würzen.'
-              },
-              {
-                title: `Ofen-Gratin Zero-Waste (${baseIng})`,
-                urgency: 'medium',
-                expiringUsed: [baseIng],
-                prepTime: '20 Min',
-                p: 36, c: 32, f: 16, sugar: 5, fiber: 7,
-                steps: 'Zutaten in einer Auflaufform schichten, leicht würzen und goldbraun im Ofen backen.'
-              }
-            ]
-          };
-        }
-
+        const raw = await callGeminiVisionAPI(prompt, currentFridgeImageBase64, prompt);
+        const data = extractJSON(raw);
         const recipes = Array.isArray(data.recipes) ? data.recipes : (Array.isArray(data) ? data : []);
         const expiringList = Array.isArray(data.detectedExpiringItems) ? data.detectedExpiringItems : [];
 
@@ -2791,6 +2755,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
           resultsEl.innerHTML = html;
           resultsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+      } catch (err) {
+        showToast(err.message || 'Fehler bei der Rezept-Generierung.', 'error');
       } finally {
         if (loadingEl) loadingEl.classList.add('hidden');
         if (btnEl) btnEl.disabled = false;
@@ -2851,25 +2817,10 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
 }`;
 
       try {
-        let data;
-        try {
-          const raw = await callGeminiVisionAPI(prompt, currentMenuImageBase64, prompt);
-          data = extractJSON(raw);
-        } catch (_) {
-          const dish = userText || 'Gegrilltes Hähnchen / Steak mit Beilage';
-          data = {
-            items: [
-              {
-                name: `${dish} (Protein-Fokus)`,
-                status: 'green',
-                p: 45, c: 28, f: 14, fiber: 6, sugar: 3,
-                orderHack: `Bestelle Grillgemüse oder Salat statt Pommes und lass Soßen separat reichen – passt optimal in dein Rest-Budget (${vec.remKcal} kcal).`
-              }
-            ]
-          };
-        }
-
+        const raw = await callGeminiVisionAPI(prompt, currentMenuImageBase64, prompt);
+        const data = extractJSON(raw);
         const items = Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : []);
+
         const statusOrder = { green: 3, yellow: 2, red: 1 };
         items.sort((a, b) => (statusOrder[b.status] || 1) - (statusOrder[a.status] || 1));
 
@@ -2937,6 +2888,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
           resultsEl.innerHTML = html;
           resultsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+      } catch (err) {
+        showToast(err.message || 'Menü-Analyse fehlgeschlagen.', 'error');
       } finally {
         if (loadingEl) loadingEl.classList.add('hidden');
         if (btnEl) btnEl.disabled = false;
@@ -2981,20 +2934,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
 }`;
 
       try {
-        let data;
-        try {
-          const raw = await callGeminiVisionAPI(prompt, currentPotImageBase64, prompt);
-          data = extractJSON(raw);
-        } catch (_) {
-          data = {
-            dishName: userText || 'Überbackener Auflauf / Topfgericht',
-            totalP: 128,
-            totalC: 148,
-            totalF: 68,
-            totalSugar: 14,
-            totalFiber: 18
-          };
-        }
+        const raw = await callGeminiVisionAPI(prompt, currentPotImageBase64, prompt);
+        const data = extractJSON(raw);
 
         const ratio = eatenPortions / totalPortions;
         const myP = Math.round((Number(data.totalP) || 0) * ratio);
@@ -3035,6 +2976,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
           `;
           resultsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+      } catch (err) {
+        showToast(err.message || 'Fehler bei der Topf-Berechnung.', 'error');
       } finally {
         if (loadingEl) loadingEl.classList.add('hidden');
       }
@@ -3073,20 +3016,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
 }`;
 
       try {
-        let data;
-        try {
-          const raw = await callGeminiVisionAPI(prompt, null, prompt);
-          data = extractJSON(raw);
-        } catch (_) {
-          data = {
-            originalName: `${craving} (Klassisch)`,
-            originalKcal: 920,
-            hackTitle: `High-Protein Fitness-${craving}`,
-            p: 48, c: 36, f: 11, sugar: 4, fiber: 7,
-            ingredients: ['200g Magerquark / Skyr', '150g Magerprotein / Hähnchen', 'Vollkorn-Basis & frische Gewürze'],
-            instructions: 'Zubereitung im Ofen oder der Heißluftfritteuse ohne zusätzliches Frittierfett mit Skyr-Kräuter-Dip.'
-          };
-        }
+        const raw = await callGeminiVisionAPI(prompt, null, prompt);
+        const data = extractJSON(raw);
 
         const p = Math.round(Number(data.p) || 40);
         const c = Math.round(Number(data.c) || 35);
@@ -3127,6 +3058,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
           `;
           resultsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+      } catch (err) {
+        showToast(err.message || 'Fehler beim Zaubern.', 'error');
       } finally {
         if (loadingEl) loadingEl.classList.add('hidden');
       }
