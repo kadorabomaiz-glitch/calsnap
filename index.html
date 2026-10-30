@@ -998,21 +998,21 @@
     const FAST_HOST_KEY = 'calsnap_fast_host';
     const GUEST_UNLOCK_KEY = 'calsnap_guest_code';
 
-    // Global Atomic Mutex Lock against duplicate parallel calls & Quota burn
+    // Global Atomic Mutex Lock against parallel executions & double-taps
     let isVisionBusy = false;
 
-    // Runtime transient image buffers (Zero LocalStorage bloat)
+    // Transient image buffers
     let currentMealImageBase64 = null;
     let currentFridgeImageBase64 = null;
     let currentMenuImageBase64 = null;
     let currentPotImageBase64 = null;
     let pendingMealEntry = null;
 
-    // Purge non-existent or malformed model names from cache on boot
+    // Purge deprecated 404 models from cache on boot
     (function sanitizeCachedModelOnBoot() {
       try {
         const cachedModel = localStorage.getItem(FAST_MODEL_KEY);
-        if (cachedModel && /3\.8|gemini-flash-latest/i.test(cachedModel)) {
+        if (cachedModel && /1\.5|2\.0|3\.8|gemini-flash-latest/i.test(cachedModel)) {
           localStorage.removeItem(FAST_MODEL_KEY);
         }
       } catch (_) {}
@@ -1208,7 +1208,7 @@
         const fastBadge = document.getElementById('fastModelBadge');
         if (fastBadge) {
           const cached = localStorage.getItem(FAST_MODEL_KEY);
-          fastBadge.textContent = cached || 'gemini-1.5-flash';
+          fastBadge.textContent = cached || 'gemini-2.5-flash';
         }
       } catch (_) {}
     }
@@ -1228,7 +1228,7 @@
         inviteNameLabel: 'Name des Gastes (Optional für Wunsch-Code):',
         inviteActiveCodeLabel: 'Gültiger Freischalt-Code für deinen Gast:',
         apiModalTitle: 'Gemini API-Key & iOS Persistenz',
-        apiModalDesc: 'Dein Schlüssel wird über unsere 4-Layer-Bridge (State, Backup-Storage, First-Party-Cookie & URL-Sync) lokal auf deinem Gerät gesichert.',
+        apiModalDesc: 'Dein Schlüssel wird über unsere 4-Layer-Bridge lokal auf deinem Gerät gesichert.',
         apiClearBtn: 'Key löschen',
         cancelBtn: 'Abbrechen',
         saveBtn: 'Speichern',
@@ -1251,7 +1251,7 @@
         qaEggs: '2 Eier',
         qaQuark: '250g Quark',
         qaWhey: 'Protein-Shake',
-        analyzingText: 'Turbo-Scan analysiert Bild, Etikett & Nährwerte...',
+        analyzingText: 'Turbo-Scan analysiert Bild, Etikett & Nährwerte in Echtzeit...',
         waterTitle: 'Wasser-Haushalt',
         todayLogTitle: 'Heutiges Ernährungstagebuch',
         resetDayBtn: 'Tag leeren',
@@ -1296,7 +1296,7 @@
         sugarCritTitle: 'KRITISCHES TAGES-ZUCKERLIMIT ÜBERSCHRITTEN!',
         sugarCritDesc: 'Dein tägliches Zuckerlimit wurde überschritten. Hohe Blutzuckerspitzen hemmen die Fettverbrennung – setze heute nur noch auf Wasser, Gemüse und Magerprotein.',
         highSugarBadge: 'Zucker-Bombe',
-        offlineResolvedBadge: '⚡ 0.0s Lokales Top-100 Lexikon (Offline-Ready)',
+        offlineResolvedBadge: '⚡ 0.0s Lokales Wörterbuch (Offline-Ready)',
         expiryHighBadge: '🔥 Zuerst verbrauchen (1–2 Tage haltbar)',
         expiryMedBadge: '⏳ Bald verbrauchen (3–4 Tage haltbar)',
         expiryLowBadge: '✅ Gut haltbar (> 5 Tage)',
@@ -1313,7 +1313,7 @@
         inviteNameLabel: 'Imię gościa (Opcjonalnie):',
         inviteActiveCodeLabel: 'Twój aktywny kod dostępu dla gościa:',
         apiModalTitle: 'Klucz API Gemini i Trwałość iOS',
-        apiModalDesc: 'Twój klucz jest bezpiecznie zapisany w 4 warstwach pamięci (State, Backup, Cookie i URL).',
+        apiModalDesc: 'Twój klucz jest bezpiecznie zapisany lokalnie w urządzeniu.',
         apiClearBtn: 'Usuń klucz',
         cancelBtn: 'Anuluj',
         saveBtn: 'Zapisz',
@@ -1325,7 +1325,7 @@
         microSugar: 'Cukier',
         microFiber: 'Błonnik',
         scannerTitle: 'Skaner Posiłków i ⚡ Turbo-Skan',
-        scannerSubtitle: 'Turbo-Kamera (Auto-Zapis), Zdjęcie lub 0.0s Tekst',
+        scannerSubtitle: 'Zrób zdjęcie, wpisz tekst lub kliknij szybki przycisk',
         photoBtn: 'Zdjęcie',
         analyzeBtn: 'Turbo-Skan',
         quickAddLabel: 'Szybki wybór 1-Klik (Od razu do dziennika):',
@@ -1336,7 +1336,7 @@
         qaEggs: '2 Jajka',
         qaQuark: '250g Twaróg',
         qaWhey: 'Shake Białkowy',
-        analyzingText: 'Turbo-Skan analizuje naczynie, etykietę i makro...',
+        analyzingText: 'Turbo-Skan analizuje naczynie, etykietę i makro w czasie rzeczywistym...',
         waterTitle: 'Nawodnienie',
         todayLogTitle: 'Dzisiejszy Dziennik Posiłków',
         resetDayBtn: 'Wyczyść dzień',
@@ -1381,7 +1381,7 @@
         sugarCritTitle: 'PRZEKROCZONO DZIENNY LIMIT CUKRU!',
         sugarCritDesc: 'Twój dzienny limit cukru został przekroczony. Unikaj słodyczy i postaw na wodę, warzywa oraz chude białko.',
         highSugarBadge: 'Dużo cukru',
-        offlineResolvedBadge: '⚡ 0.0s Lokalny Słownik Top-100 (Offline-Ready)',
+        offlineResolvedBadge: '⚡ 0.0s Słownik Lokalny (Offline-Ready)',
         expiryHighBadge: '🔥 Zużyj najpierw (ważne 1–2 dni)',
         expiryMedBadge: '⏳ Zużyj wkrótce (ważne 3–4 dni)',
         expiryLowBadge: '✅ Długa trwałość (> 5 dni)',
@@ -1417,11 +1417,14 @@
     }
 
     // =========================================================================
-    // 3. UI HELPERS, NAVIGATION & GUEST INVITE CODE GENERATOR MODAL
+    // 3. UI HELPERS & CLEAN TOAST CONTAINER (ZERO STACKING)
     // =========================================================================
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       if (!container) return;
+
+      // SANITATION: Clear prior toasts immediately so banners NEVER stack up
+      container.innerHTML = '';
 
       const colors = {
         success: 'bg-slate-900/95 border-emerald-500/40 text-emerald-300',
@@ -1448,7 +1451,7 @@
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(-6px)';
         setTimeout(() => toast.remove(), 260);
-      }, 3600);
+      }, 4000);
     }
 
     function updateNetworkBadge() {
@@ -1458,10 +1461,10 @@
       const isOnline = navigator.onLine !== false;
       if (isOnline) {
         badge.className = 'inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400';
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span id="networkStatusText">${state.lang === 'pl' ? 'Online + Słownik Top-100' : 'Online + Top-100 Lexikon'}</span>`;
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span id="networkStatusText">${state.lang === 'pl' ? 'Online + Słownik DE/PL' : 'Online + DE/PL Lexikon'}</span>`;
       } else {
         badge.className = 'inline-flex items-center gap-1 text-[10px] font-bold text-amber-400';
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span id="networkStatusText">${state.lang === 'pl' ? 'Tryb Offline (Słownik Top-100 aktywny)' : 'Offline-Modus (Top-100 Lexikon aktiv)'}</span>`;
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span id="networkStatusText">${state.lang === 'pl' ? 'Tryb Offline (Słownik aktywny)' : 'Offline-Modus (Lexikon aktiv)'}</span>`;
       }
     }
 
@@ -1549,8 +1552,7 @@
       saveState();
       if (err) err.classList.add('hidden');
       checkAccessGate();
-      validateAndSetWorkingModel(key);
-      showToast('Google Gemini API-Key gespeichert (Live-Validierung aktiv).', 'success');
+      showToast('Google Gemini API-Key gespeichert.', 'success');
     }
 
     function getActiveOrDefaultGuestCode() {
@@ -1668,8 +1670,7 @@
       updateApiStatusUI();
       closeApiModal();
       checkAccessGate();
-      validateAndSetWorkingModel(key);
-      showToast('API-Key gespeichert & Modell-Pipeline validiert!', 'success');
+      showToast('API-Key gespeichert!', 'success');
     }
 
     function clearSavedApiKey() {
@@ -1705,7 +1706,6 @@
 
         img.onload = async () => {
           try {
-            // Asynchronous hardware frame decode to prevent WebKit race condition
             if (typeof img.decode === 'function') {
               await img.decode().catch(() => {});
             }
@@ -1732,12 +1732,11 @@
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, width, height);
 
-            // Immediate URL revocation once drawing pass is complete
             URL.revokeObjectURL(objectUrl);
 
             const dataUrl = canvas.toDataURL('image/jpeg', quality);
 
-            // CRITICAL SANITATION: Immediate zero-out of iOS WebKit CoreGraphics GPU RAM
+            // Zero-out Canvas GPU buffer on iOS WebKit
             ctx.clearRect(0, 0, width, height);
             canvas.width = 0;
             canvas.height = 0;
@@ -1808,7 +1807,6 @@
         return;
       }
 
-      // Lock Mutex immediately in millisecond 0 to stop any duplicate tap race-conditions!
       isVisionBusy = true;
 
       try {
@@ -2025,55 +2023,27 @@
     }
 
     // =========================================================================
-    // 6. PROACTIVE DISCOVERY & VERIFIED PRODUCTION QUEUE ENGINE
+    // 6. LIVE-DISCOVERED MULTI-QUOTA QUEUE & ERROR-RESILIENT ENGINE
     // =========================================================================
-    // Real, verified Google AI Studio production models (Zero phantom 404 models!)
-    const BASE_MODEL_QUEUE = [
-      'gemini-1.5-flash',
-      'gemini-2.0-flash-exp',
-      'gemini-1.5-flash-8b',
-      'gemini-1.5-pro'
+    // Fallback queue of verified models that exist on current Google AI Studio keys
+    const VERIFIED_FALLBACK_QUEUE = [
+      'gemini-2.5-flash',
+      'gemini-2.5-flash-lite',
+      'gemini-3.1-flash-lite-preview',
+      'gemini-3-flash-preview',
+      'gemini-2.5-pro',
+      'gemma-3-27b-it'
     ];
 
-    function getModelQueue() {
-      const queue = [];
-      try {
-        const cached = (localStorage.getItem(FAST_MODEL_KEY) || '').trim();
-        if (cached && !/3\.8|gemini-flash-latest/i.test(cached)) {
-          queue.push(cached);
-        } else if (cached) {
-          localStorage.removeItem(FAST_MODEL_KEY);
-        }
-      } catch (_) {}
-
-      for (const m of BASE_MODEL_QUEUE) {
-        if (!queue.includes(m)) {
-          queue.push(m);
-        }
-      }
-      return queue;
-    }
-
-    function getHostQueue(apiKey) {
-      if (apiKey && apiKey.startsWith('AQ')) {
-        return [
-          'https://aiplatform.googleapis.com',
-          'https://generativelanguage.googleapis.com'
-        ];
-      }
-      return ['https://generativelanguage.googleapis.com'];
-    }
-
-    // Proactive Live-Handshake: Queries Google API to verify exactly what exists on this key
-    async function validateAndSetWorkingModel(apiKey) {
-      if (!apiKey || apiKey.length < 15) return;
+    async function fetchLiveSupportedModels(apiKey) {
+      if (!apiKey || apiKey.length < 15) return [];
       try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
-        if (!res.ok) return;
+        if (!res.ok) return [];
         const data = await res.json();
-        if (!data || !Array.isArray(data.models)) return;
+        if (!data || !Array.isArray(data.models)) return [];
 
-        const supported = data.models
+        return data.models
           .filter((m) =>
             m &&
             typeof m.name === 'string' &&
@@ -2082,22 +2052,57 @@
             !/embedding|imagen|veo|aqa|tts|audio/i.test(m.name)
           )
           .map((m) => m.name.replace(/^models\//, ''));
-
-        // Match the fastest real flash model supported on this key
-        const best = BASE_MODEL_QUEUE.find((m) => supported.includes(m)) ||
-          supported.find((m) => /flash/i.test(m)) ||
-          supported[0];
-
-        if (best) {
-          try { localStorage.setItem(FAST_MODEL_KEY, best); } catch (_) {}
-          const badge = document.getElementById('fastModelBadge');
-          if (badge) badge.textContent = best;
-        }
-      } catch (_) {}
+      } catch (_) {
+        return [];
+      }
     }
 
-    async function executeModelCallWithTimeout(model, host, apiKey, contentsPayload) {
-      const endpoint = `${host}/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    async function buildLiveResilientQueue(apiKey) {
+      const queue = [];
+      const cached = (localStorage.getItem(FAST_MODEL_KEY) || '').trim();
+      if (cached && !/1\.5|2\.0|3\.8|gemini-flash-latest/i.test(cached)) {
+        queue.push(cached);
+      }
+
+      // Proactively query Google for all models currently active on THIS key
+      const liveGoogleModels = await fetchLiveSupportedModels(apiKey);
+
+      if (liveGoogleModels.length > 0) {
+        // Prioritize fast 2.5 flash, then 3.x preview, then gemma/pro
+        const prioritizedOrder = [
+          'gemini-2.5-flash',
+          'gemini-2.5-flash-lite',
+          'gemini-3.1-flash-lite-preview',
+          'gemini-3-flash-preview',
+          'gemini-2.5-pro',
+          'gemma-3-27b-it',
+          'gemma-3-12b-it'
+        ];
+
+        for (const pref of prioritizedOrder) {
+          if (liveGoogleModels.includes(pref) && !queue.includes(pref)) {
+            queue.push(pref);
+          }
+        }
+
+        // Add any remaining multimodal models from Google as extra backups
+        for (const m of liveGoogleModels) {
+          if (!queue.includes(m)) {
+            queue.push(m);
+          }
+        }
+      } else {
+        // If discovery failed (e.g. network blip), use verified fallback list
+        for (const fb of VERIFIED_FALLBACK_QUEUE) {
+          if (!queue.includes(fb)) queue.push(fb);
+        }
+      }
+
+      return queue;
+    }
+
+    async function executeModelCallWithTimeout(model, apiKey, contentsPayload) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 12000);
@@ -2112,7 +2117,7 @@
       }
 
       try {
-        const response = await fetch(endpoint, {
+        let response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2122,9 +2127,23 @@
           signal: controller.signal
         });
 
+        // Instant retry without thinkingConfig if endpoint returns 400
+        if (response.status === 400 && genConfig.thinkingConfig) {
+          delete genConfig.thinkingConfig;
+          response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: contentsPayload,
+              generationConfig: genConfig
+            }),
+            signal: controller.signal
+          });
+        }
+
         if (!response.ok) {
           const errText = await response.text().catch(() => '');
-          const err = new Error(`HTTP ${response.status} (${model}): ${errText.slice(0, 100)}`);
+          const err = new Error(`HTTP ${response.status} (${model}): ${errText.slice(0, 80)}`);
           err.status = response.status;
           throw err;
         }
@@ -2138,7 +2157,6 @@
             ? data.candidates[0].content.parts
             : [];
 
-        // Filter out internal thinking parts to guarantee valid JSON parsing
         const cleanParts = rawParts.filter((p) => !p.thought && typeof p.text === 'string');
         const activeParts = cleanParts.length > 0 ? cleanParts : rawParts;
         const textOut = activeParts.map((p) => p.text || '').join('\n').trim();
@@ -2149,7 +2167,6 @@
 
         try {
           localStorage.setItem(FAST_MODEL_KEY, model);
-          localStorage.setItem(FAST_HOST_KEY, host);
         } catch (_) {}
         const badge = document.getElementById('fastModelBadge');
         if (badge) badge.textContent = model;
@@ -2168,34 +2185,26 @@
       if (!apiKey) {
         openApiModal();
         throw new Error(state.lang === 'pl'
-          ? 'Brak klucza API Gemini. Kliknij ikonę klucza u góry i zapisz swój klucz API.'
-          : 'Kein Gemini API-Key hinterlegt! Bitte oben rechts auf das Schlüssel-Symbol klicken und deinen API-Key speichern.');
+          ? 'Brak klucza API Gemini. Zapisz klucz API u góry.'
+          : 'Kein Gemini API-Key hinterlegt! Bitte oben rechts auf das Schlüssel-Symbol klicken.');
       }
 
-      const models = getModelQueue();
-      const hosts = getHostQueue(apiKey);
+      // Build live resilient queue directly from Google's active model registry
+      const models = await buildLiveResilientQueue(apiKey);
       let lastError = null;
 
       for (let mIdx = 0; mIdx < models.length; mIdx++) {
         const model = models[mIdx];
+        try {
+          return await executeModelCallWithTimeout(model, apiKey, contentsPayload);
+        } catch (err) {
+          lastError = err;
 
-        for (let hIdx = 0; hIdx < hosts.length; hIdx++) {
-          const host = hosts[hIdx];
-          if (host.includes('aiplatform.googleapis.com') && apiKey.startsWith('AIza')) {
-            continue;
+          // Evict from fast cache immediately on 404 OR 429
+          if (err.status === 404 || err.status === 429) {
+            try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
           }
-
-          try {
-            return await executeModelCallWithTimeout(model, host, apiKey, contentsPayload);
-          } catch (err) {
-            lastError = err;
-
-            // Immediately clear cached model on 404 or 429 to avoid repeatedly hitting a dead end
-            if (err.status === 404 || err.status === 429) {
-              try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
-              break;
-            }
-          }
+          // Continue loop immediately to try the next working model
         }
       }
 
@@ -2275,83 +2284,93 @@
       throw new Error('JSON-Struktur konnte nicht extrahiert werden.');
     }
     // =========================================================================
-    // 7. DETERMINISTIC OFFLINE-FALLBACK TRACKER & TOP-100 BILINGUAL LEXICON
+    // 7. DETERMINISTIC OFFLINE-FALLBACK TRACKER & EXPANDED BILINGUAL LEXICON
     // =========================================================================
     const FOOD_LEXICON = [
+      // Everyday Composite Dishes & User-Requested Classics (DE & PL)
+      { keys: ['lasagne', 'lasagna', 'lasagne bolognese', 'lazania'], nameDe: 'Lasagne Bolognese (Portion)', namePl: 'Lazania Bolognese (Porcja)', unitG: 350, isPiece: true, p: 28.0, c: 46.0, f: 24.0, sugar: 4.5, fiber: 3.2, vitC: 8, mag: 26 },
+      { keys: ['mieso wieprzowe w sosie', 'mięso wieprzowe w sosie', 'wieprzowina w sosie', 'schweinefleisch in sosse', 'schweinefleisch in soße', 'schweinebraten mit sosse', 'schweinebraten mit soße'], nameDe: 'Schweinefleisch in Soße (Portion)', namePl: 'Mięso wieprzowe w sosie (Porcja)', unitG: 250, isPiece: true, p: 32.0, c: 6.0, f: 19.0, sugar: 2.0, fiber: 1.0, vitC: 2, mag: 30 },
+      { keys: ['gulasch', 'gulasz', 'rinderschmorfleisch', 'wolowina w sosie', 'wołowina w sosie'], nameDe: 'Gulasch (Portion)', namePl: 'Gulasz (Porcja)', unitG: 300, isPiece: true, p: 34.0, c: 8.0, f: 16.0, sugar: 3.0, fiber: 2.0, vitC: 12, mag: 32 },
+      { keys: ['schnitzel', 'panierter schnitzel', 'paniertes schnitzel', 'kotlet schabowy', 'schabowy'], nameDe: 'Paniertes Schnitzel', namePl: 'Kotlet schabowy', unitG: 180, isPiece: true, p: 29.0, c: 14.0, f: 18.0, sugar: 0.5, fiber: 1.0, vitC: 0, mag: 24 },
+      { keys: ['frikadelle', 'bulette', 'fleischpflanzerl', 'kotlet mielony', 'mielony'], nameDe: 'Frikadelle / Bulette', namePl: 'Kotlet mielony', unitG: 120, isPiece: true, p: 18.0, c: 6.0, f: 19.0, sugar: 0.8, fiber: 0.8, vitC: 1, mag: 16 },
+      { keys: ['pierogi', 'pierogi ruskie', 'pierogi z miesem', 'pierogi z mięsem', 'pirogen'], nameDe: 'Pierogi / Piroggen (Portion)', namePl: 'Pierogi (Porcja)', unitG: 250, isPiece: true, p: 16.0, c: 54.0, f: 11.0, sugar: 2.5, fiber: 2.8, vitC: 3, mag: 22 },
+      { keys: ['bigos', 'schmorkraut'], nameDe: 'Bigos (Sauerkrauteintopf)', namePl: 'Bigos staropolski', unitG: 300, isPiece: true, p: 19.0, c: 9.0, f: 21.0, sugar: 4.5, fiber: 5.5, vitC: 28, mag: 26 },
+      { keys: ['spaghetti bolognese', 'pasta bolognese', 'spaghetti z sosem', 'makaron bolognese'], nameDe: 'Spaghetti Bolognese', namePl: 'Spaghetti Bolognese', unitG: 350, isPiece: true, p: 24.0, c: 56.0, f: 14.0, sugar: 5.0, fiber: 3.5, vitC: 10, mag: 30 },
+      { keys: ['pommes', 'pommes frites', 'frytki'], nameDe: 'Pommes Frites (Portion)', namePl: 'Frytki', unitG: 150, isPiece: true, p: 4.5, c: 48.0, f: 18.0, sugar: 0.5, fiber: 4.2, vitC: 8, mag: 28 },
+      { keys: ['currywurst', 'currywurst mit sosse', 'currywurst mit soße'], nameDe: 'Currywurst mit Soße', namePl: 'Kiełbaska Currywurst', unitG: 180, isPiece: true, p: 18.0, c: 14.0, f: 32.0, sugar: 12.0, fiber: 1.0, vitC: 4, mag: 18 },
+      { keys: ['auflauf', 'kartoffelauflauf', 'nudelauflauf', 'gratin', 'zapiekanka'], nameDe: 'Überbackener Auflauf / Gratin (Portion)', namePl: 'Zapiekanka (Porcja)', unitG: 350, isPiece: true, p: 9.5, c: 14.0, f: 8.5, sugar: 2.5, fiber: 2.2, vitC: 12, mag: 28 },
+      { keys: ['döner', 'doener', 'döner kebab', 'kebab'], nameDe: 'Döner Kebab', namePl: 'Kebab', unitG: 350, isPiece: true, p: 8.8, c: 17.5, f: 8.2, sugar: 2.8, fiber: 1.8, vitC: 8, mag: 22 },
+      { keys: ['pizza margherita', 'pizza salami', 'pizza'], nameDe: 'Pizza (Standardgröße)', namePl: 'Pizza klasyczna', unitG: 380, isPiece: true, p: 10.5, c: 29.0, f: 9.8, sugar: 3.2, fiber: 2.1, vitC: 4, mag: 20 },
+      { keys: ['burger', 'cheeseburger', 'hamburger'], nameDe: 'Burger / Cheeseburger', namePl: 'Burger / Cheeseburger', unitG: 220, isPiece: true, p: 13.5, c: 22.0, f: 12.5, sugar: 4.5, fiber: 1.8, vitC: 2, mag: 20 },
+
       // Beverages
       { keys: ['schwarzer kaffee', 'kaffee schwarz', 'kaffee', 'espresso', 'americano', 'czarna kawa', 'kawa bez mleka', 'kawa'], nameDe: 'Schwarzer Kaffee', namePl: 'Czarna kawa', unitG: 250, p: 0.3, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 7, zeroCal: true },
       { keys: ['kaffee mit milch', 'kaffee+milch', 'milchkaffee', 'cappuccino', 'latte macchiato', 'kawa z mlekiem'], nameDe: 'Kaffee mit Milch / Cappuccino', namePl: 'Kawa z mlekiem', unitG: 250, p: 1.5, c: 2.2, f: 1.3, sugar: 2.2, fiber: 0, vitC: 0, mag: 6 },
       { keys: ['grüner tee', 'schwarzer tee', 'kräutertee', 'tee', 'zielona herbata', 'czarna herbata', 'herbata'], nameDe: 'Ungesüßter Tee', namePl: 'Herbata bez cukru', unitG: 250, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 2, zeroCal: true },
       { keys: ['wasser', 'mineralwasser', 'woda'], nameDe: 'Mineralwasser', namePl: 'Woda mineralna', unitG: 300, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 10, zeroCal: true },
-      { keys: ['cola zero', 'pepsi max', 'zero limo', 'erfrischungsgetränk zero', 'cola light'], nameDe: 'Zero-Erfrischungsgetränk / Cola Zero', namePl: 'Napój Zero / Cola Zero', unitG: 330, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0, zeroCal: true },
+      { keys: ['cola zero', 'pepsi max', 'zero limo', 'erfrischungsgetraenk zero', 'cola light'], nameDe: 'Zero-Erfrischungsgetränk / Cola Zero', namePl: 'Napój Zero / Cola Zero', unitG: 330, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0, zeroCal: true },
       { keys: ['apfelschorle', 'apfelsaftschorle', 'schorle'], nameDe: 'Apfelschorle (60% Fruchtgehalt)', namePl: 'Napój jabłkowy gazowany', unitG: 500, p: 0.1, c: 6.0, f: 0.1, sugar: 5.8, fiber: 0.1, vitC: 2, mag: 4 },
 
-      // Dairy, Eggs & Protein
-      { keys: ['magerquark', 'quark', 'speisequark', 'twaróg chudy', 'twaróg'], nameDe: 'Magerquark', namePl: 'Twaróg chudy', unitG: 250, p: 12.0, c: 4.0, f: 0.3, sugar: 4.0, fiber: 0, vitC: 1, mag: 11 },
+      // Dairy, Eggs & Protein Staples
+      { keys: ['magerquark', 'quark', 'speisequark', 'twarog chudy', 'twaróg chudy', 'twarog', 'twaróg'], nameDe: 'Magerquark', namePl: 'Twaróg chudy', unitG: 250, p: 12.0, c: 4.0, f: 0.3, sugar: 4.0, fiber: 0, vitC: 1, mag: 11 },
       { keys: ['skyr', 'skyr natur', 'skyr naturalny'], nameDe: 'Skyr Natur', namePl: 'Skyr naturalny', unitG: 200, p: 11.0, c: 4.0, f: 0.2, sugar: 4.0, fiber: 0, vitC: 1, mag: 12 },
-      { keys: ['hüttenkäse', 'körniger frischkäse', 'serek wiejski', 'cottage cheese'], nameDe: 'Körniger Frischkäse (Hüttenkäse)', namePl: 'Serek wiejski', unitG: 200, p: 12.5, c: 2.8, f: 4.0, sugar: 2.5, fiber: 0, vitC: 0, mag: 9 },
+      { keys: ['hüttenkäse', 'huttenkase', 'körniger frischkäse', 'korniger frischkase', 'serek wiejski', 'cottage cheese'], nameDe: 'Körniger Frischkäse (Hüttenkäse)', namePl: 'Serek wiejski', unitG: 200, p: 12.5, c: 2.8, f: 4.0, sugar: 2.5, fiber: 0, vitC: 0, mag: 9 },
       { keys: ['griechischer joghurt', 'jogurt grecki', 'joghurt', 'naturjoghurt', 'jogurt naturalny'], nameDe: 'Naturjoghurt / Griechischer Joghurt', namePl: 'Jogurt naturalny / grecki', unitG: 150, p: 6.5, c: 4.5, f: 5.0, sugar: 4.5, fiber: 0, vitC: 1, mag: 12 },
-      { keys: ['ei', 'eier', 'gekochtes ei', 'spiegelei', 'rührei', 'jajko', 'jajka', 'jajecznica'], nameDe: 'Hühnerei (Größe M/L)', namePl: 'Jajko kurze', unitG: 60, isPiece: true, p: 12.8, c: 0.7, f: 10.5, sugar: 0.5, fiber: 0, vitC: 0, mag: 12 },
-      { keys: ['whey', 'proteinshake', 'protein shake', 'eiweißshake', 'whey protein', 'odżywka białkowa'], nameDe: 'Whey Protein-Shake', namePl: 'Shake Białkowy (Whey)', unitG: 30, isPiece: true, p: 78.0, c: 5.5, f: 4.5, sugar: 3.5, fiber: 0, vitC: 0, mag: 25 },
+      { keys: ['ei', 'eier', 'gekochtes ei', 'spiegelei', 'rührei', 'ruhrei', 'jajko', 'jajka', 'jajecznica'], nameDe: 'Hühnerei (Größe M/L)', namePl: 'Jajko kurze', unitG: 60, isPiece: true, p: 12.8, c: 0.7, f: 10.5, sugar: 0.5, fiber: 0, vitC: 0, mag: 12 },
+      { keys: ['whey', 'proteinshake', 'protein shake', 'eiweißshake', 'eiweissshake', 'whey protein', 'odzywka bialkowa', 'odżywka białkowa'], nameDe: 'Whey Protein-Shake', namePl: 'Shake Białkowy (Whey)', unitG: 30, isPiece: true, p: 78.0, c: 5.5, f: 4.5, sugar: 3.5, fiber: 0, vitC: 0, mag: 25 },
       { keys: ['mozzarella light', 'mozzarella'], nameDe: 'Mozzarella', namePl: 'Mozzarella', unitG: 125, p: 19.0, c: 1.0, f: 12.5, sugar: 1.0, fiber: 0, vitC: 0, mag: 20 },
-      { keys: ['gouda', 'edamer', 'käse', 'ser żółty'], nameDe: 'Schnittkäse (Gouda/Edamer)', namePl: 'Ser żółty', unitG: 30, isPiece: true, p: 24.0, c: 0, f: 27.0, sugar: 0, fiber: 0, vitC: 0, mag: 28 },
-      { keys: ['feta', 'hirtenkäse', 'schafskäse', 'ser feta'], nameDe: 'Feta / Hirtenkäse', namePl: 'Ser Feta', unitG: 100, p: 16.5, c: 1.5, f: 21.0, sugar: 1.5, fiber: 0, vitC: 0, mag: 20 },
-      { keys: ['harzer käse', 'handkäse', 'harzer'], nameDe: 'Harzer Roller (High-Protein)', namePl: 'Ser Harzer', unitG: 100, p: 30.0, c: 0.1, f: 0.5, sugar: 0, fiber: 0, vitC: 0, mag: 25 },
+      { keys: ['gouda', 'edamer', 'käse', 'kase', 'ser zolty', 'ser żółty'], nameDe: 'Schnittkäse (Gouda/Edamer)', namePl: 'Ser żółty', unitG: 30, isPiece: true, p: 24.0, c: 0, f: 27.0, sugar: 0, fiber: 0, vitC: 0, mag: 28 },
+      { keys: ['feta', 'hirtenkäse', 'hirtenkase', 'schafskäse', 'schafskase', 'ser feta'], nameDe: 'Feta / Hirtenkäse', namePl: 'Ser Feta', unitG: 100, p: 16.5, c: 1.5, f: 21.0, sugar: 1.5, fiber: 0, vitC: 0, mag: 20 },
+      { keys: ['harzer käse', 'harzer kase', 'handkäse', 'handkase', 'harzer'], nameDe: 'Harzer Roller (High-Protein)', namePl: 'Ser Harzer', unitG: 100, p: 30.0, c: 0.1, f: 0.5, sugar: 0, fiber: 0, vitC: 0, mag: 25 },
       { keys: ['milch', 'vollmilch', 'fettarme milch', 'mleko'], nameDe: 'Kuhmilch', namePl: 'Mleko', unitG: 200, p: 3.4, c: 4.8, f: 2.0, sugar: 4.8, fiber: 0, vitC: 1, mag: 12 },
       { keys: ['hafermilch', 'haferdrink', 'mleko owsiane'], nameDe: 'Haferdrink', namePl: 'Napój owsiany', unitG: 200, p: 0.8, c: 6.8, f: 1.5, sugar: 4.0, fiber: 0.8, vitC: 0, mag: 6 },
 
       // Meat, Poultry & Fish
-      { keys: ['hähnchenbrust', 'hähnchen', 'putenbrust', 'pute', 'hühnchen', 'kurczak', 'pierś z kurczaka', 'indyk'], nameDe: 'Hähnchenbrustfilet (gegart)', namePl: 'Pierś z kurczaka', unitG: 180, p: 29.5, c: 0, f: 2.5, sugar: 0, fiber: 0, vitC: 0, mag: 32 },
-      { keys: ['rinderhack', 'hackfleisch', 'tatar', 'rinderfilet', 'rumpsteak', 'rindfleisch', 'steak', 'wołowina'], nameDe: 'Rindfleisch / Rumpsteak', namePl: 'Wołowina / Stek wołowy', unitG: 180, p: 25.0, c: 0, f: 9.5, sugar: 0, fiber: 0, vitC: 0, mag: 24 },
-      { keys: ['lachs', 'lachsfilet', 'räucherlachs', 'łosoś'], nameDe: 'Lachsfilet', namePl: 'Filet z łososia', unitG: 150, p: 21.0, c: 0, f: 13.5, sugar: 0, fiber: 0, vitC: 1, mag: 29 },
-      { keys: ['thunfisch', 'tuńczyk'], nameDe: 'Thunfisch (im eigenen Saft)', namePl: 'Tuńczyk w sosie własnym', unitG: 150, p: 25.5, c: 0, f: 1.0, sugar: 0, fiber: 0, vitC: 0, mag: 30 },
+      { keys: ['hähnchenbrust', 'hahnchenbrust', 'hähnchen', 'hahnchen', 'putenbrust', 'pute', 'hühnchen', 'huhnchen', 'kurczak', 'piers z kurczaka', 'pierś z kurczaka', 'indyk'], nameDe: 'Hähnchenbrustfilet (gegart)', namePl: 'Pierś z kurczaka', unitG: 180, p: 29.5, c: 0, f: 2.5, sugar: 0, fiber: 0, vitC: 0, mag: 32 },
+      { keys: ['rinderhack', 'hackfleisch', 'tatar', 'rinderfilet', 'rumpsteak', 'rindfleisch', 'steak', 'wolowina', 'wołowina'], nameDe: 'Rindfleisch / Rumpsteak', namePl: 'Wołowina / Stek wołowy', unitG: 180, p: 25.0, c: 0, f: 9.5, sugar: 0, fiber: 0, vitC: 0, mag: 24 },
+      { keys: ['lachs', 'lachsfilet', 'räucherlachs', 'raucherlachs', 'losos', 'łosoś'], nameDe: 'Lachsfilet', namePl: 'Filet z łososia', unitG: 150, p: 21.0, c: 0, f: 13.5, sugar: 0, fiber: 0, vitC: 1, mag: 29 },
+      { keys: ['thunfisch', 'tunczyk', 'tuńczyk'], nameDe: 'Thunfisch (im eigenen Saft)', namePl: 'Tuńczyk w sosie własnym', unitG: 150, p: 25.5, c: 0, f: 1.0, sugar: 0, fiber: 0, vitC: 0, mag: 30 },
       { keys: ['garnelen', 'shrimps', 'krewetki'], nameDe: 'Garnelen / Shrimps', namePl: 'Krewetki', unitG: 150, p: 22.0, c: 0.5, f: 1.5, sugar: 0, fiber: 0, vitC: 2, mag: 35 },
       { keys: ['kochschinken', 'putenschinken', 'schinken', 'szynka'], nameDe: 'Magerer Schinken', namePl: 'Szynka chuda', unitG: 50, p: 20.0, c: 1.0, f: 3.0, sugar: 1.0, fiber: 0, vitC: 0, mag: 18 },
-      { keys: ['tofu', 'räuchertofu'], nameDe: 'Tofu Natur / Räuchertofu', namePl: 'Tofu', unitG: 150, p: 15.5, c: 1.8, f: 8.5, sugar: 0.6, fiber: 1.5, vitC: 0, mag: 45 },
+      { keys: ['tofu', 'räuchertofu', 'rauchertofu'], nameDe: 'Tofu Natur / Räuchertofu', namePl: 'Tofu', unitG: 150, p: 15.5, c: 1.8, f: 8.5, sugar: 0.6, fiber: 1.5, vitC: 0, mag: 45 },
 
       // Carbs, Grains, Bread & Potatoes
-      { keys: ['haferflocken', 'porridge', 'oatmeal', 'płatki owsiane', 'owsianka'], nameDe: 'Haferflocken', namePl: 'Płatki owsiane', unitG: 60, p: 13.5, c: 58.7, f: 7.0, sugar: 0.8, fiber: 10.0, vitC: 0, mag: 130 },
-      { keys: ['reis', 'basmatireis', 'jasminreis', 'ryż'], nameDe: 'Reis (gekocht)', namePl: 'Ryż ugotowany', unitG: 180, p: 2.8, c: 28.0, f: 0.3, sugar: 0.1, fiber: 0.8, vitC: 0, mag: 13 },
+      { keys: ['haferflocken', 'porridge', 'oatmeal', 'platki owsiane', 'płatki owsiane', 'owsianka'], nameDe: 'Haferflocken', namePl: 'Płatki owsiane', unitG: 60, p: 13.5, c: 58.7, f: 7.0, sugar: 0.8, fiber: 10.0, vitC: 0, mag: 130 },
+      { keys: ['reis', 'basmatireis', 'jasminreis', 'ryz', 'ryż'], nameDe: 'Reis (gekocht)', namePl: 'Ryż ugotowany', unitG: 180, p: 2.8, c: 28.0, f: 0.3, sugar: 0.1, fiber: 0.8, vitC: 0, mag: 13 },
       { keys: ['nudeln', 'pasta', 'spaghetti', 'vollkornnudeln', 'makaron'], nameDe: 'Pasta / Nudeln (gekocht)', namePl: 'Makaron ugotowany', unitG: 200, p: 5.5, c: 30.0, f: 0.9, sugar: 0.6, fiber: 2.2, vitC: 0, mag: 18 },
       { keys: ['kartoffeln', 'kartoffel', 'salzkartoffeln', 'pellkartoffeln', 'ofenkartoffel', 'ziemniaki'], nameDe: 'Kartoffeln (gegart)', namePl: 'Ziemniaki gotowane', unitG: 250, p: 2.0, c: 15.5, f: 0.1, sugar: 0.8, fiber: 2.1, vitC: 14, mag: 21 },
-      { keys: ['süßkartoffel', 'süßkartoffeln', 'bataty'], nameDe: 'Süßkartoffel (gegart)', namePl: 'Bataty', unitG: 200, p: 1.6, c: 20.0, f: 0.1, sugar: 4.2, fiber: 3.0, vitC: 18, mag: 25 },
+      { keys: ['süßkartoffel', 'susskartoffel', 'süßkartoffeln', 'susskartoffeln', 'bataty'], nameDe: 'Süßkartoffel (gegart)', namePl: 'Bataty', unitG: 200, p: 1.6, c: 20.0, f: 0.1, sugar: 4.2, fiber: 3.0, vitC: 18, mag: 25 },
       { keys: ['vollkornbrot', 'brot', 'roggenbrot', 'dinkelbrot', 'chleb razowy', 'chleb'], nameDe: 'Vollkornbrot (Scheibe)', namePl: 'Chleb razowy', unitG: 55, isPiece: true, p: 7.8, c: 41.0, f: 2.2, sugar: 2.5, fiber: 7.5, vitC: 0, mag: 55 },
-      { keys: ['brötchen', 'weizenbrötchen', 'semmel', 'bułka', 'kajzerka'], nameDe: 'Brötchen / Semmel', namePl: 'Bułka kajzerka', unitG: 65, isPiece: true, p: 8.5, c: 51.0, f: 1.8, sugar: 2.2, fiber: 3.2, vitC: 0, mag: 22 },
-      { keys: ['käsebrötchen', 'bułka z serem'], nameDe: 'Überbackenes Käsebrötchen', namePl: 'Bułka z serem', unitG: 95, isPiece: true, p: 12.5, c: 41.0, f: 11.5, sugar: 2.2, fiber: 2.8, vitC: 0, mag: 25 },
-      { keys: ['reiswaffel', 'reiswaffeln', 'wafle ryżowe'], nameDe: 'Reiswaffel', namePl: 'Wafel ryżowy', unitG: 10, isPiece: true, p: 8.0, c: 81.0, f: 2.8, sugar: 0.5, fiber: 3.5, vitC: 0, mag: 110 },
+      { keys: ['brötchen', 'brotchen', 'weizenbrötchen', 'weizenbrotchen', 'semmel', 'bulka', 'bułka', 'kajzerka'], nameDe: 'Brötchen / Semmel', namePl: 'Bułka kajzerka', unitG: 65, isPiece: true, p: 8.5, c: 51.0, f: 1.8, sugar: 2.2, fiber: 3.2, vitC: 0, mag: 22 },
+      { keys: ['käsebrötchen', 'kasebrotchen', 'bulka z serem', 'bułka z serem'], nameDe: 'Überbackenes Käsebrötchen', namePl: 'Bułka z serem', unitG: 95, isPiece: true, p: 12.5, c: 41.0, f: 11.5, sugar: 2.2, fiber: 2.8, vitC: 0, mag: 25 },
+      { keys: ['reiswaffel', 'reiswaffeln', 'wafle ryzowe', 'wafle ryżowe'], nameDe: 'Reiswaffel', namePl: 'Wafel ryżowy', unitG: 10, isPiece: true, p: 8.0, c: 81.0, f: 2.8, sugar: 0.5, fiber: 3.5, vitC: 0, mag: 110 },
       { keys: ['linsen', 'rote linsen', 'kichererbsen', 'bohnen', 'kidneybohnen', 'soczewica', 'ciecierzyca', 'fasola'], nameDe: 'Hülsenfrüchte / Linsen (gegart)', namePl: 'Soczewica / Ciecierzyca gotowana', unitG: 180, p: 9.0, c: 17.5, f: 0.8, sugar: 1.2, fiber: 7.5, vitC: 2, mag: 36 },
 
       // Fruits
-      { keys: ['apfel', 'äpfel', 'ein apfel', '1 apfel', 'jabłko', 'jabłka'], nameDe: 'Apfel (mittelgroß)', namePl: 'Jabłko', unitG: 150, isPiece: true, p: 0.3, c: 11.4, f: 0.2, sugar: 10.3, fiber: 2.4, vitC: 12, mag: 5 },
+      { keys: ['apfel', 'äpfel', 'apfel', 'ein apfel', '1 apfel', 'jablko', 'jabłko', 'jablka', 'jabłka'], nameDe: 'Apfel (mittelgroß)', namePl: 'Jabłko', unitG: 150, isPiece: true, p: 0.3, c: 11.4, f: 0.2, sugar: 10.3, fiber: 2.4, vitC: 12, mag: 5 },
       { keys: ['banane', 'bananen', 'eine banane', '1 banane', 'banan', 'banany'], nameDe: 'Banane (mittelgroß)', namePl: 'Banan', unitG: 120, isPiece: true, p: 1.1, c: 20.0, f: 0.2, sugar: 14.5, fiber: 2.6, vitC: 10, mag: 28 },
-      { keys: ['beeren', 'blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'borówki', 'truskawki', 'maliny'], nameDe: 'Beeren-Mix (Heidel-/Erd-/Himbeeren)', namePl: 'Owoce jagodowe', unitG: 125, p: 0.9, c: 7.5, f: 0.4, sugar: 6.2, fiber: 3.5, vitC: 45, mag: 12 },
-      { keys: ['orange', 'apfelsine', 'mandarine', 'pomarańcza', 'mandarynka'], nameDe: 'Orange / Mandarine', namePl: 'Pomarańcza', unitG: 150, isPiece: true, p: 0.9, c: 9.2, f: 0.2, sugar: 8.5, fiber: 2.2, vitC: 52, mag: 11 },
+      { keys: ['beeren', 'blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'borowki', 'borówki', 'truskawki', 'maliny'], nameDe: 'Beeren-Mix (Heidel-/Erd-/Himbeeren)', namePl: 'Owoce jagodowe', unitG: 125, p: 0.9, c: 7.5, f: 0.4, sugar: 6.2, fiber: 3.5, vitC: 45, mag: 12 },
+      { keys: ['orange', 'apfelsine', 'mandarine', 'pomarancza', 'pomarańcza', 'mandarynka'], nameDe: 'Orange / Mandarine', namePl: 'Pomarańcza', unitG: 150, isPiece: true, p: 0.9, c: 9.2, f: 0.2, sugar: 8.5, fiber: 2.2, vitC: 52, mag: 11 },
       { keys: ['birne', 'gruszka'], nameDe: 'Birne', namePl: 'Gruszka', unitG: 160, isPiece: true, p: 0.5, c: 12.4, f: 0.3, sugar: 9.8, fiber: 2.8, vitC: 5, mag: 7 },
       { keys: ['weintrauben', 'trauben', 'winogrona'], nameDe: 'Weintrauben', namePl: 'Winogrona', unitG: 125, p: 0.7, c: 15.6, f: 0.2, sugar: 15.2, fiber: 1.5, vitC: 4, mag: 7 },
 
       // Vegetables & Salads
-      { keys: ['brokkoli', 'blumenkohl', 'brokuły', 'kalafior'], nameDe: 'Brokkoli / Blumenkohl', namePl: 'Brokuły / Kalafior', unitG: 200, p: 3.2, c: 2.8, f: 0.3, sugar: 1.8, fiber: 3.0, vitC: 65, mag: 22 },
+      { keys: ['brokkoli', 'blumenkohl', 'brokuly', 'brokuły', 'kalafior'], nameDe: 'Brokkoli / Blumenkohl', namePl: 'Brokuły / Kalafior', unitG: 200, p: 3.2, c: 2.8, f: 0.3, sugar: 1.8, fiber: 3.0, vitC: 65, mag: 22 },
       { keys: ['spinat', 'blattspinat', 'szpinak'], nameDe: 'Spinat', namePl: 'Szpinak', unitG: 150, p: 2.9, c: 0.8, f: 0.4, sugar: 0.4, fiber: 2.5, vitC: 35, mag: 62 },
       { keys: ['tomate', 'tomaten', 'cherrytomaten', 'pomidor', 'pomidory'], nameDe: 'Tomaten', namePl: 'Pomidory', unitG: 150, p: 0.9, c: 2.6, f: 0.2, sugar: 2.5, fiber: 1.2, vitC: 18, mag: 11 },
-      { keys: ['gurke', 'salatgurke', 'ogórek'], nameDe: 'Salatgurke', namePl: 'Ogórek zielony', unitG: 150, p: 0.6, c: 1.8, f: 0.1, sugar: 1.6, fiber: 0.7, vitC: 6, mag: 12 },
+      { keys: ['gurke', 'salatgurke', 'ogorek', 'ogórek'], nameDe: 'Salatgurke', namePl: 'Ogórek zielony', unitG: 150, p: 0.6, c: 1.8, f: 0.1, sugar: 1.6, fiber: 0.7, vitC: 6, mag: 12 },
       { keys: ['paprika', 'rote paprika', 'papryka'], nameDe: 'Paprika', namePl: 'Papryka', unitG: 150, isPiece: true, p: 1.1, c: 6.0, f: 0.3, sugar: 4.5, fiber: 2.1, vitC: 120, mag: 13 },
-      { keys: ['salat', 'beilagensalat', 'gemischter salat', 'sałatka'], nameDe: 'Gemischter Salat', namePl: 'Sałatka mieszana', unitG: 200, p: 1.8, c: 4.5, f: 3.5, sugar: 2.8, fiber: 2.5, vitC: 28, mag: 18 },
+      { keys: ['salat', 'beilagensalat', 'gemischter salat', 'salatka', 'sałatka'], nameDe: 'Gemischter Salat', namePl: 'Sałatka mieszana', unitG: 200, p: 1.8, c: 4.5, f: 3.5, sugar: 2.8, fiber: 2.5, vitC: 28, mag: 18 },
 
       // Fats, Nuts & Oils
       { keys: ['avocado', 'awokado'], nameDe: 'Avocado', namePl: 'Awokado', unitG: 100, isPiece: true, p: 2.0, c: 1.8, f: 15.0, sugar: 0.7, fiber: 6.7, vitC: 10, mag: 29 },
-      { keys: ['mandeln', 'walnüsse', 'cashews', 'nüsse', 'erdnüsse', 'migdały', 'orzechy'], nameDe: 'Nüsse / Mandeln (Handvoll)', namePl: 'Orzechy / Migdały', unitG: 30, p: 20.0, c: 6.5, f: 53.0, sugar: 4.0, fiber: 10.5, vitC: 0, mag: 220 },
-      { keys: ['erdnussbutter', 'erdnussmus', 'masło orzechowe'], nameDe: 'Erdnussmus', namePl: 'Masło orzechowe', unitG: 20, p: 26.0, c: 11.0, f: 50.0, sugar: 4.5, fiber: 7.5, vitC: 0, mag: 160 },
-      { keys: ['olivenöl', 'rapsöl', 'leinöl', 'butter', 'oliwa', 'masło'], nameDe: 'Olivenöl / Butter (1 EL)', namePl: 'Oliwa / Masło (1 łyżka)', unitG: 10, isPiece: true, p: 0, c: 0, f: 99.0, sugar: 0, fiber: 0, vitC: 0, mag: 0 },
-
-      // Everyday Composite Meals
-      { keys: ['auflauf', 'kartoffelauflauf', 'nudelauflauf', 'gratin', 'zapiekanka'], nameDe: 'Überbackener Auflauf / Gratin (Portion)', namePl: 'Zapiekanka (Porcja)', unitG: 350, isPiece: true, p: 9.5, c: 14.0, f: 8.5, sugar: 2.5, fiber: 2.2, vitC: 12, mag: 28 },
-      { keys: ['döner', 'doener', 'döner kebab', 'kebab'], nameDe: 'Döner Kebab', namePl: 'Kebab', unitG: 350, isPiece: true, p: 8.8, c: 17.5, f: 8.2, sugar: 2.8, fiber: 1.8, vitC: 8, mag: 22 },
-      { keys: ['pizza margherita', 'pizza salami', 'pizza'], nameDe: 'Pizza (Standardgröße)', namePl: 'Pizza klasyczna', unitG: 380, isPiece: true, p: 10.5, c: 29.0, f: 9.8, sugar: 3.2, fiber: 2.1, vitC: 4, mag: 20 },
-      { keys: ['burger', 'cheeseburger', 'hamburger'], nameDe: 'Burger / Cheeseburger', namePl: 'Burger / Cheeseburger', unitG: 220, isPiece: true, p: 13.5, c: 22.0, f: 12.5, sugar: 4.5, fiber: 1.8, vitC: 2, mag: 20 },
+      { keys: ['mandeln', 'walnüsse', 'walnusse', 'cashews', 'nüsse', 'nusse', 'erdnüsse', 'erdnusse', 'migdaly', 'migdały', 'orzechy'], nameDe: 'Nüsse / Mandeln (Handvoll)', namePl: 'Orzechy / Migdały', unitG: 30, p: 20.0, c: 6.5, f: 53.0, sugar: 4.0, fiber: 10.5, vitC: 0, mag: 220 },
+      { keys: ['erdnussbutter', 'erdnussmus', 'maslo orzechowe', 'masło orzechowe'], nameDe: 'Erdnussmus', namePl: 'Masło orzechowe', unitG: 20, p: 26.0, c: 11.0, f: 50.0, sugar: 4.5, fiber: 7.5, vitC: 0, mag: 160 },
+      { keys: ['olivenöl', 'olivenol', 'rapsöl', 'rapsol', 'leinöl', 'leinol', 'butter', 'oliwa', 'maslo', 'masło'], nameDe: 'Olivenöl / Butter (1 EL)', namePl: 'Oliwa / Masło (1 łyżka)', unitG: 10, isPiece: true, p: 0, c: 0, f: 99.0, sugar: 0, fiber: 0, vitC: 0, mag: 0 },
       { keys: ['schokolade', 'vollmilchschokolade', 'zartbitterschokolade', 'czekolada'], nameDe: 'Schokolade (Riegel / 25g)', namePl: 'Czekolada (25g)', unitG: 25, p: 7.0, c: 54.0, f: 32.0, sugar: 48.0, fiber: 3.5, vitC: 0, mag: 85 }
     ];
 
-    // 1-Click Quick-Add Presets (Bucht direkt ins Tagebuch!)
+    // 1-Click Quick-Add Presets
     function quickAddPreset(presetKey) {
       const isPl = state.lang === 'pl';
       const presets = {
@@ -2390,10 +2409,30 @@
       quickLogItem(chosen);
     }
 
-    function normalizeLexiconText(str) {
+    // High-Precision Diacritics Normalizer (Smooths ą/ę/ł/ś/ć/ó/ź/ż/ä/ö/ü/ß)
+    function foldDiacritics(str) {
       return (str || '')
         .toLowerCase()
-        .replace(/[,.;:!?()]/g, ' ')
+        .replace(/ą/g, 'a')
+        .replace(/ć/g, 'c')
+        .replace(/ę/g, 'e')
+        .replace(/ł/g, 'l')
+        .replace(/ń/g, 'n')
+        .replace(/ó/g, 'o')
+        .replace(/ś/g, 's')
+        .replace(/ź/g, 'z')
+        .replace(/ż/g, 'z')
+        .replace(/ä/g, 'ae')
+        .replace(/ö/g, 'oe')
+        .replace(/ü/g, 'ue')
+        .replace(/ß/g, 'ss')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function normalizeLexiconText(str) {
+      return foldDiacritics(str)
+        .replace(/[,.;:!?()\/\\+&_-]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
     }
@@ -2422,8 +2461,8 @@
         for (let i = 0; i < FOOD_LEXICON.length; i++) {
           const entry = FOOD_LEXICON[i];
           for (let k = 0; k < entry.keys.length; k++) {
-            const kw = entry.keys[k];
-            if (normSeg === kw || normSeg.includes(kw)) {
+            const kw = foldDiacritics(entry.keys[k]);
+            if (normSeg === kw || normSeg.includes(kw) || kw.includes(normSeg)) {
               if (kw.length > bestKeyLen) {
                 bestKeyLen = kw.length;
                 bestEntry = entry;
@@ -2486,7 +2525,36 @@
         fiber: finalFiber,
         vitC: Math.round(totalVitC),
         mag: Math.round(totalMag),
-        notes: '0.0s Sofort-Berechnung aus dem verifizierten Top-100 Lexikon.',
+        notes: '0.0s Sofort-Berechnung aus dem verifizierten DE/PL-Wörterbuch.',
+        isLocalLexicon: true
+      };
+    }
+
+    // Universal Deterministic Offline-Fallback Estimator for Unrecognized Text Inputs
+    function estimateGeneralMealOffline(rawText) {
+      const clean = (rawText || 'Mahlzeit').trim();
+      const gramsMatch = clean.match(/(\d+)\s*(g|ml)\b/i);
+      const grams = gramsMatch ? Math.max(50, Math.min(1000, parseInt(gramsMatch[1], 10))) : 300;
+      const factor = grams / 100;
+
+      // Realistic warm dinner macro average (~135 kcal / 100g)
+      const p = Math.round(10 * factor);
+      const c = Math.round(13 * factor);
+      const f = Math.round(5 * factor);
+      const fiber = Math.round(2 * factor);
+      const kcal = enforceAtwater(p, c, f, fiber);
+
+      return {
+        name: `${clean} (~${grams}g Portion)`,
+        kcal,
+        p,
+        c,
+        f,
+        sugar: Math.round(3 * factor),
+        fiber,
+        vitC: 6,
+        mag: 24,
+        notes: 'Deterministische Offline-Berechnung (Standard-Portion).',
         isLocalLexicon: true
       };
     }
@@ -2508,14 +2576,14 @@
         isVisionBusy = false;
         showToast(
           state.lang === 'pl'
-            ? 'Zrób zdjęcie, wpisz tekst (np. Jabłko) lub kliknij szybki przycisk!'
-            : 'Bitte mache ein Foto, tippe einen Text ein (z.B. Apfel) oder nutze die 1-Klick-Buttons!',
+            ? 'Zrób zdjęcie, wpisz tekst (np. Jabłko, Lasagne) lub kliknij szybki przycisk!'
+            : 'Bitte mache ein Foto, tippe einen Text ein (z.B. Apfel, Lasagne) oder nutze die 1-Klick-Buttons!',
           'warn'
         );
         return;
       }
 
-      // STAGE A: Instant 0.0s Local Lexicon Resolution if text matches Top-100 (and no photo active)
+      // STAGE A: Instant 0.0s Local Lexicon Resolution if text matches (and no photo active)
       if (!hasPhoto && userText) {
         const fastMatch = resolveFromLexicon(userText);
         if (fastMatch) {
@@ -2594,7 +2662,6 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
         const mag = Math.max(0, Math.round(Number(data.mag) || 0));
         const rawKcal = Math.max(0, Math.round(Number(data.kcal) || 0));
 
-        // Preserve exact printed label kcal (e.g. 26 kcal/100ml or 7 kcal on 0,33L) when explicit label was detected
         const computedKcal = (data.isNutritionLabel === true || (p === 0 && c === 0 && f === 0 && fiber === 0))
           ? rawKcal
           : enforceAtwater(p, c, f, fiber);
@@ -2609,20 +2676,19 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
           fiber,
           vitC,
           mag,
-          notes: data.notes || 'Mit Gemini Flash Vision analysiert.',
+          notes: data.notes || 'KI-Vision & Atwater-Physik verifiziert.',
           isLocalLexicon: false
         };
 
         renderMealPreview(pendingMealEntry);
       } catch (err) {
+        // Safe Offline fallback for pure text queries if network or API quota dropped
         if (userText) {
-          const fallbackMatch = resolveFromLexicon(userText);
-          if (fallbackMatch) {
-            pendingMealEntry = fallbackMatch;
-            renderMealPreview(fallbackMatch);
-            showToast('Per lokalem Top-100 Lexikon berechnet!', 'success');
-            return;
-          }
+          const fallbackMatch = resolveFromLexicon(userText) || estimateGeneralMealOffline(userText);
+          pendingMealEntry = fallbackMatch;
+          renderMealPreview(fallbackMatch);
+          showToast('Offline-Berechnung aktiv!', 'info');
+          return;
         }
         showToast(err.message || 'KI-Analyse fehlgeschlagen. Bitte API-Key oder Quota prüfen.', 'error');
       } finally {
@@ -3438,7 +3504,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
       URL.revokeObjectURL(url);
     }
 
-    // iOS/PWA Lifecycle Persistence Hooks
+    // Lifecycle Persistence Hooks
     window.addEventListener('pagehide', () => saveState());
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
@@ -3454,11 +3520,6 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
       checkAccessGate();
       renderDashboard();
       updateMenuMacroContextUI();
-
-      // Proactive Handshake on Boot: Validate working Flash model with Google API
-      if (state.geminiApiKey) {
-        validateAndSetWorkingModel(state.geminiApiKey);
-      }
     });
   </script>
 </body>
