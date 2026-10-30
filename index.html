@@ -346,7 +346,7 @@
   <main class="max-w-2xl mx-auto px-4 pt-4 space-y-5">
 
     <!-- =================================================================== -->
-    <!-- TAB 1: DASHBOARD, MEAL SCANNER, QUICK-BUTTONS & OFFLINE TRACKER     -->
+    <!-- TAB 1: DASHBOARD, TURBO-SCANNER, QUICK-BUTTONS & OFFLINE TRACKER    -->
     <!-- =================================================================== -->
     <section id="tab-dashboard" class="tab-section active space-y-4">
 
@@ -429,7 +429,7 @@
         </div>
       </div>
 
-      <!-- Dual-Mode AI Vision, 0.0s Offline-Fallback & 1-Click Quick-Add Card -->
+      <!-- Dual-Mode AI Vision, ⚡ TURBO-SCAN, 0.0s Offline-Fallback & 1-Click Quick-Add Card -->
       <div class="glass-card rounded-3xl p-5 shadow-xl border border-emerald-500/20">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
@@ -437,12 +437,12 @@
               <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
             </div>
             <div>
-              <h3 class="text-sm font-bold text-white" data-i18n="scannerTitle">Mahlzeiten-Scanner & Schnell-Eintrag</h3>
-              <p class="text-[11px] text-slate-400" data-i18n="scannerSubtitle">Foto aufnehmen, Text eingeben oder 1-Klick Schnellwahl nutzen</p>
+              <h3 class="text-sm font-bold text-white" data-i18n="scannerTitle">Mahlzeiten-Scanner & ⚡ Turbo-Scan</h3>
+              <p class="text-[11px] text-slate-400" data-i18n="scannerSubtitle">Turbo-Kamera (Sofort-Log), Foto-Vorschau oder 0.0s Text</p>
             </div>
           </div>
           <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">
-            <i class="fa-solid fa-bolt mr-1"></i>3.8 Flash Ready
+            <i class="fa-solid fa-bolt text-amber-400 mr-1"></i>Turbo Active
           </span>
         </div>
 
@@ -454,12 +454,12 @@
           </button>
         </div>
 
-        <!-- Text Input + Camera Trigger Row -->
-        <div class="flex flex-col sm:flex-row gap-2.5">
-          <div class="relative flex-1">
+        <!-- Text Input + Camera & ⚡ Turbo-Scan Row -->
+        <div class="space-y-2.5">
+          <div class="relative">
             <input id="foodTextInput" type="text"
               placeholder="z.B. Apfel, 250g Magerquark, 2 Eier, Hähnchen mit Reis..."
-              onkeydown="if(event.key==='Enter') { event.preventDefault(); analyzeMeal(); }"
+              onkeydown="if(event.key==='Enter') { event.preventDefault(); analyzeMeal(false); }"
               class="w-full rounded-2xl bg-slate-900/95 border border-slate-700/90 pl-3.5 pr-9 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
             <button type="button" onclick="document.getElementById('foodTextInput').value=''; document.getElementById('foodTextInput').focus();"
               class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
@@ -467,16 +467,25 @@
             </button>
           </div>
 
-          <div class="flex gap-2">
-            <label for="mealPhotoInput" class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-sm font-semibold flex items-center justify-center gap-2 transition shrink-0">
+          <div class="grid grid-cols-3 gap-2">
+            <!-- Standard Photo / Gallery Button -->
+            <label for="mealPhotoInput" class="cursor-pointer py-3 px-2 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition">
               <i class="fa-solid fa-camera text-emerald-400"></i>
               <span data-i18n="photoBtn">Foto</span>
             </label>
             <input id="mealPhotoInput" type="file" accept="image/*" class="hidden" onchange="handleMealPhoto(event)" />
 
-            <button id="analyzeMealBtn" type="button" onclick="analyzeMeal()"
-              class="flex-1 sm:flex-initial px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition">
+            <!-- ⚡ TURBO-SCAN BUTTON (Direct Camera + Instant Auto-Log!) -->
+            <label for="turboPhotoInput" class="cursor-pointer py-3 px-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20 transition">
               <i class="fa-solid fa-bolt"></i>
+              <span data-i18n="turboBtn">Turbo-Scan</span>
+            </label>
+            <input id="turboPhotoInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleTurboPhoto(event)" />
+
+            <!-- Analyze / Erfassen Button -->
+            <button id="analyzeMealBtn" type="button" onclick="analyzeMeal(false)"
+              class="py-3 px-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition">
+              <i class="fa-solid fa-check-double"></i>
               <span data-i18n="analyzeBtn">Erfassen</span>
             </button>
           </div>
@@ -528,7 +537,7 @@
         <!-- Loading Indicator -->
         <div id="mealLoading" class="hidden mt-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center gap-3">
           <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-base"></i>
-          <span class="text-xs font-medium text-slate-300" data-i18n="analyzingText">Analysiere mit Gemini 3.8 Flash Vision...</span>
+          <span class="text-xs font-medium text-slate-300" data-i18n="analyzingText">Analysiere Bild & Nährwerte in Echtzeit...</span>
         </div>
 
         <!-- Analysis Result Preview Card -->
@@ -927,8 +936,8 @@
 
       <div class="glass-card rounded-3xl p-5 shadow-xl space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-300">Aktives KI-Routing & Modell-Cache:</span>
-          <span id="fastModelBadge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">gemini-3.8-flash</span>
+          <span class="text-xs font-bold text-slate-300">Aktives KI-Routing & Auto-Discovery:</span>
+          <span id="fastModelBadge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">gemini-2.5-flash</span>
         </div>
 
         <button type="button" onclick="openInviteModal()"
@@ -998,11 +1007,11 @@
     const FAST_HOST_KEY = 'calsnap_fast_host';
     const GUEST_UNLOCK_KEY = 'calsnap_guest_code';
 
-    // Anti-Degradation Filter: Purge weak/deprecated models on boot
-    (function purgeDegradedModelsOnBoot() {
+    // Purge non-existent 404 model names from cache on boot
+    (function sanitizeCachedModelOnBoot() {
       try {
         const cachedModel = localStorage.getItem(FAST_MODEL_KEY);
-        if (cachedModel && /2\.0|3\.0|lite/i.test(cachedModel)) {
+        if (cachedModel && /3\.8|gemini-flash-latest/i.test(cachedModel)) {
           localStorage.removeItem(FAST_MODEL_KEY);
         }
       } catch (_) {}
@@ -1205,7 +1214,7 @@
         const fastBadge = document.getElementById('fastModelBadge');
         if (fastBadge) {
           const cached = localStorage.getItem(FAST_MODEL_KEY);
-          fastBadge.textContent = (cached && !/2\.0|3\.0|lite/i.test(cached)) ? cached : 'gemini-3.8-flash';
+          fastBadge.textContent = cached || 'gemini-2.5-flash';
         }
       } catch (_) {}
     }
@@ -1236,9 +1245,10 @@
         macroFat: 'Fett',
         microSugar: 'Zucker',
         microFiber: 'Ballastst.',
-        scannerTitle: 'Mahlzeiten-Scanner & Schnell-Eintrag',
-        scannerSubtitle: 'Foto aufnehmen, Text eingeben oder 1-Klick Schnellwahl nutzen',
+        scannerTitle: 'Mahlzeiten-Scanner & ⚡ Turbo-Scan',
+        scannerSubtitle: 'Turbo-Kamera (Sofort-Log), Foto-Vorschau oder 0.0s Text',
         photoBtn: 'Foto',
+        turboBtn: 'Turbo-Scan',
         analyzeBtn: 'Erfassen',
         quickAddLabel: '1-Klick Schnellwahl (Sofort ins Tagebuch):',
         qaCoffee: 'Kaffee',
@@ -1248,7 +1258,7 @@
         qaEggs: '2 Eier',
         qaQuark: '250g Quark',
         qaWhey: 'Protein-Shake',
-        analyzingText: 'Analysiere mit Gemini 3.8 Flash Vision (Geometrie, Etikett & Nährwerte)...',
+        analyzingText: 'Analysiere Bild, Etikett & Nährwerte in Echtzeit...',
         waterTitle: 'Wasser-Haushalt',
         todayLogTitle: 'Heutiges Ernährungstagebuch',
         resetDayBtn: 'Tag leeren',
@@ -1287,7 +1297,7 @@
         navMenu: 'Restaurant',
         navPot: 'Kochstudio',
         navProfile: 'Profil',
-        emptyLogText: 'Noch keine Mahlzeiten für heute eingetragen. Nutze Foto, Text oder die 1-Klick-Buttons!',
+        emptyLogText: 'Noch keine Mahlzeiten für heute eingetragen. Nutze ⚡ Turbo-Scan, Foto, Text oder die 1-Klick-Buttons!',
         sugarWarnTitle: 'WHO-Zuckerschwelle erreicht (≥ 25g)',
         sugarWarnDesc: 'Du hast bereits 25g oder mehr Zucker aufgenommen. Achte bei weiteren Mahlzeiten auf komplexe Kohlenhydrate und Proteine.',
         sugarCritTitle: 'KRITISCHES TAGES-ZUCKERLIMIT ÜBERSCHRITTEN!',
@@ -1321,9 +1331,10 @@
         macroFat: 'Tłuszcz',
         microSugar: 'Cukier',
         microFiber: 'Błonnik',
-        scannerTitle: 'Skaner Posiłków i Szybki Wpis',
-        scannerSubtitle: 'Zrób zdjęcie, wpisz tekst lub kliknij szybki przycisk',
+        scannerTitle: 'Skaner Posiłków i ⚡ Turbo-Skan',
+        scannerSubtitle: 'Turbo-Kamera (Auto-Zapis), Zdjęcie lub 0.0s Tekst',
         photoBtn: 'Zdjęcie',
+        turboBtn: 'Turbo-Skan',
         analyzeBtn: 'Dodaj',
         quickAddLabel: 'Szybki wybór 1-Klik (Od razu do dziennika):',
         qaCoffee: 'Kawa czarna',
@@ -1333,7 +1344,7 @@
         qaEggs: '2 Jajka',
         qaQuark: '250g Twaróg',
         qaWhey: 'Shake Białkowy',
-        analyzingText: 'Analizuję za pomocą Gemini 3.8 Flash Vision (naczynie, etykieta i makro)...',
+        analyzingText: 'Analizuję obraz, etykietę i makro w czasie rzeczywistym...',
         waterTitle: 'Nawodnienie',
         todayLogTitle: 'Dzisiejszy Dziennik Posiłków',
         resetDayBtn: 'Wyczyść dzień',
@@ -1372,7 +1383,7 @@
         navMenu: 'Restauracja',
         navPot: 'Kuchnia',
         navProfile: 'Profil',
-        emptyLogText: 'Brak zapisanych posiłków na dziś. Użyj zdjęcia, tekstu lub szybkich przycisków!',
+        emptyLogText: 'Brak zapisanych posiłków na dziś. Użyj ⚡ Turbo-Skanu, zdjęcia, tekstu lub szybkich przycisków!',
         sugarWarnTitle: 'Próg cukru WHO osiągnięty (≥ 25g)',
         sugarWarnDesc: 'Spożyłeś już ponad 25g cukru. W kolejnych posiłkach wybieraj białko i błonnik.',
         sugarCritTitle: 'PRZEKROCZONO DZIENNY LIMIT CUKRU!',
@@ -1679,7 +1690,7 @@
     }
 
     // =========================================================================
-    // 4. CAMERA & IMAGE PRE-PROCESSING ENGINE (`compressImageFile` + AUTO-SCAN)
+    // 4. CAMERA, ⚡ TURBO-SCAN & IMAGE PRE-PROCESSING ENGINE (`compressImageFile`)
     // =========================================================================
     function compressImageFile(file, mode = 'standard') {
       return new Promise((resolve, reject) => {
@@ -1688,8 +1699,15 @@
           return;
         }
 
-        const maxDim = (mode === 'menu' || mode === 'label') ? 1080 : 800;
-        const quality = (mode === 'menu' || mode === 'label') ? 0.78 : 0.76;
+        let maxDim = 800;
+        let quality = 0.76;
+        if (mode === 'menu' || mode === 'label') {
+          maxDim = 1080;
+          quality = 0.78;
+        } else if (mode === 'turbo') {
+          maxDim = 680;
+          quality = 0.72;
+        }
 
         const processImageElement = (img, cleanupFn) => {
           try {
@@ -1768,9 +1786,9 @@
         if (container) container.classList.remove('hidden');
 
         inputEl.value = '';
-        showToast('Foto geladen — starte Gemini 3.8 Flash Vision...', 'info');
+        showToast('Foto geladen — starte KI-Analyse...', 'info');
         if (typeof analyzeMeal === 'function') {
-          setTimeout(() => analyzeMeal(), 80);
+          setTimeout(() => analyzeMeal(false), 60);
         }
       } catch (err) {
         inputEl.value = '';
@@ -1778,11 +1796,37 @@
       }
     }
 
+    // ⚡ TURBO-SCAN HANDLER (Ultra-Fast Compression + Instant 1-Step Diary Log!)
+    async function handleTurboPhoto(event) {
+      const inputEl = event.target;
+      const file = inputEl && inputEl.files && inputEl.files[0];
+      if (!file) return;
+      try {
+        const res = await compressImageFile(file, 'turbo');
+        currentMealImageBase64 = res.base64;
+        const preview = document.getElementById('mealPhotoPreview');
+        const container = document.getElementById('mealPhotoPreviewContainer');
+        if (preview) preview.src = res.dataUrl;
+        if (container) container.classList.remove('hidden');
+
+        inputEl.value = '';
+        showToast('⚡ Turbo-Scan läuft — erfasse & buche direkt...', 'info');
+        if (typeof analyzeMeal === 'function') {
+          setTimeout(() => analyzeMeal(true), 50);
+        }
+      } catch (err) {
+        inputEl.value = '';
+        showToast(err.message || 'Fehler beim Turbo-Scan.', 'error');
+      }
+    }
+
     function clearMealPhoto() {
       currentMealImageBase64 = null;
       const input = document.getElementById('mealPhotoInput');
+      const turboInput = document.getElementById('turboPhotoInput');
       const container = document.getElementById('mealPhotoPreviewContainer');
       if (input) input.value = '';
+      if (turboInput) turboInput.value = '';
       if (container) container.classList.add('hidden');
     }
 
@@ -1801,7 +1845,7 @@
 
         showToast('Kühlschrank-Foto geladen — starte Smart Expiry Guard...', 'info');
         if (typeof runFridgeLeftoverAI === 'function') {
-          setTimeout(() => runFridgeLeftoverAI(), 80);
+          setTimeout(() => runFridgeLeftoverAI(), 60);
         }
       } catch (err) {
         inputEl.value = '';
@@ -1832,7 +1876,7 @@
 
         showToast('Speisekarte geladen — starte Makro-Abgleich...', 'info');
         if (typeof runMenuScannerAI === 'function') {
-          setTimeout(() => runMenuScannerAI(), 80);
+          setTimeout(() => runMenuScannerAI(), 60);
         }
       } catch (err) {
         inputEl.value = '';
@@ -1863,7 +1907,7 @@
 
         showToast('Topf-/Auflauf-Foto geladen — berechne Portionsanteil...', 'info');
         if (typeof runPotCalculatorAI === 'function') {
-          setTimeout(() => runPotCalculatorAI(), 80);
+          setTimeout(() => runPotCalculatorAI(), 60);
         }
       } catch (err) {
         inputEl.value = '';
@@ -1942,20 +1986,22 @@
     }
 
     // =========================================================================
-    // 6. GEMINI ROUTING & MODEL QUEUE ENGINE (`callGeminiRequest`)
+    // 6. GEMINI ROUTING, MODEL QUEUE & AUTO-DISCOVERY ENGINE (`callGeminiRequest`)
     // =========================================================================
+    // Official verified Google Gemini Flash production models (No fake 404 names!)
     const BASE_MODEL_QUEUE = [
-      'gemini-3.8-flash',
-      'gemini-3-flash-preview',
       'gemini-2.5-flash',
-      'gemini-flash-latest'
+      'gemini-2.5-flash-lite',
+      'gemini-2.0-flash',
+      'gemini-3-flash-preview',
+      'gemini-1.5-flash'
     ];
 
     function getModelQueue() {
       const queue = [];
       try {
         const cached = (localStorage.getItem(FAST_MODEL_KEY) || '').trim();
-        if (cached && !/2\.0|3\.0|lite/i.test(cached)) {
+        if (cached && !/3\.8|gemini-flash-latest/i.test(cached)) {
           queue.push(cached);
         } else if (cached) {
           localStorage.removeItem(FAST_MODEL_KEY);
@@ -1963,37 +2009,104 @@
       } catch (_) {}
 
       for (const m of BASE_MODEL_QUEUE) {
-        if (!/2\.0|3\.0|lite/i.test(m) && !queue.includes(m)) {
+        if (!queue.includes(m)) {
           queue.push(m);
         }
       }
       return queue;
     }
 
-    function getHostQueue(apiKey) {
-      const defaultHosts = [
-        'https://generativelanguage.googleapis.com',
-        'https://aiplatform.googleapis.com'
-      ];
-      const hosts = [];
+    // Dynamic Auto-Discovery: Queries Google API for available Flash models on this exact API key
+    async function discoverAvailableFlashModel(apiKey) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || !Array.isArray(data.models)) return null;
+
+        const supported = data.models
+          .filter((m) =>
+            m &&
+            typeof m.name === 'string' &&
+            Array.isArray(m.supportedGenerationMethods) &&
+            m.supportedGenerationMethods.includes('generateContent') &&
+            !/embedding|imagen|veo|aqa|tts|audio/i.test(m.name)
+          )
+          .map((m) => m.name.replace(/^models\//, ''));
+
+        const preferredFlash = supported.find((name) => /gemini-2\.5-flash|gemini-2\.0-flash|gemini-3.*flash|flash/i.test(name));
+        return preferredFlash || supported[0] || null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function executeSingleModelCall(model, apiKey, contentsPayload) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      // Only send thinkingBudget: 0 on gemini-2.5 models where it is natively supported
+      const genConfig = {
+        temperature: 0.1,
+        topP: 0.85,
+        maxOutputTokens: 2048
+      };
+      if (/^gemini-2\.5/i.test(model)) {
+        genConfig.thinkingConfig = { thinkingBudget: 0 };
+      }
+
+      let response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: contentsPayload,
+          generationConfig: genConfig
+        })
+      });
+
+      // Instant fallback without thinkingConfig if 400 occurs
+      if (response.status === 400 && genConfig.thinkingConfig) {
+        delete genConfig.thinkingConfig;
+        response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: contentsPayload,
+            generationConfig: genConfig
+          })
+        });
+      }
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        const err = new Error(`HTTP ${response.status} (${model}): ${errText.slice(0, 100)}`);
+        err.status = response.status;
+        throw err;
+      }
+
+      const data = await response.json();
+      const rawParts = (data &&
+        data.candidates &&
+        data.candidates[0] &&
+        data.candidates[0].content &&
+        Array.isArray(data.candidates[0].content.parts))
+          ? data.candidates[0].content.parts
+          : [];
+
+      const cleanParts = rawParts.filter((p) => !p.thought && typeof p.text === 'string');
+      const activeParts = cleanParts.length > 0 ? cleanParts : rawParts;
+      const textOut = activeParts.map((p) => p.text || '').join('\n').trim();
+
+      if (!textOut) {
+        throw new Error(`Leere Antwort von ${model}`);
+      }
 
       try {
-        const cachedHost = (localStorage.getItem(FAST_HOST_KEY) || '').trim();
-        if (cachedHost && defaultHosts.includes(cachedHost)) {
-          hosts.push(cachedHost);
-        }
+        localStorage.setItem(FAST_MODEL_KEY, model);
       } catch (_) {}
+      const badge = document.getElementById('fastModelBadge');
+      if (badge) badge.textContent = model;
 
-      if (apiKey && apiKey.startsWith('AQ') && !hosts.includes('https://aiplatform.googleapis.com')) {
-        hosts.push('https://aiplatform.googleapis.com');
-      } else if (!hosts.includes('https://generativelanguage.googleapis.com')) {
-        hosts.push('https://generativelanguage.googleapis.com');
-      }
-
-      for (const h of defaultHosts) {
-        if (!hosts.includes(h)) hosts.push(h);
-      }
-      return hosts;
+      return textOut;
     }
 
     async function callGeminiRequest(contentsPayload) {
@@ -2004,104 +2117,41 @@
       if (!apiKey) {
         openApiModal();
         throw new Error(state.lang === 'pl'
-          ? 'Brak klucza API Gemini. Kliknij ikonę klucza u góry i wklej swój klucz API.'
-          : 'Kein Gemini API-Key hinterlegt! Bitte oben rechts auf das Schlüssel-Symbol klicken und API-Key speichern.');
+          ? 'Brak klucza API Gemini. Kliknij ikonę klucza u góry i zapisz swój klucz API.'
+          : 'Kein Gemini API-Key hinterlegt! Bitte oben rechts auf das Schlüssel-Symbol klicken und deinen API-Key speichern.');
       }
 
       const models = getModelQueue();
-      const hosts = getHostQueue(apiKey);
+      let lastNon404Error = null;
       let lastError = null;
 
       for (let mIdx = 0; mIdx < models.length; mIdx++) {
         const model = models[mIdx];
-
-        for (let hIdx = 0; hIdx < hosts.length; hIdx++) {
-          const host = hosts[hIdx];
-          if (host.includes('aiplatform.googleapis.com') && apiKey.startsWith('AIza')) {
-            continue;
+        try {
+          return await executeSingleModelCall(model, apiKey, contentsPayload);
+        } catch (err) {
+          lastError = err;
+          if (err.status !== 404) {
+            lastNon404Error = err;
           }
-
-          const endpoint = `${host}/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-          const requestBodyWithThinking = {
-            contents: contentsPayload,
-            generationConfig: {
-              temperature: 0.1,
-              topP: 0.85,
-              maxOutputTokens: 2048,
-              thinkingConfig: { thinkingBudget: 0 }
-            }
-          };
-
-          try {
-            let response = await fetch(endpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(requestBodyWithThinking)
-            });
-
-            if (response.status === 400) {
-              const fallbackBody = {
-                contents: contentsPayload,
-                generationConfig: {
-                  temperature: 0.1,
-                  topP: 0.85,
-                  maxOutputTokens: 2048
-                }
-              };
-              response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(fallbackBody)
-              });
-            }
-
-            if (response.status === 404) {
-              lastError = new Error(`Model ${model} not found (404)`);
-              break;
-            }
-
-            if (!response.ok) {
-              const errText = await response.text().catch(() => '');
-              lastError = new Error(`HTTP ${response.status}: ${errText.slice(0, 120)}`);
-              continue;
-            }
-
-            const data = await response.json();
-            const rawParts = (data &&
-              data.candidates &&
-              data.candidates[0] &&
-              data.candidates[0].content &&
-              Array.isArray(data.candidates[0].content.parts))
-                ? data.candidates[0].content.parts
-                : [];
-
-            const cleanParts = rawParts.filter((p) => !p.thought && typeof p.text === 'string');
-            const activeParts = cleanParts.length > 0 ? cleanParts : rawParts;
-            const textOut = activeParts.map((p) => p.text || '').join('\n').trim();
-
-            if (!textOut) {
-              lastError = new Error('Leere Antwort vom KI-Modell.');
-              continue;
-            }
-
-            if (!/2\.0|3\.0|lite/i.test(model)) {
-              try {
-                localStorage.setItem(FAST_MODEL_KEY, model);
-                localStorage.setItem(FAST_HOST_KEY, host);
-              } catch (_) {}
-              const badge = document.getElementById('fastModelBadge');
-              if (badge) badge.textContent = model;
-            }
-
-            return textOut;
-          } catch (fetchErr) {
-            lastError = fetchErr;
+          // If cached model returned 404, purge it immediately
+          if (err.status === 404 && mIdx === 0) {
+            try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
           }
         }
       }
 
-      throw lastError || new Error('KI-Analyse fehlgeschlagen. Bitte API-Key oder Internetverbindung prüfen.');
+      // Dynamic Auto-Discovery Fallback: Query Google API for any active Flash model on this key
+      const discoveredModel = await discoverAvailableFlashModel(apiKey);
+      if (discoveredModel && !models.includes(discoveredModel)) {
+        try {
+          return await executeSingleModelCall(discoveredModel, apiKey, contentsPayload);
+        } catch (discErr) {
+          lastError = discErr;
+        }
+      }
+
+      throw lastNon404Error || lastError || new Error('KI-Analyse fehlgeschlagen. Bitte API-Key prüfen.');
     }
 
     async function callGeminiVisionAPI(visionPrompt, base64Img, textOnlyPrompt = null) {
@@ -2393,9 +2443,9 @@
     }
 
     // =========================================================================
-    // 8. DUAL-MODE MEAL SCANNER WITH ZERO-SHOT VISUAL ANCHORING & LABEL OCR
+    // 8. DUAL-MODE MEAL SCANNER & ⚡ TURBO-SCAN (`analyzeMeal`)
     // =========================================================================
-    async function analyzeMeal() {
+    async function analyzeMeal(isTurbo = false) {
       const textInputEl = document.getElementById('foodTextInput');
       const userText = (textInputEl ? textInputEl.value : '').trim();
       const hasPhoto = Boolean(currentMealImageBase64);
@@ -2403,8 +2453,8 @@
       if (!hasPhoto && !userText) {
         showToast(
           state.lang === 'pl'
-            ? 'Zrób zdjęcie posiłku, wpisz nazwę (np. Jabłko) lub kliknij szybki przycisk!'
-            : 'Bitte mache ein Foto, gib einen Text ein (z.B. Apfel) oder nutze die 1-Klick-Buttons!',
+            ? 'Zrób zdjęcie, użyj ⚡ Turbo-Skanu, wpisz nazwę (np. Jabłko) lub kliknij szybki przycisk!'
+            : 'Bitte nutze ⚡ Turbo-Scan, Foto, Text (z.B. Apfel) oder die 1-Klick-Buttons!',
           'warn'
         );
         return;
@@ -2415,7 +2465,7 @@
         const fastMatch = resolveFromLexicon(userText);
         if (fastMatch) {
           pendingMealEntry = fastMatch;
-          renderMealPreview(fastMatch);
+          renderMealPreview(fastMatch, false);
           showToast(t('offlineResolvedBadge'), 'success');
           return;
         }
@@ -2502,18 +2552,25 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
           fiber,
           vitC,
           mag,
-          notes: data.notes || 'Mit Gemini 3.8 Flash Vision analysiert.',
+          notes: data.notes || 'KI-Vision & Atwater-Physik verifiziert.',
           isLocalLexicon: false
         };
 
-        renderMealPreview(pendingMealEntry);
+        // ⚡ TURBO-SCAN MODE: Automatically log into today's diary in 1 step!
+        if (isTurbo) {
+          quickLogItem(pendingMealEntry);
+          renderMealPreview(pendingMealEntry, true);
+          if (textInputEl) textInputEl.value = '';
+          clearMealPhoto();
+        } else {
+          renderMealPreview(pendingMealEntry, false);
+        }
       } catch (err) {
-        // Offline-Fallback ONLY if user entered text matching the lexicon (NEVER invent 371 kcal for photos!)
         if (userText) {
           const fallbackMatch = resolveFromLexicon(userText);
           if (fallbackMatch) {
             pendingMealEntry = fallbackMatch;
-            renderMealPreview(fallbackMatch);
+            renderMealPreview(fallbackMatch, false);
             showToast('Per lokalem Top-100 Lexikon berechnet!', 'success');
             return;
           }
@@ -2525,18 +2582,43 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
       }
     }
 
-    function renderMealPreview(entry) {
+    function renderMealPreview(entry, wasAutoLogged = false) {
       const card = document.getElementById('mealResultCard');
       const content = document.getElementById('mealResultContent');
       if (!card || !content || !entry) return;
 
-      const sourceBadge = entry.isLocalLexicon
-        ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">${t('offlineResolvedBadge')}</span>`
-        : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30"><i class="fa-solid fa-microchip mr-1"></i>Gemini 3.8 Flash Vision</span>`;
+      let sourceBadge = '';
+      if (wasAutoLogged) {
+        sourceBadge = `<span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40"><i class="fa-solid fa-bolt mr-1"></i>⚡ TURBO-SCAN DIREKT GEBUCHT</span>`;
+      } else if (entry.isLocalLexicon) {
+        sourceBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">${t('offlineResolvedBadge')}</span>`;
+      } else {
+        sourceBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30"><i class="fa-solid fa-microchip mr-1"></i>Gemini Flash Vision</span>`;
+      }
 
       const sugarWarnHtml = entry.sugar >= 15
         ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${entry.sugar}g Zucker</span>`
         : '';
+
+      const actionButtonsHtml = wasAutoLogged
+        ? `
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-circle-check mr-1"></i>Bereits im heutigen Tagebuch gespeichert!</span>
+            <button type="button" onclick="document.getElementById('mealResultCard').classList.add('hidden')" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+              Ausblenden
+            </button>
+          </div>
+        `
+        : `
+          <div class="flex gap-2 pt-1">
+            <button type="button" onclick="document.getElementById('mealResultCard').classList.add('hidden')" class="px-3.5 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+              Abbrechen
+            </button>
+            <button type="button" onclick="confirmAddMeal()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20">
+              <i class="fa-solid fa-check"></i> Jetzt ins Tagebuch eintragen (+${entry.kcal} kcal)
+            </button>
+          </div>
+        `;
 
       content.innerHTML = `
         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -2554,14 +2636,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
           <div><span class="block text-[10px] text-rose-400 font-bold">Fett</span><span class="font-mono font-bold text-white">${entry.f}g</span></div>
           <div><span class="block text-[10px] text-emerald-400 font-bold">Ballastst.</span><span class="font-mono font-bold text-white">${entry.fiber}g</span></div>
         </div>
-        <div class="flex gap-2 pt-1">
-          <button type="button" onclick="document.getElementById('mealResultCard').classList.add('hidden')" class="px-3.5 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
-            Abbrechen
-          </button>
-          <button type="button" onclick="confirmAddMeal()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20">
-            <i class="fa-solid fa-check"></i> Jetzt ins Tagebuch eintragen (+${entry.kcal} kcal)
-          </button>
-        </div>
+        ${actionButtonsHtml}
       `;
       card.classList.remove('hidden');
       card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2644,9 +2719,9 @@ Zusätzliche Zutaten vom Nutzer (Ground-Truth): "${userText || 'Siehe Foto'}".
 
 SMART EXPIRY GUARD REGELN (KEINE MHD-HALLUZINATION!):
 1. Rate NIEMALS unlesbare gedruckte Datumsangaben! Bewerte stattdessen die biologische Verderblichkeit und optische Reifemerkmale:
-   - "high" (1-2 Tage haltbar, ZUERST VERBRAUCHEN): Rohes Geflügel/Hackfleisch/Fisch, Beeren, Blattspinat/Salat, geöffnete Packungen, angeschnittenes Gemüse.
-   - "medium" (3-4 Tage haltbar): Offener Quark/Skyr/Joghurt, Weichgemüse (Tomaten, Paprika), gekochte Reste.
-   - "low" (>5 Tage haltbar): Eier, Hartkäse, Wurzelgemüse.
+   - "high" (1-2 Tage haltbar, ZUERST VERBRAUCHEN): Offene Salate/Schüsseln (wie Gemüsesalat in Glasschale), rohes Geflügel/Hackfleisch/Fisch, Beeren, Blattspinat, geöffnete Packungen, angeschnittenes Gemüse.
+   - "medium" (3-4 Tage haltbar): Offener Quark/Skyr/Joghurt (z.B. 10% Joghurt-Eimer), Weichgemüse, gekochte Reste.
+   - "low" (>5 Tage haltbar): Gläser (Oliven, Senf, Gurken), Eier, Hartkäse, Konserven.
 2. Erstelle 3 köstliche Rezepte. Mindestens das erste Rezept MUSS die Zutaten mit der höchsten Dringlichkeit ("high") verwerten!
 
 Gib AUSSCHLIESSLICH valides JSON zurück:
