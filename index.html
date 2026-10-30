@@ -346,7 +346,7 @@
   <main class="max-w-2xl mx-auto px-4 pt-4 space-y-5">
 
     <!-- =================================================================== -->
-    <!-- TAB 1: DASHBOARD, TURBO-SCANNER, QUICK-BUTTONS & OFFLINE TRACKER    -->
+    <!-- TAB 1: DASHBOARD, ⚡ TURBO-SCANNER, QUICK-BUTTONS & OFFLINE TRACKER -->
     <!-- =================================================================== -->
     <section id="tab-dashboard" class="tab-section active space-y-4">
 
@@ -429,7 +429,7 @@
         </div>
       </div>
 
-      <!-- Dual-Mode AI Vision, ⚡ TURBO-SCAN (1-Button), 0.0s Offline-Fallback & Quick-Add Card -->
+      <!-- Dual-Mode Vision & ⚡ Turbo-Scan Card -->
       <div class="glass-card rounded-3xl p-5 shadow-xl border border-emerald-500/20">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
@@ -437,12 +437,12 @@
               <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
             </div>
             <div>
-              <h3 class="text-sm font-bold text-white" data-i18n="scannerTitle">Mahlzeiten-Scanner & Schnell-Eintrag</h3>
+              <h3 class="text-sm font-bold text-white" data-i18n="scannerTitle">Mahlzeiten-Scanner & ⚡ Turbo-Scan</h3>
               <p class="text-[11px] text-slate-400" data-i18n="scannerSubtitle">Foto aufnehmen, Text eingeben oder 1-Klick Schnellwahl nutzen</p>
             </div>
           </div>
           <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">
-            <i class="fa-solid fa-bolt text-amber-400 mr-1"></i>3.8 Flash
+            <i class="fa-solid fa-bolt text-amber-400 mr-1"></i>1.5 Flash
           </span>
         </div>
 
@@ -454,7 +454,7 @@
           </button>
         </div>
 
-        <!-- Text Input + 2-Button Row: [📷 Foto] + [⚡ Turbo-Scan] (Unified Button!) -->
+        <!-- Input & 2-Button Row: [📷 Foto] + [⚡ Turbo-Scan] (Unified!) -->
         <div class="flex flex-col sm:flex-row gap-2.5">
           <div class="relative flex-1">
             <input id="foodTextInput" type="text"
@@ -528,7 +528,7 @@
         <!-- Loading Indicator -->
         <div id="mealLoading" class="hidden mt-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center gap-3">
           <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-base"></i>
-          <span class="text-xs font-medium text-slate-300" data-i18n="analyzingText">Turbo-Scan analysiert Geometrie, Etikett & Nährwerte...</span>
+          <span class="text-xs font-medium text-slate-300" data-i18n="analyzingText">Turbo-Scan analysiert Bild, Etikett & Nährwerte...</span>
         </div>
 
         <!-- Analysis Result Preview Card -->
@@ -927,8 +927,8 @@
 
       <div class="glass-card rounded-3xl p-5 shadow-xl space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-300">Aktives KI-Routing & Modell-Cache:</span>
-          <span id="fastModelBadge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">gemini-3.8-flash</span>
+          <span class="text-xs font-bold text-slate-300">Aktives KI-Routing & Modell-Status:</span>
+          <span id="fastModelBadge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">gemini-1.5-flash</span>
         </div>
 
         <button type="button" onclick="openInviteModal()"
@@ -998,7 +998,7 @@
     const FAST_HOST_KEY = 'calsnap_fast_host';
     const GUEST_UNLOCK_KEY = 'calsnap_guest_code';
 
-    // Global Atomic Mutex Lock against parallel scan execution & Quota-burn
+    // Global Atomic Mutex Lock against duplicate parallel calls & Quota burn
     let isVisionBusy = false;
 
     // Runtime transient image buffers (Zero LocalStorage bloat)
@@ -1008,11 +1008,11 @@
     let currentPotImageBase64 = null;
     let pendingMealEntry = null;
 
-    // Purge deprecated or malformed model names from cache on boot
+    // Purge non-existent or malformed model names from cache on boot
     (function sanitizeCachedModelOnBoot() {
       try {
         const cachedModel = localStorage.getItem(FAST_MODEL_KEY);
-        if (cachedModel && /gemini-flash-latest/i.test(cachedModel)) {
+        if (cachedModel && /3\.8|gemini-flash-latest/i.test(cachedModel)) {
           localStorage.removeItem(FAST_MODEL_KEY);
         }
       } catch (_) {}
@@ -1208,7 +1208,7 @@
         const fastBadge = document.getElementById('fastModelBadge');
         if (fastBadge) {
           const cached = localStorage.getItem(FAST_MODEL_KEY);
-          fastBadge.textContent = cached || 'gemini-3.8-flash';
+          fastBadge.textContent = cached || 'gemini-1.5-flash';
         }
       } catch (_) {}
     }
@@ -1251,7 +1251,7 @@
         qaEggs: '2 Eier',
         qaQuark: '250g Quark',
         qaWhey: 'Protein-Shake',
-        analyzingText: 'Turbo-Scan analysiert Geometrie, Etikett & Nährwerte...',
+        analyzingText: 'Turbo-Scan analysiert Bild, Etikett & Nährwerte...',
         waterTitle: 'Wasser-Haushalt',
         todayLogTitle: 'Heutiges Ernährungstagebuch',
         resetDayBtn: 'Tag leeren',
@@ -1325,7 +1325,7 @@
         microSugar: 'Cukier',
         microFiber: 'Błonnik',
         scannerTitle: 'Skaner Posiłków i ⚡ Turbo-Skan',
-        scannerSubtitle: 'Zrób zdjęcie, wpisz tekst lub kliknij szybki przycisk',
+        scannerSubtitle: 'Turbo-Kamera (Auto-Zapis), Zdjęcie lub 0.0s Tekst',
         photoBtn: 'Zdjęcie',
         analyzeBtn: 'Turbo-Skan',
         quickAddLabel: 'Szybki wybór 1-Klik (Od razu do dziennika):',
@@ -1549,7 +1549,8 @@
       saveState();
       if (err) err.classList.add('hidden');
       checkAccessGate();
-      showToast('Google Gemini API-Key gespeichert (4-Layer-Bridge aktiv).', 'success');
+      validateAndSetWorkingModel(key);
+      showToast('Google Gemini API-Key gespeichert (Live-Validierung aktiv).', 'success');
     }
 
     function getActiveOrDefaultGuestCode() {
@@ -1667,7 +1668,8 @@
       updateApiStatusUI();
       closeApiModal();
       checkAccessGate();
-      showToast('API-Key sicher auf allen 4 Ebenen gespeichert!', 'success');
+      validateAndSetWorkingModel(key);
+      showToast('API-Key gespeichert & Modell-Pipeline validiert!', 'success');
     }
 
     function clearSavedApiKey() {
@@ -1735,7 +1737,7 @@
 
             const dataUrl = canvas.toDataURL('image/jpeg', quality);
 
-            // CRITICAL SANITATION: Immediate zero-out of iOS WebKit CoreGraphics buffer
+            // CRITICAL SANITATION: Immediate zero-out of iOS WebKit CoreGraphics GPU RAM
             ctx.clearRect(0, 0, width, height);
             canvas.width = 0;
             canvas.height = 0;
@@ -1755,7 +1757,6 @@
 
         img.onerror = () => {
           URL.revokeObjectURL(objectUrl);
-          // Fallback to FileReader if objectURL is restricted
           const reader = new FileReader();
           reader.onload = async (e) => {
             try {
@@ -1807,6 +1808,9 @@
         return;
       }
 
+      // Lock Mutex immediately in millisecond 0 to stop any duplicate tap race-conditions!
+      isVisionBusy = true;
+
       try {
         const res = await compressImageFile(file, 'label');
         currentMealImageBase64 = res.base64;
@@ -1818,9 +1822,10 @@
         inputEl.value = '';
         showToast('Foto geladen — starte Turbo-Scan...', 'info');
         if (typeof analyzeMeal === 'function') {
-          setTimeout(() => analyzeMeal(), 50);
+          setTimeout(() => analyzeMeal(true), 40);
         }
       } catch (err) {
+        isVisionBusy = false;
         inputEl.value = '';
         showToast(err.message || 'Fehler beim Laden des Fotos.', 'error');
       }
@@ -1845,6 +1850,8 @@
         return;
       }
 
+      isVisionBusy = true;
+
       try {
         const res = await compressImageFile(file, 'standard');
         currentFridgeImageBase64 = res.base64;
@@ -1856,9 +1863,10 @@
 
         showToast('Kühlschrank-Foto geladen — starte Smart Expiry Guard...', 'info');
         if (typeof runFridgeLeftoverAI === 'function') {
-          setTimeout(() => runFridgeLeftoverAI(), 50);
+          setTimeout(() => runFridgeLeftoverAI(true), 40);
         }
       } catch (err) {
+        isVisionBusy = false;
         inputEl.value = '';
         showToast(err.message || 'Fehler beim Laden des Fotos.', 'error');
       }
@@ -1883,6 +1891,8 @@
         return;
       }
 
+      isVisionBusy = true;
+
       try {
         const res = await compressImageFile(file, 'menu');
         currentMenuImageBase64 = res.base64;
@@ -1894,9 +1904,10 @@
 
         showToast('Speisekarte geladen — starte Makro-Abgleich...', 'info');
         if (typeof runMenuScannerAI === 'function') {
-          setTimeout(() => runMenuScannerAI(), 50);
+          setTimeout(() => runMenuScannerAI(true), 40);
         }
       } catch (err) {
+        isVisionBusy = false;
         inputEl.value = '';
         showToast(err.message || 'Fehler beim Laden des Fotos.', 'error');
       }
@@ -1921,6 +1932,8 @@
         return;
       }
 
+      isVisionBusy = true;
+
       try {
         const res = await compressImageFile(file, 'standard');
         currentPotImageBase64 = res.base64;
@@ -1932,9 +1945,10 @@
 
         showToast('Topf-/Auflauf-Foto geladen — berechne Portionsanteil...', 'info');
         if (typeof runPotCalculatorAI === 'function') {
-          setTimeout(() => runPotCalculatorAI(), 50);
+          setTimeout(() => runPotCalculatorAI(true), 40);
         }
       } catch (err) {
+        isVisionBusy = false;
         inputEl.value = '';
         showToast(err.message || 'Fehler beim Laden des Fotos.', 'error');
       }
@@ -2011,22 +2025,21 @@
     }
 
     // =========================================================================
-    // 6. MULTIMODAL ROUTING, TIMEOUT PIPELINE & 429/404-RESILIENT QUEUE
+    // 6. PROACTIVE DISCOVERY & VERIFIED PRODUCTION QUEUE ENGINE
     // =========================================================================
-    // Official Baseline Queue with gemini-3.8-flash strictly at #1
+    // Real, verified Google AI Studio production models (Zero phantom 404 models!)
     const BASE_MODEL_QUEUE = [
-      'gemini-3.8-flash',
-      'gemini-3-flash-preview',
-      'gemini-2.5-flash',
-      'gemini-2.5-flash-lite',
-      'gemini-2.0-flash'
+      'gemini-1.5-flash',
+      'gemini-2.0-flash-exp',
+      'gemini-1.5-flash-8b',
+      'gemini-1.5-pro'
     ];
 
     function getModelQueue() {
       const queue = [];
       try {
         const cached = (localStorage.getItem(FAST_MODEL_KEY) || '').trim();
-        if (cached && !/gemini-flash-latest/i.test(cached)) {
+        if (cached && !/3\.8|gemini-flash-latest/i.test(cached)) {
           queue.push(cached);
         } else if (cached) {
           localStorage.removeItem(FAST_MODEL_KEY);
@@ -2051,10 +2064,41 @@
       return ['https://generativelanguage.googleapis.com'];
     }
 
+    // Proactive Live-Handshake: Queries Google API to verify exactly what exists on this key
+    async function validateAndSetWorkingModel(apiKey) {
+      if (!apiKey || apiKey.length < 15) return;
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !Array.isArray(data.models)) return;
+
+        const supported = data.models
+          .filter((m) =>
+            m &&
+            typeof m.name === 'string' &&
+            Array.isArray(m.supportedGenerationMethods) &&
+            m.supportedGenerationMethods.includes('generateContent') &&
+            !/embedding|imagen|veo|aqa|tts|audio/i.test(m.name)
+          )
+          .map((m) => m.name.replace(/^models\//, ''));
+
+        // Match the fastest real flash model supported on this key
+        const best = BASE_MODEL_QUEUE.find((m) => supported.includes(m)) ||
+          supported.find((m) => /flash/i.test(m)) ||
+          supported[0];
+
+        if (best) {
+          try { localStorage.setItem(FAST_MODEL_KEY, best); } catch (_) {}
+          const badge = document.getElementById('fastModelBadge');
+          if (badge) badge.textContent = best;
+        }
+      } catch (_) {}
+    }
+
     async function executeModelCallWithTimeout(model, host, apiKey, contentsPayload) {
       const endpoint = `${host}/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-      // Deterministic AbortController bounded across connection AND json streaming pass
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 12000);
 
@@ -2094,7 +2138,7 @@
             ? data.candidates[0].content.parts
             : [];
 
-        // Filter out internal thinking parts to guarantee clean JSON extraction
+        // Filter out internal thinking parts to guarantee valid JSON parsing
         const cleanParts = rawParts.filter((p) => !p.thought && typeof p.text === 'string');
         const activeParts = cleanParts.length > 0 ? cleanParts : rawParts;
         const textOut = activeParts.map((p) => p.text || '').join('\n').trim();
@@ -2112,7 +2156,6 @@
 
         return textOut;
       } finally {
-        // Guaranteed cleanup of timer to prevent residual hanging promises
         clearTimeout(timeoutId);
       }
     }
@@ -2147,13 +2190,9 @@
           } catch (err) {
             lastError = err;
 
-            // SANITATION: Immediately evict cached model on 404 OR 429 Quota exhaustion
+            // Immediately clear cached model on 404 or 429 to avoid repeatedly hitting a dead end
             if (err.status === 404 || err.status === 429) {
               try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
-            }
-
-            // Break host loop immediately on 404 or 429 to avoid wasting quota on alternate host
-            if (err.status === 404 || err.status === 429) {
               break;
             }
           }
@@ -2244,7 +2283,8 @@
       { keys: ['kaffee mit milch', 'kaffee+milch', 'milchkaffee', 'cappuccino', 'latte macchiato', 'kawa z mlekiem'], nameDe: 'Kaffee mit Milch / Cappuccino', namePl: 'Kawa z mlekiem', unitG: 250, p: 1.5, c: 2.2, f: 1.3, sugar: 2.2, fiber: 0, vitC: 0, mag: 6 },
       { keys: ['grüner tee', 'schwarzer tee', 'kräutertee', 'tee', 'zielona herbata', 'czarna herbata', 'herbata'], nameDe: 'Ungesüßter Tee', namePl: 'Herbata bez cukru', unitG: 250, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 2, zeroCal: true },
       { keys: ['wasser', 'mineralwasser', 'woda'], nameDe: 'Mineralwasser', namePl: 'Woda mineralna', unitG: 300, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 10, zeroCal: true },
-      { keys: ['cola zero', 'pepsi max', 'zero limo', 'erfrischungsgetränk', 'cola light'], nameDe: 'Zero-Erfrischungsgetränk / Cola Zero', namePl: 'Napój Zero / Cola Zero', unitG: 330, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0, zeroCal: true },
+      { keys: ['cola zero', 'pepsi max', 'zero limo', 'erfrischungsgetränk zero', 'cola light'], nameDe: 'Zero-Erfrischungsgetränk / Cola Zero', namePl: 'Napój Zero / Cola Zero', unitG: 330, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0, zeroCal: true },
+      { keys: ['apfelschorle', 'apfelsaftschorle', 'schorle'], nameDe: 'Apfelschorle (60% Fruchtgehalt)', namePl: 'Napój jabłkowy gazowany', unitG: 500, p: 0.1, c: 6.0, f: 0.1, sugar: 5.8, fiber: 0.1, vitC: 2, mag: 4 },
 
       // Dairy, Eggs & Protein
       { keys: ['magerquark', 'quark', 'speisequark', 'twaróg chudy', 'twaróg'], nameDe: 'Magerquark', namePl: 'Twaróg chudy', unitG: 250, p: 12.0, c: 4.0, f: 0.3, sugar: 4.0, fiber: 0, vitC: 1, mag: 11 },
@@ -2454,9 +2494,9 @@
     // =========================================================================
     // 8. DUAL-MODE MEAL SCANNER WITH MUTEX & LABEL OCR (`analyzeMeal`)
     // =========================================================================
-    async function analyzeMeal() {
-      if (isVisionBusy) {
-        showToast('Eine Analyse läuft bereits. Bitte einen Moment warten...', 'info');
+    async function analyzeMeal(isAutoTriggered = false) {
+      if (isVisionBusy && !isAutoTriggered) {
+        showToast('Eine Analyse läuft bereits. Bitte kurz warten...', 'info');
         return;
       }
 
@@ -2465,6 +2505,7 @@
       const hasPhoto = Boolean(currentMealImageBase64);
 
       if (!hasPhoto && !userText) {
+        isVisionBusy = false;
         showToast(
           state.lang === 'pl'
             ? 'Zrób zdjęcie, wpisz tekst (np. Jabłko) lub kliknij szybki przycisk!'
@@ -2478,6 +2519,7 @@
       if (!hasPhoto && userText) {
         const fastMatch = resolveFromLexicon(userText);
         if (fastMatch) {
+          isVisionBusy = false;
           pendingMealEntry = fastMatch;
           renderMealPreview(fastMatch);
           showToast(t('offlineResolvedBadge'), 'success');
@@ -2500,7 +2542,7 @@
 Analysiere das Foto deterministisch. Antworte auf ${langName}.
 VERBINDLICHE ZERO-SHOT VISUAL ANCHORING & OCR-ETIKETTEN-REGELN:
 1. NÄHRWERTTABELLEN / ETIKETTEN / FLASCHEN (OCR-PRIORITÄT):
-   - Wenn das Foto eine Nährwerttabelle, ein Flaschen-Etikett oder eine Verpackung zeigt (z.B. "0,33L", "100ml = 2 kcal", "330ml = 7 kcal", "Kohlenhydrate 0g", "Zucker 0g"), lies EXAKT die aufgedruckten Werte für die gesamte Flasche/Portion (z.B. 330ml = 7 kcal) ab! Setze in diesem Fall "isNutritionLabel": true.
+   - Wenn das Foto eine Nährwerttabelle, ein Flaschen-Etikett oder eine Verpackung zeigt (z.B. "Lidl Apfelschorle", "Ø/100 ml: 26 kcal / 107 kJ, Kohlenhydrate 6.0g, davon Zucker 5.8g" oder "0,33L = 7 kcal"), lies EXAKT die aufgedruckten Werte für die 100ml oder die Portion ab! Setze in diesem Fall "isNutritionLabel": true.
 2. GEFÄSS- & SCHICHTUNGS-PRÜFUNG FÜR TELLER/AUFLAUF:
    - Befindet sich das Essen in einer Keramik-/Glas-Auflaufform, Kasserolle oder Pfanne mit geschmolzenem/überbackenem Käse, klassifiziere es ZWINGEND als "Auflauf / Gratin / Pfannengericht" und NIEMALS als Backware oder Käsebrötchen!
 3. GROUND-TRUTH VORRANG:
@@ -2508,13 +2550,13 @@ VERBINDLICHE ZERO-SHOT VISUAL ANCHORING & OCR-ETIKETTEN-REGELN:
 
 Gib AUSSCHLIESSLICH valides JSON im folgenden Schema zurück:
 {
-  "name": "Präziser Name des Produkts/Gerichts inkl. Menge (z.B. Erfrischungsgetränk Zero 330ml)",
+  "name": "Präziser Name des Produkts/Gerichts inkl. Menge (z.B. Apfelschorle 500ml oder Portion)",
   "isNutritionLabel": true,
-  "kcal": 7,
+  "kcal": 26,
   "p": 0,
-  "c": 0,
+  "c": 6,
   "f": 0,
-  "sugar": 0,
+  "sugar": 5.8,
   "fiber": 0,
   "vitC": 0,
   "mag": 0,
@@ -2552,7 +2594,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
         const mag = Math.max(0, Math.round(Number(data.mag) || 0));
         const rawKcal = Math.max(0, Math.round(Number(data.kcal) || 0));
 
-        // Preserve exact printed label kcal (e.g. 7 kcal on 0,33L Zero-Drink) when macros are 0g
+        // Preserve exact printed label kcal (e.g. 26 kcal/100ml or 7 kcal on 0,33L) when explicit label was detected
         const computedKcal = (data.isNutritionLabel === true || (p === 0 && c === 0 && f === 0 && fiber === 0))
           ? rawKcal
           : enforceAtwater(p, c, f, fiber);
@@ -2567,7 +2609,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
           fiber,
           vitC,
           mag,
-          notes: data.notes || 'Mit Gemini 3.8 Flash Vision analysiert.',
+          notes: data.notes || 'Mit Gemini Flash Vision analysiert.',
           isLocalLexicon: false
         };
 
@@ -2597,7 +2639,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
 
       const sourceBadge = entry.isLocalLexicon
         ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">${t('offlineResolvedBadge')}</span>`
-        : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30"><i class="fa-solid fa-microchip mr-1"></i>Gemini 3.8 Flash Vision</span>`;
+        : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30"><i class="fa-solid fa-microchip mr-1"></i>Gemini Flash Vision</span>`;
 
       const sugarWarnHtml = entry.sugar >= 15
         ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${entry.sugar}g Zucker</span>`
@@ -2682,8 +2724,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
     // =========================================================================
     // 9. MODULE 1: SMART EXPIRY GUARD (`runFridgeLeftoverAI`)
     // =========================================================================
-    async function runFridgeLeftoverAI() {
-      if (isVisionBusy) {
+    async function runFridgeLeftoverAI(isAutoTriggered = false) {
+      if (isVisionBusy && !isAutoTriggered) {
         showToast('Eine Analyse läuft bereits...', 'info');
         return;
       }
@@ -2698,6 +2740,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
       const dietPref = dietEl ? dietEl.value : 'Ausgewogen & High-Protein';
 
       if (!currentFridgeImageBase64 && !userText) {
+        isVisionBusy = false;
         showToast('Bitte mache ein Kühlschrank-Foto oder gib vorhandene Zutaten ein.', 'warn');
         return;
       }
@@ -2838,8 +2881,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
     // =========================================================================
     // 10. MODULE 2: CONTEXTUAL AI MENU COMPANION (`runMenuScannerAI`)
     // =========================================================================
-    async function runMenuScannerAI() {
-      if (isVisionBusy) {
+    async function runMenuScannerAI(isAutoTriggered = false) {
+      if (isVisionBusy && !isAutoTriggered) {
         showToast('Eine Analyse läuft bereits...', 'info');
         return;
       }
@@ -2851,6 +2894,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
 
       const userText = (textEl ? textEl.value : '').trim();
       if (!currentMenuImageBase64 && !userText) {
+        isVisionBusy = false;
         showToast('Bitte fotografiere die Speisekarte oder tippe Gerichte ein.', 'warn');
         return;
       }
@@ -2978,8 +3022,8 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
     // =========================================================================
     // 11. POT / CASSEROLE CALCULATOR (`runPotCalculatorAI`) & ZAUBERN (`runZaubernAI`)
     // =========================================================================
-    async function runPotCalculatorAI() {
-      if (isVisionBusy) {
+    async function runPotCalculatorAI(isAutoTriggered = false) {
+      if (isVisionBusy && !isAutoTriggered) {
         showToast('Eine Analyse läuft bereits...', 'info');
         return;
       }
@@ -2995,6 +3039,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
       const eatenPortions = Math.max(0.25, parseFloat(eatenPortEl ? eatenPortEl.value : '1') || 1);
 
       if (!currentPotImageBase64 && !userText) {
+        isVisionBusy = false;
         showToast('Bitte fotografiere den Topf/Auflauf oder beschreibe die Zutaten.', 'warn');
         return;
       }
@@ -3393,6 +3438,7 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
       URL.revokeObjectURL(url);
     }
 
+    // iOS/PWA Lifecycle Persistence Hooks
     window.addEventListener('pagehide', () => saveState());
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
@@ -3408,6 +3454,11 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
       checkAccessGate();
       renderDashboard();
       updateMenuMacroContextUI();
+
+      // Proactive Handshake on Boot: Validate working Flash model with Google API
+      if (state.geminiApiKey) {
+        validateAndSetWorkingModel(state.geminiApiKey);
+      }
     });
   </script>
 </body>
