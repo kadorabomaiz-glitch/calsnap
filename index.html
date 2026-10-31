@@ -294,7 +294,7 @@
           <div class="flex items-center gap-2">
             <span id="networkStatusBadge" class="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span id="networkStatusText">Online + Top-100 Lexikon</span>
+              <span id="networkStatusText">Online + DE/PL Lexikon</span>
             </span>
           </div>
         </div>
@@ -441,8 +441,8 @@
               <p class="text-[11px] text-slate-400" data-i18n="scannerSubtitle">Foto aufnehmen, Text eingeben oder 1-Klick Schnellwahl nutzen</p>
             </div>
           </div>
-          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">
-            <i class="fa-solid fa-bolt text-amber-400 mr-1"></i>1.5 Flash
+          <span id="scannerModelBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">
+            <i class="fa-solid fa-bolt text-amber-400 mr-1"></i>3.8 Flash
           </span>
         </div>
 
@@ -454,11 +454,11 @@
           </button>
         </div>
 
-        <!-- Input & 2-Button Row: [📷 Foto] + [⚡ Turbo-Scan] (Unified!) -->
+        <!-- Input & 2-Button Row: [📷 Foto] + [⚡ Turbo-Scan] -->
         <div class="flex flex-col sm:flex-row gap-2.5">
           <div class="relative flex-1">
             <input id="foodTextInput" type="text"
-              placeholder="z.B. Apfel, 250g Magerquark, 2 Eier, Hähnchen mit Reis..."
+              placeholder="z.B. Apfel, Lasagne 250g, 2 Eier, Mięso wieprzowe..."
               onkeydown="if(event.key==='Enter') { event.preventDefault(); analyzeMeal(); }"
               class="w-full rounded-2xl bg-slate-900/95 border border-slate-700/90 pl-3.5 pr-9 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
             <button type="button" onclick="document.getElementById('foodTextInput').value=''; document.getElementById('foodTextInput').focus();"
@@ -818,7 +818,7 @@
     </section>
 
     <!-- =================================================================== -->
-    <!-- TAB 5: PROFILE, MIFFLIN-ST JEOR CALCULATOR & SYSTEM SETTINGS        -->
+    <!-- TAB 5: PROFILE, MIFFLIN-ST JEOR CALCULATOR (WITH TARGET WEIGHT!)    -->
     <!-- =================================================================== -->
     <section id="tab-profile" class="tab-section space-y-4">
 
@@ -829,10 +829,11 @@
           </div>
           <div>
             <h2 class="text-base font-extrabold text-white" data-i18n="profCalcTitle">Mifflin-St Jeor Kalorien- & Makro-Rechner</h2>
-            <p class="text-xs text-slate-400" data-i18n="profCalcSubtitle">Wissenschaftliche Grund- & Leistungsumsatzberechnung</p>
+            <p class="text-xs text-slate-400" data-i18n="profCalcSubtitle">Wissenschaftliche Grund-, Leistungs- & Zielgewichtsberechnung</p>
           </div>
         </div>
 
+        <!-- Row 1: Gender & Age -->
         <div class="grid grid-cols-2 gap-3 mb-3">
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1" data-i18n="profGenderLabel">Geschlecht</label>
@@ -846,16 +847,33 @@
             <input id="profAge" type="number" min="14" max="100" value="30"
               class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-sm text-white font-mono" />
           </div>
+        </div>
+
+        <!-- Row 2: Current Weight, Target Weight (NEW!) & Height -->
+        <div class="grid grid-cols-3 gap-2.5 mb-3">
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1" data-i18n="profWeightLabel">Gewicht (kg)</label>
             <input id="profWeight" type="number" min="35" max="250" step="0.5" value="70"
+              oninput="updateWeightDiffPreview()"
               class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-sm text-white font-mono" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-emerald-400 mb-1" data-i18n="profTargetWeightLabel">Zielgewicht (kg)</label>
+            <input id="profTargetWeight" type="number" min="35" max="250" step="0.5" value="65"
+              oninput="updateWeightDiffPreview()"
+              class="w-full rounded-xl bg-slate-900 border border-emerald-500/50 px-3 py-2.5 text-sm text-emerald-300 font-mono font-bold focus:outline-none focus:border-emerald-400" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1" data-i18n="profHeightLabel">Größe (cm)</label>
             <input id="profHeight" type="number" min="120" max="230" value="170"
               class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-sm text-white font-mono" />
           </div>
+        </div>
+
+        <!-- Live Target Weight Difference Info Banner -->
+        <div id="profWeightDiffBanner" class="mb-3 px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between text-xs">
+          <span class="text-slate-300 font-medium"><i class="fa-solid fa-scale-balanced text-emerald-400 mr-1.5"></i> Weg bis zum Zielgewicht:</span>
+          <span id="profWeightDiffVal" class="font-mono font-extrabold text-emerald-400">-5.0 kg</span>
         </div>
 
         <div class="space-y-3 mb-4">
@@ -928,7 +946,7 @@
       <div class="glass-card rounded-3xl p-5 shadow-xl space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-slate-300">Aktives KI-Routing & Modell-Status:</span>
-          <span id="fastModelBadge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">gemini-1.5-flash</span>
+          <span id="fastModelBadge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">gemini-3.8-flash</span>
         </div>
 
         <button type="button" onclick="openInviteModal()"
@@ -1008,11 +1026,11 @@
     let currentPotImageBase64 = null;
     let pendingMealEntry = null;
 
-    // Purge deprecated 404 models from cache on boot
+    // Purge deprecated 1.5 / 2.0 models from cache on boot
     (function sanitizeCachedModelOnBoot() {
       try {
         const cachedModel = localStorage.getItem(FAST_MODEL_KEY);
-        if (cachedModel && /1\.5|2\.0|3\.8|gemini-flash-latest/i.test(cachedModel)) {
+        if (cachedModel && /1\.5|2\.0|gemini-flash-latest/i.test(cachedModel)) {
           localStorage.removeItem(FAST_MODEL_KEY);
         }
       } catch (_) {}
@@ -1041,6 +1059,7 @@
           gender: 'female',
           age: 30,
           weight: 70,
+          targetWeight: 65,
           height: 170,
           activity: 1.375,
           goalType: -500,
@@ -1157,6 +1176,10 @@
       merged.fatGoal = Number(merged.fatGoal) >= 0 ? Math.round(Number(merged.fatGoal)) : 65;
       merged.waterGoal = Number(merged.waterGoal) > 500 ? Math.round(Number(merged.waterGoal)) : 2500;
 
+      if (!merged.profile.targetWeight) {
+        merged.profile.targetWeight = Math.max(45, Math.round((Number(merged.profile.weight) || 70) - 5));
+      }
+
       extractAuthFromRuntime(merged);
       return merged;
     }
@@ -1176,12 +1199,37 @@
       } catch (_) {}
     }
 
+    function updateWeightDiffPreview() {
+      try {
+        const wEl = document.getElementById('profWeight');
+        const twEl = document.getElementById('profTargetWeight');
+        const diffValEl = document.getElementById('profWeightDiffVal');
+        if (!wEl || !twEl || !diffValEl) return;
+
+        const w = parseFloat(wEl.value) || 70;
+        const tw = parseFloat(twEl.value) || w;
+        const diff = Math.round((tw - w) * 10) / 10;
+
+        if (diff < 0) {
+          diffValEl.textContent = `${w} kg → ${tw} kg (${diff} kg Abnahme)`;
+          diffValEl.className = 'font-mono font-extrabold text-emerald-400';
+        } else if (diff > 0) {
+          diffValEl.textContent = `${w} kg → ${tw} kg (+${diff} kg Aufbau)`;
+          diffValEl.className = 'font-mono font-extrabold text-sky-400';
+        } else {
+          diffValEl.textContent = `${w} kg (Zielgewicht erreicht!)`;
+          diffValEl.className = 'font-mono font-extrabold text-amber-300';
+        }
+      } catch (_) {}
+    }
+
     function syncProfileInputs() {
       try {
         const p = state.profile || {};
         const elGender = document.getElementById('profGender');
         const elAge = document.getElementById('profAge');
         const elWeight = document.getElementById('profWeight');
+        const elTargetWeight = document.getElementById('profTargetWeight');
         const elHeight = document.getElementById('profHeight');
         const elActivity = document.getElementById('profActivity');
         const elGoalType = document.getElementById('profGoalType');
@@ -1190,10 +1238,13 @@
         if (elGender && p.gender) elGender.value = String(p.gender);
         if (elAge && p.age) elAge.value = Number(p.age);
         if (elWeight && p.weight) elWeight.value = Number(p.weight);
+        if (elTargetWeight) elTargetWeight.value = Number(p.targetWeight || p.weight || 65);
         if (elHeight && p.height) elHeight.value = Number(p.height);
         if (elActivity && p.activity) elActivity.value = String(p.activity);
         if (elGoalType && p.goalType !== undefined) elGoalType.value = String(p.goalType);
         if (elDietMode && p.dietMode) elDietMode.value = String(p.dietMode);
+
+        updateWeightDiffPreview();
 
         const mKcal = document.getElementById('manualKcal');
         const mProt = document.getElementById('manualProt');
@@ -1208,7 +1259,7 @@
         const fastBadge = document.getElementById('fastModelBadge');
         if (fastBadge) {
           const cached = localStorage.getItem(FAST_MODEL_KEY);
-          fastBadge.textContent = cached || 'gemini-2.5-flash';
+          fastBadge.textContent = (cached && !/1\.5|2\.0/i.test(cached)) ? cached : 'gemini-3.8-flash';
         }
       } catch (_) {}
     }
@@ -1274,10 +1325,11 @@
         zaubernSubtitle: 'Verwandelt Kalorienbomben in proteinreiche, kalorienarme Alternativen',
         zaubernRunBtn: 'Gesunde Fitness-Alternative zaubern',
         profCalcTitle: 'Mifflin-St Jeor Kalorien- & Makro-Rechner',
-        profCalcSubtitle: 'Wissenschaftliche Grund- & Leistungsumsatzberechnung',
+        profCalcSubtitle: 'Wissenschaftliche Grund-, Leistungs- & Zielgewichtsberechnung',
         profGenderLabel: 'Geschlecht',
         profAgeLabel: 'Alter (Jahre)',
         profWeightLabel: 'Gewicht (kg)',
+        profTargetWeightLabel: 'Zielgewicht (kg)',
         profHeightLabel: 'Größe (cm)',
         profActivityLabel: 'Aktivitätslevel (PAL)',
         profGoalLabel: 'Zielsetzung',
@@ -1359,10 +1411,11 @@
         zaubernSubtitle: 'Zamienia bomby kaloryczne w wysokobiałkowe fit-alternatywy',
         zaubernRunBtn: 'Stwórz zdrowy fit-zamiennik',
         profCalcTitle: 'Kalkulator Kalorii i Makro Mifflin-St Jeor',
-        profCalcSubtitle: 'Naukowe wyliczenie zapotrzebowania kalorycznego',
+        profCalcSubtitle: 'Naukowe wyliczenie zapotrzebowania i wagi docelowej',
         profGenderLabel: 'Płeć',
         profAgeLabel: 'Wiek (lata)',
         profWeightLabel: 'Waga (kg)',
+        profTargetWeightLabel: 'Cel wagi (kg)',
         profHeightLabel: 'Wzrost (cm)',
         profActivityLabel: 'Poziom aktywności (PAL)',
         profGoalLabel: 'Cel sylwetkowy',
@@ -1423,7 +1476,6 @@
       const container = document.getElementById('toastContainer');
       if (!container) return;
 
-      // SANITATION: Clear prior toasts immediately so banners NEVER stack up
       container.innerHTML = '';
 
       const colors = {
@@ -1684,7 +1736,7 @@
       showToast('API-Key wurde entfernt.', 'info');
     }
 
-// =========================================================================
+    // =========================================================================
     // 4. SANITIZED CAMERA ENGINE (SYNCHRONOUS CANVAS & WEBKIT GPU ISOLATION)
     // =========================================================================
     let visionWatchdogTimer = null;
@@ -1817,19 +1869,16 @@
           objectUrl = URL.createObjectURL(file);
           const img = new Image();
 
-          // Pure synchronous onload execution (Zero async/await suspension race)
           img.onload = () => {
             if (settled) return;
             settled = true;
             clearTimeout(loadTimer);
 
-            // Detach listeners FIRST to prevent false onerror trigger during cleanup
             img.onload = null;
             img.onerror = null;
 
             try {
               const result = renderImageToJpegBase64(img, maxDim, quality);
-              // Revoke ObjectURL ONLY AFTER canvas.toDataURL has flushed GPU pixels
               URL.revokeObjectURL(objectUrl);
               img.removeAttribute('src');
               resolve(result);
@@ -1867,7 +1916,6 @@
       const file = inputEl && inputEl.files && inputEl.files[0];
       if (!file) return;
 
-      // Reset file input immediately so selecting the same image again always fires onchange
       if (isVisionBusy) {
         inputEl.value = '';
         showToast('Eine Analyse läuft bereits. Bitte kurz warten...', 'info');
@@ -2105,11 +2153,9 @@
       'gemma-3-27b-it'
     ];
 
-    // In-memory cache so model discovery runs at most ONCE per session and never blocks scans
     let cachedLiveModelsList = null;
     let cachedLiveModelsKey = '';
 
-    // Isolated AbortController wrapper: creates a fresh controller per HTTP call & guarantees cleanup
     async function fetchWithIsolatedSignal(url, options = {}, timeoutMs = 10000) {
       const controller = new AbortController();
       const timerId = setTimeout(() => {
@@ -2221,7 +2267,6 @@
         11000
       );
 
-      // Fresh isolated signal for 400 fallback without thinkingConfig
       if (res.status === 400 && genConfig.thinkingConfig) {
         delete genConfig.thinkingConfig;
         res = await fetchWithIsolatedSignal(
@@ -2377,28 +2422,28 @@
 
       throw new Error('JSON-Struktur konnte nicht extrahiert werden.');
     }
-   
     // =========================================================================
     // 7. DETERMINISTIC OFFLINE-FALLBACK TRACKER & EXPANDED BILINGUAL LEXICON
     // =========================================================================
+    // ALL nutritional values (p, c, f, sugar, fiber, vitC, mag) are strictly standardized PER 100g!
     const FOOD_LEXICON = [
-      // Everyday Composite Dishes & User-Requested Classics (DE & PL)
-      { keys: ['lasagne', 'lasagna', 'lasagne bolognese', 'lazania'], nameDe: 'Lasagne Bolognese (Portion)', namePl: 'Lazania Bolognese (Porcja)', unitG: 350, isPiece: true, p: 28.0, c: 46.0, f: 24.0, sugar: 4.5, fiber: 3.2, vitC: 8, mag: 26 },
-      { keys: ['mieso wieprzowe w sosie', 'mięso wieprzowe w sosie', 'wieprzowina w sosie', 'schweinefleisch in sosse', 'schweinefleisch in soße', 'schweinebraten mit sosse', 'schweinebraten mit soße'], nameDe: 'Schweinefleisch in Soße (Portion)', namePl: 'Mięso wieprzowe w sosie (Porcja)', unitG: 250, isPiece: true, p: 32.0, c: 6.0, f: 19.0, sugar: 2.0, fiber: 1.0, vitC: 2, mag: 30 },
-      { keys: ['gulasch', 'gulasz', 'rinderschmorfleisch', 'wolowina w sosie', 'wołowina w sosie'], nameDe: 'Gulasch (Portion)', namePl: 'Gulasz (Porcja)', unitG: 300, isPiece: true, p: 34.0, c: 8.0, f: 16.0, sugar: 3.0, fiber: 2.0, vitC: 12, mag: 32 },
-      { keys: ['schnitzel', 'panierter schnitzel', 'paniertes schnitzel', 'kotlet schabowy', 'schabowy'], nameDe: 'Paniertes Schnitzel', namePl: 'Kotlet schabowy', unitG: 180, isPiece: true, p: 29.0, c: 14.0, f: 18.0, sugar: 0.5, fiber: 1.0, vitC: 0, mag: 24 },
-      { keys: ['frikadelle', 'bulette', 'fleischpflanzerl', 'kotlet mielony', 'mielony'], nameDe: 'Frikadelle / Bulette', namePl: 'Kotlet mielony', unitG: 120, isPiece: true, p: 18.0, c: 6.0, f: 19.0, sugar: 0.8, fiber: 0.8, vitC: 1, mag: 16 },
-      { keys: ['pierogi', 'pierogi ruskie', 'pierogi z miesem', 'pierogi z mięsem', 'pirogen'], nameDe: 'Pierogi / Piroggen (Portion)', namePl: 'Pierogi (Porcja)', unitG: 250, isPiece: true, p: 16.0, c: 54.0, f: 11.0, sugar: 2.5, fiber: 2.8, vitC: 3, mag: 22 },
-      { keys: ['bigos', 'schmorkraut'], nameDe: 'Bigos (Sauerkrauteintopf)', namePl: 'Bigos staropolski', unitG: 300, isPiece: true, p: 19.0, c: 9.0, f: 21.0, sugar: 4.5, fiber: 5.5, vitC: 28, mag: 26 },
-      { keys: ['spaghetti bolognese', 'pasta bolognese', 'spaghetti z sosem', 'makaron bolognese'], nameDe: 'Spaghetti Bolognese', namePl: 'Spaghetti Bolognese', unitG: 350, isPiece: true, p: 24.0, c: 56.0, f: 14.0, sugar: 5.0, fiber: 3.5, vitC: 10, mag: 30 },
-      { keys: ['pommes', 'pommes frites', 'frytki'], nameDe: 'Pommes Frites (Portion)', namePl: 'Frytki', unitG: 150, isPiece: true, p: 4.5, c: 48.0, f: 18.0, sugar: 0.5, fiber: 4.2, vitC: 8, mag: 28 },
-      { keys: ['currywurst', 'currywurst mit sosse', 'currywurst mit soße'], nameDe: 'Currywurst mit Soße', namePl: 'Kiełbaska Currywurst', unitG: 180, isPiece: true, p: 18.0, c: 14.0, f: 32.0, sugar: 12.0, fiber: 1.0, vitC: 4, mag: 18 },
-      { keys: ['auflauf', 'kartoffelauflauf', 'nudelauflauf', 'gratin', 'zapiekanka'], nameDe: 'Überbackener Auflauf / Gratin (Portion)', namePl: 'Zapiekanka (Porcja)', unitG: 350, isPiece: true, p: 9.5, c: 14.0, f: 8.5, sugar: 2.5, fiber: 2.2, vitC: 12, mag: 28 },
+      // Everyday Composite Dishes & User-Requested Classics (Strictly PER 100g!)
+      { keys: ['lasagne', 'lasagna', 'lasagne bolognese', 'lazania'], nameDe: 'Lasagne Bolognese', namePl: 'Lazania Bolognese', unitG: 350, isPiece: true, p: 8.5, c: 14.0, f: 7.5, sugar: 2.0, fiber: 1.2, vitC: 3, mag: 18 },
+      { keys: ['mieso wieprzowe w sosie', 'mięso wieprzowe w sosie', 'wieprzowina w sosie', 'schweinefleisch in sosse', 'schweinefleisch in soße', 'schweinebraten mit sosse', 'schweinebraten mit soße'], nameDe: 'Schweinefleisch in Soße', namePl: 'Mięso wieprzowe w sosie', unitG: 250, isPiece: true, p: 14.5, c: 2.8, f: 8.2, sugar: 0.8, fiber: 0.4, vitC: 1, mag: 20 },
+      { keys: ['gulasch', 'gulasz', 'rinderschmorfleisch', 'wolowina w sosie', 'wołowina w sosie'], nameDe: 'Gulasch (Rind/Schwein)', namePl: 'Gulasz', unitG: 300, isPiece: true, p: 13.5, c: 3.2, f: 6.5, sugar: 1.0, fiber: 0.6, vitC: 4, mag: 22 },
+      { keys: ['schnitzel', 'panierter schnitzel', 'paniertes schnitzel', 'kotlet schabowy', 'schabowy'], nameDe: 'Paniertes Schnitzel', namePl: 'Kotlet schabowy', unitG: 180, isPiece: true, p: 18.0, c: 9.5, f: 11.5, sugar: 0.5, fiber: 0.6, vitC: 0, mag: 22 },
+      { keys: ['frikadelle', 'bulette', 'fleischpflanzerl', 'kotlet mielony', 'mielony'], nameDe: 'Frikadelle / Bulette', namePl: 'Kotlet mielony', unitG: 120, isPiece: true, p: 15.5, c: 5.5, f: 15.5, sugar: 0.6, fiber: 0.5, vitC: 1, mag: 16 },
+      { keys: ['pierogi', 'pierogi ruskie', 'pierogi z miesem', 'pierogi z mięsem', 'pirogen'], nameDe: 'Pierogi / Piroggen', namePl: 'Pierogi', unitG: 250, isPiece: true, p: 6.5, c: 24.0, f: 5.5, sugar: 1.2, fiber: 1.5, vitC: 2, mag: 18 },
+      { keys: ['bigos', 'schmorkraut'], nameDe: 'Bigos (Sauerkrauteintopf)', namePl: 'Bigos staropolski', unitG: 300, isPiece: true, p: 6.8, c: 3.5, f: 7.0, sugar: 1.8, fiber: 2.2, vitC: 14, mag: 16 },
+      { keys: ['spaghetti bolognese', 'pasta bolognese', 'spaghetti z sosem', 'makaron bolognese'], nameDe: 'Spaghetti Bolognese', namePl: 'Spaghetti Bolognese', unitG: 350, isPiece: true, p: 7.2, c: 16.5, f: 4.8, sugar: 2.2, fiber: 1.4, vitC: 4, mag: 18 },
+      { keys: ['pommes', 'pommes frites', 'frytki'], nameDe: 'Pommes Frites', namePl: 'Frytki', unitG: 150, isPiece: true, p: 3.4, c: 34.0, f: 14.0, sugar: 0.4, fiber: 3.0, vitC: 6, mag: 24 },
+      { keys: ['currywurst', 'currywurst mit sosse', 'currywurst mit soße'], nameDe: 'Currywurst mit Soße', namePl: 'Kiełbaska Currywurst', unitG: 180, isPiece: true, p: 11.5, c: 8.5, f: 20.0, sugar: 6.5, fiber: 0.6, vitC: 2, mag: 14 },
+      { keys: ['auflauf', 'kartoffelauflauf', 'nudelauflauf', 'gratin', 'zapiekanka'], nameDe: 'Überbackener Auflauf / Gratin', namePl: 'Zapiekanka', unitG: 350, isPiece: true, p: 9.5, c: 14.0, f: 8.5, sugar: 2.5, fiber: 2.2, vitC: 12, mag: 28 },
       { keys: ['döner', 'doener', 'döner kebab', 'kebab'], nameDe: 'Döner Kebab', namePl: 'Kebab', unitG: 350, isPiece: true, p: 8.8, c: 17.5, f: 8.2, sugar: 2.8, fiber: 1.8, vitC: 8, mag: 22 },
       { keys: ['pizza margherita', 'pizza salami', 'pizza'], nameDe: 'Pizza (Standardgröße)', namePl: 'Pizza klasyczna', unitG: 380, isPiece: true, p: 10.5, c: 29.0, f: 9.8, sugar: 3.2, fiber: 2.1, vitC: 4, mag: 20 },
       { keys: ['burger', 'cheeseburger', 'hamburger'], nameDe: 'Burger / Cheeseburger', namePl: 'Burger / Cheeseburger', unitG: 220, isPiece: true, p: 13.5, c: 22.0, f: 12.5, sugar: 4.5, fiber: 1.8, vitC: 2, mag: 20 },
 
-      // Beverages
+      // Beverages (PER 100ml)
       { keys: ['schwarzer kaffee', 'kaffee schwarz', 'kaffee', 'espresso', 'americano', 'czarna kawa', 'kawa bez mleka', 'kawa'], nameDe: 'Schwarzer Kaffee', namePl: 'Czarna kawa', unitG: 250, p: 0.3, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 7, zeroCal: true },
       { keys: ['kaffee mit milch', 'kaffee+milch', 'milchkaffee', 'cappuccino', 'latte macchiato', 'kawa z mlekiem'], nameDe: 'Kaffee mit Milch / Cappuccino', namePl: 'Kawa z mlekiem', unitG: 250, p: 1.5, c: 2.2, f: 1.3, sugar: 2.2, fiber: 0, vitC: 0, mag: 6 },
       { keys: ['grüner tee', 'schwarzer tee', 'kräutertee', 'tee', 'zielona herbata', 'czarna herbata', 'herbata'], nameDe: 'Ungesüßter Tee', namePl: 'Herbata bez cukru', unitG: 250, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 2, zeroCal: true },
@@ -2406,7 +2451,7 @@
       { keys: ['cola zero', 'pepsi max', 'zero limo', 'erfrischungsgetraenk zero', 'cola light'], nameDe: 'Zero-Erfrischungsgetränk / Cola Zero', namePl: 'Napój Zero / Cola Zero', unitG: 330, p: 0, c: 0, f: 0, sugar: 0, fiber: 0, vitC: 0, mag: 0, zeroCal: true },
       { keys: ['apfelschorle', 'apfelsaftschorle', 'schorle'], nameDe: 'Apfelschorle (60% Fruchtgehalt)', namePl: 'Napój jabłkowy gazowany', unitG: 500, p: 0.1, c: 6.0, f: 0.1, sugar: 5.8, fiber: 0.1, vitC: 2, mag: 4 },
 
-      // Dairy, Eggs & Protein Staples
+      // Dairy, Eggs & Protein Staples (PER 100g)
       { keys: ['magerquark', 'quark', 'speisequark', 'twarog chudy', 'twaróg chudy', 'twarog', 'twaróg'], nameDe: 'Magerquark', namePl: 'Twaróg chudy', unitG: 250, p: 12.0, c: 4.0, f: 0.3, sugar: 4.0, fiber: 0, vitC: 1, mag: 11 },
       { keys: ['skyr', 'skyr natur', 'skyr naturalny'], nameDe: 'Skyr Natur', namePl: 'Skyr naturalny', unitG: 200, p: 11.0, c: 4.0, f: 0.2, sugar: 4.0, fiber: 0, vitC: 1, mag: 12 },
       { keys: ['hüttenkäse', 'huttenkase', 'körniger frischkäse', 'korniger frischkase', 'serek wiejski', 'cottage cheese'], nameDe: 'Körniger Frischkäse (Hüttenkäse)', namePl: 'Serek wiejski', unitG: 200, p: 12.5, c: 2.8, f: 4.0, sugar: 2.5, fiber: 0, vitC: 0, mag: 9 },
@@ -2420,7 +2465,7 @@
       { keys: ['milch', 'vollmilch', 'fettarme milch', 'mleko'], nameDe: 'Kuhmilch', namePl: 'Mleko', unitG: 200, p: 3.4, c: 4.8, f: 2.0, sugar: 4.8, fiber: 0, vitC: 1, mag: 12 },
       { keys: ['hafermilch', 'haferdrink', 'mleko owsiane'], nameDe: 'Haferdrink', namePl: 'Napój owsiany', unitG: 200, p: 0.8, c: 6.8, f: 1.5, sugar: 4.0, fiber: 0.8, vitC: 0, mag: 6 },
 
-      // Meat, Poultry & Fish
+      // Meat, Poultry & Fish (PER 100g)
       { keys: ['hähnchenbrust', 'hahnchenbrust', 'hähnchen', 'hahnchen', 'putenbrust', 'pute', 'hühnchen', 'huhnchen', 'kurczak', 'piers z kurczaka', 'pierś z kurczaka', 'indyk'], nameDe: 'Hähnchenbrustfilet (gegart)', namePl: 'Pierś z kurczaka', unitG: 180, p: 29.5, c: 0, f: 2.5, sugar: 0, fiber: 0, vitC: 0, mag: 32 },
       { keys: ['rinderhack', 'hackfleisch', 'tatar', 'rinderfilet', 'rumpsteak', 'rindfleisch', 'steak', 'wolowina', 'wołowina'], nameDe: 'Rindfleisch / Rumpsteak', namePl: 'Wołowina / Stek wołowy', unitG: 180, p: 25.0, c: 0, f: 9.5, sugar: 0, fiber: 0, vitC: 0, mag: 24 },
       { keys: ['lachs', 'lachsfilet', 'räucherlachs', 'raucherlachs', 'losos', 'łosoś'], nameDe: 'Lachsfilet', namePl: 'Filet z łososia', unitG: 150, p: 21.0, c: 0, f: 13.5, sugar: 0, fiber: 0, vitC: 1, mag: 29 },
@@ -2429,7 +2474,7 @@
       { keys: ['kochschinken', 'putenschinken', 'schinken', 'szynka'], nameDe: 'Magerer Schinken', namePl: 'Szynka chuda', unitG: 50, p: 20.0, c: 1.0, f: 3.0, sugar: 1.0, fiber: 0, vitC: 0, mag: 18 },
       { keys: ['tofu', 'räuchertofu', 'rauchertofu'], nameDe: 'Tofu Natur / Räuchertofu', namePl: 'Tofu', unitG: 150, p: 15.5, c: 1.8, f: 8.5, sugar: 0.6, fiber: 1.5, vitC: 0, mag: 45 },
 
-      // Carbs, Grains, Bread & Potatoes
+      // Carbs, Grains, Bread & Potatoes (PER 100g)
       { keys: ['haferflocken', 'porridge', 'oatmeal', 'platki owsiane', 'płatki owsiane', 'owsianka'], nameDe: 'Haferflocken', namePl: 'Płatki owsiane', unitG: 60, p: 13.5, c: 58.7, f: 7.0, sugar: 0.8, fiber: 10.0, vitC: 0, mag: 130 },
       { keys: ['reis', 'basmatireis', 'jasminreis', 'ryz', 'ryż'], nameDe: 'Reis (gekocht)', namePl: 'Ryż ugotowany', unitG: 180, p: 2.8, c: 28.0, f: 0.3, sugar: 0.1, fiber: 0.8, vitC: 0, mag: 13 },
       { keys: ['nudeln', 'pasta', 'spaghetti', 'vollkornnudeln', 'makaron'], nameDe: 'Pasta / Nudeln (gekocht)', namePl: 'Makaron ugotowany', unitG: 200, p: 5.5, c: 30.0, f: 0.9, sugar: 0.6, fiber: 2.2, vitC: 0, mag: 18 },
@@ -2441,7 +2486,7 @@
       { keys: ['reiswaffel', 'reiswaffeln', 'wafle ryzowe', 'wafle ryżowe'], nameDe: 'Reiswaffel', namePl: 'Wafel ryżowy', unitG: 10, isPiece: true, p: 8.0, c: 81.0, f: 2.8, sugar: 0.5, fiber: 3.5, vitC: 0, mag: 110 },
       { keys: ['linsen', 'rote linsen', 'kichererbsen', 'bohnen', 'kidneybohnen', 'soczewica', 'ciecierzyca', 'fasola'], nameDe: 'Hülsenfrüchte / Linsen (gegart)', namePl: 'Soczewica / Ciecierzyca gotowana', unitG: 180, p: 9.0, c: 17.5, f: 0.8, sugar: 1.2, fiber: 7.5, vitC: 2, mag: 36 },
 
-      // Fruits
+      // Fruits (PER 100g)
       { keys: ['apfel', 'äpfel', 'apfel', 'ein apfel', '1 apfel', 'jablko', 'jabłko', 'jablka', 'jabłka'], nameDe: 'Apfel (mittelgroß)', namePl: 'Jabłko', unitG: 150, isPiece: true, p: 0.3, c: 11.4, f: 0.2, sugar: 10.3, fiber: 2.4, vitC: 12, mag: 5 },
       { keys: ['banane', 'bananen', 'eine banane', '1 banane', 'banan', 'banany'], nameDe: 'Banane (mittelgroß)', namePl: 'Banan', unitG: 120, isPiece: true, p: 1.1, c: 20.0, f: 0.2, sugar: 14.5, fiber: 2.6, vitC: 10, mag: 28 },
       { keys: ['beeren', 'blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'borowki', 'borówki', 'truskawki', 'maliny'], nameDe: 'Beeren-Mix (Heidel-/Erd-/Himbeeren)', namePl: 'Owoce jagodowe', unitG: 125, p: 0.9, c: 7.5, f: 0.4, sugar: 6.2, fiber: 3.5, vitC: 45, mag: 12 },
@@ -2449,7 +2494,7 @@
       { keys: ['birne', 'gruszka'], nameDe: 'Birne', namePl: 'Gruszka', unitG: 160, isPiece: true, p: 0.5, c: 12.4, f: 0.3, sugar: 9.8, fiber: 2.8, vitC: 5, mag: 7 },
       { keys: ['weintrauben', 'trauben', 'winogrona'], nameDe: 'Weintrauben', namePl: 'Winogrona', unitG: 125, p: 0.7, c: 15.6, f: 0.2, sugar: 15.2, fiber: 1.5, vitC: 4, mag: 7 },
 
-      // Vegetables & Salads
+      // Vegetables & Salads (PER 100g)
       { keys: ['brokkoli', 'blumenkohl', 'brokuly', 'brokuły', 'kalafior'], nameDe: 'Brokkoli / Blumenkohl', namePl: 'Brokuły / Kalafior', unitG: 200, p: 3.2, c: 2.8, f: 0.3, sugar: 1.8, fiber: 3.0, vitC: 65, mag: 22 },
       { keys: ['spinat', 'blattspinat', 'szpinak'], nameDe: 'Spinat', namePl: 'Szpinak', unitG: 150, p: 2.9, c: 0.8, f: 0.4, sugar: 0.4, fiber: 2.5, vitC: 35, mag: 62 },
       { keys: ['tomate', 'tomaten', 'cherrytomaten', 'pomidor', 'pomidory'], nameDe: 'Tomaten', namePl: 'Pomidory', unitG: 150, p: 0.9, c: 2.6, f: 0.2, sugar: 2.5, fiber: 1.2, vitC: 18, mag: 11 },
@@ -2457,7 +2502,7 @@
       { keys: ['paprika', 'rote paprika', 'papryka'], nameDe: 'Paprika', namePl: 'Papryka', unitG: 150, isPiece: true, p: 1.1, c: 6.0, f: 0.3, sugar: 4.5, fiber: 2.1, vitC: 120, mag: 13 },
       { keys: ['salat', 'beilagensalat', 'gemischter salat', 'salatka', 'sałatka'], nameDe: 'Gemischter Salat', namePl: 'Sałatka mieszana', unitG: 200, p: 1.8, c: 4.5, f: 3.5, sugar: 2.8, fiber: 2.5, vitC: 28, mag: 18 },
 
-      // Fats, Nuts & Oils
+      // Fats, Nuts & Oils (PER 100g)
       { keys: ['avocado', 'awokado'], nameDe: 'Avocado', namePl: 'Awokado', unitG: 100, isPiece: true, p: 2.0, c: 1.8, f: 15.0, sugar: 0.7, fiber: 6.7, vitC: 10, mag: 29 },
       { keys: ['mandeln', 'walnüsse', 'walnusse', 'cashews', 'nüsse', 'nusse', 'erdnüsse', 'erdnusse', 'migdaly', 'migdały', 'orzechy'], nameDe: 'Nüsse / Mandeln (Handvoll)', namePl: 'Orzechy / Migdały', unitG: 30, p: 20.0, c: 6.5, f: 53.0, sugar: 4.0, fiber: 10.5, vitC: 0, mag: 220 },
       { keys: ['erdnussbutter', 'erdnussmus', 'maslo orzechowe', 'masło orzechowe'], nameDe: 'Erdnussmus', namePl: 'Masło orzechowe', unitG: 20, p: 26.0, c: 11.0, f: 50.0, sugar: 4.5, fiber: 7.5, vitC: 0, mag: 160 },
@@ -2625,14 +2670,12 @@
       };
     }
 
-    // Universal Deterministic Offline-Fallback Estimator for Unrecognized Text Inputs
     function estimateGeneralMealOffline(rawText) {
       const clean = (rawText || 'Mahlzeit').trim();
       const gramsMatch = clean.match(/(\d+)\s*(g|ml)\b/i);
       const grams = gramsMatch ? Math.max(50, Math.min(1000, parseInt(gramsMatch[1], 10))) : 300;
       const factor = grams / 100;
 
-      // Realistic warm dinner macro average (~135 kcal / 100g)
       const p = Math.round(10 * factor);
       const c = Math.round(13 * factor);
       const f = Math.round(5 * factor);
@@ -2777,7 +2820,6 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
 
         renderMealPreview(pendingMealEntry);
       } catch (err) {
-        // Safe Offline fallback for pure text queries if network or API quota dropped
         if (userText) {
           const fallbackMatch = resolveFromLexicon(userText) || estimateGeneralMealOffline(userText);
           pendingMealEntry = fallbackMatch;
@@ -3533,12 +3575,13 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
     }
 
     // =========================================================================
-    // 13. MIFFLIN-ST JEOR SCIENTIFIC CALCULATOR & LIFECYCLE HOOKS
+    // 13. MIFFLIN-ST JEOR CALCULATOR (WITH TARGET WEIGHT REFERENCE!)
     // =========================================================================
     function calculateAndSaveProfile() {
       const gender = document.getElementById('profGender').value || 'female';
       const age = Math.max(14, Math.min(100, Number(document.getElementById('profAge').value) || 30));
       const weight = Math.max(35, Math.min(250, Number(document.getElementById('profWeight').value) || 70));
+      const targetWeight = Math.max(35, Math.min(250, Number(document.getElementById('profTargetWeight').value) || weight));
       const height = Math.max(120, Math.min(230, Number(document.getElementById('profHeight').value) || 170));
       const activity = Number(document.getElementById('profActivity').value) || 1.375;
       const goalType = Number(document.getElementById('profGoalType').value) || -500;
@@ -3551,25 +3594,30 @@ Gib AUSSCHLIESSLICH valides JSON zurück:
       const tdee = Math.round(bmr * activity);
       const targetKcal = Math.max(1200, tdee + goalType);
 
-      const protG = Math.round(weight * 2.0);
-      const fatG = Math.round(weight * 0.9);
+      // Use Target Weight as physiological reference when losing weight so protein/fat are not over-inflated
+      const effectiveRefWeight = targetWeight < weight
+        ? Math.round(targetWeight + (weight - targetWeight) * 0.25)
+        : weight;
+
+      const protG = Math.round(effectiveRefWeight * 2.0);
+      const fatG = Math.round(effectiveRefWeight * 0.85);
       const remainingKcal = Math.max(0, targetKcal - (protG * 4 + fatG * 9));
       const carbsG = dietMode === 'lowcarb'
         ? Math.min(80, Math.round(remainingKcal / 4))
         : Math.round(remainingKcal / 4);
 
-      state.profile = { gender, age, weight, height, activity, goalType, dietMode };
+      state.profile = { gender, age, weight, targetWeight, height, activity, goalType, dietMode };
       state.goal = targetKcal;
       state.protGoal = protG;
       state.carbsGoal = carbsG;
       state.fatGoal = fatG;
-      state.waterGoal = Math.round(weight * 35);
+      state.waterGoal = Math.min(4000, Math.max(2000, Math.round(effectiveRefWeight * 35)));
 
       saveState();
       syncProfileInputs();
       renderDashboard();
       updateMenuMacroContextUI();
-      showToast(`Berechnet: ${targetKcal} kcal (P: ${protG}g, C: ${carbsG}g, F: ${fatG}g)`, 'success');
+      showToast(`Gespeichert (Ziel ${targetWeight}kg): ${targetKcal} kcal | P: ${protG}g | C: ${carbsG}g | F: ${fatG}g`, 'success');
     }
 
     function saveManualMacros() {
