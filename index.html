@@ -1684,9 +1684,75 @@
       showToast('API-Key wurde entfernt.', 'info');
     }
 
+// =========================================================================
+    // 4. SANITIZED CAMERA ENGINE (SYNCHRONOUS CANVAS & WEBKIT GPU ISOLATION)
     // =========================================================================
-    // 4. SANITIZED CAMERA ENGINE WITH ZERO-LEAK CANVAS GPU RAM ACQUISITION
-    // =========================================================================
+    let visionWatchdogTimer = null;
+
+    function armVisionWatchdog() {
+      if (visionWatchdogTimer) clearTimeout(visionWatchdogTimer);
+      visionWatchdogTimer = setTimeout(() => {
+        isVisionBusy = false;
+        ['mealLoading', 'fridgeLoading', 'menuLoading', 'potLoading', 'zaubernLoading'].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add('hidden');
+        });
+        ['analyzeMealBtn', 'runFridgeBtn', 'runMenuBtn', 'runPotBtn', 'runZaubernBtn'].forEach((id) => {
+          const btn = document.getElementById(id);
+          if (btn) btn.disabled = false;
+        });
+      }, 15000);
+    }
+
+    function disarmVisionWatchdog() {
+      if (visionWatchdogTimer) {
+        clearTimeout(visionWatchdogTimer);
+        visionWatchdogTimer = null;
+      }
+      isVisionBusy = false;
+    }
+
+    function renderImageToJpegBase64(imgElement, maxDim, quality) {
+      let width = imgElement.naturalWidth || imgElement.width || 800;
+      let height = imgElement.naturalHeight || imgElement.height || 800;
+
+      if (width > maxDim || height > maxDim) {
+        if (width >= height) {
+          height = Math.max(1, Math.round((height * maxDim) / width));
+          width = maxDim;
+        } else {
+          width = Math.max(1, Math.round((width * maxDim) / height));
+          height = maxDim;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      // STEP 1: Queue GPU draw command while source texture is alive
+      ctx.drawImage(imgElement, 0, 0, width, height);
+
+      // STEP 2: Force synchronous GPU command buffer flush & JPEG encoding BEFORE revoking URL
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+      // STEP 3: Deterministically zero out WebKit CoreGraphics GPU RAM buffer
+      ctx.clearRect(0, 0, width, height);
+      canvas.width = 0;
+      canvas.height = 0;
+
+      const base64Clean = dataUrl.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
+      if (!base64Clean || base64Clean.length < 50) {
+        throw new Error('Bild-Kodierung lieferte keinen gültigen Datenstrom.');
+      }
+
+      return { dataUrl, base64: base64Clean };
+    }
+
     function compressImageFile(file, mode = 'standard') {
       return new Promise((resolve, reject) => {
         if (!file) {
@@ -1694,105 +1760,105 @@
           return;
         }
 
-        let maxDim = 800;
-        let quality = 0.76;
-        if (mode === 'menu' || mode === 'label') {
-          maxDim = 1080;
-          quality = 0.78;
-        }
+        const maxDim = (mode === 'menu' || mode === 'label') ? 1080 : 800;
+        const quality = (mode === 'menu' || mode === 'label') ? 0.78 : 0.76;
 
-        const objectUrl = URL.createObjectURL(file);
-        const img = new Image();
+        let settled = false;
+        let objectUrl = null;
 
-        img.onload = async () => {
-          try {
-            if (typeof img.decode === 'function') {
-              await img.decode().catch(() => {});
-            }
-
-            let width = img.naturalWidth || img.width || 800;
-            let height = img.naturalHeight || img.height || 800;
-
-            if (width > maxDim || height > maxDim) {
-              if (width >= height) {
-                height = Math.max(1, Math.round((height * maxDim) / width));
-                width = maxDim;
-              } else {
-                width = Math.max(1, Math.round((width * maxDim) / height));
-                height = maxDim;
-              }
-            }
-
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, 0, 0, width, height);
-
-            URL.revokeObjectURL(objectUrl);
-
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-
-            // Zero-out Canvas GPU buffer on iOS WebKit
-            ctx.clearRect(0, 0, width, height);
-            canvas.width = 0;
-            canvas.height = 0;
-            img.src = '';
-
-            const base64Clean = dataUrl.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
-            if (!base64Clean || base64Clean.length < 50) {
-              reject(new Error('Bild-Komprimierung lieferte leere Daten.'));
-              return;
-            }
-            resolve({ dataUrl, base64: base64Clean });
-          } catch (err) {
-            URL.revokeObjectURL(objectUrl);
-            reject(err);
+        const loadTimer = setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          if (objectUrl) {
+            try { URL.revokeObjectURL(objectUrl); } catch (_) {}
           }
-        };
+          reject(new Error('Zeitüberschreitung beim Laden der Bilddatei.'));
+        }, 8000);
 
-        img.onerror = () => {
-          URL.revokeObjectURL(objectUrl);
+        const runFileReaderFallback = () => {
           const reader = new FileReader();
-          reader.onload = async (e) => {
-            try {
-              const fallbackImg = new Image();
-              fallbackImg.onload = async () => {
-                if (typeof fallbackImg.decode === 'function') {
-                  await fallbackImg.decode().catch(() => {});
-                }
-                const canvas = document.createElement('canvas');
-                let w = fallbackImg.naturalWidth || 800;
-                let h = fallbackImg.naturalHeight || 800;
-                if (w > maxDim || h > maxDim) {
-                  if (w >= h) { h = Math.round((h * maxDim) / w); w = maxDim; }
-                  else { w = Math.round((w * maxDim) / h); h = maxDim; }
-                }
-                canvas.width = w;
-                canvas.height = h;
-                const c = canvas.getContext('2d');
-                c.drawImage(fallbackImg, 0, 0, w, h);
-                const dUrl = canvas.toDataURL('image/jpeg', quality);
-                c.clearRect(0, 0, w, h);
-                canvas.width = 0;
-                canvas.height = 0;
-                fallbackImg.src = '';
-                resolve({ dataUrl: dUrl, base64: dUrl.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '') });
-              };
-              fallbackImg.onerror = () => reject(new Error('Bild konnte nicht dekodiert werden.'));
-              fallbackImg.src = e.target.result;
-            } catch (fbErr) {
-              reject(fbErr);
-            }
+          reader.onload = (e) => {
+            if (settled) return;
+            const fbImg = new Image();
+            fbImg.onload = () => {
+              if (settled) return;
+              settled = true;
+              clearTimeout(loadTimer);
+              fbImg.onload = null;
+              fbImg.onerror = null;
+              try {
+                const result = renderImageToJpegBase64(fbImg, maxDim, quality);
+                fbImg.removeAttribute('src');
+                resolve(result);
+              } catch (err) {
+                reject(err);
+              }
+            };
+            fbImg.onerror = () => {
+              if (settled) return;
+              settled = true;
+              clearTimeout(loadTimer);
+              fbImg.onload = null;
+              fbImg.onerror = null;
+              reject(new Error('Bilddatei konnte nicht dekodiert werden.'));
+            };
+            fbImg.src = e.target.result;
           };
-          reader.onerror = () => reject(new Error('Datei-Lesezugriff fehlgeschlagen.'));
+          reader.onerror = () => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(loadTimer);
+            reject(new Error('Dateizugriff fehlgeschlagen.'));
+          };
           reader.readAsDataURL(file);
         };
 
-        img.src = objectUrl;
+        try {
+          objectUrl = URL.createObjectURL(file);
+          const img = new Image();
+
+          // Pure synchronous onload execution (Zero async/await suspension race)
+          img.onload = () => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(loadTimer);
+
+            // Detach listeners FIRST to prevent false onerror trigger during cleanup
+            img.onload = null;
+            img.onerror = null;
+
+            try {
+              const result = renderImageToJpegBase64(img, maxDim, quality);
+              // Revoke ObjectURL ONLY AFTER canvas.toDataURL has flushed GPU pixels
+              URL.revokeObjectURL(objectUrl);
+              img.removeAttribute('src');
+              resolve(result);
+            } catch (drawErr) {
+              URL.revokeObjectURL(objectUrl);
+              img.removeAttribute('src');
+              reject(drawErr);
+            }
+          };
+
+          img.onerror = () => {
+            img.onload = null;
+            img.onerror = null;
+            if (objectUrl) {
+              try { URL.revokeObjectURL(objectUrl); } catch (_) {}
+              objectUrl = null;
+            }
+            if (!settled) {
+              runFileReaderFallback();
+            }
+          };
+
+          img.src = objectUrl;
+        } catch (_) {
+          if (objectUrl) {
+            try { URL.revokeObjectURL(objectUrl); } catch (_) {}
+          }
+          runFileReaderFallback();
+        }
       });
     }
 
@@ -1801,30 +1867,30 @@
       const file = inputEl && inputEl.files && inputEl.files[0];
       if (!file) return;
 
+      // Reset file input immediately so selecting the same image again always fires onchange
       if (isVisionBusy) {
-        showToast('Eine Analyse läuft bereits. Bitte kurz warten...', 'info');
         inputEl.value = '';
+        showToast('Eine Analyse läuft bereits. Bitte kurz warten...', 'info');
         return;
       }
 
-      isVisionBusy = true;
-
       try {
         const res = await compressImageFile(file, 'label');
+        inputEl.value = '';
+
         currentMealImageBase64 = res.base64;
         const preview = document.getElementById('mealPhotoPreview');
         const container = document.getElementById('mealPhotoPreviewContainer');
         if (preview) preview.src = res.dataUrl;
         if (container) container.classList.remove('hidden');
 
-        inputEl.value = '';
-        showToast('Foto geladen — starte Turbo-Scan...', 'info');
+        showToast('Foto bereit — starte Turbo-Scan...', 'info');
         if (typeof analyzeMeal === 'function') {
-          setTimeout(() => analyzeMeal(true), 40);
+          await analyzeMeal(false);
         }
       } catch (err) {
-        isVisionBusy = false;
         inputEl.value = '';
+        disarmVisionWatchdog();
         showToast(err.message || 'Fehler beim Laden des Fotos.', 'error');
       }
     }
@@ -1833,7 +1899,9 @@
       currentMealImageBase64 = null;
       const input = document.getElementById('mealPhotoInput');
       const container = document.getElementById('mealPhotoPreviewContainer');
+      const preview = document.getElementById('mealPhotoPreview');
       if (input) input.value = '';
+      if (preview) preview.removeAttribute('src');
       if (container) container.classList.add('hidden');
     }
 
@@ -1843,29 +1911,28 @@
       if (!file) return;
 
       if (isVisionBusy) {
-        showToast('Eine Analyse läuft bereits...', 'info');
         inputEl.value = '';
+        showToast('Eine Analyse läuft bereits...', 'info');
         return;
       }
 
-      isVisionBusy = true;
-
       try {
         const res = await compressImageFile(file, 'standard');
+        inputEl.value = '';
+
         currentFridgeImageBase64 = res.base64;
         const preview = document.getElementById('fridgePhotoPreview');
         const container = document.getElementById('fridgePhotoPreviewContainer');
         if (preview) preview.src = res.dataUrl;
         if (container) container.classList.remove('hidden');
-        inputEl.value = '';
 
-        showToast('Kühlschrank-Foto geladen — starte Smart Expiry Guard...', 'info');
+        showToast('Kühlschrank-Foto bereit — starte Smart Expiry Guard...', 'info');
         if (typeof runFridgeLeftoverAI === 'function') {
-          setTimeout(() => runFridgeLeftoverAI(true), 40);
+          await runFridgeLeftoverAI(false);
         }
       } catch (err) {
-        isVisionBusy = false;
         inputEl.value = '';
+        disarmVisionWatchdog();
         showToast(err.message || 'Fehler beim Laden des Fotos.', 'error');
       }
     }
@@ -1874,7 +1941,9 @@
       currentFridgeImageBase64 = null;
       const input = document.getElementById('fridgePhotoInput');
       const container = document.getElementById('fridgePhotoPreviewContainer');
+      const preview = document.getElementById('fridgePhotoPreview');
       if (input) input.value = '';
+      if (preview) preview.removeAttribute('src');
       if (container) container.classList.add('hidden');
     }
 
@@ -1884,29 +1953,28 @@
       if (!file) return;
 
       if (isVisionBusy) {
-        showToast('Eine Analyse läuft bereits...', 'info');
         inputEl.value = '';
+        showToast('Eine Analyse läuft bereits...', 'info');
         return;
       }
 
-      isVisionBusy = true;
-
       try {
         const res = await compressImageFile(file, 'menu');
+        inputEl.value = '';
+
         currentMenuImageBase64 = res.base64;
         const preview = document.getElementById('menuPhotoPreview');
         const container = document.getElementById('menuPhotoPreviewContainer');
         if (preview) preview.src = res.dataUrl;
         if (container) container.classList.remove('hidden');
-        inputEl.value = '';
 
-        showToast('Speisekarte geladen — starte Makro-Abgleich...', 'info');
+        showToast('Speisekarte bereit — starte Makro-Abgleich...', 'info');
         if (typeof runMenuScannerAI === 'function') {
-          setTimeout(() => runMenuScannerAI(true), 40);
+          await runMenuScannerAI(false);
         }
       } catch (err) {
-        isVisionBusy = false;
         inputEl.value = '';
+        disarmVisionWatchdog();
         showToast(err.message || 'Fehler beim Laden des Fotos.', 'error');
       }
     }
@@ -1915,7 +1983,9 @@
       currentMenuImageBase64 = null;
       const input = document.getElementById('menuPhotoInput');
       const container = document.getElementById('menuPhotoPreviewContainer');
+      const preview = document.getElementById('menuPhotoPreview');
       if (input) input.value = '';
+      if (preview) preview.removeAttribute('src');
       if (container) container.classList.add('hidden');
     }
 
@@ -1925,29 +1995,28 @@
       if (!file) return;
 
       if (isVisionBusy) {
-        showToast('Eine Analyse läuft bereits...', 'info');
         inputEl.value = '';
+        showToast('Eine Analyse läuft bereits...', 'info');
         return;
       }
 
-      isVisionBusy = true;
-
       try {
         const res = await compressImageFile(file, 'standard');
+        inputEl.value = '';
+
         currentPotImageBase64 = res.base64;
         const preview = document.getElementById('potPhotoPreview');
         const container = document.getElementById('potPhotoPreviewContainer');
         if (preview) preview.src = res.dataUrl;
         if (container) container.classList.remove('hidden');
-        inputEl.value = '';
 
-        showToast('Topf-/Auflauf-Foto geladen — berechne Portionsanteil...', 'info');
+        showToast('Topf-/Auflauf-Foto bereit — berechne Portionsanteil...', 'info');
         if (typeof runPotCalculatorAI === 'function') {
-          setTimeout(() => runPotCalculatorAI(true), 40);
+          await runPotCalculatorAI(false);
         }
       } catch (err) {
-        isVisionBusy = false;
         inputEl.value = '';
+        disarmVisionWatchdog();
         showToast(err.message || 'Fehler beim Laden des Fotos.', 'error');
       }
     }
@@ -1956,7 +2025,9 @@
       currentPotImageBase64 = null;
       const input = document.getElementById('potPhotoInput');
       const container = document.getElementById('potPhotoPreviewContainer');
+      const preview = document.getElementById('potPhotoPreview');
       if (input) input.value = '';
+      if (preview) preview.removeAttribute('src');
       if (container) container.classList.add('hidden');
     }
 
@@ -2023,9 +2094,8 @@
     }
 
     // =========================================================================
-    // 6. LIVE-DISCOVERED MULTI-QUOTA QUEUE & ERROR-RESILIENT ENGINE
+    // 6. ISOLATED ABORT-CONTROLLER PIPELINE & CACHED MODEL ROUTING ENGINE
     // =========================================================================
-    // Fallback queue of verified models that exist on current Google AI Studio keys
     const VERIFIED_FALLBACK_QUEUE = [
       'gemini-2.5-flash',
       'gemini-2.5-flash-lite',
@@ -2035,15 +2105,47 @@
       'gemma-3-27b-it'
     ];
 
+    // In-memory cache so model discovery runs at most ONCE per session and never blocks scans
+    let cachedLiveModelsList = null;
+    let cachedLiveModelsKey = '';
+
+    // Isolated AbortController wrapper: creates a fresh controller per HTTP call & guarantees cleanup
+    async function fetchWithIsolatedSignal(url, options = {}, timeoutMs = 10000) {
+      const controller = new AbortController();
+      const timerId = setTimeout(() => {
+        try { controller.abort(); } catch (_) {}
+      }, timeoutMs);
+
+      try {
+        const response = await fetch(url, Object.assign({}, options, { signal: controller.signal }));
+        const rawText = await response.text();
+        return {
+          ok: response.ok,
+          status: response.status,
+          text: rawText
+        };
+      } finally {
+        clearTimeout(timerId);
+      }
+    }
+
     async function fetchLiveSupportedModels(apiKey) {
       if (!apiKey || apiKey.length < 15) return [];
+      if (cachedLiveModelsList && cachedLiveModelsKey === apiKey && cachedLiveModelsList.length > 0) {
+        return cachedLiveModelsList;
+      }
+
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
-        if (!res.ok) return [];
-        const data = await res.json();
+        const res = await fetchWithIsolatedSignal(
+          `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
+          { method: 'GET' },
+          3500
+        );
+        if (!res.ok || !res.text) return [];
+        const data = JSON.parse(res.text);
         if (!data || !Array.isArray(data.models)) return [];
 
-        return data.models
+        const discovered = data.models
           .filter((m) =>
             m &&
             typeof m.name === 'string' &&
@@ -2052,6 +2154,12 @@
             !/embedding|imagen|veo|aqa|tts|audio/i.test(m.name)
           )
           .map((m) => m.name.replace(/^models\//, ''));
+
+        if (discovered.length > 0) {
+          cachedLiveModelsList = discovered;
+          cachedLiveModelsKey = apiKey;
+        }
+        return discovered;
       } catch (_) {
         return [];
       }
@@ -2059,40 +2167,27 @@
 
     async function buildLiveResilientQueue(apiKey) {
       const queue = [];
-      const cached = (localStorage.getItem(FAST_MODEL_KEY) || '').trim();
-      if (cached && !/1\.5|2\.0|3\.8|gemini-flash-latest/i.test(cached)) {
-        queue.push(cached);
-      }
+      try {
+        const cached = (localStorage.getItem(FAST_MODEL_KEY) || '').trim();
+        if (cached && !/1\.5|2\.0|3\.8|gemini-flash-latest/i.test(cached)) {
+          queue.push(cached);
+        }
+      } catch (_) {}
 
-      // Proactively query Google for all models currently active on THIS key
       const liveGoogleModels = await fetchLiveSupportedModels(apiKey);
 
       if (liveGoogleModels.length > 0) {
-        // Prioritize fast 2.5 flash, then 3.x preview, then gemma/pro
-        const prioritizedOrder = [
-          'gemini-2.5-flash',
-          'gemini-2.5-flash-lite',
-          'gemini-3.1-flash-lite-preview',
-          'gemini-3-flash-preview',
-          'gemini-2.5-pro',
-          'gemma-3-27b-it',
-          'gemma-3-12b-it'
-        ];
-
-        for (const pref of prioritizedOrder) {
+        for (const pref of VERIFIED_FALLBACK_QUEUE) {
           if (liveGoogleModels.includes(pref) && !queue.includes(pref)) {
             queue.push(pref);
           }
         }
-
-        // Add any remaining multimodal models from Google as extra backups
         for (const m of liveGoogleModels) {
           if (!queue.includes(m)) {
             queue.push(m);
           }
         }
       } else {
-        // If discovery failed (e.g. network blip), use verified fallback list
         for (const fb of VERIFIED_FALLBACK_QUEUE) {
           if (!queue.includes(fb)) queue.push(fb);
         }
@@ -2104,9 +2199,6 @@
     async function executeModelCallWithTimeout(model, apiKey, contentsPayload) {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
-
       const genConfig = {
         temperature: 0.1,
         topP: 0.85,
@@ -2116,99 +2208,101 @@
         genConfig.thinkingConfig = { thinkingBudget: 0 };
       }
 
-      try {
-        let response = await fetch(endpoint, {
+      let res = await fetchWithIsolatedSignal(
+        endpoint,
+        {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: contentsPayload,
             generationConfig: genConfig
-          }),
-          signal: controller.signal
-        });
+          })
+        },
+        11000
+      );
 
-        // Instant retry without thinkingConfig if endpoint returns 400
-        if (response.status === 400 && genConfig.thinkingConfig) {
-          delete genConfig.thinkingConfig;
-          response = await fetch(endpoint, {
+      // Fresh isolated signal for 400 fallback without thinkingConfig
+      if (res.status === 400 && genConfig.thinkingConfig) {
+        delete genConfig.thinkingConfig;
+        res = await fetchWithIsolatedSignal(
+          endpoint,
+          {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: contentsPayload,
               generationConfig: genConfig
-            }),
-            signal: controller.signal
-          });
-        }
-
-        if (!response.ok) {
-          const errText = await response.text().catch(() => '');
-          const err = new Error(`HTTP ${response.status} (${model}): ${errText.slice(0, 80)}`);
-          err.status = response.status;
-          throw err;
-        }
-
-        const data = await response.json();
-        const rawParts = (data &&
-          data.candidates &&
-          data.candidates[0] &&
-          data.candidates[0].content &&
-          Array.isArray(data.candidates[0].content.parts))
-            ? data.candidates[0].content.parts
-            : [];
-
-        const cleanParts = rawParts.filter((p) => !p.thought && typeof p.text === 'string');
-        const activeParts = cleanParts.length > 0 ? cleanParts : rawParts;
-        const textOut = activeParts.map((p) => p.text || '').join('\n').trim();
-
-        if (!textOut) {
-          throw new Error(`Leere Antwort von ${model}`);
-        }
-
-        try {
-          localStorage.setItem(FAST_MODEL_KEY, model);
-        } catch (_) {}
-        const badge = document.getElementById('fastModelBadge');
-        if (badge) badge.textContent = model;
-
-        return textOut;
-      } finally {
-        clearTimeout(timeoutId);
+            })
+          },
+          11000
+        );
       }
+
+      if (!res.ok) {
+        const err = new Error(`HTTP ${res.status} (${model}): ${(res.text || '').slice(0, 80)}`);
+        err.status = res.status;
+        throw err;
+      }
+
+      const data = JSON.parse(res.text);
+      const rawParts = (data &&
+        data.candidates &&
+        data.candidates[0] &&
+        data.candidates[0].content &&
+        Array.isArray(data.candidates[0].content.parts))
+          ? data.candidates[0].content.parts
+          : [];
+
+      const cleanParts = rawParts.filter((p) => !p.thought && typeof p.text === 'string');
+      const activeParts = cleanParts.length > 0 ? cleanParts : rawParts;
+      const textOut = activeParts.map((p) => p.text || '').join('\n').trim();
+
+      if (!textOut) {
+        throw new Error(`Leere Antwort von ${model}`);
+      }
+
+      try {
+        localStorage.setItem(FAST_MODEL_KEY, model);
+      } catch (_) {}
+      const badge = document.getElementById('fastModelBadge');
+      if (badge) badge.textContent = model;
+
+      return textOut;
     }
 
     async function callGeminiRequest(contentsPayload) {
-      if (!state.geminiApiKey) {
-        extractAuthFromRuntime(state);
-      }
-      const apiKey = (state.geminiApiKey || '').trim();
-      if (!apiKey) {
-        openApiModal();
-        throw new Error(state.lang === 'pl'
-          ? 'Brak klucza API Gemini. Zapisz klucz API u góry.'
-          : 'Kein Gemini API-Key hinterlegt! Bitte oben rechts auf das Schlüssel-Symbol klicken.');
-      }
-
-      // Build live resilient queue directly from Google's active model registry
-      const models = await buildLiveResilientQueue(apiKey);
-      let lastError = null;
-
-      for (let mIdx = 0; mIdx < models.length; mIdx++) {
-        const model = models[mIdx];
-        try {
-          return await executeModelCallWithTimeout(model, apiKey, contentsPayload);
-        } catch (err) {
-          lastError = err;
-
-          // Evict from fast cache immediately on 404 OR 429
-          if (err.status === 404 || err.status === 429) {
-            try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
-          }
-          // Continue loop immediately to try the next working model
+      armVisionWatchdog();
+      try {
+        if (!state.geminiApiKey) {
+          extractAuthFromRuntime(state);
         }
-      }
+        const apiKey = (state.geminiApiKey || '').trim();
+        if (!apiKey) {
+          openApiModal();
+          throw new Error(state.lang === 'pl'
+            ? 'Brak klucza API Gemini. Zapisz klucz API u góry.'
+            : 'Kein Gemini API-Key hinterlegt! Bitte oben rechts auf das Schlüssel-Symbol klicken.');
+        }
 
-      throw lastError || new Error('KI-Analyse fehlgeschlagen. Bitte API-Key oder Quota prüfen.');
+        const models = await buildLiveResilientQueue(apiKey);
+        let lastError = null;
+
+        for (let mIdx = 0; mIdx < models.length; mIdx++) {
+          const model = models[mIdx];
+          try {
+            return await executeModelCallWithTimeout(model, apiKey, contentsPayload);
+          } catch (err) {
+            lastError = err;
+            if (err.status === 404 || err.status === 429) {
+              try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
+            }
+          }
+        }
+
+        throw lastError || new Error('KI-Analyse fehlgeschlagen. Bitte API-Key oder Quota prüfen.');
+      } finally {
+        disarmVisionWatchdog();
+      }
     }
 
     async function callGeminiVisionAPI(visionPrompt, base64Img, textOnlyPrompt = null) {
@@ -2283,6 +2377,7 @@
 
       throw new Error('JSON-Struktur konnte nicht extrahiert werden.');
     }
+   
     // =========================================================================
     // 7. DETERMINISTIC OFFLINE-FALLBACK TRACKER & EXPANDED BILINGUAL LEXICON
     // =========================================================================
