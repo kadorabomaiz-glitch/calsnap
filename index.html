@@ -133,7 +133,7 @@
     <!-- ==================== TAB 1: TAGEBUCH ==================== -->
     <section id="tab-diary" class="tab-section active space-y-4">
 
-      <!-- TAGESBILANZ DASHBOARD -->
+      <!-- TAGESBILANZ DASHBOARD (INKL. BALLASTSTOFFE 30g & ZUCKER 35g) -->
       <div class="glass-card rounded-2xl p-4 shadow-xl">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -147,7 +147,7 @@
         </div>
 
         <!-- KCAL HAUPTBALKEN -->
-        <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800/80 mb-3">
+        <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800/80 mb-2.5">
           <div class="flex items-baseline justify-between mb-1.5">
             <div class="flex items-baseline gap-1.5">
               <span id="kcalConsumed" class="text-2xl font-extrabold text-white">0</span>
@@ -160,8 +160,8 @@
           </div>
         </div>
 
-        <!-- MAKRO-GRID -->
-        <div class="grid grid-cols-3 gap-2.5">
+        <!-- HAUPT-MAKRO-GRID (PROTEIN, KOHLENHYDRATE, FETT) -->
+        <div class="grid grid-cols-3 gap-2.5 mb-2.5">
           <div class="bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/70">
             <div class="flex justify-between items-center text-[11px] mb-1">
               <span class="font-bold text-sky-400">Protein</span>
@@ -189,6 +189,33 @@
             </div>
             <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
               <div id="fatBar" class="h-full bg-rose-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZUSATZ-REITER: BALLASTSTOFFE (0/30g) & ZUCKER-LIMIT (0/35g) -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/70">
+            <div class="flex justify-between items-center text-[11px] mb-1">
+              <span class="font-bold text-emerald-400 flex items-center gap-1">
+                <i class="fa-solid fa-seedling text-[10px]"></i> Ballaststoffe
+              </span>
+              <span class="text-slate-400"><span id="fiberConsumed" class="text-white font-bold">0</span>/<span id="fiberTarget">30</span>g</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div id="fiberBar" class="h-full bg-emerald-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/70">
+            <div class="flex justify-between items-center text-[11px] mb-1">
+              <span class="font-bold text-fuchsia-400 flex items-center gap-1">
+                <i class="fa-solid fa-cube text-[10px]"></i> Zucker (Max.)
+              </span>
+              <span class="text-slate-400"><span id="sugarConsumed" class="text-white font-bold">0</span>/<span id="sugarTarget">35</span>g</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div id="sugarBar" class="h-full bg-fuchsia-400 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
           </div>
         </div>
@@ -310,23 +337,27 @@
 
           <p id="resExplanation" class="text-xs text-slate-400 leading-relaxed"></p>
 
-          <!-- MAKRO-BOX -->
-          <div class="grid grid-cols-4 gap-1.5 bg-slate-950/70 rounded-xl p-2.5 border border-slate-800/80 text-center">
+          <!-- MAKRO-BOX (PROTEIN, KOHLENH., ZUCKER, FETT, BALLASTST.) -->
+          <div class="grid grid-cols-5 gap-1 bg-slate-950/70 rounded-xl p-2.5 border border-slate-800/80 text-center">
             <div>
               <div class="text-[10px] font-bold text-sky-400">Protein</div>
-              <div id="resProt" class="text-sm font-extrabold text-white">0g</div>
+              <div id="resProt" class="text-xs font-extrabold text-white">0g</div>
             </div>
             <div>
               <div class="text-[10px] font-bold text-amber-400">Kohlenh.</div>
-              <div id="resCarbs" class="text-sm font-extrabold text-white">0g</div>
+              <div id="resCarbs" class="text-xs font-extrabold text-white">0g</div>
+            </div>
+            <div>
+              <div class="text-[10px] font-bold text-fuchsia-400">Zucker</div>
+              <div id="resSugar" class="text-xs font-extrabold text-white">0g</div>
             </div>
             <div>
               <div class="text-[10px] font-bold text-rose-400">Fett</div>
-              <div id="resFat" class="text-sm font-extrabold text-white">0g</div>
+              <div id="resFat" class="text-xs font-extrabold text-white">0g</div>
             </div>
             <div>
-              <div class="text-[10px] font-bold text-emerald-400">Ballastst.</div>
-              <div id="resFiber" class="text-sm font-extrabold text-white">0g</div>
+              <div class="text-[10px] font-bold text-emerald-400">Ballast.</div>
+              <div id="resFiber" class="text-xs font-extrabold text-white">0g</div>
             </div>
           </div>
 
@@ -793,7 +824,6 @@
   let visionWatchdogTimer = null;
   let liveModelsCache = null;
 
-  // Unskalierter Basis-Zustand für den Echtzeit-Portionsregler (50% -> 100% -> 150% -> 200%)
   let activeMealBaseResult = null;
   let activePortionScalePercent = 100;
 
@@ -822,6 +852,8 @@
         targetProt: 150,
         targetCarbs: 180,
         targetFat: 65,
+        targetFiber: 30,
+        targetSugar: 35,
         waterTarget: 2500
       },
       days: {}
@@ -901,7 +933,6 @@
       days: (loaded.days && typeof loaded.days === 'object') ? loaded.days : {}
     };
 
-    // Scope-Purge: Entferne verbotene Altlasten (Step Counter / Cycling)
     delete merged.steps;
     delete merged.cycling;
 
@@ -938,9 +969,6 @@
     return state.days[iso];
   }
 
-  // ============================================================================
-  // TOAST & UI HELPERS (NON-STACKING)
-  // ============================================================================
   function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
@@ -1014,15 +1042,11 @@
     try {
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, width, height);
-      // 1. Textur-Draw-Command bei garantierter aktiver Bildquelle
       ctx.drawImage(img, 0, 0, width, height);
-      // 2. Synchroner GPU-Flush vor URL-Widerruf
       const dataUrl = canvas.toDataURL('image/jpeg', quality);
-      // 3. URL.revokeObjectURL erst NACH erfolgreicher toDataURL-Extraktion
       if (objectUrl) {
         try { URL.revokeObjectURL(objectUrl); } catch (_) {}
       }
-      // 4. Sofortige Nullung des CoreGraphics GPU-Puffers
       ctx.clearRect(0, 0, width, height);
       canvas.width = 0;
       canvas.height = 0;
@@ -1212,7 +1236,6 @@
           timeoutMs
         );
 
-        // Fallback bei HTTP 400 falls thinkingConfig vom Modell abgelehnt wird
         if (res.status === 400 && basePayload.generationConfig.thinkingConfig) {
           const fallbackPayload = {
             contents: [{ role: 'user', parts }],
@@ -1293,31 +1316,31 @@
     {
       name: 'Latte Macchiato',
       keywords: ['latte macchiato', 'macchiato', 'latte'],
-      kcal: 46, p: 2.8, c: 4.2, f: 1.9, fiber: 0,
+      kcal: 46, p: 2.8, c: 4.2, sugar: 4.1, f: 1.9, fiber: 0,
       defaultPortion: 300
     },
     {
       name: 'Kaffee Schwarz / Espresso / Americano',
       keywords: ['kaffee schwarz', 'schwarzer kaffee', 'espresso', 'americano', 'kawa czarna', 'czarna kawa'],
-      kcal: 2, p: 0.2, c: 0.2, f: 0, fiber: 0,
+      kcal: 2, p: 0.2, c: 0.2, sugar: 0, f: 0, fiber: 0,
       defaultPortion: 250
     },
     {
       name: 'Kaffee mit Milch / Cappuccino',
       keywords: ['cappuccino', 'kaffee mit milch', 'milchkaffee', 'kawa z mlekiem', 'flat white', 'kaffee', 'kawa'],
-      kcal: 36, p: 1.9, c: 2.8, f: 1.8, fiber: 0,
+      kcal: 36, p: 1.9, c: 2.8, sugar: 2.7, f: 1.8, fiber: 0,
       defaultPortion: 250
     },
     {
       name: 'Zucker / Haushaltszucker',
       keywords: ['zucker', 'haushaltszucker', 'rohrzucker', 'brauner zucker', 'cukier'],
-      kcal: 400, p: 0, c: 100, f: 0, fiber: 0,
+      kcal: 400, p: 0, c: 100, sugar: 100, f: 0, fiber: 0,
       defaultPortion: 5
     },
     {
       name: 'Honig / Miód',
       keywords: ['honig', 'bienenhonig', 'miod'],
-      kcal: 304, p: 0.3, c: 82, f: 0, fiber: 0.2,
+      kcal: 304, p: 0.3, c: 82, sugar: 81, f: 0, fiber: 0.2,
       defaultPortion: 15
     },
 
@@ -1325,55 +1348,55 @@
     {
       name: 'High Protein Mousse / Pudding Schoko',
       keywords: ['high protein yoghurt mousse schoko', 'high protein mousse schoko', 'protein mousse schoko', 'protein mousse', 'high protein mousse', 'protein pudding schoko', 'high protein pudding', 'high protein yoghurt', 'high protein joghurt', 'protein joghurt', 'protein yoghurt', 'mousse schoko'],
-      kcal: 84, p: 10.0, c: 5.5, f: 2.0, fiber: 0.8,
+      kcal: 84, p: 10.0, c: 5.5, sugar: 4.0, f: 2.0, fiber: 0.8,
       defaultPortion: 200
     },
     {
       name: 'Magerquark / Twaróg chudy',
       keywords: ['magerquark', 'speisequark magerstufe', 'quark', 'twarog chudy', 'twarog'],
-      kcal: 68, p: 12.2, c: 3.9, f: 0.3, fiber: 0,
+      kcal: 68, p: 12.2, c: 3.9, sugar: 3.9, f: 0.3, fiber: 0,
       defaultPortion: 250
     },
     {
       name: 'Skyr Natur',
       keywords: ['skyr', 'skyr natur'],
-      kcal: 64, p: 11.0, c: 4.0, f: 0.2, fiber: 0,
+      kcal: 64, p: 11.0, c: 4.0, sugar: 4.0, f: 0.2, fiber: 0,
       defaultPortion: 200
     },
     {
       name: 'Griechischer Joghurt / Naturjoghurt',
       keywords: ['griechischer joghurt', 'naturjoghurt', 'joghurt', 'yoghurt', 'jogurt naturalny', 'jogurt grecki', 'jogurt'],
-      kcal: 95, p: 6.5, c: 4.2, f: 5.5, fiber: 0,
+      kcal: 95, p: 6.5, c: 4.2, sugar: 4.1, f: 5.5, fiber: 0,
       defaultPortion: 180
     },
     {
       name: 'Körniger Frischkäse / Hüttenkäse / Serek wiejski',
       keywords: ['korniger frischkase', 'huttenkase', 'cottage cheese', 'serek wiejski'],
-      kcal: 98, p: 12.5, c: 2.7, f: 4.0, fiber: 0,
+      kcal: 98, p: 12.5, c: 2.7, sugar: 2.5, f: 4.0, fiber: 0,
       defaultPortion: 200
     },
     {
       name: 'Whey Protein Shake',
       keywords: ['protein shake', 'proteinshake', 'whey shake', 'whey protein', 'eiweissshake', 'odzywka bialkowa'],
-      kcal: 120, p: 24.0, c: 3.0, f: 1.5, fiber: 0,
+      kcal: 120, p: 24.0, c: 3.0, sugar: 1.5, f: 1.5, fiber: 0,
       defaultPortion: 100
     },
     {
       name: 'Vollmilch (3,5%) / Mleko',
       keywords: ['vollmilch', 'milch', 'mleko'],
-      kcal: 64, p: 3.3, c: 4.8, f: 3.5, fiber: 0,
+      kcal: 64, p: 3.3, c: 4.8, sugar: 4.8, f: 3.5, fiber: 0,
       defaultPortion: 200
     },
     {
       name: 'Gouda / Schnittkäse / Ser żółty',
       keywords: ['gouda', 'schnittkase', 'edamer', 'emmentaler', 'ser zolty', 'kase'],
-      kcal: 356, p: 25.0, c: 0.1, f: 28.0, fiber: 0,
+      kcal: 356, p: 25.0, c: 0.1, sugar: 0.1, f: 28.0, fiber: 0,
       defaultPortion: 30
     },
     {
       name: 'Mozzarella',
       keywords: ['mozzarella'],
-      kcal: 245, p: 18.5, c: 1.0, f: 18.5, fiber: 0,
+      kcal: 245, p: 18.5, c: 1.0, sugar: 1.0, f: 18.5, fiber: 0,
       defaultPortion: 125
     },
 
@@ -1381,31 +1404,31 @@
     {
       name: 'Hühnerei (Größe M/L)',
       keywords: ['huhner ei', 'huhnerei', 'gekochtes ei', 'spiegelei', 'ruherei', 'jajko', 'jajka', 'eier', 'ei'],
-      kcal: 143, p: 12.6, c: 0.7, f: 9.5, fiber: 0,
+      kcal: 143, p: 12.6, c: 0.7, sugar: 0.5, f: 9.5, fiber: 0,
       defaultPortion: 60
     },
     {
       name: 'Haferflocken / Płatki owsiane',
       keywords: ['haferflocken', 'porridge', 'oatmeal', 'platki owsiane', 'owsianka'],
-      kcal: 372, p: 13.5, c: 58.7, f: 7.0, fiber: 10.0,
+      kcal: 372, p: 13.5, c: 58.7, sugar: 1.1, f: 7.0, fiber: 10.0,
       defaultPortion: 60
     },
     {
       name: 'Vollkornbrot / Chleb razowy',
       keywords: ['vollkornbrot', 'graubrot', 'schwarzbrot', 'brot', 'scheibe brot', 'chleb razowy', 'chleb', 'kromka chleba'],
-      kcal: 225, p: 7.5, c: 41.0, f: 2.2, fiber: 6.5,
+      kcal: 225, p: 7.5, c: 41.0, sugar: 2.8, f: 2.2, fiber: 6.5,
       defaultPortion: 50
     },
     {
       name: 'Brötchen / Semmel / Bułka',
       keywords: ['brotchen', 'weizenbrotchen', 'semmel', 'bulka', 'kaiserbrotchen'],
-      kcal: 278, p: 8.8, c: 55.0, f: 1.8, fiber: 3.2,
+      kcal: 278, p: 8.8, c: 55.0, sugar: 2.5, f: 1.8, fiber: 3.2,
       defaultPortion: 65
     },
     {
       name: 'Butter / Masło',
       keywords: ['butter', 'maslo'],
-      kcal: 741, p: 0.7, c: 0.6, f: 82.0, fiber: 0,
+      kcal: 741, p: 0.7, c: 0.6, sugar: 0.6, f: 82.0, fiber: 0,
       defaultPortion: 10
     },
 
@@ -1413,25 +1436,25 @@
     {
       name: 'Apfel / Jabłko',
       keywords: ['apfel', 'apfel frisch', 'jablko'],
-      kcal: 52, p: 0.3, c: 11.4, f: 0.2, fiber: 2.4,
+      kcal: 52, p: 0.3, c: 11.4, sugar: 10.3, f: 0.2, fiber: 2.4,
       defaultPortion: 150
     },
     {
       name: 'Banane / Banan',
       keywords: ['banane', 'bananen', 'banan'],
-      kcal: 89, p: 1.1, c: 20.0, f: 0.3, fiber: 2.6,
+      kcal: 89, p: 1.1, c: 20.0, sugar: 14.2, f: 0.3, fiber: 2.6,
       defaultPortion: 120
     },
     {
       name: 'Beeren / Blaubeeren / Erdbeeren',
       keywords: ['blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'beeren', 'truskawki', 'borowki', 'maliny'],
-      kcal: 42, p: 0.8, c: 7.6, f: 0.3, fiber: 2.4,
+      kcal: 42, p: 0.8, c: 7.6, sugar: 5.8, f: 0.3, fiber: 2.4,
       defaultPortion: 125
     },
     {
       name: 'Gemischter Salat / Tomate / Gurke',
       keywords: ['gemischter salat', 'beilagensalat', 'gurkensalat', 'tomatensalat', 'tomate', 'gurke', 'salatka', 'pomidor', 'ogorek'],
-      kcal: 32, p: 1.2, c: 3.8, f: 1.2, fiber: 1.5,
+      kcal: 32, p: 1.2, c: 3.8, sugar: 2.4, f: 1.2, fiber: 1.5,
       defaultPortion: 180
     },
 
@@ -1439,105 +1462,105 @@
     {
       name: 'Hähnchenbrustfilet (gebraten) / Pierś z kurczaka',
       keywords: ['hahnchenbrustfilet', 'hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'piers z kurczaka', 'kurczak'],
-      kcal: 152, p: 29.5, c: 0.5, f: 3.2, fiber: 0,
+      kcal: 152, p: 29.5, c: 0.5, sugar: 0, f: 3.2, fiber: 0,
       defaultPortion: 200
     },
     {
       name: 'Schweinefleisch in Soße / Mięso wieprzowe w sosie',
       keywords: ['mieso wieprzowe w sosie', 'wieprzowina w sosie', 'schweinefleisch in sosse', 'schweinebraten in sosse', 'schweinegulasch', 'gulasz wieprzowy', 'schweinefleisch', 'wieprzowina'],
-      kcal: 178, p: 18.5, c: 3.8, f: 9.8, fiber: 0.4,
+      kcal: 178, p: 18.5, c: 3.8, sugar: 1.2, f: 9.8, fiber: 0.4,
       defaultPortion: 220
     },
     {
       name: 'Rindergulasch / Gulasz wołowy',
       keywords: ['rindergulasch', 'gulasch', 'gulasz wolowy', 'gulasz', 'rindfleisch in sosse'],
-      kcal: 158, p: 19.8, c: 3.5, f: 7.0, fiber: 0.5,
+      kcal: 158, p: 19.8, c: 3.5, sugar: 1.4, f: 7.0, fiber: 0.5,
       defaultPortion: 250
     },
     {
       name: 'Schnitzel paniert / Kotlet schabowy',
       keywords: ['kotlet schabowy', 'schabowy', 'schweineschnitzel', 'wiener schnitzel', 'schnitzel'],
-      kcal: 255, p: 21.0, c: 13.5, f: 13.0, fiber: 0.8,
+      kcal: 255, p: 21.0, c: 13.5, sugar: 0.8, f: 13.0, fiber: 0.8,
       defaultPortion: 180
     },
     {
       name: 'Hackfleischkotelett / Frikadelle / Kotlet mielony',
       keywords: ['kotlet mielony', 'mielony', 'frikadelle', 'bulette', 'fleischpflanzerl'],
-      kcal: 242, p: 17.5, c: 7.5, f: 15.8, fiber: 0.6,
+      kcal: 242, p: 17.5, c: 7.5, sugar: 0.9, f: 15.8, fiber: 0.6,
       defaultPortion: 140
     },
     {
       name: 'Lasagne Bolognese',
       keywords: ['lasagne bolognese', 'lasagne', 'lasagna'],
-      kcal: 160, p: 9.8, c: 13.5, f: 7.2, fiber: 1.2,
+      kcal: 160, p: 9.8, c: 13.5, sugar: 2.8, f: 7.2, fiber: 1.2,
       defaultPortion: 300
     },
     {
       name: 'Pierogi (Ruskie / mit Fleisch)',
       keywords: ['pierogi ruskie', 'pierogi z miesem', 'pierogi'],
-      kcal: 198, p: 7.2, c: 29.5, f: 5.5, fiber: 1.6,
+      kcal: 198, p: 7.2, c: 29.5, sugar: 1.2, f: 5.5, fiber: 1.6,
       defaultPortion: 250
     },
     {
       name: 'Bigos (Polnischer Krauteintopf)',
       keywords: ['bigos'],
-      kcal: 112, p: 7.8, c: 5.2, f: 6.5, fiber: 2.4,
+      kcal: 112, p: 7.8, c: 5.2, sugar: 2.5, f: 6.5, fiber: 2.4,
       defaultPortion: 300
     },
     {
       name: 'Lachsfilet / Łosoś',
       keywords: ['lachsfilet', 'lachs', 'losos'],
-      kcal: 208, p: 20.4, c: 0, f: 13.4, fiber: 0,
+      kcal: 208, p: 20.4, c: 0, sugar: 0, f: 13.4, fiber: 0,
       defaultPortion: 160
     },
     {
       name: 'Thunfisch im eigenen Saft / Tuńczyk',
       keywords: ['thunfisch', 'tunczyk'],
-      kcal: 112, p: 25.5, c: 0, f: 1.0, fiber: 0,
+      kcal: 112, p: 25.5, c: 0, sugar: 0, f: 1.0, fiber: 0,
       defaultPortion: 140
     },
     {
       name: 'Döner Kebab (im Brot)',
       keywords: ['doner kebab', 'doner', 'kebab', 'kebap'],
-      kcal: 215, p: 13.5, c: 21.0, f: 8.2, fiber: 1.8,
+      kcal: 215, p: 13.5, c: 21.0, sugar: 3.2, f: 8.2, fiber: 1.8,
       defaultPortion: 350
     },
     {
       name: 'Pizza (Margherita / Salami / Schinken)',
       keywords: ['pizza salami', 'pizza margherita', 'pizza schinken', 'pizza'],
-      kcal: 245, p: 10.5, c: 29.0, f: 9.5, fiber: 1.8,
+      kcal: 245, p: 10.5, c: 29.0, sugar: 3.1, f: 9.5, fiber: 1.8,
       defaultPortion: 350
     },
 
-    // --- BEILAGEN (GEKOCHT, 100g-BASIS) ---
+    // --- BEILAGEN & GETRÄNKE (GEKOCHT, 100g-BASIS) ---
     {
       name: 'Reis gekocht / Ryż',
       keywords: ['reis gekocht', 'basmatireis', 'jasminreis', 'reis', 'ryz'],
-      kcal: 130, p: 2.7, c: 28.2, f: 0.3, fiber: 0.4,
+      kcal: 130, p: 2.7, c: 28.2, sugar: 0.1, f: 0.3, fiber: 0.4,
       defaultPortion: 180
     },
     {
       name: 'Nudeln gekocht / Pasta / Makaron',
       keywords: ['spaghetti', 'nudeln gekocht', 'nudeln', 'pasta', 'makaron'],
-      kcal: 152, p: 5.5, c: 30.2, f: 0.9, fiber: 1.8,
+      kcal: 152, p: 5.5, c: 30.2, sugar: 0.6, f: 0.9, fiber: 1.8,
       defaultPortion: 200
     },
     {
       name: 'Kartoffeln gekocht / Ziemniaki',
       keywords: ['salzkartoffeln', 'pellkartoffeln', 'kartoffeln', 'kartoffel', 'ziemniaki'],
-      kcal: 73, p: 2.0, c: 15.4, f: 0.1, fiber: 1.8,
+      kcal: 73, p: 2.0, c: 15.4, sugar: 0.8, f: 0.1, fiber: 1.8,
       defaultPortion: 220
     },
     {
       name: 'Pommes Frites / Frytki',
       keywords: ['pommes frites', 'pommes', 'frytki'],
-      kcal: 292, p: 3.4, c: 36.5, f: 14.2, fiber: 3.2,
+      kcal: 292, p: 3.4, c: 36.5, sugar: 0.5, f: 14.2, fiber: 3.2,
       defaultPortion: 160
     },
     {
       name: 'Apfelschorle / Saftschorle',
       keywords: ['apfelschorle', 'saftschorle', 'apfelsaftschorle'],
-      kcal: 26, p: 0.1, c: 6.2, f: 0, fiber: 0,
+      kcal: 26, p: 0.1, c: 6.2, sugar: 5.9, f: 0, fiber: 0,
       defaultPortion: 330
     }
   ];
@@ -1586,7 +1609,7 @@
     if (segments.length === 0) return null;
 
     const matchedParts = [];
-    let totalKcal = 0, totalP = 0, totalC = 0, totalF = 0, totalFiber = 0;
+    let totalKcal = 0, totalP = 0, totalC = 0, totalSugar = 0, totalF = 0, totalFiber = 0;
 
     for (const seg of segments) {
       const foldedSeg = foldDiacritics(seg);
@@ -1695,6 +1718,7 @@
       let segKcal = Math.round(bestEntry.kcal * ratio);
       let segP = Math.round(bestEntry.p * ratio * 10) / 10;
       let segC = Math.round(bestEntry.c * ratio * 10) / 10;
+      let segSugar = Math.round((bestEntry.sugar !== undefined ? bestEntry.sugar : bestEntry.c * 0.2) * ratio * 10) / 10;
       let segF = Math.round(bestEntry.f * ratio * 10) / 10;
       let segFiber = Math.round((bestEntry.fiber || 0) * ratio * 10) / 10;
 
@@ -1703,6 +1727,7 @@
         segKcal = Math.round(explicitKcal);
         segP = Math.round(segP * kcalScale * 10) / 10;
         segC = Math.round(segC * kcalScale * 10) / 10;
+        segSugar = Math.round(segSugar * kcalScale * 10) / 10;
         segF = Math.round(segF * kcalScale * 10) / 10;
         segFiber = Math.round(segFiber * kcalScale * 10) / 10;
         portionLabel = `${segKcal} kcal Angabe`;
@@ -1712,6 +1737,7 @@
       totalKcal += segKcal;
       totalP += segP;
       totalC += segC;
+      totalSugar += segSugar;
       totalF += segF;
       totalFiber += segFiber;
     }
@@ -1721,6 +1747,7 @@
       kcal: Math.round(totalKcal),
       protein: Math.round(totalP),
       carbs: Math.round(totalC),
+      sugar: Math.round(totalSugar),
       fat: Math.round(totalF),
       fiber: Math.round(totalFiber),
       explanation: '0.0s Sofort-Berechnung aus dem verifizierten DE/PL-Wörterbuch.',
@@ -1750,6 +1777,7 @@
     const scaledKcal = Math.round((activeMealBaseResult.kcal || 0) * factor);
     const scaledProt = Math.round((activeMealBaseResult.protein || 0) * factor);
     const scaledCarbs = Math.round((activeMealBaseResult.carbs || 0) * factor);
+    const scaledSugar = Math.round((activeMealBaseResult.sugar || 0) * factor);
     const scaledFat = Math.round((activeMealBaseResult.fat || 0) * factor);
     const scaledFiber = Math.round((activeMealBaseResult.fiber || 0) * factor);
 
@@ -1758,6 +1786,8 @@
     document.getElementById('resKcal').textContent = String(scaledKcal);
     document.getElementById('resProt').textContent = `${scaledProt}g`;
     document.getElementById('resCarbs').textContent = `${scaledCarbs}g`;
+    const sugarEl = document.getElementById('resSugar');
+    if (sugarEl) sugarEl.textContent = `${scaledSugar}g`;
     document.getElementById('resFat').textContent = `${scaledFat}g`;
     document.getElementById('resFiber').textContent = `${scaledFiber}g`;
     document.getElementById('addMealBtnText').textContent = `Jetzt ins Tagebuch eintragen (+${scaledKcal} kcal)`;
@@ -1769,6 +1799,7 @@
       kcal: Math.round(Number(res.kcal) || 0),
       protein: Math.round(Number(res.protein) || 0),
       carbs: Math.round(Number(res.carbs) || 0),
+      sugar: Math.round(Number(res.sugar) || 0),
       fat: Math.round(Number(res.fat) || 0),
       fiber: Math.round(Number(res.fiber) || 0),
       explanation: res.explanation || '',
@@ -1801,6 +1832,7 @@
         kcal: Math.round(activeMealBaseResult.kcal * factor),
         protein: Math.round(activeMealBaseResult.protein * factor),
         carbs: Math.round(activeMealBaseResult.carbs * factor),
+        sugar: Math.round(activeMealBaseResult.sugar * factor),
         fat: Math.round(activeMealBaseResult.fat * factor),
         fiber: Math.round(activeMealBaseResult.fiber * factor)
       });
@@ -1871,7 +1903,6 @@
         showToast('0.0s Sofort-Treffer im lokalen Wörterbuch!', 'success');
         return;
       }
-      // Falls kein API-Key vorhanden, aber explizite Kalorien im Text stehen (z.B. "167kcal"):
       const hasApiKey = Boolean((state.geminiApiKey || recoverRedundantApiKey(state) || '').trim());
       if (!hasApiKey) {
         const explicitKcalMatch = textVal.match(/(\d{1,4}(?:[.,]\d+)?)\s*kcal\b/i);
@@ -1880,12 +1911,14 @@
           const isHighProt = /protein|quark|skyr|mousse|shake/i.test(textVal);
           const pG = isHighProt ? Math.round((kVal * 0.45) / 4) : Math.round((kVal * 0.25) / 4);
           const cG = Math.round((kVal * 0.35) / 4);
+          const sG = isHighProt ? Math.round(cG * 0.5) : Math.round(cG * 0.4);
           const fG = Math.max(1, Math.round((kVal - (pG * 4 + cG * 4)) / 9));
           showMealResult({
             mealName: textVal.replace(/\s*\d+\s*kcal/i, '').trim() || 'Mahlzeit',
             kcal: kVal,
             protein: pG,
             carbs: cG,
+            sugar: sG,
             fat: fG,
             fiber: 1,
             explanation: `Exakte Kalorienübernahme (${kVal} kcal) aus deiner Texteingabe.`,
@@ -1932,6 +1965,7 @@ REGELN:
   "kcal": 0,
   "protein": 0,
   "carbs": 0,
+  "sugar": 0,
   "fat": 0,
   "fiber": 0,
   "explanation": "Kurze Begründung auf Deutsch (max. 2 Sätze)"
@@ -1943,6 +1977,7 @@ REGELN:
 
       const p = Math.max(0, Math.round(Number(data.protein) || 0));
       const c = Math.max(0, Math.round(Number(data.carbs) || 0));
+      const sug = Math.min(c, Math.max(0, Math.round(Number(data.sugar) || 0)));
       const f = Math.max(0, Math.round(Number(data.fat) || 0));
       const fib = Math.max(0, Math.round(Number(data.fiber) || 0));
       let kcal = Math.max(0, Math.round(Number(data.kcal) || 0));
@@ -1961,6 +1996,7 @@ REGELN:
         kcal,
         protein: p,
         carbs: c,
+        sugar: sug,
         fat: f,
         fiber: fib,
         explanation: data.explanation || 'KI-Analyse abgeschlossen.',
@@ -1978,17 +2014,17 @@ REGELN:
   }
 
   // ============================================================================
-  // 1-KLICK SCHNELLWAHL & TAGEBUCH-VERWALTUNG
+  // 1-KLICK SCHNELLWAHL & TAGEBUCH-VERWALTUNG (INKL. BALLASTSTOFFE & ZUCKER)
   // ============================================================================
   function quickAddPreset(presetId) {
     const presets = {
-      coffee_black: { name: '☕ Kaffee Schwarz (250ml)', kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
-      coffee_milk: { name: '🥛 Kaffee mit Milch (250ml)', kcal: 45, protein: 2, carbs: 3, fat: 2, fiber: 0 },
-      apple: { name: '🍎 Apfel frisch (150g)', kcal: 78, protein: 0, carbs: 17, fat: 0, fiber: 4 },
-      banana: { name: '🍌 Banane (120g)', kcal: 105, protein: 1, carbs: 24, fat: 0, fiber: 3 },
-      eggs_2: { name: '🥚 2 Hühnereier (120g)', kcal: 172, protein: 15, carbs: 1, fat: 11, fiber: 0 },
-      quark_250: { name: '🥣 Magerquark (250g)', kcal: 170, protein: 30, carbs: 10, fat: 1, fiber: 0 },
-      protein_shake: { name: '🥤 Whey Protein-Shake (30g Pulver)', kcal: 120, protein: 24, carbs: 3, fat: 2, fiber: 0 }
+      coffee_black: { name: '☕ Kaffee Schwarz (250ml)', kcal: 0, protein: 0, carbs: 0, sugar: 0, fat: 0, fiber: 0 },
+      coffee_milk: { name: '🥛 Kaffee mit Milch (250ml)', kcal: 45, protein: 2, carbs: 3, sugar: 3, fat: 2, fiber: 0 },
+      apple: { name: '🍎 Apfel frisch (150g)', kcal: 78, protein: 0, carbs: 17, sugar: 15, fat: 0, fiber: 4 },
+      banana: { name: '🍌 Banane (120g)', kcal: 105, protein: 1, carbs: 24, sugar: 17, fat: 0, fiber: 3 },
+      eggs_2: { name: '🥚 2 Hühnereier (120g)', kcal: 172, protein: 15, carbs: 1, sugar: 1, fat: 11, fiber: 0 },
+      quark_250: { name: '🥣 Magerquark (250g)', kcal: 170, protein: 30, carbs: 10, sugar: 10, fat: 1, fiber: 0 },
+      protein_shake: { name: '🥤 Whey Protein-Shake (30g Pulver)', kcal: 120, protein: 24, carbs: 3, sugar: 1, fat: 2, fiber: 0 }
     };
     const item = presets[presetId];
     if (!item) return;
@@ -2007,6 +2043,7 @@ REGELN:
       kcal: Math.max(0, Math.round(Number(entry.kcal) || 0)),
       protein: Math.max(0, Math.round(Number(entry.protein) || 0)),
       carbs: Math.max(0, Math.round(Number(entry.carbs) || 0)),
+      sugar: Math.max(0, Math.round(Number(entry.sugar) || 0)),
       fat: Math.max(0, Math.round(Number(entry.fat) || 0)),
       fiber: Math.max(0, Math.round(Number(entry.fiber) || 0))
     });
@@ -2045,18 +2082,22 @@ REGELN:
     const today = getTodayData();
     const prof = state.profile;
 
-    let sumKcal = 0, sumP = 0, sumC = 0, sumF = 0;
+    let sumKcal = 0, sumP = 0, sumC = 0, sumSugar = 0, sumF = 0, sumFiber = 0;
     for (const m of today.meals) {
       sumKcal += Number(m.kcal) || 0;
       sumP += Number(m.protein) || 0;
       sumC += Number(m.carbs) || 0;
+      sumSugar += Number(m.sugar) || 0;
       sumF += Number(m.fat) || 0;
+      sumFiber += Number(m.fiber) || 0;
     }
 
     const tKcal = Math.max(500, Number(prof.targetKcal) || 2000);
     const tProt = Math.max(20, Number(prof.targetProt) || 140);
     const tCarbs = Math.max(20, Number(prof.targetCarbs) || 180);
     const tFat = Math.max(15, Number(prof.targetFat) || 65);
+    const tFiber = Math.max(10, Number(prof.targetFiber) || 30);
+    const tSugar = Math.max(10, Number(prof.targetSugar) || 35);
 
     const remKcal = tKcal - sumKcal;
     const pctKcal = Math.min(100, Math.round((sumKcal / tKcal) * 100));
@@ -2079,6 +2120,29 @@ REGELN:
     document.getElementById('fatTarget').textContent = String(tFat);
     document.getElementById('fatBar').style.width = `${Math.min(100, Math.round((sumF / tFat) * 100))}%`;
 
+    // Ballaststoffe (0/30g) & Zucker (0/35g)
+    const fibConsEl = document.getElementById('fiberConsumed');
+    const fibTargEl = document.getElementById('fiberTarget');
+    const fibBarEl = document.getElementById('fiberBar');
+    if (fibConsEl) fibConsEl.textContent = String(sumFiber);
+    if (fibTargEl) fibTargEl.textContent = String(tFiber);
+    if (fibBarEl) fibBarEl.style.width = `${Math.min(100, Math.round((sumFiber / tFiber) * 100))}%`;
+
+    const sugConsEl = document.getElementById('sugarConsumed');
+    const sugTargEl = document.getElementById('sugarTarget');
+    const sugBarEl = document.getElementById('sugarBar');
+    if (sugConsEl) {
+      sugConsEl.textContent = String(sumSugar);
+      sugConsEl.className = sumSugar > tSugar ? 'text-rose-400 font-extrabold' : 'text-white font-bold';
+    }
+    if (sugTargEl) sugTargEl.textContent = String(tSugar);
+    if (sugBarEl) {
+      sugBarEl.style.width = `${Math.min(100, Math.round((sumSugar / tSugar) * 100))}%`;
+      sugBarEl.className = sumSugar > tSugar
+        ? 'h-full bg-rose-500 rounded-full transition-all duration-300'
+        : 'h-full bg-fuchsia-400 rounded-full transition-all duration-300';
+    }
+
     document.getElementById('waterConsumed').textContent = String(today.waterMl || 0);
     document.getElementById('waterTarget').textContent = String(prof.waterTarget || 2500);
 
@@ -2093,10 +2157,12 @@ REGELN:
               <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${m.time || ''}</span>
               <h4 class="text-xs font-extrabold text-white truncate">${m.name}</h4>
             </div>
-            <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-2.5">
-              <span class="text-sky-400 font-semibold">P: ${m.protein}g</span>
-              <span class="text-amber-400 font-semibold">K: ${m.carbs}g</span>
-              <span class="text-rose-400 font-semibold">F: ${m.fat}g</span>
+            <div class="text-[11px] text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+              <span class="text-sky-400 font-semibold">P: ${m.protein || 0}g</span>
+              <span class="text-amber-400 font-semibold">K: ${m.carbs || 0}g</span>
+              <span class="text-fuchsia-400 font-semibold">Z: ${m.sugar || 0}g</span>
+              <span class="text-rose-400 font-semibold">F: ${m.fat || 0}g</span>
+              <span class="text-emerald-400 font-semibold">B: ${m.fiber || 0}g</span>
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0">
@@ -2200,7 +2266,7 @@ Antworte AUSSCHLIESSLICH als JSON:
             <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">
               ${(r.steps || []).map(s => `<li>${s}</li>`).join('')}
             </ul>
-            <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, fat: r.fat || 12, fiber: 4 })})' class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
+            <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, sugar: 4, fat: r.fat || 12, fiber: 4 })})' class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
               + Direkt ins Tagebuch übernehmen (${r.kcal} kcal)
             </button>
           </div>
@@ -2299,7 +2365,7 @@ Antworte AUSSCHLIESSLICH als JSON:
           <p class="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2">
             <i class="fa-solid fa-lightbulb mr-1"></i> <strong>Bestell-Hack:</strong> ${r.orderHack || 'Beilage kalorienarm wählen.'}
           </p>
-          <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, fat: r.fat || 15, fiber: 3 })})' class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
+          <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, sugar: 4, fat: r.fat || 15, fiber: 3 })})' class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
             + Ins Tagebuch eintragen (${r.kcal} kcal)
           </button>
         </div>
@@ -2357,7 +2423,7 @@ Antworte AUSSCHLIESSLICH als JSON:
             <strong class="text-emerald-400">Zubereitung:</strong>
             <ol class="list-decimal pl-4 mt-1 space-y-1">${(r.steps || []).map(s => `<li>${s}</li>`).join('')}</ol>
           </div>
-          <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.title || craving, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 35, fat: r.fat || 15, fiber: 4 })})' class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">
+          <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.title || craving, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 35, sugar: 4, fat: r.fat || 15, fiber: 4 })})' class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">
             + Rezept direkt ins Tagebuch eintragen (${r.kcal} kcal)
           </button>
         </div>
@@ -2407,7 +2473,6 @@ Antworte AUSSCHLIESSLICH als JSON:
     if (goal === 'cut') targetKcal = Math.max(1200, tdee - 500);
     if (goal === 'bulk') targetKcal = tdee + 300;
 
-    // Physiologische Deckelung über effectiveRefWeight bei hohem Startgewicht
     const effectiveRefWeight = (targetWeight < weight)
       ? Math.round(targetWeight + (weight - targetWeight) * 0.25)
       : weight;
@@ -2458,6 +2523,8 @@ Antworte AUSSCHLIESSLICH als JSON:
     p.targetProt = Math.max(30, parseInt(document.getElementById('profTargetProt').value, 10) || 150);
     p.targetCarbs = Math.max(20, parseInt(document.getElementById('profTargetCarbs').value, 10) || 180);
     p.targetFat = Math.max(20, parseInt(document.getElementById('profTargetFat').value, 10) || 65);
+    p.targetFiber = 30;
+    p.targetSugar = 35;
     p.waterTarget = Math.max(1500, Math.round(p.weight * 35));
 
     saveState();
