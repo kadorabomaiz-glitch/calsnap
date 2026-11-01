@@ -11,23 +11,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    :root {
-      --bg-dark: #0b1120;
-      --card-dark: #131c31;
-      --accent: #10b981;
-    }
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    :root { --bg-dark: #0b1120; --card-dark: #131c31; --accent: #10b981; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-dark);
       color: #f1f5f9;
       margin: 0;
-      padding: 0;
+      padding: 0 0 92px 0;
       overflow-x: hidden;
-      padding-bottom: 92px;
     }
     .glass-card {
       background: rgba(19, 28, 49, 0.88);
@@ -35,60 +27,29 @@
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .tab-section {
-      display: none;
-      animation: fadeIn 0.18s ease-out;
-    }
-    .tab-section.active {
-      display: block;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .nav-btn.active {
-      color: #10b981;
-    }
-    .nav-btn.active .nav-indicator {
-      opacity: 1;
-      transform: scaleX(1);
-    }
+    .tab-section { display: none; animation: fadeIn 0.18s ease-out; }
+    .tab-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .nav-btn.active { color: #10b981; }
+    .nav-btn.active .nav-indicator { opacity: 1; transform: scaleX(1); }
     input[type="range"].portion-slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 6px;
       background: rgba(255, 255, 255, 0.14);
-      border-radius: 999px;
-      outline: none;
+      border-radius: 999px; outline: none;
     }
     input[type="range"].portion-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #10b981;
-      border: 2px solid #ffffff;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+      -webkit-appearance: none; appearance: none;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #10b981; border: 2px solid #ffffff;
+      cursor: pointer; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
     }
-    .portion-pill-btn {
-      transition: all 0.15s ease;
-    }
+    .portion-pill-btn { transition: all 0.15s ease; }
     .portion-pill-btn.active {
       background-color: #10b981 !important;
       color: #06281e !important;
       border-color: #34d399 !important;
       font-weight: 800;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      height: 4px;
-      width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.18);
-      border-radius: 9999px;
     }
   </style>
 </head>
@@ -246,22 +207,10 @@
           </button>
         </div>
 
-        <!-- TEXT-EINGABE MIT CLEAR BUTTON -->
+        <!-- TEXT-EINGABE -->
         <div class="relative">
-          <input
-            id="mealTextInput"
-            type="text"
-            placeholder="z.B. 2 Latte macchiato groß, 167kcal Mousse, 2 Eier..."
-            class="w-full bg-slate-900/90 border border-slate-700/90 focus:border-emerald-500 rounded-xl pl-3.5 pr-9 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();triggerMealAnalysis();}"
-          />
-          <button
-            id="clearMealTextBtn"
-            type="button"
-            onclick="clearMealText()"
-            class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-700/80 hover:bg-slate-600 text-slate-300 flex items-center justify-center text-[10px]"
-            title="Text löschen"
-          >
+          <input id="mealTextInput" type="text" placeholder="z.B. 2 Latte macchiato groß, 167kcal Mousse, 2 Eier..." class="w-full bg-slate-900/90 border border-slate-700/90 focus:border-emerald-500 rounded-xl pl-3.5 pr-9 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition" onkeydown="if(event.key==='Enter'){event.preventDefault();triggerMealAnalysis();}" />
+          <button id="clearMealTextBtn" type="button" onclick="clearMealText()" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-700/80 hover:bg-slate-600 text-slate-300 flex items-center justify-center text-[10px]" title="Text löschen">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -269,22 +218,11 @@
         <!-- KAMERA & TURBO-SCAN BUTTONS -->
         <div class="flex gap-2.5">
           <input id="mealPhotoInput" type="file" accept="image/*" class="hidden" onchange="handleMealPhotoSelect(event)" />
-          <button
-            type="button"
-            onclick="document.getElementById('mealPhotoInput').click()"
-            class="px-4 py-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-sm font-bold text-slate-200 flex items-center justify-center gap-2 shrink-0 transition"
-          >
-            <i class="fa-solid fa-camera text-emerald-400"></i>
-            <span>Foto</span>
+          <button type="button" onclick="document.getElementById('mealPhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-sm font-bold text-slate-200 flex items-center justify-center gap-2 shrink-0 transition">
+            <i class="fa-solid fa-camera text-emerald-400"></i> <span>Foto</span>
           </button>
-          <button
-            id="analyzeMealBtn"
-            type="button"
-            onclick="triggerMealAnalysis()"
-            class="flex-1 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition"
-          >
-            <i class="fa-solid fa-bolt"></i>
-            <span>Turbo-Scan</span>
+          <button id="analyzeMealBtn" type="button" onclick="triggerMealAnalysis()" class="flex-1 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition">
+            <i class="fa-solid fa-bolt"></i> <span>Turbo-Scan</span>
           </button>
         </div>
 
@@ -292,27 +230,13 @@
         <div class="pt-1">
           <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">1-Klick Schnellwahl (Sofort ins Tagebuch):</p>
           <div class="flex flex-wrap gap-1.5">
-            <button type="button" onclick="quickAddPreset('coffee_black')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
-              <span>☕ Kaffee</span><span class="text-emerald-400 font-bold">0 kcal</span>
-            </button>
-            <button type="button" onclick="quickAddPreset('coffee_milk')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
-              <span>🥛 Kaffee+Milch</span><span class="text-emerald-400 font-bold">45 kcal</span>
-            </button>
-            <button type="button" onclick="quickAddPreset('apple')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
-              <span>🍎 Apfel</span><span class="text-emerald-400 font-bold">78 kcal</span>
-            </button>
-            <button type="button" onclick="quickAddPreset('banana')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
-              <span>🍌 Banane</span><span class="text-emerald-400 font-bold">105 kcal</span>
-            </button>
-            <button type="button" onclick="quickAddPreset('eggs_2')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
-              <span>🥚 2 Eier</span><span class="text-sky-400 font-bold">15g P</span>
-            </button>
-            <button type="button" onclick="quickAddPreset('quark_250')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
-              <span>🥣 250g Quark</span><span class="text-sky-400 font-bold">30g P</span>
-            </button>
-            <button type="button" onclick="quickAddPreset('protein_shake')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
-              <span>🥤 Protein-Shake</span><span class="text-sky-400 font-bold">24g P</span>
-            </button>
+            <button type="button" onclick="quickAddPreset('coffee_black')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>☕ Kaffee</span><span class="text-emerald-400 font-bold">0 kcal</span></button>
+            <button type="button" onclick="quickAddPreset('coffee_milk')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🥛 Kaffee+Milch</span><span class="text-emerald-400 font-bold">45 kcal</span></button>
+            <button type="button" onclick="quickAddPreset('apple')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🍎 Apfel</span><span class="text-emerald-400 font-bold">78 kcal</span></button>
+            <button type="button" onclick="quickAddPreset('banana')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🍌 Banane</span><span class="text-emerald-400 font-bold">105 kcal</span></button>
+            <button type="button" onclick="quickAddPreset('eggs_2')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🥚 2 Eier</span><span class="text-sky-400 font-bold">15g P</span></button>
+            <button type="button" onclick="quickAddPreset('quark_250')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🥣 250g Quark</span><span class="text-sky-400 font-bold">30g P</span></button>
+            <button type="button" onclick="quickAddPreset('protein_shake')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🥤 Protein-Shake</span><span class="text-sky-400 font-bold">24g P</span></button>
           </div>
         </div>
 
@@ -322,9 +246,7 @@
             <span id="resSourceBadge" class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
               <i class="fa-solid fa-bolt text-amber-400"></i> 0.0s Lokales Wörterbuch
             </span>
-            <span id="portionScaleBadge" class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-slate-800 text-emerald-400 border border-slate-700">
-              Portion: 100%
-            </span>
+            <span id="portionScaleBadge" class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-slate-800 text-emerald-400 border border-slate-700">Portion: 100%</span>
           </div>
 
           <div class="flex items-start justify-between gap-3">
@@ -339,84 +261,34 @@
 
           <!-- MAKRO-BOX (PROTEIN, KOHLENH., ZUCKER, FETT, BALLASTST.) -->
           <div class="grid grid-cols-5 gap-1 bg-slate-950/70 rounded-xl p-2.5 border border-slate-800/80 text-center">
-            <div>
-              <div class="text-[10px] font-bold text-sky-400">Protein</div>
-              <div id="resProt" class="text-xs font-extrabold text-white">0g</div>
-            </div>
-            <div>
-              <div class="text-[10px] font-bold text-amber-400">Kohlenh.</div>
-              <div id="resCarbs" class="text-xs font-extrabold text-white">0g</div>
-            </div>
-            <div>
-              <div class="text-[10px] font-bold text-fuchsia-400">Zucker</div>
-              <div id="resSugar" class="text-xs font-extrabold text-white">0g</div>
-            </div>
-            <div>
-              <div class="text-[10px] font-bold text-rose-400">Fett</div>
-              <div id="resFat" class="text-xs font-extrabold text-white">0g</div>
-            </div>
-            <div>
-              <div class="text-[10px] font-bold text-emerald-400">Ballast.</div>
-              <div id="resFiber" class="text-xs font-extrabold text-white">0g</div>
-            </div>
+            <div><div class="text-[10px] font-bold text-sky-400">Protein</div><div id="resProt" class="text-xs font-extrabold text-white">0g</div></div>
+            <div><div class="text-[10px] font-bold text-amber-400">Kohlenh.</div><div id="resCarbs" class="text-xs font-extrabold text-white">0g</div></div>
+            <div><div class="text-[10px] font-bold text-fuchsia-400">Zucker</div><div id="resSugar" class="text-xs font-extrabold text-white">0g</div></div>
+            <div><div class="text-[10px] font-bold text-rose-400">Fett</div><div id="resFat" class="text-xs font-extrabold text-white">0g</div></div>
+            <div><div class="text-[10px] font-bold text-emerald-400">Ballast.</div><div id="resFiber" class="text-xs font-extrabold text-white">0g</div></div>
           </div>
 
           <!-- PORTIONS-SKALIERUNG (50% >>> 75% >>> 100% >>> 150% >>> 200% + SLIDER) -->
           <div class="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80 space-y-2">
             <div class="flex items-center justify-between text-[11px]">
-              <span class="font-bold text-slate-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-sliders text-emerald-400"></i> Portionsgröße anpassen:
-              </span>
+              <span class="font-bold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-sliders text-emerald-400"></i> Portionsgröße anpassen:</span>
               <span id="portionScaleHint" class="text-emerald-400 font-bold">1.0x (100%)</span>
             </div>
-
-            <input
-              id="portionScaleSlider"
-              type="range"
-              min="25"
-              max="250"
-              step="5"
-              value="100"
-              class="portion-slider"
-              oninput="setPortionScale(this.value)"
-            />
-
+            <input id="portionScaleSlider" type="range" min="25" max="250" step="5" value="100" class="portion-slider" oninput="setPortionScale(this.value)" />
             <div class="grid grid-cols-5 gap-1.5 pt-0.5">
-              <button type="button" data-scale="50" onclick="setPortionScale(50)" class="portion-pill-btn py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">
-                50%
-              </button>
-              <button type="button" data-scale="75" onclick="setPortionScale(75)" class="portion-pill-btn py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">
-                75%
-              </button>
-              <button type="button" data-scale="100" onclick="setPortionScale(100)" class="portion-pill-btn active py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">
-                100%
-              </button>
-              <button type="button" data-scale="150" onclick="setPortionScale(150)" class="portion-pill-btn py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">
-                150%
-              </button>
-              <button type="button" data-scale="200" onclick="setPortionScale(200)" class="portion-pill-btn py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">
-                200%
-              </button>
+              <button type="button" data-scale="50" onclick="setPortionScale(50)" class="portion-pill-btn py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">50%</button>
+              <button type="button" data-scale="75" onclick="setPortionScale(75)" class="portion-pill-btn py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">75%</button>
+              <button type="button" data-scale="100" onclick="setPortionScale(100)" class="portion-pill-btn active py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">100%</button>
+              <button type="button" data-scale="150" onclick="setPortionScale(150)" class="portion-pill-btn py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">150%</button>
+              <button type="button" data-scale="200" onclick="setPortionScale(200)" class="portion-pill-btn py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">200%</button>
             </div>
           </div>
 
           <!-- AKTIONEN -->
           <div class="flex gap-2 pt-1">
-            <button
-              id="cancelMealResBtn"
-              type="button"
-              onclick="hideMealResult()"
-              class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition"
-            >
-              Abbrechen
-            </button>
-            <button
-              id="addMealToLogBtn"
-              type="button"
-              class="flex-1 py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-md transition"
-            >
-              <i class="fa-solid fa-check"></i>
-              <span id="addMealBtnText">Jetzt ins Tagebuch eintragen</span>
+            <button id="cancelMealResBtn" type="button" onclick="hideMealResult()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition">Abbrechen</button>
+            <button id="addMealToLogBtn" type="button" class="flex-1 py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-md transition">
+              <i class="fa-solid fa-check"></i> <span id="addMealBtnText">Jetzt ins Tagebuch eintragen</span>
             </button>
           </div>
         </div>
@@ -425,14 +297,10 @@
       <!-- WASSER-TRACKER -->
       <div class="glass-card rounded-2xl p-3.5 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
-            <i class="fa-solid fa-glass-water"></i>
-          </div>
+          <div class="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400"><i class="fa-solid fa-glass-water"></i></div>
           <div>
             <div class="text-xs font-bold text-white">Wasser-Haushalt</div>
-            <div class="text-xs font-extrabold text-sky-400">
-              <span id="waterConsumed">0</span> / <span id="waterTarget">2500</span> ml
-            </div>
+            <div class="text-xs font-extrabold text-sky-400"><span id="waterConsumed">0</span> / <span id="waterTarget">2500</span> ml</div>
           </div>
         </div>
         <div class="flex items-center gap-1.5">
@@ -444,152 +312,88 @@
       <!-- HEUTIGES PROTOKOLL -->
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
-            <i class="fa-solid fa-utensils text-emerald-400"></i> Heutige Mahlzeiten
-          </h3>
-          <button type="button" onclick="clearTodayMeals()" class="text-[11px] font-semibold text-slate-400 hover:text-rose-400 transition">
-            Tag leeren
-          </button>
+          <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-utensils text-emerald-400"></i> Heutige Mahlzeiten</h3>
+          <button type="button" onclick="clearTodayMeals()" class="text-[11px] font-semibold text-slate-400 hover:text-rose-400 transition">Tag leeren</button>
         </div>
         <div id="diaryLogList" class="space-y-2"></div>
       </div>
     </section>
 
-    <!-- ==================== TAB 2: RESTEKÜCHE (SMART EXPIRY GUARD) ==================== -->
+    <!-- ==================== TAB 2: RESTEKÜCHE ==================== -->
     <section id="tab-fridge" class="tab-section space-y-4">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400">
-            <i class="fa-solid fa-temperature-arrow-down"></i>
-          </div>
+          <div class="w-9 h-9 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400"><i class="fa-solid fa-temperature-arrow-down"></i></div>
           <div>
             <h2 class="text-sm font-extrabold text-white">Resteküche & Smart Expiry Guard</h2>
             <p class="text-[11px] text-slate-400">Kühlschrank fotografieren — Frische-Check & High-Protein Rezepte</p>
           </div>
         </div>
-
         <div id="fridgePreviewContainer" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
           <img id="fridgePreviewImg" src="" alt="Kühlschrank" class="w-full max-h-52 object-cover" />
-          <button type="button" onclick="clearFridgePhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white hover:bg-rose-600 flex items-center justify-center border border-slate-700">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+          <button type="button" onclick="clearFridgePhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white hover:bg-rose-600 flex items-center justify-center border border-slate-700"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
-        <input
-          id="fridgeExtraText"
-          type="text"
-          placeholder="Optional: Vorräte ergänzen (z.B. Eier, Quark, Tomaten, Hähnchen)..."
-          class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
-        />
-
+        <input id="fridgeExtraText" type="text" placeholder="Optional: Vorräte ergänzen (z.B. Eier, Quark, Tomaten, Hähnchen)..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500" />
         <div class="flex gap-2.5">
           <input id="fridgePhotoInput" type="file" accept="image/*" class="hidden" onchange="handleFridgePhotoSelect(event)" />
-          <button type="button" onclick="document.getElementById('fridgePhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2">
-            <i class="fa-solid fa-camera text-teal-400"></i> Foto
-          </button>
-          <button id="scanFridgeBtn" type="button" onclick="runFridgeLeftoverAI()" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg">
-            <i class="fa-solid fa-magnifying-glass-chart"></i> Frische-Check & Rezepte
-          </button>
+          <button type="button" onclick="document.getElementById('fridgePhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-camera text-teal-400"></i> Foto</button>
+          <button id="scanFridgeBtn" type="button" onclick="runFridgeLeftoverAI()" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-magnifying-glass-chart"></i> Frische-Check & Rezepte</button>
         </div>
       </div>
-
       <div id="fridgeResultsContainer" class="space-y-3"></div>
     </section>
 
-    <!-- ==================== TAB 3: RESTAURANT (CONTEXTUAL MENU COMPANION) ==================== -->
+    <!-- ==================== TAB 3: RESTAURANT ==================== -->
     <section id="tab-menu" class="tab-section space-y-4">
       <div class="glass-card rounded-2xl p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
-              <i class="fa-solid fa-utensils"></i>
-            </div>
-            <div>
-              <h2 class="text-sm font-extrabold text-white">Restaurant & Speisekarten-Kompass</h2>
-              <p class="text-[11px] text-slate-400">Findet die besten Gerichte passend zu deinem Restbudget</p>
-            </div>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400"><i class="fa-solid fa-utensils"></i></div>
+          <div>
+            <h2 class="text-sm font-extrabold text-white">Restaurant & Speisekarten-Kompass</h2>
+            <p class="text-[11px] text-slate-400">Findet die besten Gerichte passend zu deinem Restbudget</p>
           </div>
         </div>
-
         <div id="menuBudgetBanner" class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs">
           <span class="text-slate-400">Verbleibendes Tagesbudget:</span>
           <span class="font-extrabold text-emerald-400"><span id="menuRemKcal">2000</span> kcal | <span id="menuRemProt">140</span>g P</span>
         </div>
-
         <div id="menuPreviewContainer" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
           <img id="menuPreviewImg" src="" alt="Speisekarte" class="w-full max-h-56 object-cover" />
-          <button type="button" onclick="clearMenuPhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white hover:bg-rose-600 flex items-center justify-center border border-slate-700">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+          <button type="button" onclick="clearMenuPhoto()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-950/80 text-white hover:bg-rose-600 flex items-center justify-center border border-slate-700"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
         <select id="menuGoalSelect" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white outline-none">
           <option value="Cut / Fettabbau (High Protein, kalorienarm)">🎯 Ziel: Fettabbau / Cut (High Protein, kalorienarm)</option>
           <option value="Muskelaufbau / Lean Bulk (Maximal Protein)">💪 Ziel: Muskelaufbau (Maximal Protein)</option>
           <option value="Low Carb / Keto freundlich">🥑 Ziel: Low Carb / Wenig Kohlenhydrate</option>
         </select>
-
-        <input
-          id="menuTextInput"
-          type="text"
-          placeholder="Oder Gerichte / Restaurant-Typ eintippen (z.B. Italiener, Döner, Steakhouse)..."
-          class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
-        />
-
+        <input id="menuTextInput" type="text" placeholder="Oder Gerichte / Restaurant-Typ eintippen (z.B. Italiener, Döner, Steakhouse)..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500" />
         <div class="flex gap-2.5">
           <input id="menuPhotoInput" type="file" accept="image/*" class="hidden" onchange="handleMenuPhotoSelect(event)" />
-          <button type="button" onclick="document.getElementById('menuPhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2">
-            <i class="fa-solid fa-camera text-amber-400"></i> Speisekarte
-          </button>
-          <button id="scanMenuBtn" type="button" onclick="runMenuScannerAI()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg">
-            <i class="fa-solid fa-compass"></i> Top-3 Auswahl berechnen
-          </button>
+          <button type="button" onclick="document.getElementById('menuPhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-camera text-amber-400"></i> Speisekarte</button>
+          <button id="scanMenuBtn" type="button" onclick="runMenuScannerAI()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-compass"></i> Top-3 Auswahl berechnen</button>
         </div>
       </div>
-
       <div id="menuResultsContainer" class="space-y-3"></div>
     </section>
 
-    <!-- ==================== TAB 4: KOCHSTUDIO (AI MACRO CHEF) ==================== -->
+    <!-- ==================== TAB 4: KOCHSTUDIO ==================== -->
     <section id="tab-chef" class="tab-section space-y-4">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400">
-            <i class="fa-solid fa-hat-chef"></i>
-          </div>
+          <div class="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400"><i class="fa-solid fa-hat-chef"></i></div>
           <div>
             <h2 class="text-sm font-extrabold text-white">KI-Kochstudio (Macro Chef)</h2>
             <p class="text-[11px] text-slate-400">Maßgeschneiderte Fitness-Rezepte nach deinen Ziel-Makros</p>
           </div>
         </div>
-
-        <input
-          id="chefCravingInput"
-          type="text"
-          placeholder="Worauf hast du Lust? (z.B. Pfannengericht mit Hähnchen, süßes Quark-Dessert)..."
-          class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
-        />
-
+        <input id="chefCravingInput" type="text" placeholder="Worauf hast du Lust? (z.B. Pfannengericht mit Hähnchen, süßes Quark-Dessert)..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500" />
         <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label class="text-[10px] font-bold text-slate-400 uppercase">Max. Kalorien</label>
-            <input id="chefKcalLimit" type="number" value="600" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-white" />
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-slate-400 uppercase">Min. Protein (g)</label>
-            <input id="chefProtMin" type="number" value="45" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-white" />
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-slate-400 uppercase">Max. Zeit (Min)</label>
-            <input id="chefTimeMax" type="number" value="20" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-white" />
-          </div>
+          <div><label class="text-[10px] font-bold text-slate-400 uppercase">Max. Kalorien</label><input id="chefKcalLimit" type="number" value="600" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-white" /></div>
+          <div><label class="text-[10px] font-bold text-slate-400 uppercase">Min. Protein (g)</label><input id="chefProtMin" type="number" value="45" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-white" /></div>
+          <div><label class="text-[10px] font-bold text-slate-400 uppercase">Max. Zeit (Min)</label><input id="chefTimeMax" type="number" value="20" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-white" /></div>
         </div>
-
-        <button id="generateChefBtn" type="button" onclick="runChefRecipeAI()" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg">
-          <i class="fa-solid fa-wand-sparkles"></i> Fitness-Rezept generieren
-        </button>
+        <button id="generateChefBtn" type="button" onclick="runChefRecipeAI()" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-wand-sparkles"></i> Fitness-Rezept generieren</button>
       </div>
-
       <div id="chefResultsContainer" class="space-y-3"></div>
     </section>
 
@@ -597,52 +401,21 @@
     <section id="tab-profile" class="tab-section space-y-4">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between">
-          <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
-            <i class="fa-solid fa-user-gear text-emerald-400"></i> Körperdaten & Kalorienrechner
-          </h2>
+          <h2 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-user-gear text-emerald-400"></i> Körperdaten & Kalorienrechner</h2>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Mifflin-St Jeor</span>
         </div>
-
         <div class="grid grid-cols-2 gap-2.5">
-          <div>
-            <label class="text-[11px] text-slate-400 font-semibold">Geschlecht</label>
-            <select id="profGender" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white">
-              <option value="male">Männlich</option>
-              <option value="female">Weiblich</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-[11px] text-slate-400 font-semibold">Alter (Jahre)</label>
-            <input id="profAge" type="number" value="35" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white" />
-          </div>
-          <div>
-            <label class="text-[11px] text-slate-400 font-semibold">Größe (cm)</label>
-            <input id="profHeight" type="number" value="180" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white" />
-          </div>
-          <div>
-            <label class="text-[11px] text-slate-400 font-semibold">Aktuelles Gewicht (kg)</label>
-            <input id="profWeight" type="number" step="0.1" value="90" oninput="updateWeightDiffBanner()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white" />
-          </div>
-          <div>
-            <label class="text-[11px] text-emerald-400 font-bold">Zielgewicht (kg)</label>
-            <input id="profTargetWeight" type="number" step="0.1" value="80" oninput="updateWeightDiffBanner()" class="w-full mt-1 bg-slate-900 border border-emerald-500/50 rounded-xl px-3 py-2 text-xs font-bold text-emerald-300" />
-          </div>
-          <div>
-            <label class="text-[11px] text-slate-400 font-semibold">Alltags-Aktivität (PAL)</label>
-            <select id="profActivity" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white">
-              <option value="1.2">Sitzend / Büro (1.2)</option>
-              <option value="1.375">Leicht aktiv (1.375)</option>
-              <option value="1.55">Mäßig aktiv / Sport (1.55)</option>
-              <option value="1.725">Sehr aktiv / körperlich (1.725)</option>
-            </select>
-          </div>
+          <div><label class="text-[11px] text-slate-400 font-semibold">Geschlecht</label><select id="profGender" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white"><option value="male">Männlich</option><option value="female">Weiblich</option></select></div>
+          <div><label class="text-[11px] text-slate-400 font-semibold">Alter (Jahre)</label><input id="profAge" type="number" value="35" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white" /></div>
+          <div><label class="text-[11px] text-slate-400 font-semibold">Größe (cm)</label><input id="profHeight" type="number" value="180" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white" /></div>
+          <div><label class="text-[11px] text-slate-400 font-semibold">Aktuelles Gewicht (kg)</label><input id="profWeight" type="number" step="0.1" value="90" oninput="updateWeightDiffBanner()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white" /></div>
+          <div><label class="text-[11px] text-emerald-400 font-bold">Zielgewicht (kg)</label><input id="profTargetWeight" type="number" step="0.1" value="80" oninput="updateWeightDiffBanner()" class="w-full mt-1 bg-slate-900 border border-emerald-500/50 rounded-xl px-3 py-2 text-xs font-bold text-emerald-300" /></div>
+          <div><label class="text-[11px] text-slate-400 font-semibold">Alltags-Aktivität (PAL)</label><select id="profActivity" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white"><option value="1.2">Sitzend / Büro (1.2)</option><option value="1.375">Leicht aktiv (1.375)</option><option value="1.55">Mäßig aktiv / Sport (1.55)</option><option value="1.725">Sehr aktiv / körperlich (1.725)</option></select></div>
         </div>
-
         <div id="profWeightDiffBanner" class="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 flex items-center justify-between">
           <span>Differenz zum Zielgewicht:</span>
           <span id="profWeightDiffValue" class="font-extrabold text-emerald-400">-10.0 kg</span>
         </div>
-
         <div>
           <label class="text-[11px] text-slate-400 font-semibold">Strategisches Ziel</label>
           <select id="profGoal" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white">
@@ -651,42 +424,21 @@
             <option value="bulk">💪 Muskelaufbau / Aufbau (+300 kcal)</option>
           </select>
         </div>
-
-        <button type="button" onclick="calculateMifflinTargets()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-xs font-extrabold text-emerald-400 flex items-center justify-center gap-2 transition">
-          <i class="fa-solid fa-calculator"></i> Optimale Zielwerte automatisch berechnen
-        </button>
-
+        <button type="button" onclick="calculateMifflinTargets()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-xs font-extrabold text-emerald-400 flex items-center justify-center gap-2 transition"><i class="fa-solid fa-calculator"></i> Optimale Zielwerte automatisch berechnen</button>
         <div class="grid grid-cols-4 gap-2 pt-1">
-          <div>
-            <label class="text-[10px] font-bold text-slate-400">Ziel kcal</label>
-            <input id="profTargetKcal" type="number" value="2000" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" />
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-sky-400">Protein (g)</label>
-            <input id="profTargetProt" type="number" value="150" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" />
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-amber-400">Kohlenh. (g)</label>
-            <input id="profTargetCarbs" type="number" value="180" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" />
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-rose-400">Fett (g)</label>
-            <input id="profTargetFat" type="number" value="65" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" />
-          </div>
+          <div><label class="text-[10px] font-bold text-slate-400">Ziel kcal</label><input id="profTargetKcal" type="number" value="2000" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" /></div>
+          <div><label class="text-[10px] font-bold text-sky-400">Protein (g)</label><input id="profTargetProt" type="number" value="150" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" /></div>
+          <div><label class="text-[10px] font-bold text-amber-400">Kohlenh. (g)</label><input id="profTargetCarbs" type="number" value="180" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" /></div>
+          <div><label class="text-[10px] font-bold text-rose-400">Fett (g)</label><input id="profTargetFat" type="number" value="65" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" /></div>
         </div>
-
-        <button type="button" onclick="saveProfileFromUI()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg transition">
-          <i class="fa-solid fa-floppy-disk mr-1"></i> Profil & Tagesziele dauerhaft speichern
-        </button>
+        <button type="button" onclick="saveProfileFromUI()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg transition"><i class="fa-solid fa-floppy-disk mr-1"></i> Profil & Tagesziele dauerhaft speichern</button>
       </div>
 
       <!-- BACKUP & DATEN -->
       <div class="glass-card rounded-2xl p-4 space-y-2.5">
         <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Datensicherung & System</h3>
         <div class="grid grid-cols-2 gap-2">
-          <button type="button" onclick="exportBackupJSON()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-download text-emerald-400"></i> Backup Export
-          </button>
+          <button type="button" onclick="exportBackupJSON()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center justify-center gap-1.5"><i class="fa-solid fa-download text-emerald-400"></i> Backup Export</button>
           <label class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center justify-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-upload text-sky-400"></i> Backup Import
             <input type="file" accept=".json" class="hidden" onchange="importBackupJSON(event)" />
@@ -701,57 +453,31 @@
   <div id="apiKeyModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl max-w-md w-full p-5 border border-slate-700 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-          <i class="fa-solid fa-key text-emerald-400"></i> Gemini API-Key Tresor (4-Layer)
-        </h3>
-        <button type="button" onclick="closeApiKeyModal()" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+        <h3 class="text-base font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-key text-emerald-400"></i> Gemini API-Key Tresor (4-Layer)</h3>
+        <button type="button" onclick="closeApiKeyModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <p class="text-xs text-slate-300 leading-relaxed">
-        Dein API-Schlüssel wird mehrfach gesichert lokal auf deinem Gerät gespeichert (State, Backup-Slot & Cookie) und niemals öffentlich hochgeladen.
-      </p>
-      <input
-        id="apiKeyInput"
-        type="password"
-        placeholder="AIzaSy..."
-        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none focus:border-emerald-500"
-      />
+      <p class="text-xs text-slate-300 leading-relaxed">Dein API-Schlüssel wird mehrfach gesichert lokal auf deinem Gerät gespeichert (State, Backup-Slot & Cookie) und niemals öffentlich hochgeladen.</p>
+      <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none focus:border-emerald-500" />
       <div class="flex gap-2">
-        <button type="button" onclick="clearSavedApiKey()" class="px-3.5 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-xs font-bold text-rose-300">
-          Löschen
-        </button>
-        <button type="button" onclick="saveApiKeyFromModal()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs">
-          API-Key dauerhaft speichern
-        </button>
+        <button type="button" onclick="clearSavedApiKey()" class="px-3.5 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-xs font-bold text-rose-300">Löschen</button>
+        <button type="button" onclick="saveApiKeyFromModal()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs">API-Key dauerhaft speichern</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== MODAL 2: GAST-CODE & EINLADUNGS-CENTER ==================== -->
+  <!-- ==================== MODAL 2: GAST-CODE & EINLADUNGS-CENTER (INKL. WHATSAPP) ==================== -->
   <div id="inviteModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl max-w-md w-full p-5 border border-slate-700 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-          <i class="fa-solid fa-ticket text-amber-400"></i> Gast-Code & Einladungs-Center
-        </h3>
-        <button type="button" onclick="closeInviteModal()" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+        <h3 class="text-base font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-ticket text-amber-400"></i> Gast-Code & Einladungs-Center</h3>
+        <button type="button" onclick="closeInviteModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 space-y-2">
         <div class="text-xs font-bold text-amber-300">Gast-Zugang aktivieren</div>
         <div class="flex gap-2">
-          <input
-            id="guestCodeInput"
-            type="text"
-            placeholder="z.B. FIT-ANNA-2025"
-            class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white uppercase"
-          />
-          <button type="button" onclick="activateGuestCode()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs">
-            Aktivieren
-          </button>
+          <input id="guestCodeInput" type="text" placeholder="z.B. FIT-ANNA-2025" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white uppercase" />
+          <button type="button" onclick="activateGuestCode()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs">Aktivieren</button>
         </div>
       </div>
 
@@ -763,12 +489,13 @@
         </div>
         <div class="bg-slate-950 rounded-xl p-2.5 border border-slate-800 flex items-center justify-between">
           <code id="generatedInviteCode" class="text-xs font-extrabold text-emerald-400">FIT-GAST-2025</code>
-          <button type="button" onclick="copySingleInviteCode()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-200">
-            Code kopieren
-          </button>
+          <button type="button" onclick="copySingleInviteCode()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-200">Code kopieren</button>
         </div>
-        <button type="button" onclick="copyFullInviteLink()" class="w-full py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300 flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-share-nodes"></i> Komplettpaket-Link (inkl. API-Key) kopieren
+        <button type="button" onclick="copyFullInviteLink()" class="w-full py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300 flex items-center justify-center gap-1.5 transition">
+          <i class="fa-solid fa-link"></i> Komplettpaket-Link (inkl. API-Key) kopieren
+        </button>
+        <button type="button" onclick="shareInviteViaWhatsApp()" class="w-full py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition">
+          <i class="fa-brands fa-whatsapp text-base"></i> Direkt per WhatsApp senden (Einladungslink)
         </button>
       </div>
     </div>
@@ -779,28 +506,23 @@
     <div class="max-w-lg mx-auto grid grid-cols-5 gap-1">
       <button type="button" onclick="switchTab('diary')" id="nav-diary" class="nav-btn active relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-chart-pie text-base"></i>
-        <span class="text-[10px] font-semibold mt-1">Tagebuch</span>
+        <i class="fa-solid fa-chart-pie text-base"></i><span class="text-[10px] font-semibold mt-1">Tagebuch</span>
       </button>
       <button type="button" onclick="switchTab('fridge')" id="nav-fridge" class="nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-temperature-arrow-down text-base"></i>
-        <span class="text-[10px] font-semibold mt-1">Resteküche</span>
+        <i class="fa-solid fa-temperature-arrow-down text-base"></i><span class="text-[10px] font-semibold mt-1">Resteküche</span>
       </button>
       <button type="button" onclick="switchTab('menu')" id="nav-menu" class="nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-utensils text-base"></i>
-        <span class="text-[10px] font-semibold mt-1">Restaurant</span>
+        <i class="fa-solid fa-utensils text-base"></i><span class="text-[10px] font-semibold mt-1">Restaurant</span>
       </button>
       <button type="button" onclick="switchTab('chef')" id="nav-chef" class="nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-hat-wizard text-base"></i>
-        <span class="text-[10px] font-semibold mt-1">Kochstudio</span>
+        <i class="fa-solid fa-hat-wizard text-base"></i><span class="text-[10px] font-semibold mt-1">Kochstudio</span>
       </button>
       <button type="button" onclick="switchTab('profile')" id="nav-profile" class="nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-user-gear text-base"></i>
-        <span class="text-[10px] font-semibold mt-1">Profil</span>
+        <i class="fa-solid fa-user-gear text-base"></i><span class="text-[10px] font-semibold mt-1">Profil</span>
       </button>
     </div>
   </nav>
@@ -829,10 +551,7 @@
 
   function getTodayISO() {
     const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   function createDefaultState() {
@@ -841,20 +560,10 @@
       geminiApiKey: '',
       guestCode: '',
       profile: {
-        gender: 'male',
-        age: 35,
-        height: 180,
-        weight: 90,
-        targetWeight: 80,
-        activity: 1.375,
-        goal: 'cut',
-        targetKcal: 2000,
-        targetProt: 150,
-        targetCarbs: 180,
-        targetFat: 65,
-        targetFiber: 30,
-        targetSugar: 35,
-        waterTarget: 2500
+        gender: 'male', age: 35, height: 180, weight: 90, targetWeight: 80,
+        activity: 1.375, goal: 'cut',
+        targetKcal: 2000, targetProt: 150, targetCarbs: 180, targetFat: 65,
+        targetFiber: 30, targetSugar: 35, waterTarget: 2500
       },
       days: {}
     };
@@ -862,11 +571,8 @@
 
   function setKeyCookie(val) {
     try {
-      if (!val) {
-        document.cookie = `${COOKIE_KEY_NAME}=; path=/; max-age=0; SameSite=Lax`;
-      } else {
-        document.cookie = `${COOKIE_KEY_NAME}=${encodeURIComponent(val)}; path=/; max-age=31536000; SameSite=Lax`;
-      }
+      if (!val) document.cookie = `${COOKIE_KEY_NAME}=; path=/; max-age=0; SameSite=Lax`;
+      else document.cookie = `${COOKIE_KEY_NAME}=${encodeURIComponent(val)}; path=/; max-age=31536000; SameSite=Lax`;
     } catch (_) {}
   }
 
@@ -874,32 +580,21 @@
     try {
       const m = document.cookie.match(new RegExp('(?:^|; )' + COOKIE_KEY_NAME + '=([^;]*)'));
       return m ? decodeURIComponent(m[1]) : '';
-    } catch (_) {
-      return '';
-    }
+    } catch (_) { return ''; }
   }
 
   function persistApiKeyRedundant(key) {
     const clean = (key || '').trim();
     try {
-      if (clean) {
-        localStorage.setItem(API_KEY_BACKUP_SLOT, clean);
-        setKeyCookie(clean);
-      } else {
-        localStorage.removeItem(API_KEY_BACKUP_SLOT);
-        setKeyCookie('');
-      }
+      if (clean) { localStorage.setItem(API_KEY_BACKUP_SLOT, clean); setKeyCookie(clean); }
+      else { localStorage.removeItem(API_KEY_BACKUP_SLOT); setKeyCookie(''); }
     } catch (_) {}
   }
 
   function recoverRedundantApiKey(parsedState) {
     let k = (parsedState && typeof parsedState.geminiApiKey === 'string') ? parsedState.geminiApiKey.trim() : '';
-    if (!k) {
-      try { k = (localStorage.getItem(API_KEY_BACKUP_SLOT) || '').trim(); } catch (_) {}
-    }
-    if (!k) {
-      k = (getKeyCookie() || '').trim();
-    }
+    if (!k) { try { k = (localStorage.getItem(API_KEY_BACKUP_SLOT) || '').trim(); } catch (_) {} }
+    if (!k) k = (getKeyCookie() || '').trim();
     return k;
   }
 
@@ -907,15 +602,9 @@
     const def = createDefaultState();
     let loaded = null;
     try {
-      const rawV2 = localStorage.getItem(STORAGE_KEY_V2);
-      const rawV1 = !rawV2 ? localStorage.getItem(STORAGE_KEY_V1) : null;
-      const raw = rawV2 || rawV1;
-      if (raw) {
-        loaded = JSON.parse(raw);
-      }
-    } catch (_) {
-      loaded = null;
-    }
+      const raw = localStorage.getItem(STORAGE_KEY_V2) || localStorage.getItem(STORAGE_KEY_V1);
+      if (raw) loaded = JSON.parse(raw);
+    } catch (_) { loaded = null; }
 
     if (!loaded || typeof loaded !== 'object') {
       const recovered = recoverRedundantApiKey(null);
@@ -924,15 +613,10 @@
     }
 
     const merged = {
-      ...def,
-      ...loaded,
-      profile: {
-        ...def.profile,
-        ...(loaded.profile || {})
-      },
+      ...def, ...loaded,
+      profile: { ...def.profile, ...(loaded.profile || {}) },
       days: (loaded.days && typeof loaded.days === 'object') ? loaded.days : {}
     };
-
     delete merged.steps;
     delete merged.cycling;
 
@@ -941,7 +625,6 @@
       merged.geminiApiKey = recoveredKey;
       persistApiKeyRedundant(recoveredKey);
     }
-
     return merged;
   }
 
@@ -949,23 +632,14 @@
 
   function saveState() {
     try {
-      if (state.geminiApiKey) {
-        persistApiKeyRedundant(state.geminiApiKey);
-      }
+      if (state.geminiApiKey) persistApiKeyRedundant(state.geminiApiKey);
       localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state));
-    } catch (e) {
-      console.error('State-Speicherfehler:', e);
-    }
+    } catch (e) { console.error('State-Speicherfehler:', e); }
   }
 
   function getTodayData() {
     const iso = getTodayISO();
-    if (!state.days[iso]) {
-      state.days[iso] = {
-        meals: [],
-        waterMl: 0
-      };
-    }
+    if (!state.days[iso]) state.days[iso] = { meals: [], waterMl: 0 };
     return state.days[iso];
   }
 
@@ -973,7 +647,6 @@
     const container = document.getElementById('toastContainer');
     if (!container) return;
     container.innerHTML = '';
-
     const colors = {
       success: 'bg-emerald-950/95 border-emerald-500/60 text-emerald-200',
       error: 'bg-rose-950/95 border-rose-500/60 text-rose-200',
@@ -986,77 +659,49 @@
       warning: 'fa-circle-exclamation text-amber-400',
       info: 'fa-bolt text-emerald-400'
     };
-
     const el = document.createElement('div');
     el.className = `pointer-events-auto px-4 py-3 rounded-2xl border shadow-2xl flex items-center gap-2.5 text-xs font-bold backdrop-blur-md transition-all ${colors[type] || colors.info}`;
     el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-sm shrink-0"></i><span class="leading-snug">${message}</span>`;
     container.appendChild(el);
-
-    setTimeout(() => {
-      if (el.parentNode === container) {
-        el.remove();
-      }
-    }, 3400);
+    setTimeout(() => { if (el.parentNode === container) el.remove(); }, 3400);
   }
 
   function switchTab(tabId) {
     document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-
     const targetSec = document.getElementById(`tab-${tabId}`);
     const targetNav = document.getElementById(`nav-${tabId}`);
     if (targetSec) targetSec.classList.add('active');
     if (targetNav) targetNav.classList.add('active');
-
-    if (tabId === 'menu') {
-      updateMenuBudgetBanner();
-    } else if (tabId === 'profile') {
-      syncProfileToUI();
-    }
+    if (tabId === 'menu') updateMenuBudgetBanner();
+    else if (tabId === 'profile') syncProfileToUI();
   }
 
-  // ============================================================================
-  // WEBKIT METAL-GPU MEMORY ISOLATION & CAMERA ENGINE (compressImageFile)
-  // ============================================================================
   function renderImageToJpegBase64(img, objectUrl, maxDim, quality) {
     const origW = img.naturalWidth || img.width || 800;
     const origH = img.naturalHeight || img.height || 600;
-    let width = origW;
-    let height = origH;
-
+    let width = origW, height = origH;
     if (width > maxDim || height > maxDim) {
-      if (width >= height) {
-        height = Math.max(1, Math.round((height * maxDim) / width));
-        width = maxDim;
-      } else {
-        width = Math.max(1, Math.round((width * maxDim) / height));
-        height = maxDim;
-      }
+      if (width >= height) { height = Math.max(1, Math.round((height * maxDim) / width)); width = maxDim; }
+      else { width = Math.max(1, Math.round((width * maxDim) / height)); height = maxDim; }
     }
-
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d', { alpha: false });
-
     try {
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
       const dataUrl = canvas.toDataURL('image/jpeg', quality);
-      if (objectUrl) {
-        try { URL.revokeObjectURL(objectUrl); } catch (_) {}
-      }
+      if (objectUrl) { try { URL.revokeObjectURL(objectUrl); } catch (_) {} }
       ctx.clearRect(0, 0, width, height);
       canvas.width = 0;
       canvas.height = 0;
-
       const commaIdx = dataUrl.indexOf(',');
       return commaIdx >= 0 ? dataUrl.slice(commaIdx + 1) : dataUrl;
     } catch (err) {
-      if (objectUrl) {
-        try { URL.revokeObjectURL(objectUrl); } catch (_) {}
-      }
+      if (objectUrl) { try { URL.revokeObjectURL(objectUrl); } catch (_) {} }
       canvas.width = 0;
       canvas.height = 0;
       throw err;
@@ -1065,14 +710,9 @@
 
   function compressImageFile(file, mode = 'standard') {
     return new Promise((resolve, reject) => {
-      if (!file) {
-        reject(new Error('Keine Bilddatei ausgewählt.'));
-        return;
-      }
-
+      if (!file) { reject(new Error('Keine Bilddatei ausgewählt.')); return; }
       const maxDim = (mode === 'menu' || mode === 'label') ? 1080 : 800;
       const quality = (mode === 'menu' || mode === 'label') ? 0.78 : 0.76;
-
       let settled = false;
       const objectUrl = URL.createObjectURL(file);
       const img = new Image();
@@ -1080,8 +720,7 @@
       const watchdog = setTimeout(() => {
         if (settled) return;
         settled = true;
-        img.onload = null;
-        img.onerror = null;
+        img.onload = null; img.onerror = null;
         try { img.removeAttribute('src'); } catch (_) {}
         try { URL.revokeObjectURL(objectUrl); } catch (_) {}
         reject(new Error('Bildverarbeitung Zeitüberschreitung (8s).'));
@@ -1091,8 +730,7 @@
         if (settled) return;
         settled = true;
         clearTimeout(watchdog);
-        img.onload = null;
-        img.onerror = null;
+        img.onload = null; img.onerror = null;
         try {
           const base64 = renderImageToJpegBase64(img, objectUrl, maxDim, quality);
           try { img.removeAttribute('src'); } catch (_) {}
@@ -1107,34 +745,23 @@
         if (settled) return;
         settled = true;
         clearTimeout(watchdog);
-        img.onload = null;
-        img.onerror = null;
+        img.onload = null; img.onerror = null;
         try { img.removeAttribute('src'); } catch (_) {}
         try { URL.revokeObjectURL(objectUrl); } catch (_) {}
-        reject(new Error('Bilddatei konnte auf diesem Gerät nicht dekodiert werden.'));
+        reject(new Error('Bilddatei konnte nicht dekodiert werden.'));
       };
 
       img.src = objectUrl;
     });
   }
 
-  // ============================================================================
-  // ISOLATED ABORT-CONTROLLER PIPELINE & MULTI-QUOTA ROUTING (callGeminiRequest)
-  // ============================================================================
   async function fetchWithIsolatedSignal(url, options, timeoutMs) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
+      const response = await fetch(url, { ...options, signal: controller.signal });
       const text = await response.text();
-      return {
-        ok: response.ok,
-        status: response.status,
-        text
-      };
+      return { ok: response.ok, status: response.status, text };
     } finally {
       clearTimeout(timer);
     }
@@ -1149,7 +776,6 @@
       'gemini-2.5-pro',
       'gemma-3-27b-it'
     ];
-
     let cachedFast = null;
     try { cachedFast = localStorage.getItem(FAST_MODEL_KEY); } catch (_) {}
     if (cachedFast && (/1\.5|2\.0/.test(cachedFast))) {
@@ -1177,35 +803,19 @@
     }
 
     const queue = [];
-    const addUnique = (m) => {
-      if (m && !/1\.5|2\.0/.test(m) && !queue.includes(m)) {
-        queue.push(m);
-      }
-    };
-
+    const addUnique = (m) => { if (m && !/1\.5|2\.0/.test(m) && !queue.includes(m)) queue.push(m); };
     if (cachedFast) addUnique(cachedFast);
     preferredOrder.forEach(addUnique);
-    if (Array.isArray(liveModelsCache)) {
-      liveModelsCache.forEach(addUnique);
-    }
+    if (Array.isArray(liveModelsCache)) liveModelsCache.forEach(addUnique);
     return queue;
   }
 
   async function callGeminiRequest(promptText, base64Image = null, timeoutMs = 14000) {
     const apiKey = (state.geminiApiKey || recoverRedundantApiKey(state) || '').trim();
-    if (!apiKey) {
-      throw new Error('Kein Gemini API-Key hinterlegt. Bitte oben rechts auf „API-Key" klicken.');
-    }
+    if (!apiKey) throw new Error('Kein Gemini API-Key hinterlegt. Bitte oben rechts auf „API-Key" klicken.');
 
     const parts = [{ text: promptText }];
-    if (base64Image) {
-      parts.push({
-        inline_data: {
-          mime_type: 'image/jpeg',
-          data: base64Image
-        }
-      });
-    }
+    if (base64Image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Image } });
 
     const modelsQueue = await buildLiveResilientQueue(apiKey);
     let lastError = 'Keine Antwort vom KI-Server.';
@@ -1213,26 +823,16 @@
     for (const modelName of modelsQueue) {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
       const supportsThinking = /^gemini-(2\.5-flash|3)/i.test(modelName);
-
       const basePayload = {
         contents: [{ role: 'user', parts }],
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 1200
-        }
+        generationConfig: { temperature: 0.1, maxOutputTokens: 1200 }
       };
-      if (supportsThinking) {
-        basePayload.generationConfig.thinkingConfig = { thinkingBudget: 0 };
-      }
+      if (supportsThinking) basePayload.generationConfig.thinkingConfig = { thinkingBudget: 0 };
 
       try {
         let res = await fetchWithIsolatedSignal(
           endpoint,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(basePayload)
-          },
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(basePayload) },
           timeoutMs
         );
 
@@ -1243,11 +843,7 @@
           };
           res = await fetchWithIsolatedSignal(
             endpoint,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(fallbackPayload)
-            },
+            { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fallbackPayload) },
             timeoutMs
           );
         }
@@ -1257,7 +853,6 @@
           lastError = `HTTP ${res.status} (${modelName})`;
           continue;
         }
-
         if (!res.ok) {
           lastError = `HTTP ${res.status}: ${(res.text || '').slice(0, 120)}`;
           continue;
@@ -1265,16 +860,8 @@
 
         const parsed = JSON.parse(res.text);
         const candParts = parsed?.candidates?.[0]?.content?.parts || [];
-        const textOut = candParts
-          .filter(p => !p.thought && typeof p.text === 'string')
-          .map(p => p.text)
-          .join('\n')
-          .trim();
-
-        if (!textOut) {
-          lastError = 'Leere Modell-Antwort.';
-          continue;
-        }
+        const textOut = candParts.filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('\n').trim();
+        if (!textOut) { lastError = 'Leere Modell-Antwort.'; continue; }
 
         try { localStorage.setItem(FAST_MODEL_KEY, modelName); } catch (_) {}
         return textOut;
@@ -1283,28 +870,17 @@
         continue;
       }
     }
-
     throw new Error(`KI-Anfrage fehlgeschlagen (${lastError}).`);
   }
 
   function extractJSON(raw) {
-    if (!raw || typeof raw !== 'string') {
-      throw new Error('Keine gültige Textantwort für JSON-Extraktion.');
-    }
-    const cleaned = raw
-      .replace(/```json/gi, '')
-      .replace(/```/g, '')
-      .trim();
-
-    try {
-      return JSON.parse(cleaned);
-    } catch (_) {}
-
+    if (!raw || typeof raw !== 'string') throw new Error('Keine gültige Textantwort für JSON-Extraktion.');
+    const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+    try { return JSON.parse(cleaned); } catch (_) {}
     const firstBrace = cleaned.indexOf('{');
     const lastBrace = cleaned.lastIndexOf('}');
     if (firstBrace !== -1 && lastBrace > firstBrace) {
-      const candidate = cleaned.slice(firstBrace, lastBrace + 1);
-      return JSON.parse(candidate);
+      return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
     }
     throw new Error('JSON-Struktur konnte nicht gelesen werden.');
   }
@@ -1312,284 +888,61 @@
   // 100g-NORMIERTES DE/PL-LEXIKON & STRENG WORTGRENZEN-GESICHERTER PARSER
   // ============================================================================
   const FOOD_LEXICON = [
-    // --- KAFFEE, MILCHGETRÄNKE & ZUCKER (INKL. LATTE MACCHIATO & LÖFFEL-EINHEITEN) ---
-    {
-      name: 'Latte Macchiato',
-      keywords: ['latte macchiato', 'macchiato', 'latte'],
-      kcal: 46, p: 2.8, c: 4.2, sugar: 4.1, f: 1.9, fiber: 0,
-      defaultPortion: 300
-    },
-    {
-      name: 'Kaffee Schwarz / Espresso / Americano',
-      keywords: ['kaffee schwarz', 'schwarzer kaffee', 'espresso', 'americano', 'kawa czarna', 'czarna kawa'],
-      kcal: 2, p: 0.2, c: 0.2, sugar: 0, f: 0, fiber: 0,
-      defaultPortion: 250
-    },
-    {
-      name: 'Kaffee mit Milch / Cappuccino',
-      keywords: ['cappuccino', 'kaffee mit milch', 'milchkaffee', 'kawa z mlekiem', 'flat white', 'kaffee', 'kawa'],
-      kcal: 36, p: 1.9, c: 2.8, sugar: 2.7, f: 1.8, fiber: 0,
-      defaultPortion: 250
-    },
-    {
-      name: 'Zucker / Haushaltszucker',
-      keywords: ['zucker', 'haushaltszucker', 'rohrzucker', 'brauner zucker', 'cukier'],
-      kcal: 400, p: 0, c: 100, sugar: 100, f: 0, fiber: 0,
-      defaultPortion: 5
-    },
-    {
-      name: 'Honig / Miód',
-      keywords: ['honig', 'bienenhonig', 'miod'],
-      kcal: 304, p: 0.3, c: 82, sugar: 81, f: 0, fiber: 0.2,
-      defaultPortion: 15
-    },
-
-    // --- HIGH PROTEIN DESSERTS, MOUSSE, PUDDING & MILCHPRODUKTE ---
-    {
-      name: 'High Protein Mousse / Pudding Schoko',
-      keywords: ['high protein yoghurt mousse schoko', 'high protein mousse schoko', 'protein mousse schoko', 'protein mousse', 'high protein mousse', 'protein pudding schoko', 'high protein pudding', 'high protein yoghurt', 'high protein joghurt', 'protein joghurt', 'protein yoghurt', 'mousse schoko'],
-      kcal: 84, p: 10.0, c: 5.5, sugar: 4.0, f: 2.0, fiber: 0.8,
-      defaultPortion: 200
-    },
-    {
-      name: 'Magerquark / Twaróg chudy',
-      keywords: ['magerquark', 'speisequark magerstufe', 'quark', 'twarog chudy', 'twarog'],
-      kcal: 68, p: 12.2, c: 3.9, sugar: 3.9, f: 0.3, fiber: 0,
-      defaultPortion: 250
-    },
-    {
-      name: 'Skyr Natur',
-      keywords: ['skyr', 'skyr natur'],
-      kcal: 64, p: 11.0, c: 4.0, sugar: 4.0, f: 0.2, fiber: 0,
-      defaultPortion: 200
-    },
-    {
-      name: 'Griechischer Joghurt / Naturjoghurt',
-      keywords: ['griechischer joghurt', 'naturjoghurt', 'joghurt', 'yoghurt', 'jogurt naturalny', 'jogurt grecki', 'jogurt'],
-      kcal: 95, p: 6.5, c: 4.2, sugar: 4.1, f: 5.5, fiber: 0,
-      defaultPortion: 180
-    },
-    {
-      name: 'Körniger Frischkäse / Hüttenkäse / Serek wiejski',
-      keywords: ['korniger frischkase', 'huttenkase', 'cottage cheese', 'serek wiejski'],
-      kcal: 98, p: 12.5, c: 2.7, sugar: 2.5, f: 4.0, fiber: 0,
-      defaultPortion: 200
-    },
-    {
-      name: 'Whey Protein Shake',
-      keywords: ['protein shake', 'proteinshake', 'whey shake', 'whey protein', 'eiweissshake', 'odzywka bialkowa'],
-      kcal: 120, p: 24.0, c: 3.0, sugar: 1.5, f: 1.5, fiber: 0,
-      defaultPortion: 100
-    },
-    {
-      name: 'Vollmilch (3,5%) / Mleko',
-      keywords: ['vollmilch', 'milch', 'mleko'],
-      kcal: 64, p: 3.3, c: 4.8, sugar: 4.8, f: 3.5, fiber: 0,
-      defaultPortion: 200
-    },
-    {
-      name: 'Gouda / Schnittkäse / Ser żółty',
-      keywords: ['gouda', 'schnittkase', 'edamer', 'emmentaler', 'ser zolty', 'kase'],
-      kcal: 356, p: 25.0, c: 0.1, sugar: 0.1, f: 28.0, fiber: 0,
-      defaultPortion: 30
-    },
-    {
-      name: 'Mozzarella',
-      keywords: ['mozzarella'],
-      kcal: 245, p: 18.5, c: 1.0, sugar: 1.0, f: 18.5, fiber: 0,
-      defaultPortion: 125
-    },
-
-    // --- EIER & FRÜHSTÜCK (STRENG AUF EIGENSTÄNDIGES WORT "EI" / "EIER" GEPRÜFT) ---
-    {
-      name: 'Hühnerei (Größe M/L)',
-      keywords: ['huhner ei', 'huhnerei', 'gekochtes ei', 'spiegelei', 'ruherei', 'jajko', 'jajka', 'eier', 'ei'],
-      kcal: 143, p: 12.6, c: 0.7, sugar: 0.5, f: 9.5, fiber: 0,
-      defaultPortion: 60
-    },
-    {
-      name: 'Haferflocken / Płatki owsiane',
-      keywords: ['haferflocken', 'porridge', 'oatmeal', 'platki owsiane', 'owsianka'],
-      kcal: 372, p: 13.5, c: 58.7, sugar: 1.1, f: 7.0, fiber: 10.0,
-      defaultPortion: 60
-    },
-    {
-      name: 'Vollkornbrot / Chleb razowy',
-      keywords: ['vollkornbrot', 'graubrot', 'schwarzbrot', 'brot', 'scheibe brot', 'chleb razowy', 'chleb', 'kromka chleba'],
-      kcal: 225, p: 7.5, c: 41.0, sugar: 2.8, f: 2.2, fiber: 6.5,
-      defaultPortion: 50
-    },
-    {
-      name: 'Brötchen / Semmel / Bułka',
-      keywords: ['brotchen', 'weizenbrotchen', 'semmel', 'bulka', 'kaiserbrotchen'],
-      kcal: 278, p: 8.8, c: 55.0, sugar: 2.5, f: 1.8, fiber: 3.2,
-      defaultPortion: 65
-    },
-    {
-      name: 'Butter / Masło',
-      keywords: ['butter', 'maslo'],
-      kcal: 741, p: 0.7, c: 0.6, sugar: 0.6, f: 82.0, fiber: 0,
-      defaultPortion: 10
-    },
-
-    // --- OBST & GEMÜSE ---
-    {
-      name: 'Apfel / Jabłko',
-      keywords: ['apfel', 'apfel frisch', 'jablko'],
-      kcal: 52, p: 0.3, c: 11.4, sugar: 10.3, f: 0.2, fiber: 2.4,
-      defaultPortion: 150
-    },
-    {
-      name: 'Banane / Banan',
-      keywords: ['banane', 'bananen', 'banan'],
-      kcal: 89, p: 1.1, c: 20.0, sugar: 14.2, f: 0.3, fiber: 2.6,
-      defaultPortion: 120
-    },
-    {
-      name: 'Beeren / Blaubeeren / Erdbeeren',
-      keywords: ['blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'beeren', 'truskawki', 'borowki', 'maliny'],
-      kcal: 42, p: 0.8, c: 7.6, sugar: 5.8, f: 0.3, fiber: 2.4,
-      defaultPortion: 125
-    },
-    {
-      name: 'Gemischter Salat / Tomate / Gurke',
-      keywords: ['gemischter salat', 'beilagensalat', 'gurkensalat', 'tomatensalat', 'tomate', 'gurke', 'salatka', 'pomidor', 'ogorek'],
-      kcal: 32, p: 1.2, c: 3.8, sugar: 2.4, f: 1.2, fiber: 1.5,
-      defaultPortion: 180
-    },
-
-    // --- FLEISCH, FISCH & POLNISCH/DEUTSCHE HAUPTGERICHTE (100g-NORMIERT) ---
-    {
-      name: 'Hähnchenbrustfilet (gebraten) / Pierś z kurczaka',
-      keywords: ['hahnchenbrustfilet', 'hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'piers z kurczaka', 'kurczak'],
-      kcal: 152, p: 29.5, c: 0.5, sugar: 0, f: 3.2, fiber: 0,
-      defaultPortion: 200
-    },
-    {
-      name: 'Schweinefleisch in Soße / Mięso wieprzowe w sosie',
-      keywords: ['mieso wieprzowe w sosie', 'wieprzowina w sosie', 'schweinefleisch in sosse', 'schweinebraten in sosse', 'schweinegulasch', 'gulasz wieprzowy', 'schweinefleisch', 'wieprzowina'],
-      kcal: 178, p: 18.5, c: 3.8, sugar: 1.2, f: 9.8, fiber: 0.4,
-      defaultPortion: 220
-    },
-    {
-      name: 'Rindergulasch / Gulasz wołowy',
-      keywords: ['rindergulasch', 'gulasch', 'gulasz wolowy', 'gulasz', 'rindfleisch in sosse'],
-      kcal: 158, p: 19.8, c: 3.5, sugar: 1.4, f: 7.0, fiber: 0.5,
-      defaultPortion: 250
-    },
-    {
-      name: 'Schnitzel paniert / Kotlet schabowy',
-      keywords: ['kotlet schabowy', 'schabowy', 'schweineschnitzel', 'wiener schnitzel', 'schnitzel'],
-      kcal: 255, p: 21.0, c: 13.5, sugar: 0.8, f: 13.0, fiber: 0.8,
-      defaultPortion: 180
-    },
-    {
-      name: 'Hackfleischkotelett / Frikadelle / Kotlet mielony',
-      keywords: ['kotlet mielony', 'mielony', 'frikadelle', 'bulette', 'fleischpflanzerl'],
-      kcal: 242, p: 17.5, c: 7.5, sugar: 0.9, f: 15.8, fiber: 0.6,
-      defaultPortion: 140
-    },
-    {
-      name: 'Lasagne Bolognese',
-      keywords: ['lasagne bolognese', 'lasagne', 'lasagna'],
-      kcal: 160, p: 9.8, c: 13.5, sugar: 2.8, f: 7.2, fiber: 1.2,
-      defaultPortion: 300
-    },
-    {
-      name: 'Pierogi (Ruskie / mit Fleisch)',
-      keywords: ['pierogi ruskie', 'pierogi z miesem', 'pierogi'],
-      kcal: 198, p: 7.2, c: 29.5, sugar: 1.2, f: 5.5, fiber: 1.6,
-      defaultPortion: 250
-    },
-    {
-      name: 'Bigos (Polnischer Krauteintopf)',
-      keywords: ['bigos'],
-      kcal: 112, p: 7.8, c: 5.2, sugar: 2.5, f: 6.5, fiber: 2.4,
-      defaultPortion: 300
-    },
-    {
-      name: 'Lachsfilet / Łosoś',
-      keywords: ['lachsfilet', 'lachs', 'losos'],
-      kcal: 208, p: 20.4, c: 0, sugar: 0, f: 13.4, fiber: 0,
-      defaultPortion: 160
-    },
-    {
-      name: 'Thunfisch im eigenen Saft / Tuńczyk',
-      keywords: ['thunfisch', 'tunczyk'],
-      kcal: 112, p: 25.5, c: 0, sugar: 0, f: 1.0, fiber: 0,
-      defaultPortion: 140
-    },
-    {
-      name: 'Döner Kebab (im Brot)',
-      keywords: ['doner kebab', 'doner', 'kebab', 'kebap'],
-      kcal: 215, p: 13.5, c: 21.0, sugar: 3.2, f: 8.2, fiber: 1.8,
-      defaultPortion: 350
-    },
-    {
-      name: 'Pizza (Margherita / Salami / Schinken)',
-      keywords: ['pizza salami', 'pizza margherita', 'pizza schinken', 'pizza'],
-      kcal: 245, p: 10.5, c: 29.0, sugar: 3.1, f: 9.5, fiber: 1.8,
-      defaultPortion: 350
-    },
-
-    // --- BEILAGEN & GETRÄNKE (GEKOCHT, 100g-BASIS) ---
-    {
-      name: 'Reis gekocht / Ryż',
-      keywords: ['reis gekocht', 'basmatireis', 'jasminreis', 'reis', 'ryz'],
-      kcal: 130, p: 2.7, c: 28.2, sugar: 0.1, f: 0.3, fiber: 0.4,
-      defaultPortion: 180
-    },
-    {
-      name: 'Nudeln gekocht / Pasta / Makaron',
-      keywords: ['spaghetti', 'nudeln gekocht', 'nudeln', 'pasta', 'makaron'],
-      kcal: 152, p: 5.5, c: 30.2, sugar: 0.6, f: 0.9, fiber: 1.8,
-      defaultPortion: 200
-    },
-    {
-      name: 'Kartoffeln gekocht / Ziemniaki',
-      keywords: ['salzkartoffeln', 'pellkartoffeln', 'kartoffeln', 'kartoffel', 'ziemniaki'],
-      kcal: 73, p: 2.0, c: 15.4, sugar: 0.8, f: 0.1, fiber: 1.8,
-      defaultPortion: 220
-    },
-    {
-      name: 'Pommes Frites / Frytki',
-      keywords: ['pommes frites', 'pommes', 'frytki'],
-      kcal: 292, p: 3.4, c: 36.5, sugar: 0.5, f: 14.2, fiber: 3.2,
-      defaultPortion: 160
-    },
-    {
-      name: 'Apfelschorle / Saftschorle',
-      keywords: ['apfelschorle', 'saftschorle', 'apfelsaftschorle'],
-      kcal: 26, p: 0.1, c: 6.2, sugar: 5.9, f: 0, fiber: 0,
-      defaultPortion: 330
-    }
+    { name: 'Latte Macchiato', keywords: ['latte macchiato', 'macchiato', 'latte'], kcal: 46, p: 2.8, c: 4.2, sugar: 4.1, f: 1.9, fiber: 0, defaultPortion: 300 },
+    { name: 'Kaffee Schwarz / Espresso / Americano', keywords: ['kaffee schwarz', 'schwarzer kaffee', 'espresso', 'americano', 'kawa czarna', 'czarna kawa'], kcal: 2, p: 0.2, c: 0.2, sugar: 0, f: 0, fiber: 0, defaultPortion: 250 },
+    { name: 'Kaffee mit Milch / Cappuccino', keywords: ['cappuccino', 'kaffee mit milch', 'milchkaffee', 'kawa z mlekiem', 'flat white', 'kaffee', 'kawa'], kcal: 36, p: 1.9, c: 2.8, sugar: 2.7, f: 1.8, fiber: 0, defaultPortion: 250 },
+    { name: 'Zucker / Haushaltszucker', keywords: ['zucker', 'haushaltszucker', 'rohrzucker', 'brauner zucker', 'cukier'], kcal: 400, p: 0, c: 100, sugar: 100, f: 0, fiber: 0, defaultPortion: 5 },
+    { name: 'Honig / Miód', keywords: ['honig', 'bienenhonig', 'miod'], kcal: 304, p: 0.3, c: 82, sugar: 81, f: 0, fiber: 0.2, defaultPortion: 15 },
+    { name: 'High Protein Mousse / Pudding Schoko', keywords: ['high protein yoghurt mousse schoko', 'high protein mousse schoko', 'protein mousse schoko', 'protein mousse', 'high protein mousse', 'protein pudding schoko', 'high protein pudding', 'high protein yoghurt', 'high protein joghurt', 'protein joghurt', 'protein yoghurt', 'mousse schoko'], kcal: 84, p: 10.0, c: 5.5, sugar: 4.0, f: 2.0, fiber: 0.8, defaultPortion: 200 },
+    { name: 'Magerquark / Twaróg chudy', keywords: ['magerquark', 'speisequark magerstufe', 'quark', 'twarog chudy', 'twarog'], kcal: 68, p: 12.2, c: 3.9, sugar: 3.9, f: 0.3, fiber: 0, defaultPortion: 250 },
+    { name: 'Skyr Natur', keywords: ['skyr', 'skyr natur'], kcal: 64, p: 11.0, c: 4.0, sugar: 4.0, f: 0.2, fiber: 0, defaultPortion: 200 },
+    { name: 'Griechischer Joghurt / Naturjoghurt', keywords: ['griechischer joghurt', 'naturjoghurt', 'joghurt', 'yoghurt', 'jogurt naturalny', 'jogurt grecki', 'jogurt'], kcal: 95, p: 6.5, c: 4.2, sugar: 4.1, f: 5.5, fiber: 0, defaultPortion: 180 },
+    { name: 'Körniger Frischkäse / Hüttenkäse / Serek wiejski', keywords: ['korniger frischkase', 'huttenkase', 'cottage cheese', 'serek wiejski'], kcal: 98, p: 12.5, c: 2.7, sugar: 2.5, f: 4.0, fiber: 0, defaultPortion: 200 },
+    { name: 'Whey Protein Shake', keywords: ['protein shake', 'proteinshake', 'whey shake', 'whey protein', 'eiweissshake', 'odzywka bialkowa'], kcal: 120, p: 24.0, c: 3.0, sugar: 1.5, f: 1.5, fiber: 0, defaultPortion: 100 },
+    { name: 'Vollmilch (3,5%) / Mleko', keywords: ['vollmilch', 'milch', 'mleko'], kcal: 64, p: 3.3, c: 4.8, sugar: 4.8, f: 3.5, fiber: 0, defaultPortion: 200 },
+    { name: 'Gouda / Schnittkäse / Ser żółty', keywords: ['gouda', 'schnittkase', 'edamer', 'emmentaler', 'ser zolty', 'kase'], kcal: 356, p: 25.0, c: 0.1, sugar: 0.1, f: 28.0, fiber: 0, defaultPortion: 30 },
+    { name: 'Mozzarella', keywords: ['mozzarella'], kcal: 245, p: 18.5, c: 1.0, sugar: 1.0, f: 18.5, fiber: 0, defaultPortion: 125 },
+    { name: 'Hühnerei (Größe M/L)', keywords: ['huhner ei', 'huhnerei', 'gekochtes ei', 'spiegelei', 'ruherei', 'jajko', 'jajka', 'eier', 'ei'], kcal: 143, p: 12.6, c: 0.7, sugar: 0.5, f: 9.5, fiber: 0, defaultPortion: 60 },
+    { name: 'Haferflocken / Płatki owsiane', keywords: ['haferflocken', 'porridge', 'oatmeal', 'platki owsiane', 'owsianka'], kcal: 372, p: 13.5, c: 58.7, sugar: 1.1, f: 7.0, fiber: 10.0, defaultPortion: 60 },
+    { name: 'Vollkornbrot / Chleb razowy', keywords: ['vollkornbrot', 'graubrot', 'schwarzbrot', 'brot', 'scheibe brot', 'chleb razowy', 'chleb', 'kromka chleba'], kcal: 225, p: 7.5, c: 41.0, sugar: 2.8, f: 2.2, fiber: 6.5, defaultPortion: 50 },
+    { name: 'Brötchen / Semmel / Bułka', keywords: ['brotchen', 'weizenbrotchen', 'semmel', 'bulka', 'kaiserbrotchen'], kcal: 278, p: 8.8, c: 55.0, sugar: 2.5, f: 1.8, fiber: 3.2, defaultPortion: 65 },
+    { name: 'Butter / Masło', keywords: ['butter', 'maslo'], kcal: 741, p: 0.7, c: 0.6, sugar: 0.6, f: 82.0, fiber: 0, defaultPortion: 10 },
+    { name: 'Apfel / Jabłko', keywords: ['apfel', 'apfel frisch', 'jablko'], kcal: 52, p: 0.3, c: 11.4, sugar: 10.3, f: 0.2, fiber: 2.4, defaultPortion: 150 },
+    { name: 'Banane / Banan', keywords: ['banane', 'bananen', 'banan'], kcal: 89, p: 1.1, c: 20.0, sugar: 14.2, f: 0.3, fiber: 2.6, defaultPortion: 120 },
+    { name: 'Beeren / Blaubeeren / Erdbeeren', keywords: ['blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'beeren', 'truskawki', 'borowki', 'maliny'], kcal: 42, p: 0.8, c: 7.6, sugar: 5.8, f: 0.3, fiber: 2.4, defaultPortion: 125 },
+    { name: 'Gemischter Salat / Tomate / Gurke', keywords: ['gemischter salat', 'beilagensalat', 'gurkensalat', 'tomatensalat', 'tomate', 'gurke', 'salatka', 'pomidor', 'ogorek'], kcal: 32, p: 1.2, c: 3.8, sugar: 2.4, f: 1.2, fiber: 1.5, defaultPortion: 180 },
+    { name: 'Hähnchenbrustfilet (gebraten) / Pierś z kurczaka', keywords: ['hahnchenbrustfilet', 'hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'piers z kurczaka', 'kurczak'], kcal: 152, p: 29.5, c: 0.5, sugar: 0, f: 3.2, fiber: 0, defaultPortion: 200 },
+    { name: 'Schweinefleisch in Soße / Mięso wieprzowe w sosie', keywords: ['mieso wieprzowe w sosie', 'wieprzowina w sosie', 'schweinefleisch in sosse', 'schweinebraten in sosse', 'schweinegulasch', 'gulasz wieprzowy', 'schweinefleisch', 'wieprzowina'], kcal: 178, p: 18.5, c: 3.8, sugar: 1.2, f: 9.8, fiber: 0.4, defaultPortion: 220 },
+    { name: 'Rindergulasch / Gulasz wołowy', keywords: ['rindergulasch', 'gulasch', 'gulasz wolowy', 'gulasz', 'rindfleisch in sosse'], kcal: 158, p: 19.8, c: 3.5, sugar: 1.4, f: 7.0, fiber: 0.5, defaultPortion: 250 },
+    { name: 'Schnitzel paniert / Kotlet schabowy', keywords: ['kotlet schabowy', 'schabowy', 'schweineschnitzel', 'wiener schnitzel', 'schnitzel'], kcal: 255, p: 21.0, c: 13.5, sugar: 0.8, f: 13.0, fiber: 0.8, defaultPortion: 180 },
+    { name: 'Hackfleischkotelett / Frikadelle / Kotlet mielony', keywords: ['kotlet mielony', 'mielony', 'frikadelle', 'bulette', 'fleischpflanzerl'], kcal: 242, p: 17.5, c: 7.5, sugar: 0.9, f: 15.8, fiber: 0.6, defaultPortion: 140 },
+    { name: 'Lasagne Bolognese', keywords: ['lasagne bolognese', 'lasagne', 'lasagna'], kcal: 160, p: 9.8, c: 13.5, sugar: 2.8, f: 7.2, fiber: 1.2, defaultPortion: 300 },
+    { name: 'Pierogi (Ruskie / mit Fleisch)', keywords: ['pierogi ruskie', 'pierogi z miesem', 'pierogi'], kcal: 198, p: 7.2, c: 29.5, sugar: 1.2, f: 5.5, fiber: 1.6, defaultPortion: 250 },
+    { name: 'Bigos (Polnischer Krauteintopf)', keywords: ['bigos'], kcal: 112, p: 7.8, c: 5.2, sugar: 2.5, f: 6.5, fiber: 2.4, defaultPortion: 300 },
+    { name: 'Lachsfilet / Łosoś', keywords: ['lachsfilet', 'lachs', 'losos'], kcal: 208, p: 20.4, c: 0, sugar: 0, f: 13.4, fiber: 0, defaultPortion: 160 },
+    { name: 'Thunfisch im eigenen Saft / Tuńczyk', keywords: ['thunfisch', 'tunczyk'], kcal: 112, p: 25.5, c: 0, sugar: 0, f: 1.0, fiber: 0, defaultPortion: 140 },
+    { name: 'Döner Kebab (im Brot)', keywords: ['doner kebab', 'doner', 'kebab', 'kebap'], kcal: 215, p: 13.5, c: 21.0, sugar: 3.2, f: 8.2, fiber: 1.8, defaultPortion: 350 },
+    { name: 'Pizza (Margherita / Salami / Schinken)', keywords: ['pizza salami', 'pizza margherita', 'pizza schinken', 'pizza'], kcal: 245, p: 10.5, c: 29.0, sugar: 3.1, f: 9.5, fiber: 1.8, defaultPortion: 350 },
+    { name: 'Reis gekocht / Ryż', keywords: ['reis gekocht', 'basmatireis', 'jasminreis', 'reis', 'ryz'], kcal: 130, p: 2.7, c: 28.2, sugar: 0.1, f: 0.3, fiber: 0.4, defaultPortion: 180 },
+    { name: 'Nudeln gekocht / Pasta / Makaron', keywords: ['spaghetti', 'nudeln gekocht', 'nudeln', 'pasta', 'makaron'], kcal: 152, p: 5.5, c: 30.2, sugar: 0.6, f: 0.9, fiber: 1.8, defaultPortion: 200 },
+    { name: 'Kartoffeln gekocht / Ziemniaki', keywords: ['salzkartoffeln', 'pellkartoffeln', 'kartoffeln', 'kartoffel', 'ziemniaki'], kcal: 73, p: 2.0, c: 15.4, sugar: 0.8, f: 0.1, fiber: 1.8, defaultPortion: 220 },
+    { name: 'Pommes Frites / Frytki', keywords: ['pommes frites', 'pommes', 'frytki'], kcal: 292, p: 3.4, c: 36.5, sugar: 0.5, f: 14.2, fiber: 3.2, defaultPortion: 160 },
+    { name: 'Apfelschorle / Saftschorle', keywords: ['apfelschorle', 'saftschorle', 'apfelsaftschorle'], kcal: 26, p: 0.1, c: 6.2, sugar: 5.9, f: 0, fiber: 0, defaultPortion: 330 }
   ];
 
   function foldDiacritics(str) {
     if (!str) return '';
-    return String(str)
-      .toLowerCase()
-      .replace(/ä/g, 'a')
-      .replace(/ö/g, 'o')
-      .replace(/ü/g, 'u')
-      .replace(/ß/g, 'ss')
-      .replace(/ą/g, 'a')
-      .replace(/ć/g, 'c')
-      .replace(/ę/g, 'e')
-      .replace(/ł/g, 'l')
-      .replace(/ń/g, 'n')
-      .replace(/ó/g, 'o')
-      .replace(/ś/g, 's')
-      .replace(/[źż]/g, 'z')
-      .replace(/\s+/g, ' ')
-      .trim();
+    return String(str).toLowerCase()
+      .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss')
+      .replace(/ą/g, 'a').replace(/ć/g, 'c').replace(/ę/g, 'e').replace(/ł/g, 'l')
+      .replace(/ń/g, 'n').replace(/ó/g, 'o').replace(/ś/g, 's').replace(/[źż]/g, 'z')
+      .replace(/\s+/g, ' ').trim();
   }
 
   function escapeRegExp(s) {
     return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  // Prüft Keywords strikt an echten Wortgrenzen (verhindert "ei" in "kleine" oder "Protein"!)
   function matchKeywordWithBoundary(foldedText, kw) {
     const cleanKw = foldDiacritics(kw);
     if (!cleanKw) return false;
@@ -1601,11 +954,7 @@
     const raw = (rawQuery || '').trim();
     if (!raw || raw.length < 2) return null;
 
-    const segments = raw
-      .split(/\s*(?:\+|,|\bund\b|\boraz\b)\s*/i)
-      .map(s => s.trim())
-      .filter(Boolean);
-
+    const segments = raw.split(/\s*(?:\+|,|\bund\b|\boraz\b)\s*/i).map(s => s.trim()).filter(Boolean);
     if (segments.length === 0) return null;
 
     const matchedParts = [];
@@ -1614,14 +963,10 @@
     for (const seg of segments) {
       const foldedSeg = foldDiacritics(seg);
 
-      // 1. Prüfe auf explizite Kalorienangabe im Segment (z.B. "167kcal" oder "167 kcal")
       let explicitKcal = null;
       const kcalMatch = foldedSeg.match(/(?:^|\s)(\d{1,4}(?:[.,]\d+)?)\s*kcal(?=$|\s)/i);
-      if (kcalMatch) {
-        explicitKcal = parseFloat(kcalMatch[1].replace(',', '.'));
-      }
+      if (kcalMatch) explicitKcal = parseFloat(kcalMatch[1].replace(',', '.'));
 
-      // 2. Prüfe auf Löffel-Einheiten ("4 kleine Löffel", "2 TL", "1 EL", "Teelöffel", "Esslöffel")
       let spoonGrams = null;
       let spoonLabel = '';
       const tspMatch = foldedSeg.match(/(?:(\d+(?:[.,]\d+)?)\s*)?(?:kleine\s+loffel|kleiner\s+loffel|kleine\s+loeffel|teeloffel|tl|lyzeczk[ai]|loffel|loeffel)\b/i);
@@ -1637,17 +982,12 @@
         spoonLabel = `${count} TL (${spoonGrams}g)`;
       }
 
-      // 3. Beste Lexikon-Übereinstimmung mit strikter Wortgrenze suchen
-      let bestEntry = null;
-      let bestKwLen = 0;
-      let matchedKeyword = '';
-
+      let bestEntry = null, bestKwLen = 0, matchedKeyword = '';
       for (const entry of FOOD_LEXICON) {
         for (const kw of entry.keywords) {
           if (matchKeywordWithBoundary(foldedSeg, kw)) {
-            const len = kw.length;
-            if (len > bestKwLen) {
-              bestKwLen = len;
+            if (kw.length > bestKwLen) {
+              bestKwLen = kw.length;
               bestEntry = entry;
               matchedKeyword = foldDiacritics(kw);
             }
@@ -1655,39 +995,26 @@
         }
       }
 
-      // Spezialfall: "4 kleine Löffel" (ohne ausgeschriebenes Wort "Zucker" nach Kaffee/Latte)
       if (!bestEntry && spoonGrams !== null) {
         bestEntry = FOOD_LEXICON.find(e => e.name.startsWith('Zucker')) || null;
         matchedKeyword = 'zucker';
       }
+      if (!bestEntry) return null;
 
-      if (!bestEntry) {
-        return null;
-      }
-
-      // 4. Coverage-Gate: Prüfe, ob unbekannte Wörter im Segment stehen
       let remainder = foldedSeg
         .replace(new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(matchedKeyword)}(?=$|[^a-z0-9])`, 'ig'), ' ')
         .replace(/\b\d+(?:[.,]\d+)?\s*(?:kcal|g|gramm|ml|l|tl|el|st|stk|stuck|x)?\b/gi, ' ')
         .replace(/\b(?:kleine|kleiner|klein|grosse|grosser|gross|loffel|loeffel|teeloffel|essloffel|lyzeczka|lyzeczki|lyzka|lyzki|portion|tasse|tassen|glas|glaser|becher|teller|scheibe|scheiben|mit|ohne|und|oder|frisch|gekocht|gebraten|gr|m|l|high|protein|yoghurt|joghurt|jogurt|mousse|schoko|vanille)\b/gi, ' ')
-        .replace(/[^a-z0-9\s]/g, ' ')
-        .trim();
+        .replace(/[^a-z0-9\s]/g, ' ').trim();
 
       const unknownWords = remainder.split(/\s+/).filter(w => w.length >= 3);
-      if (unknownWords.length > 0) {
-        return null;
-      }
+      if (unknownWords.length > 0) return null;
 
-      // 5. Portionsmenge berechnen
       let grams = bestEntry.defaultPortion || 100;
       let portionLabel = `${grams}g`;
-
       let sizeMult = 1.0;
-      if (/\b(?:gross|grosse|grosser|large|duzy|duza)\b/i.test(foldedSeg)) {
-        sizeMult = 1.4;
-      } else if (/\b(?:klein|kleiner|small|maly|mala)\b/i.test(foldedSeg) && spoonGrams === null) {
-        sizeMult = 0.7;
-      }
+      if (/\b(?:gross|grosse|grosser|large|duzy|duza)\b/i.test(foldedSeg)) sizeMult = 1.4;
+      else if (/\b(?:klein|kleiner|small|maly|mala)\b/i.test(foldedSeg) && spoonGrams === null) sizeMult = 0.7;
 
       const cleanSegWithoutKcal = foldedSeg.replace(/\b\d+(?:[.,]\d+)?\s*kcal\b/gi, '');
       const gramMatch = cleanSegWithoutKcal.match(/(\d+(?:[.,]\d+)?)\s*(g|gramm|ml)\b/i);
@@ -1755,9 +1082,6 @@
     };
   }
 
-  // ============================================================================
-  // PORTIONS-REGLER (50% >>> 75% >>> 100% >>> 150% >>> 200%) & ERGEBNIS-ANZEIGE
-  // ============================================================================
   function setPortionScale(percentValue) {
     if (!activeMealBaseResult) return;
     const pct = Math.max(25, Math.min(250, Math.round(Number(percentValue) || 100)));
@@ -1765,13 +1089,10 @@
     const factor = pct / 100;
 
     const slider = document.getElementById('portionScaleSlider');
-    if (slider && Number(slider.value) !== pct) {
-      slider.value = String(pct);
-    }
+    if (slider && Number(slider.value) !== pct) slider.value = String(pct);
 
     document.querySelectorAll('.portion-pill-btn').forEach(btn => {
-      const btnScale = Number(btn.getAttribute('data-scale'));
-      btn.classList.toggle('active', btnScale === pct);
+      btn.classList.toggle('active', Number(btn.getAttribute('data-scale')) === pct);
     });
 
     const scaledKcal = Math.round((activeMealBaseResult.kcal || 0) * factor);
@@ -1782,7 +1103,7 @@
     const scaledFiber = Math.round((activeMealBaseResult.fiber || 0) * factor);
 
     document.getElementById('portionScaleBadge').textContent = `Portion: ${pct}%`;
-    document.getElementById('portionScaleHint').textContent = `${(factor).toFixed(2).replace(/\.00$/, '.0')}x (${pct}%)`;
+    document.getElementById('portionScaleHint').textContent = `${factor.toFixed(2).replace(/\.00$/, '.0')}x (${pct}%)`;
     document.getElementById('resKcal').textContent = String(scaledKcal);
     document.getElementById('resProt').textContent = `${scaledProt}g`;
     document.getElementById('resCarbs').textContent = `${scaledCarbs}g`;
@@ -1808,20 +1129,15 @@
 
     const box = document.getElementById('mealAnalysisResult');
     const badge = document.getElementById('resSourceBadge');
-
-    if (res.source === 'lexicon') {
-      badge.innerHTML = `<i class="fa-solid fa-bolt text-amber-400"></i> 0.0s Lokales Wörterbuch (Offline-Ready)`;
-    } else {
-      badge.innerHTML = `<i class="fa-solid fa-microchip text-sky-400"></i> Gemini Flash Vision`;
-    }
+    badge.innerHTML = res.source === 'lexicon'
+      ? `<i class="fa-solid fa-bolt text-amber-400"></i> 0.0s Lokales Wörterbuch (Offline-Ready)`
+      : `<i class="fa-solid fa-microchip text-sky-400"></i> Gemini Flash Vision`;
 
     document.getElementById('resMealName').textContent = activeMealBaseResult.mealName;
     document.getElementById('resExplanation').textContent = activeMealBaseResult.explanation;
-
     setPortionScale(100);
 
-    const addBtn = document.getElementById('addMealToLogBtn');
-    addBtn.onclick = () => {
+    document.getElementById('addMealToLogBtn').onclick = () => {
       const factor = activePortionScalePercent / 100;
       const finalName = activePortionScalePercent === 100
         ? activeMealBaseResult.mealName
@@ -1840,7 +1156,6 @@
       clearMealPhoto();
       clearMealText();
     };
-
     box.classList.remove('hidden');
   }
 
@@ -1849,9 +1164,6 @@
     activeMealBaseResult = null;
   }
 
-  // ============================================================================
-  // MAHLZEITEN-SCANNER (FOTO & TEXT, OCR-ANCHORING & ATWATER-VALIDIERUNG)
-  // ============================================================================
   async function handleMealPhotoSelect(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -1895,7 +1207,6 @@
       return;
     }
 
-    // 1. Falls NUR Text eingegeben wurde: Zuerst strenges 0.0s Wörterbuch prüfen
     if (!hasPhoto && textVal) {
       const lexHit = resolveFromLexicon(textVal);
       if (lexHit) {
@@ -1915,12 +1226,7 @@
           const fG = Math.max(1, Math.round((kVal - (pG * 4 + cG * 4)) / 9));
           showMealResult({
             mealName: textVal.replace(/\s*\d+\s*kcal/i, '').trim() || 'Mahlzeit',
-            kcal: kVal,
-            protein: pG,
-            carbs: cG,
-            sugar: sG,
-            fat: fG,
-            fiber: 1,
+            kcal: kVal, protein: pG, carbs: cG, sugar: sG, fat: fG, fiber: 1,
             explanation: `Exakte Kalorienübernahme (${kVal} kcal) aus deiner Texteingabe.`,
             source: 'lexicon'
           });
@@ -1929,7 +1235,6 @@
       }
     }
 
-    // 2. Gemini KI Vision / Text Analyse mit Mutex-Lock & 15s Watchdog
     const btn = document.getElementById('analyzeMealBtn');
     const origBtnHtml = btn.innerHTML;
     isVisionBusy = true;
@@ -1986,19 +1291,12 @@ REGELN:
         kcal = Math.round(parseFloat(explicitKcalInText[1].replace(',', '.')));
       } else if (!data.isNutritionLabel) {
         const atwater = Math.round(4 * p + 4 * c + 9 * f + 2 * fib);
-        if (kcal === 0 || Math.abs(kcal - atwater) > Math.max(35, atwater * 0.22)) {
-          kcal = atwater;
-        }
+        if (kcal === 0 || Math.abs(kcal - atwater) > Math.max(35, atwater * 0.22)) kcal = atwater;
       }
 
       showMealResult({
         mealName: data.mealName || textVal || 'Erkannte Mahlzeit',
-        kcal,
-        protein: p,
-        carbs: c,
-        sugar: sug,
-        fat: f,
-        fiber: fib,
+        kcal, protein: p, carbs: c, sugar: sug, fat: f, fiber: fib,
         explanation: data.explanation || 'KI-Analyse abgeschlossen.',
         source: 'ai'
       });
@@ -2013,9 +1311,6 @@ REGELN:
     }
   }
 
-  // ============================================================================
-  // 1-KLICK SCHNELLWAHL & TAGEBUCH-VERWALTUNG (INKL. BALLASTSTOFFE & ZUCKER)
-  // ============================================================================
   function quickAddPreset(presetId) {
     const presets = {
       coffee_black: { name: '☕ Kaffee Schwarz (250ml)', kcal: 0, protein: 0, carbs: 0, sugar: 0, fat: 0, fiber: 0 },
@@ -2027,15 +1322,12 @@ REGELN:
       protein_shake: { name: '🥤 Whey Protein-Shake (30g Pulver)', kcal: 120, protein: 24, carbs: 3, sugar: 1, fat: 2, fiber: 0 }
     };
     const item = presets[presetId];
-    if (!item) return;
-    addMealEntry(item);
+    if (item) addMealEntry(item);
   }
 
   function addMealEntry(entry) {
     const today = getTodayData();
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-
+    const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
     today.meals.unshift({
       id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
       time: timeStr,
@@ -2047,7 +1339,6 @@ REGELN:
       fat: Math.max(0, Math.round(Number(entry.fat) || 0)),
       fiber: Math.max(0, Math.round(Number(entry.fiber) || 0))
     });
-
     saveState();
     renderDiaryUI();
     showToast(`${entry.name} (+${entry.kcal} kcal) gespeichert!`, 'success');
@@ -2081,8 +1372,8 @@ REGELN:
   function renderDiaryUI() {
     const today = getTodayData();
     const prof = state.profile;
-
     let sumKcal = 0, sumP = 0, sumC = 0, sumSugar = 0, sumF = 0, sumFiber = 0;
+
     for (const m of today.meals) {
       sumKcal += Number(m.kcal) || 0;
       sumP += Number(m.protein) || 0;
@@ -2120,7 +1411,6 @@ REGELN:
     document.getElementById('fatTarget').textContent = String(tFat);
     document.getElementById('fatBar').style.width = `${Math.min(100, Math.round((sumF / tFat) * 100))}%`;
 
-    // Ballaststoffe (0/30g) & Zucker (0/35g)
     const fibConsEl = document.getElementById('fiberConsumed');
     const fibTargEl = document.getElementById('fiberTarget');
     const fibBarEl = document.getElementById('fiberBar');
@@ -2176,9 +1466,6 @@ REGELN:
     }
   }
 
-  // ============================================================================
-  // MODUL 2: RESTEKÜCHE & SMART EXPIRY GUARD (runFridgeLeftoverAI)
-  // ============================================================================
   async function handleFridgePhotoSelect(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -2188,9 +1475,7 @@ REGELN:
       document.getElementById('fridgePreviewImg').src = `data:image/jpeg;base64,${b64}`;
       document.getElementById('fridgePreviewContainer').classList.remove('hidden');
       showToast('Kühlschrank-Foto bereit!', 'success');
-    } catch (err) {
-      showToast(err.message || 'Bildfehler.', 'error');
-    }
+    } catch (err) { showToast(err.message || 'Bildfehler.', 'error'); }
   }
 
   function clearFridgePhoto() {
@@ -2206,7 +1491,6 @@ REGELN:
       showToast('Bitte Kühlschrank-Foto aufnehmen oder Vorräte eingeben.', 'warning');
       return;
     }
-
     const btn = document.getElementById('scanFridgeBtn');
     const orig = btn.innerHTML;
     btn.disabled = true;
@@ -2222,25 +1506,18 @@ WICHTIG (Smart Expiry Guard): Halluziniere KEINE unlesbaren MHD-Daten! Bewerte d
 Erstelle 2 High-Protein Fitness-Rezepte, die zuerst Zutaten mit "high" verbrauchen.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "ingredients": [
-    { "name": "Zutat", "urgency": "high", "shelfLifeHint": "1-2 Tage (Grund)" }
-  ],
-  "recipes": [
-    { "title": "Rezeptname", "kcal": 480, "protein": 42, "carbs": 35, "fat": 14, "steps": ["Schritt 1", "Schritt 2"] }
-  ]
+  "ingredients": [{ "name": "Zutat", "urgency": "high", "shelfLifeHint": "1-2 Tage (Grund)" }],
+  "recipes": [{ "title": "Rezeptname", "kcal": 480, "protein": 42, "carbs": 35, "fat": 14, "steps": ["Schritt 1", "Schritt 2"] }]
 }`;
 
       const raw = await callGeminiRequest(prompt, currentFridgeBase64, 14000);
       const data = extractJSON(raw);
-
       const rank = { high: 1, medium: 2, low: 3 };
       const sortedIng = (Array.isArray(data.ingredients) ? data.ingredients : [])
         .sort((a, b) => (rank[a.urgency] || 9) - (rank[b.urgency] || 9));
-
       const recipes = Array.isArray(data.recipes) ? data.recipes : [];
-      const container = document.getElementById('fridgeResultsContainer');
 
-      container.innerHTML = `
+      document.getElementById('fridgeResultsContainer').innerHTML = `
         <div class="glass-card rounded-2xl p-4 space-y-2.5">
           <h3 class="text-xs font-extrabold uppercase text-teal-400">Smart Expiry Guard — Verbrauchs-Priorität</h3>
           <div class="space-y-1.5">
@@ -2263,9 +1540,7 @@ Antworte AUSSCHLIESSLICH als JSON:
               <h4 class="text-sm font-extrabold text-white">${r.title}</h4>
               <span class="text-xs font-extrabold text-emerald-400">${r.kcal} kcal | ${r.protein}g P</span>
             </div>
-            <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">
-              ${(r.steps || []).map(s => `<li>${s}</li>`).join('')}
-            </ul>
+            <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">${(r.steps || []).map(s => `<li>${s}</li>`).join('')}</ul>
             <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, sugar: 4, fat: r.fat || 12, fiber: 4 })})' class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
               + Direkt ins Tagebuch übernehmen (${r.kcal} kcal)
             </button>
@@ -2280,18 +1555,13 @@ Antworte AUSSCHLIESSLICH als JSON:
     }
   }
 
-  // ============================================================================
-  // MODUL 3: CONTEXTUAL AI MENU COMPANION (runMenuScannerAI)
-  // ============================================================================
   function updateMenuBudgetBanner() {
     const today = getTodayData();
     const prof = state.profile;
     const usedKcal = today.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0);
     const usedProt = today.meals.reduce((a, m) => a + (Number(m.protein) || 0), 0);
-
     const remKcal = Math.max(0, (Number(prof.targetKcal) || 2000) - usedKcal);
     const remProt = Math.max(0, (Number(prof.targetProt) || 140) - usedProt);
-
     const elK = document.getElementById('menuRemKcal');
     const elP = document.getElementById('menuRemProt');
     if (elK) elK.textContent = String(remKcal);
@@ -2307,9 +1577,7 @@ Antworte AUSSCHLIESSLICH als JSON:
       document.getElementById('menuPreviewImg').src = `data:image/jpeg;base64,${b64}`;
       document.getElementById('menuPreviewContainer').classList.remove('hidden');
       showToast('Speisekarte hochauflösend geladen!', 'success');
-    } catch (err) {
-      showToast(err.message || 'Bildfehler.', 'error');
-    }
+    } catch (err) { showToast(err.message || 'Bildfehler.', 'error'); }
   }
 
   function clearMenuPhoto() {
@@ -2322,12 +1590,10 @@ Antworte AUSSCHLIESSLICH als JSON:
   async function runMenuScannerAI() {
     const textVal = (document.getElementById('menuTextInput').value || '').trim();
     const goal = document.getElementById('menuGoalSelect').value;
-
     if (!currentMenuBase64 && !textVal) {
       showToast('Bitte Speisekarte fotografieren oder Restaurant-Typ eingeben.', 'warning');
       return;
     }
-
     const today = getTodayData();
     const prof = state.profile;
     const remKcal = Math.max(0, (Number(prof.targetKcal) || 2000) - today.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0));
@@ -2342,14 +1608,12 @@ Antworte AUSSCHLIESSLICH als JSON:
     try {
       const prompt = `Du bist ein Ernährungs-Coach im Restaurant.
 Offenes Tagesbudget des Nutzers: ${remKcal} kcal, noch ${remProt}g Protein offen. Ziel: ${goal}.
-${isDamageControl ? 'ACHTUNG DAMAGE-CONTROL-MODUS: Das Kalorienbudget ist fast aufgebraucht! Empfiehl extrem kalorienarme, magere Protein-Optionen (Salat mit Hähnchenbrust ohne Dressing, klarer Fisch).' : ''}
+${isDamageControl ? 'ACHTUNG DAMAGE-CONTROL-MODUS: Das Kalorienbudget ist fast aufgebraucht! Empfiehl extrem kalorienarme, magere Protein-Optionen.' : ''}
 Hinweis/Restaurant: "${textVal}".
-Wähle die Top-3 besten Gerichte aus und gib einen konkreten Bestell-Hack (z.B. Soße separat, Salat statt Pommes).
+Wähle die Top-3 besten Gerichte aus und gib einen konkreten Bestell-Hack.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "recommendations": [
-    { "dishName": "Gericht", "kcal": 520, "protein": 45, "carbs": 35, "fat": 18, "orderHack": "Tipp bei der Bestellung" }
-  ]
+  "recommendations": [{ "dishName": "Gericht", "kcal": 520, "protein": 45, "carbs": 35, "fat": 18, "orderHack": "Tipp bei der Bestellung" }]
 }`;
 
       const raw = await callGeminiRequest(prompt, currentMenuBase64, 14000);
@@ -2378,9 +1642,6 @@ Antworte AUSSCHLIESSLICH als JSON:
     }
   }
 
-  // ============================================================================
-  // MODUL 4: KI-KOCHSTUDIO (runChefRecipeAI)
-  // ============================================================================
   async function runChefRecipeAI() {
     const craving = (document.getElementById('chefCravingInput').value || 'Schnelles High-Protein Pfannengericht').trim();
     const maxKcal = Number(document.getElementById('chefKcalLimit').value) || 600;
@@ -2397,13 +1658,8 @@ Antworte AUSSCHLIESSLICH als JSON:
 Vorgaben: Maximal ${maxKcal} kcal, mindestens ${minProt}g Protein, Zubereitungszeit max. ${maxTime} Minuten.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "title": "Rezeptname",
-  "kcal": 540,
-  "protein": 48,
-  "carbs": 42,
-  "fat": 16,
-  "ingredients": ["200g Hähnchenbrust", "..."],
-  "steps": ["Schritt 1", "Schritt 2"]
+  "title": "Rezeptname", "kcal": 540, "protein": 48, "carbs": 42, "fat": 16,
+  "ingredients": ["200g Hähnchenbrust"], "steps": ["Schritt 1", "Schritt 2"]
 }`;
 
       const raw = await callGeminiRequest(prompt, null, 13500);
@@ -2436,9 +1692,6 @@ Antworte AUSSCHLIESSLICH als JSON:
     }
   }
 
-  // ============================================================================
-  // MODUL 5: PROFIL, MIFFLIN-ST JEOR & ZIELGEWICHT-REFERENZ (effectiveRefWeight)
-  // ============================================================================
   function updateWeightDiffBanner() {
     const curW = parseFloat(document.getElementById('profWeight').value) || 90;
     const tarW = parseFloat(document.getElementById('profTargetWeight').value) || curW;
@@ -2479,7 +1732,6 @@ Antworte AUSSCHLIESSLICH als JSON:
 
     const protPerKg = goal === 'cut' ? 2.0 : 1.8;
     const fatPerKg = 0.8;
-
     const targetProt = Math.round(effectiveRefWeight * protPerKg);
     const targetFat = Math.max(45, Math.round(effectiveRefWeight * fatPerKg));
     const remKcalForCarbs = Math.max(200, targetKcal - (targetProt * 4 + targetFat * 9));
@@ -2566,22 +1818,16 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   // ============================================================================
-  // API-KEY MODAL & GAST-CENTER (4-LAYER PERSISTENZ)
+  // API-KEY MODAL & GAST-CENTER (4-LAYER PERSISTENZ + WHATSAPP DIREKTVERSAND)
   // ============================================================================
   function updateApiKeyStatusUI() {
     const hasKey = Boolean((state.geminiApiKey || recoverRedundantApiKey(state) || '').trim());
     const dot = document.getElementById('apiKeyStatusDot');
     const lbl = document.getElementById('apiKeyBtnLabel');
-    if (dot) {
-      dot.className = hasKey ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-rose-500';
-    }
-    if (lbl) {
-      lbl.textContent = hasKey ? 'Key aktiv' : 'API-Key';
-    }
+    if (dot) dot.className = hasKey ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-rose-500';
+    if (lbl) lbl.textContent = hasKey ? 'Key aktiv' : 'API-Key';
     const guestTxt = document.getElementById('guestBadgeText');
-    if (guestTxt && state.guestCode) {
-      guestTxt.textContent = state.guestCode;
-    }
+    if (guestTxt && state.guestCode) guestTxt.textContent = state.guestCode;
   }
 
   function openApiKeyModal() {
@@ -2650,6 +1896,15 @@ Antworte AUSSCHLIESSLICH als JSON:
     showToast(`Gast-Zugang ${code} aktiviert!`, 'success');
   }
 
+  function buildFullInviteUrl() {
+    const code = document.getElementById('generatedInviteCode').textContent;
+    const key = (state.geminiApiKey || recoverRedundantApiKey(state) || '').trim();
+    const baseUrl = window.location.origin + window.location.pathname;
+    return key
+      ? `${baseUrl}?invite=${encodeURIComponent(code)}&k=${encodeURIComponent(key)}`
+      : `${baseUrl}?invite=${encodeURIComponent(code)}`;
+  }
+
   function copySingleInviteCode() {
     const code = document.getElementById('generatedInviteCode').textContent;
     navigator.clipboard.writeText(code).then(() => {
@@ -2658,15 +1913,18 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   function copyFullInviteLink() {
-    const code = document.getElementById('generatedInviteCode').textContent;
-    const key = (state.geminiApiKey || recoverRedundantApiKey(state) || '').trim();
-    const baseUrl = window.location.origin + window.location.pathname;
-    const url = key
-      ? `${baseUrl}?invite=${encodeURIComponent(code)}&k=${encodeURIComponent(key)}`
-      : `${baseUrl}?invite=${encodeURIComponent(code)}`;
+    const url = buildFullInviteUrl();
     navigator.clipboard.writeText(url).then(() => {
       showToast('Komplettpaket-Einladungslink kopiert!', 'success');
     });
+  }
+
+  function shareInviteViaWhatsApp() {
+    const code = document.getElementById('generatedInviteCode').textContent;
+    const url = buildFullInviteUrl();
+    const text = `Hallo! Hier ist dein persönlicher Zugang zu *CalSnap AI* 🚀\n\n🔑 Dein Gast-Code: *${code}*\n📲 Direkt starten (automatisch eingerichtet):\n${url}`;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
   }
 
   function checkUrlOnboardingParams() {
