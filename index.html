@@ -58,28 +58,37 @@
   <!-- TOAST CONTAINER -->
   <div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-md pointer-events-none flex flex-col gap-2"></div>
 
-  <!-- HEADER -->
-  <header class="sticky top-0 z-40 glass-card border-b border-slate-800/80 px-4 py-3">
+  <!-- HEADER INKL. DE/PL SPRACH-BUTTON & ADMIN/GAST-STEUERUNG -->
+  <header class="sticky top-0 z-40 glass-card border-b border-slate-800/80 px-3.5 py-3">
     <div class="max-w-lg mx-auto flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
           <i class="fa-solid fa-bolt text-slate-950 text-base"></i>
         </div>
         <div>
           <div class="flex items-center gap-1.5">
-            <h1 class="text-base font-extrabold tracking-tight text-white leading-none">CalSnap AI</h1>
+            <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white leading-none">CalSnap AI</h1>
             <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">v4.1</span>
           </div>
-          <p class="text-[11px] text-slate-400 mt-0.5">Vision + 0.0s DE/PL Lexikon</p>
+          <p id="headerSubTitle" class="text-[10px] text-slate-400 mt-0.5">Vision + 0.0s DE/PL Lexikon</p>
         </div>
       </div>
 
       <div class="flex items-center gap-1.5">
-        <button id="headerGuestBtn" onclick="openInviteModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700 text-xs font-semibold text-amber-300 flex items-center gap-1.5 transition" title="Gast-Code & Einladungs-Center">
+        <!-- SPRACH-UMSCHALTER DE <-> PL -->
+        <button id="langToggleBtn" type="button" onclick="toggleLanguage()" class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700 text-xs font-extrabold text-white flex items-center gap-1 transition" title="Sprache wechseln (Deutsch / Polski)">
+          <span id="langFlag">🇩🇪</span>
+          <span id="langCode">DE</span>
+        </button>
+
+        <!-- GAST / EINLADUNGS-BUTTON -->
+        <button id="headerGuestBtn" type="button" onclick="openInviteModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700 text-xs font-semibold text-amber-300 flex items-center gap-1.5 transition" title="Gast-Code & Einladungs-Center">
           <i class="fa-solid fa-ticket text-amber-400"></i>
           <span id="guestBadgeText" class="hidden sm:inline">Gast-Center</span>
         </button>
-        <button id="headerKeyBtn" onclick="openApiKeyModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition" title="Gemini API-Key verwalten">
+
+        <!-- API-KEY TRESOR BUTTON (WIRD FÜR EINGELADENE GÄSTE AUTOMATISCH GESPERRT/AUSGEBLENDET) -->
+        <button id="headerKeyBtn" type="button" onclick="openApiKeyModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition" title="Gemini API-Key verwalten">
           <span id="apiKeyStatusDot" class="w-2 h-2 rounded-full bg-rose-500"></span>
           <i class="fa-solid fa-key text-emerald-400"></i>
           <span id="apiKeyBtnLabel">API-Key</span>
@@ -98,11 +107,11 @@
       <div class="glass-card rounded-2xl p-4 shadow-xl">
         <div class="flex items-center justify-between mb-3">
           <div>
-            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Tagesbilanz</span>
+            <span id="lblDailyBalance" class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Tagesbilanz</span>
             <h2 id="currentDateLabel" class="text-sm font-bold text-slate-200">Heute</h2>
           </div>
           <div class="text-right">
-            <span class="text-xs text-slate-400">Offen: </span>
+            <span id="lblRemainingPrefix" class="text-xs text-slate-400">Offen: </span>
             <span id="kcalRemaining" class="text-sm font-extrabold text-emerald-400">2000 kcal</span>
           </div>
         </div>
@@ -125,7 +134,7 @@
         <div class="grid grid-cols-3 gap-2.5 mb-2.5">
           <div class="bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/70">
             <div class="flex justify-between items-center text-[11px] mb-1">
-              <span class="font-bold text-sky-400">Protein</span>
+              <span id="lblMacroProt" class="font-bold text-sky-400">Protein</span>
               <span class="text-slate-400"><span id="protConsumed" class="text-white font-bold">0</span>/<span id="protTarget">140</span>g</span>
             </div>
             <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -135,7 +144,7 @@
 
           <div class="bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/70">
             <div class="flex justify-between items-center text-[11px] mb-1">
-              <span class="font-bold text-amber-400">Kohlenh.</span>
+              <span id="lblMacroCarbs" class="font-bold text-amber-400">Kohlenh.</span>
               <span class="text-slate-400"><span id="carbsConsumed" class="text-white font-bold">0</span>/<span id="carbsTarget">200</span>g</span>
             </div>
             <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -145,7 +154,7 @@
 
           <div class="bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/70">
             <div class="flex justify-between items-center text-[11px] mb-1">
-              <span class="font-bold text-rose-400">Fett</span>
+              <span id="lblMacroFat" class="font-bold text-rose-400">Fett</span>
               <span class="text-slate-400"><span id="fatConsumed" class="text-white font-bold">0</span>/<span id="fatTarget">65</span>g</span>
             </div>
             <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -159,7 +168,7 @@
           <div class="bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/70">
             <div class="flex justify-between items-center text-[11px] mb-1">
               <span class="font-bold text-emerald-400 flex items-center gap-1">
-                <i class="fa-solid fa-seedling text-[10px]"></i> Ballaststoffe
+                <i class="fa-solid fa-seedling text-[10px]"></i> <span id="lblMacroFiber">Ballaststoffe</span>
               </span>
               <span class="text-slate-400"><span id="fiberConsumed" class="text-white font-bold">0</span>/<span id="fiberTarget">30</span>g</span>
             </div>
@@ -171,7 +180,7 @@
           <div class="bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/70">
             <div class="flex justify-between items-center text-[11px] mb-1">
               <span class="font-bold text-fuchsia-400 flex items-center gap-1">
-                <i class="fa-solid fa-cube text-[10px]"></i> Zucker (Max.)
+                <i class="fa-solid fa-cube text-[10px]"></i> <span id="lblMacroSugar">Zucker (Max.)</span>
               </span>
               <span class="text-slate-400"><span id="sugarConsumed" class="text-white font-bold">0</span>/<span id="sugarTarget">35</span>g</span>
             </div>
@@ -190,8 +199,8 @@
               <i class="fa-solid fa-wand-magic-sparkles"></i>
             </div>
             <div>
-              <h3 class="text-sm font-extrabold text-white leading-snug">Mahlzeiten-Scanner & ⚡ Turbo-Scan</h3>
-              <p class="text-[11px] text-slate-400">Foto aufnehmen, Text eingeben oder 1-Klick Schnellwahl nutzen</p>
+              <h3 id="lblScannerTitle" class="text-sm font-extrabold text-white leading-snug">Mahlzeiten-Scanner & ⚡ Turbo-Scan</h3>
+              <p id="lblScannerSub" class="text-[11px] text-slate-400">Foto aufnehmen, Text eingeben oder 1-Klick Schnellwahl nutzen</p>
             </div>
           </div>
           <span id="currentModelBadge" class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800/90 border border-slate-700 text-emerald-400 flex items-center gap-1">
@@ -219,7 +228,7 @@
         <div class="flex gap-2.5">
           <input id="mealPhotoInput" type="file" accept="image/*" class="hidden" onchange="handleMealPhotoSelect(event)" />
           <button type="button" onclick="document.getElementById('mealPhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-sm font-bold text-slate-200 flex items-center justify-center gap-2 shrink-0 transition">
-            <i class="fa-solid fa-camera text-emerald-400"></i> <span>Foto</span>
+            <i class="fa-solid fa-camera text-emerald-400"></i> <span id="lblPhotoBtn">Foto</span>
           </button>
           <button id="analyzeMealBtn" type="button" onclick="triggerMealAnalysis()" class="flex-1 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition">
             <i class="fa-solid fa-bolt"></i> <span>Turbo-Scan</span>
@@ -228,15 +237,15 @@
 
         <!-- 1-KLICK SCHNELLWAHL -->
         <div class="pt-1">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">1-Klick Schnellwahl (Sofort ins Tagebuch):</p>
+          <p id="lblQuickAddHeader" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">1-Klick Schnellwahl (Sofort ins Tagebuch):</p>
           <div class="flex flex-wrap gap-1.5">
-            <button type="button" onclick="quickAddPreset('coffee_black')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>☕ Kaffee</span><span class="text-emerald-400 font-bold">0 kcal</span></button>
-            <button type="button" onclick="quickAddPreset('coffee_milk')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🥛 Kaffee+Milch</span><span class="text-emerald-400 font-bold">45 kcal</span></button>
-            <button type="button" onclick="quickAddPreset('apple')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🍎 Apfel</span><span class="text-emerald-400 font-bold">78 kcal</span></button>
-            <button type="button" onclick="quickAddPreset('banana')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🍌 Banane</span><span class="text-emerald-400 font-bold">105 kcal</span></button>
-            <button type="button" onclick="quickAddPreset('eggs_2')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🥚 2 Eier</span><span class="text-sky-400 font-bold">15g P</span></button>
-            <button type="button" onclick="quickAddPreset('quark_250')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🥣 250g Quark</span><span class="text-sky-400 font-bold">30g P</span></button>
-            <button type="button" onclick="quickAddPreset('protein_shake')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span>🥤 Protein-Shake</span><span class="text-sky-400 font-bold">24g P</span></button>
+            <button type="button" onclick="quickAddPreset('coffee_black')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span id="qaCoffeeBlack">☕ Kaffee</span><span class="text-emerald-400 font-bold">0 kcal</span></button>
+            <button type="button" onclick="quickAddPreset('coffee_milk')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span id="qaCoffeeMilk">🥛 Kaffee+Milch</span><span class="text-emerald-400 font-bold">45 kcal</span></button>
+            <button type="button" onclick="quickAddPreset('apple')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span id="qaApple">🍎 Apfel</span><span class="text-emerald-400 font-bold">78 kcal</span></button>
+            <button type="button" onclick="quickAddPreset('banana')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span id="qaBanana">🍌 Banane</span><span class="text-emerald-400 font-bold">105 kcal</span></button>
+            <button type="button" onclick="quickAddPreset('eggs_2')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span id="qaEggs">🥚 2 Eier</span><span class="text-sky-400 font-bold">15g P</span></button>
+            <button type="button" onclick="quickAddPreset('quark_250')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span id="qaQuark">🥣 250g Quark</span><span class="text-sky-400 font-bold">30g P</span></button>
+            <button type="button" onclick="quickAddPreset('protein_shake')" class="px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"><span id="qaShake">🥤 Protein-Shake</span><span class="text-sky-400 font-bold">24g P</span></button>
           </div>
         </div>
 
@@ -271,7 +280,7 @@
           <!-- PORTIONS-SKALIERUNG (50% >>> 75% >>> 100% >>> 150% >>> 200% + SLIDER) -->
           <div class="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80 space-y-2">
             <div class="flex items-center justify-between text-[11px]">
-              <span class="font-bold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-sliders text-emerald-400"></i> Portionsgröße anpassen:</span>
+              <span id="lblPortionAdjust" class="font-bold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-sliders text-emerald-400"></i> Portionsgröße anpassen:</span>
               <span id="portionScaleHint" class="text-emerald-400 font-bold">1.0x (100%)</span>
             </div>
             <input id="portionScaleSlider" type="range" min="25" max="250" step="5" value="100" class="portion-slider" oninput="setPortionScale(this.value)" />
@@ -299,7 +308,7 @@
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400"><i class="fa-solid fa-glass-water"></i></div>
           <div>
-            <div class="text-xs font-bold text-white">Wasser-Haushalt</div>
+            <div id="lblWaterTitle" class="text-xs font-bold text-white">Wasser-Haushalt</div>
             <div class="text-xs font-extrabold text-sky-400"><span id="waterConsumed">0</span> / <span id="waterTarget">2500</span> ml</div>
           </div>
         </div>
@@ -312,8 +321,8 @@
       <!-- HEUTIGES PROTOKOLL -->
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-utensils text-emerald-400"></i> Heutige Mahlzeiten</h3>
-          <button type="button" onclick="clearTodayMeals()" class="text-[11px] font-semibold text-slate-400 hover:text-rose-400 transition">Tag leeren</button>
+          <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-utensils text-emerald-400"></i> <span id="lblTodayMeals">Heutige Mahlzeiten</span></h3>
+          <button id="lblClearDayBtn" type="button" onclick="clearTodayMeals()" class="text-[11px] font-semibold text-slate-400 hover:text-rose-400 transition">Tag leeren</button>
         </div>
         <div id="diaryLogList" class="space-y-2"></div>
       </div>
@@ -325,8 +334,8 @@
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400"><i class="fa-solid fa-temperature-arrow-down"></i></div>
           <div>
-            <h2 class="text-sm font-extrabold text-white">Resteküche & Smart Expiry Guard</h2>
-            <p class="text-[11px] text-slate-400">Kühlschrank fotografieren — Frische-Check & High-Protein Rezepte</p>
+            <h2 id="lblFridgeTitle" class="text-sm font-extrabold text-white">Resteküche & Smart Expiry Guard</h2>
+            <p id="lblFridgeSub" class="text-[11px] text-slate-400">Kühlschrank fotografieren — Frische-Check & High-Protein Rezepte</p>
           </div>
         </div>
         <div id="fridgePreviewContainer" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
@@ -336,8 +345,8 @@
         <input id="fridgeExtraText" type="text" placeholder="Optional: Vorräte ergänzen (z.B. Eier, Quark, Tomaten, Hähnchen)..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500" />
         <div class="flex gap-2.5">
           <input id="fridgePhotoInput" type="file" accept="image/*" class="hidden" onchange="handleFridgePhotoSelect(event)" />
-          <button type="button" onclick="document.getElementById('fridgePhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-camera text-teal-400"></i> Foto</button>
-          <button id="scanFridgeBtn" type="button" onclick="runFridgeLeftoverAI()" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-magnifying-glass-chart"></i> Frische-Check & Rezepte</button>
+          <button type="button" onclick="document.getElementById('fridgePhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-camera text-teal-400"></i> <span>Foto</span></button>
+          <button id="scanFridgeBtn" type="button" onclick="runFridgeLeftoverAI()" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-magnifying-glass-chart"></i> <span id="lblFridgeBtn">Frische-Check & Rezepte</span></button>
         </div>
       </div>
       <div id="fridgeResultsContainer" class="space-y-3"></div>
@@ -349,12 +358,12 @@
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400"><i class="fa-solid fa-utensils"></i></div>
           <div>
-            <h2 class="text-sm font-extrabold text-white">Restaurant & Speisekarten-Kompass</h2>
-            <p class="text-[11px] text-slate-400">Findet die besten Gerichte passend zu deinem Restbudget</p>
+            <h2 id="lblMenuTitle" class="text-sm font-extrabold text-white">Restaurant & Speisekarten-Kompass</h2>
+            <p id="lblMenuSub" class="text-[11px] text-slate-400">Findet die besten Gerichte passend zu deinem Restbudget</p>
           </div>
         </div>
         <div id="menuBudgetBanner" class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs">
-          <span class="text-slate-400">Verbleibendes Tagesbudget:</span>
+          <span id="lblMenuRemBudget" class="text-slate-400">Verbleibendes Tagesbudget:</span>
           <span class="font-extrabold text-emerald-400"><span id="menuRemKcal">2000</span> kcal | <span id="menuRemProt">140</span>g P</span>
         </div>
         <div id="menuPreviewContainer" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
@@ -369,8 +378,8 @@
         <input id="menuTextInput" type="text" placeholder="Oder Gerichte / Restaurant-Typ eintippen (z.B. Italiener, Döner, Steakhouse)..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500" />
         <div class="flex gap-2.5">
           <input id="menuPhotoInput" type="file" accept="image/*" class="hidden" onchange="handleMenuPhotoSelect(event)" />
-          <button type="button" onclick="document.getElementById('menuPhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-camera text-amber-400"></i> Speisekarte</button>
-          <button id="scanMenuBtn" type="button" onclick="runMenuScannerAI()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-compass"></i> Top-3 Auswahl berechnen</button>
+          <button type="button" onclick="document.getElementById('menuPhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-camera text-amber-400"></i> <span>Speisekarte</span></button>
+          <button id="scanMenuBtn" type="button" onclick="runMenuScannerAI()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-compass"></i> <span id="lblMenuBtn">Top-3 Auswahl berechnen</span></button>
         </div>
       </div>
       <div id="menuResultsContainer" class="space-y-3"></div>
@@ -382,8 +391,8 @@
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400"><i class="fa-solid fa-hat-chef"></i></div>
           <div>
-            <h2 class="text-sm font-extrabold text-white">KI-Kochstudio (Macro Chef)</h2>
-            <p class="text-[11px] text-slate-400">Maßgeschneiderte Fitness-Rezepte nach deinen Ziel-Makros</p>
+            <h2 id="lblChefTitle" class="text-sm font-extrabold text-white">KI-Kochstudio (Macro Chef)</h2>
+            <p id="lblChefSub" class="text-[11px] text-slate-400">Maßgeschneiderte Fitness-Rezepte nach deinen Ziel-Makros</p>
           </div>
         </div>
         <input id="chefCravingInput" type="text" placeholder="Worauf hast du Lust? (z.B. Pfannengericht mit Hähnchen, süßes Quark-Dessert)..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500" />
@@ -392,7 +401,7 @@
           <div><label class="text-[10px] font-bold text-slate-400 uppercase">Min. Protein (g)</label><input id="chefProtMin" type="number" value="45" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-white" /></div>
           <div><label class="text-[10px] font-bold text-slate-400 uppercase">Max. Zeit (Min)</label><input id="chefTimeMax" type="number" value="20" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-white" /></div>
         </div>
-        <button id="generateChefBtn" type="button" onclick="runChefRecipeAI()" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-wand-sparkles"></i> Fitness-Rezept generieren</button>
+        <button id="generateChefBtn" type="button" onclick="runChefRecipeAI()" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-wand-sparkles"></i> <span id="lblChefBtn">Fitness-Rezept generieren</span></button>
       </div>
       <div id="chefResultsContainer" class="space-y-3"></div>
     </section>
@@ -401,7 +410,7 @@
     <section id="tab-profile" class="tab-section space-y-4">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between">
-          <h2 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-user-gear text-emerald-400"></i> Körperdaten & Kalorienrechner</h2>
+          <h2 id="lblProfTitle" class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-user-gear text-emerald-400"></i> Körperdaten & Kalorienrechner</h2>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Mifflin-St Jeor</span>
         </div>
         <div class="grid grid-cols-2 gap-2.5">
@@ -449,31 +458,45 @@
 
   </main>
 
-  <!-- ==================== MODAL 1: API-KEY TRESOR ==================== -->
+  <!-- ==================== MODAL 1: API-KEY TRESOR (NUR FÜR ADMIN ZUGÄNGLICH) ==================== -->
   <div id="apiKeyModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl max-w-md w-full p-5 border border-slate-700 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-key text-emerald-400"></i> Gemini API-Key Tresor (4-Layer)</h3>
+        <h3 class="text-base font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-key text-emerald-400"></i> Admin API-Key Tresor (4-Layer)</h3>
         <button type="button" onclick="closeApiKeyModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <p class="text-xs text-slate-300 leading-relaxed">Dein API-Schlüssel wird mehrfach gesichert lokal auf deinem Gerät gespeichert (State, Backup-Slot & Cookie) und niemals öffentlich hochgeladen.</p>
+      <p class="text-xs text-slate-300 leading-relaxed">Dein API-Schlüssel wird mehrfach gesichert lokal auf deinem Admin-Gerät gespeichert. Eingeladene Gäste können diesen Tresor nicht öffnen und deinen Schlüssel niemals auslesen.</p>
       <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none focus:border-emerald-500" />
       <div class="flex gap-2">
         <button type="button" onclick="clearSavedApiKey()" class="px-3.5 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-xs font-bold text-rose-300">Löschen</button>
-        <button type="button" onclick="saveApiKeyFromModal()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs">API-Key dauerhaft speichern</button>
+        <button type="button" onclick="saveApiKeyFromModal()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs">API-Key als Admin speichern</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== MODAL 2: GAST-CODE & EINLADUNGS-CENTER (INKL. WHATSAPP) ==================== -->
+  <!-- ==================== MODAL 2: GAST-STATUS & ADMIN-EINLADUNGS-CENTER ==================== -->
   <div id="inviteModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl max-w-md w-full p-5 border border-slate-700 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-ticket text-amber-400"></i> Gast-Code & Einladungs-Center</h3>
+        <h3 id="inviteModalTitle" class="text-base font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-ticket text-amber-400"></i> Gast-Code & Einladungs-Center</h3>
         <button type="button" onclick="closeInviteModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 space-y-2">
+      <!-- ANSICHT FÜR EINGELADENE FREUNDE (SCHREIBGESCHÜTZT — KEIN WEITERLEITEN MÖGLICH!) -->
+      <div id="guestLockedInfoBox" class="hidden bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-3.5 space-y-2">
+        <div class="flex items-center gap-2 text-xs font-extrabold text-emerald-400">
+          <i class="fa-solid fa-shield-halved"></i> Persönlicher Gast-Zugang aktiv
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Dein Gerät ist über den persönlichen Einladungs-Code <strong id="guestActiveCodeDisplay" class="text-amber-300">FIT-GAST</strong> freigeschaltet. Alle KI-Funktionen stehen dir voll zur Verfügung.
+        </p>
+        <p class="text-[11px] text-slate-400 italic">
+          Hinweis: Das Erstellen weiterer Einladungslinks ist aus Sicherheitsgründen ausschließlich dem Administrator vorbehalten.
+        </p>
+      </div>
+
+      <!-- CODE-EINGABE (FÜR GAST-AKTIVIERUNG ODER ADMIN-FREISCHALTUNG) -->
+      <div id="guestCodeActivationBox" class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 space-y-2">
         <div class="text-xs font-bold text-amber-300">Gast-Zugang aktivieren</div>
         <div class="flex gap-2">
           <input id="guestCodeInput" type="text" placeholder="z.B. FIT-ANNA-2025" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white uppercase" />
@@ -481,8 +504,12 @@
         </div>
       </div>
 
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 space-y-2.5">
-        <div class="text-xs font-bold text-emerald-400">Eigenen Wunsch-Code für Freunde erstellen</div>
+      <!-- EXKLUSIVER ADMIN-GENERATOR (WIRD BEI EINGELADENEN FREUNDEN KOMPLETT AUSGEBLENDET!) -->
+      <div id="adminInviteGeneratorSection" class="bg-slate-900/90 border border-emerald-500/30 rounded-xl p-3 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-emerald-400 flex items-center gap-1.5"><i class="fa-solid fa-crown text-amber-400"></i> Admin: Freunde-Einladung erstellen</span>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300">Nur Admin</span>
+        </div>
         <div class="grid grid-cols-2 gap-2">
           <input id="customGuestName" type="text" placeholder="Name (z.B. MAREK)" oninput="updateInvitePreview()" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white uppercase" />
           <input id="customGuestYear" type="text" value="2025" oninput="updateInvitePreview()" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white" />
@@ -506,34 +533,36 @@
     <div class="max-w-lg mx-auto grid grid-cols-5 gap-1">
       <button type="button" onclick="switchTab('diary')" id="nav-diary" class="nav-btn active relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-chart-pie text-base"></i><span class="text-[10px] font-semibold mt-1">Tagebuch</span>
+        <i class="fa-solid fa-chart-pie text-base"></i><span id="navLblDiary" class="text-[10px] font-semibold mt-1">Tagebuch</span>
       </button>
       <button type="button" onclick="switchTab('fridge')" id="nav-fridge" class="nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-temperature-arrow-down text-base"></i><span class="text-[10px] font-semibold mt-1">Resteküche</span>
+        <i class="fa-solid fa-temperature-arrow-down text-base"></i><span id="navLblFridge" class="text-[10px] font-semibold mt-1">Resteküche</span>
       </button>
       <button type="button" onclick="switchTab('menu')" id="nav-menu" class="nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-utensils text-base"></i><span class="text-[10px] font-semibold mt-1">Restaurant</span>
+        <i class="fa-solid fa-utensils text-base"></i><span id="navLblMenu" class="text-[10px] font-semibold mt-1">Restaurant</span>
       </button>
       <button type="button" onclick="switchTab('chef')" id="nav-chef" class="nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-hat-wizard text-base"></i><span class="text-[10px] font-semibold mt-1">Kochstudio</span>
+        <i class="fa-solid fa-hat-wizard text-base"></i><span id="navLblChef" class="text-[10px] font-semibold mt-1">Kochstudio</span>
       </button>
       <button type="button" onclick="switchTab('profile')" id="nav-profile" class="nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
         <span class="nav-indicator absolute -top-1.5 w-6 h-0.5 rounded-full bg-emerald-400 opacity-0 scale-x-0 transition-all"></span>
-        <i class="fa-solid fa-user-gear text-base"></i><span class="text-[10px] font-semibold mt-1">Profil</span>
+        <i class="fa-solid fa-user-gear text-base"></i><span id="navLblProfile" class="text-[10px] font-semibold mt-1">Profil</span>
       </button>
     </div>
   </nav>
   <script>
   // ============================================================================
-  // CALSNAP AI v4.1 ENTERPRISE — CORE STATE, PERSISTENCE & VISION PIPELINE
+  // CALSNAP AI v4.1 ENTERPRISE — CORE STATE, PERSISTENCE & ADMIN/GUEST ISOLATION
   // ============================================================================
   const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
   const STORAGE_KEY_V1 = 'calsnap_ai_state_v1';
   const API_KEY_BACKUP_SLOT = 'calsnap_api_key_backup';
+  const GUEST_LOCK_SLOT = 'calsnap_guest_lock_v41';
   const COOKIE_KEY_NAME = 'calsnap_k';
+  const COOKIE_GUEST_LOCK = 'calsnap_gl';
   const FAST_MODEL_KEY = 'calsnap_fast_model_v41';
   const GUEST_REGEX = /^FIT-[A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]{1,12}-\d{2,6}$/i;
 
@@ -557,8 +586,10 @@
   function createDefaultState() {
     return {
       version: 4.1,
+      lang: 'de',
       geminiApiKey: '',
       guestCode: '',
+      isGuestUser: false,
       profile: {
         gender: 'male', age: 35, height: 180, weight: 90, targetWeight: 80,
         activity: 1.375, goal: 'cut',
@@ -581,6 +612,29 @@
       const m = document.cookie.match(new RegExp('(?:^|; )' + COOKIE_KEY_NAME + '=([^;]*)'));
       return m ? decodeURIComponent(m[1]) : '';
     } catch (_) { return ''; }
+  }
+
+  function persistGuestLock(isGuest) {
+    try {
+      if (isGuest) {
+        localStorage.setItem(GUEST_LOCK_SLOT, '1');
+        document.cookie = `${COOKIE_GUEST_LOCK}=1; path=/; max-age=31536000; SameSite=Lax`;
+      } else {
+        localStorage.removeItem(GUEST_LOCK_SLOT);
+        document.cookie = `${COOKIE_GUEST_LOCK}=; path=/; max-age=0; SameSite=Lax`;
+      }
+    } catch (_) {}
+  }
+
+  function isGuestLockPersisted(parsedState) {
+    if (parsedState && parsedState.isGuestUser === true) return true;
+    try {
+      if (localStorage.getItem(GUEST_LOCK_SLOT) === '1') return true;
+    } catch (_) {}
+    try {
+      if (document.cookie.includes(`${COOKIE_GUEST_LOCK}=1`)) return true;
+    } catch (_) {}
+    return false;
   }
 
   function persistApiKeyRedundant(key) {
@@ -609,11 +663,14 @@
     if (!loaded || typeof loaded !== 'object') {
       const recovered = recoverRedundantApiKey(null);
       if (recovered) def.geminiApiKey = recovered;
+      def.isGuestUser = isGuestLockPersisted(null);
       return def;
     }
 
     const merged = {
       ...def, ...loaded,
+      lang: loaded.lang === 'pl' ? 'pl' : 'de',
+      isGuestUser: isGuestLockPersisted(loaded),
       profile: { ...def.profile, ...(loaded.profile || {}) },
       days: (loaded.days && typeof loaded.days === 'object') ? loaded.days : {}
     };
@@ -633,6 +690,7 @@
   function saveState() {
     try {
       if (state.geminiApiKey) persistApiKeyRedundant(state.geminiApiKey);
+      persistGuestLock(Boolean(state.isGuestUser));
       localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state));
     } catch (e) { console.error('State-Speicherfehler:', e); }
   }
@@ -677,6 +735,9 @@
     else if (tabId === 'profile') syncProfileToUI();
   }
 
+  // ============================================================================
+  // WEBKIT METAL-GPU MEMORY ISOLATION & CAMERA ENGINE (compressImageFile)
+  // ============================================================================
   function renderImageToJpegBase64(img, objectUrl, maxDim, quality) {
     const origW = img.naturalWidth || img.width || 800;
     const origH = img.naturalHeight || img.height || 600;
@@ -755,6 +816,9 @@
     });
   }
 
+  // ============================================================================
+  // ISOLATED ABORT-CONTROLLER PIPELINE & MULTI-QUOTA ROUTING (callGeminiRequest)
+  // ============================================================================
   async function fetchWithIsolatedSignal(url, options, timeoutMs) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -812,7 +876,7 @@
 
   async function callGeminiRequest(promptText, base64Image = null, timeoutMs = 14000) {
     const apiKey = (state.geminiApiKey || recoverRedundantApiKey(state) || '').trim();
-    if (!apiKey) throw new Error('Kein Gemini API-Key hinterlegt. Bitte oben rechts auf „API-Key" klicken.');
+    if (!apiKey) throw new Error(state.lang === 'pl' ? 'Brak klucza API Gemini.' : 'Kein Gemini API-Key hinterlegt.');
 
     const parts = [{ text: promptText }];
     if (base64Image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Image } });
@@ -889,46 +953,212 @@
   // ============================================================================
   const FOOD_LEXICON = [
     { name: 'Latte Macchiato', keywords: ['latte macchiato', 'macchiato', 'latte'], kcal: 46, p: 2.8, c: 4.2, sugar: 4.1, f: 1.9, fiber: 0, defaultPortion: 300 },
-    { name: 'Kaffee Schwarz / Espresso / Americano', keywords: ['kaffee schwarz', 'schwarzer kaffee', 'espresso', 'americano', 'kawa czarna', 'czarna kawa'], kcal: 2, p: 0.2, c: 0.2, sugar: 0, f: 0, fiber: 0, defaultPortion: 250 },
-    { name: 'Kaffee mit Milch / Cappuccino', keywords: ['cappuccino', 'kaffee mit milch', 'milchkaffee', 'kawa z mlekiem', 'flat white', 'kaffee', 'kawa'], kcal: 36, p: 1.9, c: 2.8, sugar: 2.7, f: 1.8, fiber: 0, defaultPortion: 250 },
-    { name: 'Zucker / Haushaltszucker', keywords: ['zucker', 'haushaltszucker', 'rohrzucker', 'brauner zucker', 'cukier'], kcal: 400, p: 0, c: 100, sugar: 100, f: 0, fiber: 0, defaultPortion: 5 },
+    { name: 'Kaffee Schwarz / Kawa czarna', keywords: ['kaffee schwarz', 'schwarzer kaffee', 'espresso', 'americano', 'kawa czarna', 'czarna kawa'], kcal: 2, p: 0.2, c: 0.2, sugar: 0, f: 0, fiber: 0, defaultPortion: 250 },
+    { name: 'Kaffee mit Milch / Kawa z mlekiem', keywords: ['cappuccino', 'kaffee mit milch', 'milchkaffee', 'kawa z mlekiem', 'flat white', 'kaffee', 'kawa'], kcal: 36, p: 1.9, c: 2.8, sugar: 2.7, f: 1.8, fiber: 0, defaultPortion: 250 },
+    { name: 'Zucker / Cukier', keywords: ['zucker', 'haushaltszucker', 'rohrzucker', 'brauner zucker', 'cukier'], kcal: 400, p: 0, c: 100, sugar: 100, f: 0, fiber: 0, defaultPortion: 5 },
     { name: 'Honig / Miód', keywords: ['honig', 'bienenhonig', 'miod'], kcal: 304, p: 0.3, c: 82, sugar: 81, f: 0, fiber: 0.2, defaultPortion: 15 },
     { name: 'High Protein Mousse / Pudding Schoko', keywords: ['high protein yoghurt mousse schoko', 'high protein mousse schoko', 'protein mousse schoko', 'protein mousse', 'high protein mousse', 'protein pudding schoko', 'high protein pudding', 'high protein yoghurt', 'high protein joghurt', 'protein joghurt', 'protein yoghurt', 'mousse schoko'], kcal: 84, p: 10.0, c: 5.5, sugar: 4.0, f: 2.0, fiber: 0.8, defaultPortion: 200 },
     { name: 'Magerquark / Twaróg chudy', keywords: ['magerquark', 'speisequark magerstufe', 'quark', 'twarog chudy', 'twarog'], kcal: 68, p: 12.2, c: 3.9, sugar: 3.9, f: 0.3, fiber: 0, defaultPortion: 250 },
     { name: 'Skyr Natur', keywords: ['skyr', 'skyr natur'], kcal: 64, p: 11.0, c: 4.0, sugar: 4.0, f: 0.2, fiber: 0, defaultPortion: 200 },
-    { name: 'Griechischer Joghurt / Naturjoghurt', keywords: ['griechischer joghurt', 'naturjoghurt', 'joghurt', 'yoghurt', 'jogurt naturalny', 'jogurt grecki', 'jogurt'], kcal: 95, p: 6.5, c: 4.2, sugar: 4.1, f: 5.5, fiber: 0, defaultPortion: 180 },
-    { name: 'Körniger Frischkäse / Hüttenkäse / Serek wiejski', keywords: ['korniger frischkase', 'huttenkase', 'cottage cheese', 'serek wiejski'], kcal: 98, p: 12.5, c: 2.7, sugar: 2.5, f: 4.0, fiber: 0, defaultPortion: 200 },
-    { name: 'Whey Protein Shake', keywords: ['protein shake', 'proteinshake', 'whey shake', 'whey protein', 'eiweissshake', 'odzywka bialkowa'], kcal: 120, p: 24.0, c: 3.0, sugar: 1.5, f: 1.5, fiber: 0, defaultPortion: 100 },
+    { name: 'Griechischer Joghurt / Jogurt naturalny', keywords: ['griechischer joghurt', 'naturjoghurt', 'joghurt', 'yoghurt', 'jogurt naturalny', 'jogurt grecki', 'jogurt'], kcal: 95, p: 6.5, c: 4.2, sugar: 4.1, f: 5.5, fiber: 0, defaultPortion: 180 },
+    { name: 'Körniger Frischkäse / Serek wiejski', keywords: ['korniger frischkase', 'huttenkase', 'cottage cheese', 'serek wiejski'], kcal: 98, p: 12.5, c: 2.7, sugar: 2.5, f: 4.0, fiber: 0, defaultPortion: 200 },
+    { name: 'Whey Protein Shake / Odżywka białkowa', keywords: ['protein shake', 'proteinshake', 'whey shake', 'whey protein', 'eiweissshake', 'odzywka bialkowa'], kcal: 120, p: 24.0, c: 3.0, sugar: 1.5, f: 1.5, fiber: 0, defaultPortion: 100 },
     { name: 'Vollmilch (3,5%) / Mleko', keywords: ['vollmilch', 'milch', 'mleko'], kcal: 64, p: 3.3, c: 4.8, sugar: 4.8, f: 3.5, fiber: 0, defaultPortion: 200 },
     { name: 'Gouda / Schnittkäse / Ser żółty', keywords: ['gouda', 'schnittkase', 'edamer', 'emmentaler', 'ser zolty', 'kase'], kcal: 356, p: 25.0, c: 0.1, sugar: 0.1, f: 28.0, fiber: 0, defaultPortion: 30 },
     { name: 'Mozzarella', keywords: ['mozzarella'], kcal: 245, p: 18.5, c: 1.0, sugar: 1.0, f: 18.5, fiber: 0, defaultPortion: 125 },
-    { name: 'Hühnerei (Größe M/L)', keywords: ['huhner ei', 'huhnerei', 'gekochtes ei', 'spiegelei', 'ruherei', 'jajko', 'jajka', 'eier', 'ei'], kcal: 143, p: 12.6, c: 0.7, sugar: 0.5, f: 9.5, fiber: 0, defaultPortion: 60 },
+    { name: 'Hühnerei (Größe M/L) / Jajko', keywords: ['huhner ei', 'huhnerei', 'gekochtes ei', 'spiegelei', 'ruherei', 'jajko', 'jajka', 'eier', 'ei'], kcal: 143, p: 12.6, c: 0.7, sugar: 0.5, f: 9.5, fiber: 0, defaultPortion: 60 },
     { name: 'Haferflocken / Płatki owsiane', keywords: ['haferflocken', 'porridge', 'oatmeal', 'platki owsiane', 'owsianka'], kcal: 372, p: 13.5, c: 58.7, sugar: 1.1, f: 7.0, fiber: 10.0, defaultPortion: 60 },
     { name: 'Vollkornbrot / Chleb razowy', keywords: ['vollkornbrot', 'graubrot', 'schwarzbrot', 'brot', 'scheibe brot', 'chleb razowy', 'chleb', 'kromka chleba'], kcal: 225, p: 7.5, c: 41.0, sugar: 2.8, f: 2.2, fiber: 6.5, defaultPortion: 50 },
-    { name: 'Brötchen / Semmel / Bułka', keywords: ['brotchen', 'weizenbrotchen', 'semmel', 'bulka', 'kaiserbrotchen'], kcal: 278, p: 8.8, c: 55.0, sugar: 2.5, f: 1.8, fiber: 3.2, defaultPortion: 65 },
+    { name: 'Brötchen / Bułka', keywords: ['brotchen', 'weizenbrotchen', 'semmel', 'bulka', 'kaiserbrotchen'], kcal: 278, p: 8.8, c: 55.0, sugar: 2.5, f: 1.8, fiber: 3.2, defaultPortion: 65 },
     { name: 'Butter / Masło', keywords: ['butter', 'maslo'], kcal: 741, p: 0.7, c: 0.6, sugar: 0.6, f: 82.0, fiber: 0, defaultPortion: 10 },
     { name: 'Apfel / Jabłko', keywords: ['apfel', 'apfel frisch', 'jablko'], kcal: 52, p: 0.3, c: 11.4, sugar: 10.3, f: 0.2, fiber: 2.4, defaultPortion: 150 },
     { name: 'Banane / Banan', keywords: ['banane', 'bananen', 'banan'], kcal: 89, p: 1.1, c: 20.0, sugar: 14.2, f: 0.3, fiber: 2.6, defaultPortion: 120 },
-    { name: 'Beeren / Blaubeeren / Erdbeeren', keywords: ['blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'beeren', 'truskawki', 'borowki', 'maliny'], kcal: 42, p: 0.8, c: 7.6, sugar: 5.8, f: 0.3, fiber: 2.4, defaultPortion: 125 },
-    { name: 'Gemischter Salat / Tomate / Gurke', keywords: ['gemischter salat', 'beilagensalat', 'gurkensalat', 'tomatensalat', 'tomate', 'gurke', 'salatka', 'pomidor', 'ogorek'], kcal: 32, p: 1.2, c: 3.8, sugar: 2.4, f: 1.2, fiber: 1.5, defaultPortion: 180 },
-    { name: 'Hähnchenbrustfilet (gebraten) / Pierś z kurczaka', keywords: ['hahnchenbrustfilet', 'hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'piers z kurczaka', 'kurczak'], kcal: 152, p: 29.5, c: 0.5, sugar: 0, f: 3.2, fiber: 0, defaultPortion: 200 },
+    { name: 'Beeren / Owoce leśne', keywords: ['blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'beeren', 'truskawki', 'borowki', 'maliny'], kcal: 42, p: 0.8, c: 7.6, sugar: 5.8, f: 0.3, fiber: 2.4, defaultPortion: 125 },
+    { name: 'Gemischter Salat / Sałatka', keywords: ['gemischter salat', 'beilagensalat', 'gurkensalat', 'tomatensalat', 'tomate', 'gurke', 'salatka', 'pomidor', 'ogorek'], kcal: 32, p: 1.2, c: 3.8, sugar: 2.4, f: 1.2, fiber: 1.5, defaultPortion: 180 },
+    { name: 'Hähnchenbrustfilet / Pierś z kurczaka', keywords: ['hahnchenbrustfilet', 'hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'piers z kurczaka', 'kurczak'], kcal: 152, p: 29.5, c: 0.5, sugar: 0, f: 3.2, fiber: 0, defaultPortion: 200 },
     { name: 'Schweinefleisch in Soße / Mięso wieprzowe w sosie', keywords: ['mieso wieprzowe w sosie', 'wieprzowina w sosie', 'schweinefleisch in sosse', 'schweinebraten in sosse', 'schweinegulasch', 'gulasz wieprzowy', 'schweinefleisch', 'wieprzowina'], kcal: 178, p: 18.5, c: 3.8, sugar: 1.2, f: 9.8, fiber: 0.4, defaultPortion: 220 },
     { name: 'Rindergulasch / Gulasz wołowy', keywords: ['rindergulasch', 'gulasch', 'gulasz wolowy', 'gulasz', 'rindfleisch in sosse'], kcal: 158, p: 19.8, c: 3.5, sugar: 1.4, f: 7.0, fiber: 0.5, defaultPortion: 250 },
     { name: 'Schnitzel paniert / Kotlet schabowy', keywords: ['kotlet schabowy', 'schabowy', 'schweineschnitzel', 'wiener schnitzel', 'schnitzel'], kcal: 255, p: 21.0, c: 13.5, sugar: 0.8, f: 13.0, fiber: 0.8, defaultPortion: 180 },
-    { name: 'Hackfleischkotelett / Frikadelle / Kotlet mielony', keywords: ['kotlet mielony', 'mielony', 'frikadelle', 'bulette', 'fleischpflanzerl'], kcal: 242, p: 17.5, c: 7.5, sugar: 0.9, f: 15.8, fiber: 0.6, defaultPortion: 140 },
+    { name: 'Frikadelle / Kotlet mielony', keywords: ['kotlet mielony', 'mielony', 'frikadelle', 'bulette', 'fleischpflanzerl'], kcal: 242, p: 17.5, c: 7.5, sugar: 0.9, f: 15.8, fiber: 0.6, defaultPortion: 140 },
     { name: 'Lasagne Bolognese', keywords: ['lasagne bolognese', 'lasagne', 'lasagna'], kcal: 160, p: 9.8, c: 13.5, sugar: 2.8, f: 7.2, fiber: 1.2, defaultPortion: 300 },
-    { name: 'Pierogi (Ruskie / mit Fleisch)', keywords: ['pierogi ruskie', 'pierogi z miesem', 'pierogi'], kcal: 198, p: 7.2, c: 29.5, sugar: 1.2, f: 5.5, fiber: 1.6, defaultPortion: 250 },
-    { name: 'Bigos (Polnischer Krauteintopf)', keywords: ['bigos'], kcal: 112, p: 7.8, c: 5.2, sugar: 2.5, f: 6.5, fiber: 2.4, defaultPortion: 300 },
+    { name: 'Pierogi (Ruskie / z mięsem)', keywords: ['pierogi ruskie', 'pierogi z miesem', 'pierogi'], kcal: 198, p: 7.2, c: 29.5, sugar: 1.2, f: 5.5, fiber: 1.6, defaultPortion: 250 },
+    { name: 'Bigos', keywords: ['bigos'], kcal: 112, p: 7.8, c: 5.2, sugar: 2.5, f: 6.5, fiber: 2.4, defaultPortion: 300 },
     { name: 'Lachsfilet / Łosoś', keywords: ['lachsfilet', 'lachs', 'losos'], kcal: 208, p: 20.4, c: 0, sugar: 0, f: 13.4, fiber: 0, defaultPortion: 160 },
-    { name: 'Thunfisch im eigenen Saft / Tuńczyk', keywords: ['thunfisch', 'tunczyk'], kcal: 112, p: 25.5, c: 0, sugar: 0, f: 1.0, fiber: 0, defaultPortion: 140 },
-    { name: 'Döner Kebab (im Brot)', keywords: ['doner kebab', 'doner', 'kebab', 'kebap'], kcal: 215, p: 13.5, c: 21.0, sugar: 3.2, f: 8.2, fiber: 1.8, defaultPortion: 350 },
-    { name: 'Pizza (Margherita / Salami / Schinken)', keywords: ['pizza salami', 'pizza margherita', 'pizza schinken', 'pizza'], kcal: 245, p: 10.5, c: 29.0, sugar: 3.1, f: 9.5, fiber: 1.8, defaultPortion: 350 },
+    { name: 'Thunfisch / Tuńczyk', keywords: ['thunfisch', 'tunczyk'], kcal: 112, p: 25.5, c: 0, sugar: 0, f: 1.0, fiber: 0, defaultPortion: 140 },
+    { name: 'Döner Kebab', keywords: ['doner kebab', 'doner', 'kebab', 'kebap'], kcal: 215, p: 13.5, c: 21.0, sugar: 3.2, f: 8.2, fiber: 1.8, defaultPortion: 350 },
+    { name: 'Pizza', keywords: ['pizza salami', 'pizza margherita', 'pizza schinken', 'pizza'], kcal: 245, p: 10.5, c: 29.0, sugar: 3.1, f: 9.5, fiber: 1.8, defaultPortion: 350 },
     { name: 'Reis gekocht / Ryż', keywords: ['reis gekocht', 'basmatireis', 'jasminreis', 'reis', 'ryz'], kcal: 130, p: 2.7, c: 28.2, sugar: 0.1, f: 0.3, fiber: 0.4, defaultPortion: 180 },
-    { name: 'Nudeln gekocht / Pasta / Makaron', keywords: ['spaghetti', 'nudeln gekocht', 'nudeln', 'pasta', 'makaron'], kcal: 152, p: 5.5, c: 30.2, sugar: 0.6, f: 0.9, fiber: 1.8, defaultPortion: 200 },
+    { name: 'Nudeln gekocht / Makaron', keywords: ['spaghetti', 'nudeln gekocht', 'nudeln', 'pasta', 'makaron'], kcal: 152, p: 5.5, c: 30.2, sugar: 0.6, f: 0.9, fiber: 1.8, defaultPortion: 200 },
     { name: 'Kartoffeln gekocht / Ziemniaki', keywords: ['salzkartoffeln', 'pellkartoffeln', 'kartoffeln', 'kartoffel', 'ziemniaki'], kcal: 73, p: 2.0, c: 15.4, sugar: 0.8, f: 0.1, fiber: 1.8, defaultPortion: 220 },
     { name: 'Pommes Frites / Frytki', keywords: ['pommes frites', 'pommes', 'frytki'], kcal: 292, p: 3.4, c: 36.5, sugar: 0.5, f: 14.2, fiber: 3.2, defaultPortion: 160 },
     { name: 'Apfelschorle / Saftschorle', keywords: ['apfelschorle', 'saftschorle', 'apfelsaftschorle'], kcal: 26, p: 0.1, c: 6.2, sugar: 5.9, f: 0, fiber: 0, defaultPortion: 330 }
   ];
+
+  // ============================================================================
+  // ZWEISPRACHIGES UI-SYSTEM (DEUTSCH <-> POLSKI)
+  // ============================================================================
+  const UI_I18N = {
+    de: {
+      subTitle: 'Vision + 0.0s DE/PL Lexikon',
+      dailyBalance: 'Tagesbilanz',
+      remPrefix: 'Offen: ',
+      prot: 'Protein',
+      carbs: 'Kohlenh.',
+      fat: 'Fett',
+      fiber: 'Ballaststoffe',
+      sugar: 'Zucker (Max.)',
+      scannerTitle: 'Mahlzeiten-Scanner & ⚡ Turbo-Scan',
+      scannerSub: 'Foto aufnehmen, Text eingeben oder 1-Klick Schnellwahl nutzen',
+      textPlaceholder: 'z.B. 2 Latte macchiato groß, 167kcal Mousse, 2 Eier...',
+      photoBtn: 'Foto',
+      quickHeader: '1-Klick Schnellwahl (Sofort ins Tagebuch):',
+      qaCoffee: '☕ Kaffee',
+      qaMilk: '🥛 Kaffee+Milch',
+      qaApple: '🍎 Apfel',
+      qaBanana: '🍌 Banane',
+      qaEggs: '🥚 2 Eier',
+      qaQuark: '🥣 250g Quark',
+      qaShake: '🥤 Protein-Shake',
+      portionAdjust: '<i class="fa-solid fa-sliders text-emerald-400"></i> Portionsgröße anpassen:',
+      cancelBtn: 'Abbrechen',
+      waterTitle: 'Wasser-Haushalt',
+      todayMeals: 'Heutige Mahlzeiten',
+      clearDay: 'Tag leeren',
+      emptyMeals: 'Noch keine Mahlzeiten für heute eingetragen.',
+      fridgeTitle: 'Resteküche & Smart Expiry Guard',
+      fridgeSub: 'Kühlschrank fotografieren — Frische-Check & High-Protein Rezepte',
+      fridgeBtn: 'Frische-Check & Rezepte',
+      menuTitle: 'Restaurant & Speisekarten-Kompass',
+      menuSub: 'Findet die besten Gerichte passend zu deinem Restbudget',
+      menuRem: 'Verbleibendes Tagesbudget:',
+      menuBtn: 'Top-3 Auswahl berechnen',
+      chefTitle: 'KI-Kochstudio (Macro Chef)',
+      chefSub: 'Maßgeschneiderte Fitness-Rezepte nach deinen Ziel-Makros',
+      chefBtn: 'Fitness-Rezept generieren',
+      profTitle: '<i class="fa-solid fa-user-gear text-emerald-400"></i> Körperdaten & Kalorienrechner',
+      navDiary: 'Tagebuch',
+      navFridge: 'Resteküche',
+      navMenu: 'Restaurant',
+      navChef: 'Kochstudio',
+      navProf: 'Profil'
+    },
+    pl: {
+      subTitle: 'Wizja AI + Słownik DE/PL 0.0s',
+      dailyBalance: 'Bilans Dnia',
+      remPrefix: 'Pozostało: ',
+      prot: 'Białko',
+      carbs: 'Węglow.',
+      fat: 'Tłuszcz',
+      fiber: 'Błonnik',
+      sugar: 'Cukier (Max)',
+      scannerTitle: 'Skaner Posiłków & ⚡ Turbo-Skan',
+      scannerSub: 'Zrób zdjęcie, wpisz tekst lub wybierz szybki przycisk 1-Click',
+      textPlaceholder: 'np. 2 Latte macchiato duże, 2 jajka, mięso wieprzowe...',
+      photoBtn: 'Zdjęcie',
+      quickHeader: 'Szybki wybór 1-Click (Od razu do dziennika):',
+      qaCoffee: '☕ Kawa',
+      qaMilk: '🥛 Kawa+Mleko',
+      qaApple: '🍎 Jabłko',
+      qaBanana: '🍌 Banan',
+      qaEggs: '🥚 2 Jajka',
+      qaQuark: '🥣 250g Twaróg',
+      qaShake: '🥤 Shake Białkowy',
+      portionAdjust: '<i class="fa-solid fa-sliders text-emerald-400"></i> Dopasuj wielkość porcji:',
+      cancelBtn: 'Anuluj',
+      waterTitle: 'Nawodnienie (Woda)',
+      todayMeals: 'Dzisiejsze Posiłki',
+      clearDay: 'Wyczyść dzień',
+      emptyMeals: 'Brak zapisanych posiłków na dzisiaj.',
+      fridgeTitle: 'Lodówka & Smart Expiry Guard',
+      fridgeSub: 'Zrób zdjęcie lodówki — kontrola świeżości i przepisy High-Protein',
+      fridgeBtn: 'Sprawdź świeżość i przepisy',
+      menuTitle: 'Restauracja & Kompas Menu',
+      menuSub: 'Znajduje najlepsze dania dopasowane do Twojego budżetu dnia',
+      menuRem: 'Pozostały budżet na dziś:',
+      menuBtn: 'Oblicz Top-3 dania z karty',
+      chefTitle: 'Studio Kulinarne AI (Macro Chef)',
+      chefSub: 'Przepisy fitness dopasowane do Twoich makroskładników',
+      chefBtn: 'Generuj przepis fitness',
+      profTitle: '<i class="fa-solid fa-user-gear text-emerald-400"></i> Dane Ciała & Kalkulator Kalorii',
+      navDiary: 'Dziennik',
+      navFridge: 'Lodówka',
+      navMenu: 'Restauracja',
+      navChef: 'Kucharz AI',
+      navProf: 'Profil'
+    }
+  };
+
+  function toggleLanguage() {
+    state.lang = state.lang === 'pl' ? 'de' : 'pl';
+    saveState();
+    applyLanguage();
+    renderDiaryUI();
+    showToast(state.lang === 'pl' ? 'Język zmieniony na Polski 🇵🇱' : 'Sprache auf Deutsch gestellt 🇩🇪', 'success');
+  }
+
+  function applyLanguage() {
+    const lang = state.lang === 'pl' ? 'pl' : 'de';
+    const t = UI_I18N[lang];
+
+    const flagEl = document.getElementById('langFlag');
+    const codeEl = document.getElementById('langCode');
+    if (flagEl) flagEl.textContent = lang === 'pl' ? '🇵🇱' : '🇩🇪';
+    if (codeEl) codeEl.textContent = lang.toUpperCase();
+
+    const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const setHtml = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+
+    setTxt('headerSubTitle', t.subTitle);
+    setTxt('lblDailyBalance', t.dailyBalance);
+    setTxt('lblRemainingPrefix', t.remPrefix);
+    setTxt('lblMacroProt', t.prot);
+    setTxt('lblMacroCarbs', t.carbs);
+    setTxt('lblMacroFat', t.fat);
+    setTxt('lblMacroFiber', t.fiber);
+    setTxt('lblMacroSugar', t.sugar);
+    setTxt('lblScannerTitle', t.scannerTitle);
+    setTxt('lblScannerSub', t.scannerSub);
+    setTxt('lblPhotoBtn', t.photoBtn);
+    setTxt('lblQuickAddHeader', t.quickHeader);
+    setTxt('qaCoffeeBlack', t.qaCoffee);
+    setTxt('qaCoffeeMilk', t.qaMilk);
+    setTxt('qaApple', t.qaApple);
+    setTxt('qaBanana', t.qaBanana);
+    setTxt('qaEggs', t.qaEggs);
+    setTxt('qaQuark', t.qaQuark);
+    setTxt('qaShake', t.qaShake);
+    setHtml('lblPortionAdjust', t.portionAdjust);
+    setTxt('cancelMealResBtn', t.cancelBtn);
+    setTxt('lblWaterTitle', t.waterTitle);
+    setTxt('lblTodayMeals', t.todayMeals);
+    setTxt('lblClearDayBtn', t.clearDay);
+    setTxt('lblFridgeTitle', t.fridgeTitle);
+    setTxt('lblFridgeSub', t.fridgeSub);
+    setTxt('lblFridgeBtn', t.fridgeBtn);
+    setTxt('lblMenuTitle', t.menuTitle);
+    setTxt('lblMenuSub', t.menuSub);
+    setTxt('lblMenuRemBudget', t.menuRem);
+    setTxt('lblMenuBtn', t.menuBtn);
+    setTxt('lblChefTitle', t.chefTitle);
+    setTxt('lblChefSub', t.chefSub);
+    setTxt('lblChefBtn', t.chefBtn);
+    setHtml('lblProfTitle', t.profTitle);
+    setTxt('navLblDiary', t.navDiary);
+    setTxt('navLblFridge', t.navFridge);
+    setTxt('navLblMenu', t.navMenu);
+    setTxt('navLblChef', t.navChef);
+    setTxt('navLblProfile', t.navProf);
+
+    const inp = document.getElementById('mealTextInput');
+    if (inp) inp.placeholder = t.textPlaceholder;
+
+    const d = new Date();
+    const dateLbl = document.getElementById('currentDateLabel');
+    if (dateLbl) {
+      dateLbl.textContent = d.toLocaleDateString(lang === 'pl' ? 'pl-PL' : 'de-DE', { weekday: 'long', day: '2-digit', month: 'long' });
+    }
+    if (activeMealBaseResult) setPortionScale(activePortionScalePercent);
+  }
 
   function foldDiacritics(str) {
     if (!str) return '';
@@ -1004,7 +1234,7 @@
       let remainder = foldedSeg
         .replace(new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(matchedKeyword)}(?=$|[^a-z0-9])`, 'ig'), ' ')
         .replace(/\b\d+(?:[.,]\d+)?\s*(?:kcal|g|gramm|ml|l|tl|el|st|stk|stuck|x)?\b/gi, ' ')
-        .replace(/\b(?:kleine|kleiner|klein|grosse|grosser|gross|loffel|loeffel|teeloffel|essloffel|lyzeczka|lyzeczki|lyzka|lyzki|portion|tasse|tassen|glas|glaser|becher|teller|scheibe|scheiben|mit|ohne|und|oder|frisch|gekocht|gebraten|gr|m|l|high|protein|yoghurt|joghurt|jogurt|mousse|schoko|vanille)\b/gi, ' ')
+        .replace(/\b(?:kleine|kleiner|klein|grosse|grosser|gross|duze|duzy|male|maly|loffel|loeffel|teeloffel|essloffel|lyzeczka|lyzeczki|lyzka|lyzki|portion|tasse|tassen|glas|glaser|becher|teller|scheibe|scheiben|mit|ohne|und|oder|frisch|gekocht|gebraten|gr|m|l|high|protein|yoghurt|joghurt|jogurt|mousse|schoko|vanille)\b/gi, ' ')
         .replace(/[^a-z0-9\s]/g, ' ').trim();
 
       const unknownWords = remainder.split(/\s+/).filter(w => w.length >= 3);
@@ -1013,8 +1243,8 @@
       let grams = bestEntry.defaultPortion || 100;
       let portionLabel = `${grams}g`;
       let sizeMult = 1.0;
-      if (/\b(?:gross|grosse|grosser|large|duzy|duza)\b/i.test(foldedSeg)) sizeMult = 1.4;
-      else if (/\b(?:klein|kleiner|small|maly|mala)\b/i.test(foldedSeg) && spoonGrams === null) sizeMult = 0.7;
+      if (/\b(?:gross|grosse|grosser|large|duzy|duza|duze)\b/i.test(foldedSeg)) sizeMult = 1.4;
+      else if (/\b(?:klein|kleiner|small|maly|mala|male)\b/i.test(foldedSeg) && spoonGrams === null) sizeMult = 0.7;
 
       const cleanSegWithoutKcal = foldedSeg.replace(/\b\d+(?:[.,]\d+)?\s*kcal\b/gi, '');
       const gramMatch = cleanSegWithoutKcal.match(/(\d+(?:[.,]\d+)?)\s*(g|gramm|ml)\b/i);
@@ -1057,7 +1287,7 @@
         segSugar = Math.round(segSugar * kcalScale * 10) / 10;
         segF = Math.round(segF * kcalScale * 10) / 10;
         segFiber = Math.round(segFiber * kcalScale * 10) / 10;
-        portionLabel = `${segKcal} kcal Angabe`;
+        portionLabel = `${segKcal} kcal`;
       }
 
       matchedParts.push(`${bestEntry.name} (${portionLabel})`);
@@ -1077,7 +1307,9 @@
       sugar: Math.round(totalSugar),
       fat: Math.round(totalF),
       fiber: Math.round(totalFiber),
-      explanation: '0.0s Sofort-Berechnung aus dem verifizierten DE/PL-Wörterbuch.',
+      explanation: state.lang === 'pl'
+        ? '0.0s Natychmiastowe obliczenie ze zweryfikowanego słownika DE/PL.'
+        : '0.0s Sofort-Berechnung aus dem verifizierten DE/PL-Wörterbuch.',
       source: 'lexicon'
     };
   }
@@ -1102,7 +1334,7 @@
     const scaledFat = Math.round((activeMealBaseResult.fat || 0) * factor);
     const scaledFiber = Math.round((activeMealBaseResult.fiber || 0) * factor);
 
-    document.getElementById('portionScaleBadge').textContent = `Portion: ${pct}%`;
+    document.getElementById('portionScaleBadge').textContent = state.lang === 'pl' ? `Porcja: ${pct}%` : `Portion: ${pct}%`;
     document.getElementById('portionScaleHint').textContent = `${factor.toFixed(2).replace(/\.00$/, '.0')}x (${pct}%)`;
     document.getElementById('resKcal').textContent = String(scaledKcal);
     document.getElementById('resProt').textContent = `${scaledProt}g`;
@@ -1111,7 +1343,9 @@
     if (sugarEl) sugarEl.textContent = `${scaledSugar}g`;
     document.getElementById('resFat').textContent = `${scaledFat}g`;
     document.getElementById('resFiber').textContent = `${scaledFiber}g`;
-    document.getElementById('addMealBtnText').textContent = `Jetzt ins Tagebuch eintragen (+${scaledKcal} kcal)`;
+    document.getElementById('addMealBtnText').textContent = state.lang === 'pl'
+      ? `Dodaj do dziennika (+${scaledKcal} kcal)`
+      : `Jetzt ins Tagebuch eintragen (+${scaledKcal} kcal)`;
   }
 
   function showMealResult(res) {
@@ -1130,7 +1364,7 @@
     const box = document.getElementById('mealAnalysisResult');
     const badge = document.getElementById('resSourceBadge');
     badge.innerHTML = res.source === 'lexicon'
-      ? `<i class="fa-solid fa-bolt text-amber-400"></i> 0.0s Lokales Wörterbuch (Offline-Ready)`
+      ? `<i class="fa-solid fa-bolt text-amber-400"></i> ${state.lang === 'pl' ? '0.0s Słownik Lokalny' : '0.0s Lokales Wörterbuch (Offline-Ready)'}`
       : `<i class="fa-solid fa-microchip text-sky-400"></i> Gemini Flash Vision`;
 
     document.getElementById('resMealName').textContent = activeMealBaseResult.mealName;
@@ -1168,7 +1402,7 @@
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     try {
-      showToast('Optimiere Foto für GPU-Analyse...', 'info');
+      showToast(state.lang === 'pl' ? 'Optymalizacja zdjęcia...' : 'Optimiere Foto für GPU-Analyse...', 'info');
       const [stdB64, lblB64] = await Promise.all([
         compressImageFile(file, 'standard'),
         compressImageFile(file, 'label')
@@ -1203,7 +1437,7 @@
     const hasPhoto = Boolean(currentMealBase64);
 
     if (!hasPhoto && !textVal) {
-      showToast('Bitte ein Foto auswählen oder eine Mahlzeit eingeben.', 'warning');
+      showToast(state.lang === 'pl' ? 'Dodaj zdjęcie lub wpisz nazwę posiłku.' : 'Bitte ein Foto auswählen oder eine Mahlzeit eingeben.', 'warning');
       return;
     }
 
@@ -1211,7 +1445,7 @@
       const lexHit = resolveFromLexicon(textVal);
       if (lexHit) {
         showMealResult(lexHit);
-        showToast('0.0s Sofort-Treffer im lokalen Wörterbuch!', 'success');
+        showToast(state.lang === 'pl' ? '0.0s Trafienie w słowniku!' : '0.0s Sofort-Treffer im lokalen Wörterbuch!', 'success');
         return;
       }
       const hasApiKey = Boolean((state.geminiApiKey || recoverRedundantApiKey(state) || '').trim());
@@ -1219,7 +1453,7 @@
         const explicitKcalMatch = textVal.match(/(\d{1,4}(?:[.,]\d+)?)\s*kcal\b/i);
         if (explicitKcalMatch) {
           const kVal = Math.round(parseFloat(explicitKcalMatch[1].replace(',', '.')));
-          const isHighProt = /protein|quark|skyr|mousse|shake/i.test(textVal);
+          const isHighProt = /protein|quark|skyr|mousse|shake|twarog|bialk/i.test(textVal);
           const pG = isHighProt ? Math.round((kVal * 0.45) / 4) : Math.round((kVal * 0.25) / 4);
           const cG = Math.round((kVal * 0.35) / 4);
           const sG = isHighProt ? Math.round(cG * 0.5) : Math.round(cG * 0.4);
@@ -1227,7 +1461,7 @@
           showMealResult({
             mealName: textVal.replace(/\s*\d+\s*kcal/i, '').trim() || 'Mahlzeit',
             kcal: kVal, protein: pG, carbs: cG, sugar: sG, fat: fG, fiber: 1,
-            explanation: `Exakte Kalorienübernahme (${kVal} kcal) aus deiner Texteingabe.`,
+            explanation: `Exakte Kalorienübernahme (${kVal} kcal).`,
             source: 'lexicon'
           });
           return;
@@ -1239,7 +1473,7 @@
     const origBtnHtml = btn.innerHTML;
     isVisionBusy = true;
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Analysiere...</span>`;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>${state.lang === 'pl' ? 'Analiza...' : 'Analysiere...'}</span>`;
 
     clearTimeout(visionWatchdogTimer);
     visionWatchdogTimer = setTimeout(() => {
@@ -1252,20 +1486,22 @@
     }, 15000);
 
     try {
+      const targetLangName = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
       const explicitKcalInText = textVal.match(/(\d{1,4}(?:[.,]\d+)?)\s*kcal\b/i);
       const explicitHint = explicitKcalInText
         ? `WICHTIG: Der Nutzer hat explizit ${explicitKcalInText[1]} kcal angegeben. Übernimm exakt diesen Kalorienwert!`
         : '';
 
-      const prompt = `Du bist ein präziser Ernährungswissenschaftler und OCR-Spezialist (Deutsch & Polnisch).
-Analysiere die Mahlzeit ${hasPhoto ? 'auf dem Bild' : ''} ${textVal ? `und den Nutzer-Hinweis: "${textVal}"` : ''}.
+      const prompt = `Du bist ein präziser Ernährungswissenschaftler und OCR-Spezialist.
+Analysiere die Mahlzeit ${hasPhoto ? 'auf dem Bild' : ''} ${textVal ? `und den Hinweis: "${textVal}"` : ''}.
 ${explicitHint}
+WICHTIG: Schreibe "mealName" und "explanation" auf ${targetLangName}!
 REGELN:
-1. OCR-PRIORITÄT: Falls ein Etikett, Flaschenaufdruck oder eine Nährwerttabelle sichtbar ist, setze "isNutritionLabel": true und übernimm exakt die gedruckten Werte für die Gesamtmenge (z.B. 0,33L = 7 kcal oder 26 kcal/100ml).
-2. GEFÄSS-ANKER: Speisen in einer Auflaufform/Pfanne mit überbackenem Käse sind ein Auflauf/Gratin, niemals ein Käsebrötchen.
+1. OCR-PRIORITÄT: Falls ein Etikett oder eine Nährwerttabelle sichtbar ist, setze "isNutritionLabel": true und übernimm exakt die gedruckten Werte.
+2. GEFÄSS-ANKER: Speisen in einer Auflaufform/Pfanne mit überbackenem Käse sind ein Auflauf/Gratin (Zapiekanka), niemals ein Käsebrötchen.
 3. Antworte AUSSCHLIESSLICH als valides JSON-Objekt:
 {
-  "mealName": "Präziser Name inkl. geschätzter Menge in g/ml",
+  "mealName": "Name inkl. Menge in g/ml (${targetLangName})",
   "isNutritionLabel": false,
   "kcal": 0,
   "protein": 0,
@@ -1273,7 +1509,7 @@ REGELN:
   "sugar": 0,
   "fat": 0,
   "fiber": 0,
-  "explanation": "Kurze Begründung auf Deutsch (max. 2 Sätze)"
+  "explanation": "Kurze Begründung auf ${targetLangName} (max. 2 Sätze)"
 }`;
 
       const imgToSend = hasPhoto ? (currentMealLabelBase64 || currentMealBase64) : null;
@@ -1295,12 +1531,12 @@ REGELN:
       }
 
       showMealResult({
-        mealName: data.mealName || textVal || 'Erkannte Mahlzeit',
+        mealName: data.mealName || textVal || 'Mahlzeit',
         kcal, protein: p, carbs: c, sugar: sug, fat: f, fiber: fib,
-        explanation: data.explanation || 'KI-Analyse abgeschlossen.',
+        explanation: data.explanation || '',
         source: 'ai'
       });
-      showToast('Analyse abgeschlossen! Du kannst die Portion unten anpassen.', 'success');
+      showToast(state.lang === 'pl' ? 'Analiza zakończona!' : 'Analyse abgeschlossen!', 'success');
     } catch (err) {
       showToast(err.message || 'Analyse fehlgeschlagen.', 'error');
     } finally {
@@ -1312,14 +1548,15 @@ REGELN:
   }
 
   function quickAddPreset(presetId) {
+    const isPl = state.lang === 'pl';
     const presets = {
-      coffee_black: { name: '☕ Kaffee Schwarz (250ml)', kcal: 0, protein: 0, carbs: 0, sugar: 0, fat: 0, fiber: 0 },
-      coffee_milk: { name: '🥛 Kaffee mit Milch (250ml)', kcal: 45, protein: 2, carbs: 3, sugar: 3, fat: 2, fiber: 0 },
-      apple: { name: '🍎 Apfel frisch (150g)', kcal: 78, protein: 0, carbs: 17, sugar: 15, fat: 0, fiber: 4 },
-      banana: { name: '🍌 Banane (120g)', kcal: 105, protein: 1, carbs: 24, sugar: 17, fat: 0, fiber: 3 },
-      eggs_2: { name: '🥚 2 Hühnereier (120g)', kcal: 172, protein: 15, carbs: 1, sugar: 1, fat: 11, fiber: 0 },
-      quark_250: { name: '🥣 Magerquark (250g)', kcal: 170, protein: 30, carbs: 10, sugar: 10, fat: 1, fiber: 0 },
-      protein_shake: { name: '🥤 Whey Protein-Shake (30g Pulver)', kcal: 120, protein: 24, carbs: 3, sugar: 1, fat: 2, fiber: 0 }
+      coffee_black: { name: isPl ? '☕ Kawa czarna (250ml)' : '☕ Kaffee Schwarz (250ml)', kcal: 0, protein: 0, carbs: 0, sugar: 0, fat: 0, fiber: 0 },
+      coffee_milk: { name: isPl ? '🥛 Kawa z mlekiem (250ml)' : '🥛 Kaffee mit Milch (250ml)', kcal: 45, protein: 2, carbs: 3, sugar: 3, fat: 2, fiber: 0 },
+      apple: { name: isPl ? '🍎 Jabłko (150g)' : '🍎 Apfel frisch (150g)', kcal: 78, protein: 0, carbs: 17, sugar: 15, fat: 0, fiber: 4 },
+      banana: { name: isPl ? '🍌 Banan (120g)' : '🍌 Banane (120g)', kcal: 105, protein: 1, carbs: 24, sugar: 17, fat: 0, fiber: 3 },
+      eggs_2: { name: isPl ? '🥚 2 Jajka (120g)' : '🥚 2 Hühnereier (120g)', kcal: 172, protein: 15, carbs: 1, sugar: 1, fat: 11, fiber: 0 },
+      quark_250: { name: isPl ? '🥣 Twaróg chudy (250g)' : '🥣 Magerquark (250g)', kcal: 170, protein: 30, carbs: 10, sugar: 10, fat: 1, fiber: 0 },
+      protein_shake: { name: isPl ? '🥤 Shake Białkowy (30g)' : '🥤 Whey Protein-Shake (30g)', kcal: 120, protein: 24, carbs: 3, sugar: 1, fat: 2, fiber: 0 }
     };
     const item = presets[presetId];
     if (item) addMealEntry(item);
@@ -1341,7 +1578,7 @@ REGELN:
     });
     saveState();
     renderDiaryUI();
-    showToast(`${entry.name} (+${entry.kcal} kcal) gespeichert!`, 'success');
+    showToast(`${entry.name} (+${entry.kcal} kcal)`, 'success');
   }
 
   function removeMealEntry(mealId) {
@@ -1349,17 +1586,16 @@ REGELN:
     today.meals = today.meals.filter(m => m.id !== mealId);
     saveState();
     renderDiaryUI();
-    showToast('Eintrag entfernt.', 'info');
+    showToast(state.lang === 'pl' ? 'Usunięto wpis.' : 'Eintrag entfernt.', 'info');
   }
 
   function clearTodayMeals() {
     const today = getTodayData();
     if (!today.meals.length) return;
-    if (!confirm('Möchtest du wirklich alle heutigen Mahlzeiten löschen?')) return;
+    if (!confirm(state.lang === 'pl' ? 'Czy na pewno chcesz usunąć dzisiejsze posiłki?' : 'Möchtest du wirklich alle heutigen Mahlzeiten löschen?')) return;
     today.meals = [];
     saveState();
     renderDiaryUI();
-    showToast('Heutiges Protokoll geleert.', 'info');
   }
 
   function addWater(deltaMl) {
@@ -1437,8 +1673,9 @@ REGELN:
     document.getElementById('waterTarget').textContent = String(prof.waterTarget || 2500);
 
     const listEl = document.getElementById('diaryLogList');
+    const emptyMsg = UI_I18N[state.lang === 'pl' ? 'pl' : 'de'].emptyMeals;
     if (!today.meals.length) {
-      listEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">Noch keine Mahlzeiten für heute eingetragen.</div>`;
+      listEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">${emptyMsg}</div>`;
     } else {
       listEl.innerHTML = today.meals.map(m => `
         <div class="bg-slate-900/80 border border-slate-800/90 rounded-xl p-3 flex items-center justify-between gap-2">
@@ -1474,7 +1711,7 @@ REGELN:
       currentFridgeBase64 = b64;
       document.getElementById('fridgePreviewImg').src = `data:image/jpeg;base64,${b64}`;
       document.getElementById('fridgePreviewContainer').classList.remove('hidden');
-      showToast('Kühlschrank-Foto bereit!', 'success');
+      showToast(state.lang === 'pl' ? 'Zdjęcie lodówki gotowe!' : 'Kühlschrank-Foto bereit!', 'success');
     } catch (err) { showToast(err.message || 'Bildfehler.', 'error'); }
   }
 
@@ -1494,19 +1731,20 @@ REGELN:
     const btn = document.getElementById('scanFridgeBtn');
     const orig = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Prüfe Frische & Rezepte...`;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ...`;
 
     try {
-      const prompt = `Du bist ein Lebensmittelsicherheits-Experte und Fitness-Koch.
+      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+      const prompt = `Du bist ein Lebensmittelsicherheits-Experte und Fitness-Koch. Antworte auf ${targetLang}.
 Analysiere die Zutaten ${currentFridgeBase64 ? 'auf dem Kühlschrank-Foto' : ''} ${extra ? `sowie: "${extra}"` : ''}.
-WICHTIG (Smart Expiry Guard): Halluziniere KEINE unlesbaren MHD-Daten! Bewerte den biologischen Reifegrad & Verbrauchspriorität:
-- "high" (1-2 Tage: offene Milchprodukte, Fleisch, Fisch, welkes Gemüse)
+WICHTIG (Smart Expiry Guard): Halluziniere KEINE unlesbaren MHD-Daten! Bewerte den biologischen Reifegrad:
+- "high" (1-2 Tage)
 - "medium" (3-4 Tage)
 - "low" (>5 Tage)
-Erstelle 2 High-Protein Fitness-Rezepte, die zuerst Zutaten mit "high" verbrauchen.
+Erstelle 2 High-Protein Fitness-Rezepte auf ${targetLang}.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "ingredients": [{ "name": "Zutat", "urgency": "high", "shelfLifeHint": "1-2 Tage (Grund)" }],
+  "ingredients": [{ "name": "Zutat", "urgency": "high", "shelfLifeHint": "1-2 Tage" }],
   "recipes": [{ "title": "Rezeptname", "kcal": 480, "protein": 42, "carbs": 35, "fat": 14, "steps": ["Schritt 1", "Schritt 2"] }]
 }`;
 
@@ -1519,7 +1757,7 @@ Antworte AUSSCHLIESSLICH als JSON:
 
       document.getElementById('fridgeResultsContainer').innerHTML = `
         <div class="glass-card rounded-2xl p-4 space-y-2.5">
-          <h3 class="text-xs font-extrabold uppercase text-teal-400">Smart Expiry Guard — Verbrauchs-Priorität</h3>
+          <h3 class="text-xs font-extrabold uppercase text-teal-400">Smart Expiry Guard</h3>
           <div class="space-y-1.5">
             ${sortedIng.map(i => {
               const badgeClass = i.urgency === 'high'
@@ -1542,13 +1780,13 @@ Antworte AUSSCHLIESSLICH als JSON:
             </div>
             <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">${(r.steps || []).map(s => `<li>${s}</li>`).join('')}</ul>
             <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, sugar: 4, fat: r.fat || 12, fiber: 4 })})' class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
-              + Direkt ins Tagebuch übernehmen (${r.kcal} kcal)
+              + (${r.kcal} kcal)
             </button>
           </div>
         `).join('')}
       `;
     } catch (err) {
-      showToast(err.message || 'Resteküche-Analyse fehlgeschlagen.', 'error');
+      showToast(err.message || 'Fehler.', 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = orig;
@@ -1576,7 +1814,7 @@ Antworte AUSSCHLIESSLICH als JSON:
       currentMenuBase64 = b64;
       document.getElementById('menuPreviewImg').src = `data:image/jpeg;base64,${b64}`;
       document.getElementById('menuPreviewContainer').classList.remove('hidden');
-      showToast('Speisekarte hochauflösend geladen!', 'success');
+      showToast('Speisekarte geladen!', 'success');
     } catch (err) { showToast(err.message || 'Bildfehler.', 'error'); }
   }
 
@@ -1603,17 +1841,18 @@ Antworte AUSSCHLIESSLICH als JSON:
     const btn = document.getElementById('scanMenuBtn');
     const orig = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Scanne Speisekarte...`;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ...`;
 
     try {
-      const prompt = `Du bist ein Ernährungs-Coach im Restaurant.
-Offenes Tagesbudget des Nutzers: ${remKcal} kcal, noch ${remProt}g Protein offen. Ziel: ${goal}.
-${isDamageControl ? 'ACHTUNG DAMAGE-CONTROL-MODUS: Das Kalorienbudget ist fast aufgebraucht! Empfiehl extrem kalorienarme, magere Protein-Optionen.' : ''}
+      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+      const prompt = `Du bist ein Ernährungs-Coach im Restaurant. Antworte auf ${targetLang}.
+Offenes Tagesbudget: ${remKcal} kcal, noch ${remProt}g Protein offen. Ziel: ${goal}.
+${isDamageControl ? 'DAMAGE-CONTROL-MODUS: Empfiehl extrem kalorienarme, magere Protein-Optionen.' : ''}
 Hinweis/Restaurant: "${textVal}".
-Wähle die Top-3 besten Gerichte aus und gib einen konkreten Bestell-Hack.
+Wähle die Top-3 besten Gerichte aus und gib einen Bestell-Hack auf ${targetLang}.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "recommendations": [{ "dishName": "Gericht", "kcal": 520, "protein": 45, "carbs": 35, "fat": 18, "orderHack": "Tipp bei der Bestellung" }]
+  "recommendations": [{ "dishName": "Gericht", "kcal": 520, "protein": 45, "carbs": 35, "fat": 18, "orderHack": "Tipp" }]
 }`;
 
       const raw = await callGeminiRequest(prompt, currentMenuBase64, 14000);
@@ -1627,15 +1866,15 @@ Antworte AUSSCHLIESSLICH als JSON:
             <span class="text-xs font-extrabold text-emerald-400 shrink-0">${r.kcal} kcal | ${r.protein}g P</span>
           </div>
           <p class="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2">
-            <i class="fa-solid fa-lightbulb mr-1"></i> <strong>Bestell-Hack:</strong> ${r.orderHack || 'Beilage kalorienarm wählen.'}
+            <i class="fa-solid fa-lightbulb mr-1"></i> ${r.orderHack || ''}
           </p>
           <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, sugar: 4, fat: r.fat || 15, fiber: 3 })})' class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
-            + Ins Tagebuch eintragen (${r.kcal} kcal)
+            + (${r.kcal} kcal)
           </button>
         </div>
       `).join('');
     } catch (err) {
-      showToast(err.message || 'Speisekarten-Scan fehlgeschlagen.', 'error');
+      showToast(err.message || 'Fehler.', 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = orig;
@@ -1643,7 +1882,7 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   async function runChefRecipeAI() {
-    const craving = (document.getElementById('chefCravingInput').value || 'Schnelles High-Protein Pfannengericht').trim();
+    const craving = (document.getElementById('chefCravingInput').value || 'High-Protein Pfannengericht').trim();
     const maxKcal = Number(document.getElementById('chefKcalLimit').value) || 600;
     const minProt = Number(document.getElementById('chefProtMin').value) || 45;
     const maxTime = Number(document.getElementById('chefTimeMax').value) || 20;
@@ -1651,15 +1890,16 @@ Antworte AUSSCHLIESSLICH als JSON:
     const btn = document.getElementById('generateChefBtn');
     const orig = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Kreiere Fitness-Rezept...`;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ...`;
 
     try {
-      const prompt = `Erstelle ein präzises Fitness-Rezept für: "${craving}".
-Vorgaben: Maximal ${maxKcal} kcal, mindestens ${minProt}g Protein, Zubereitungszeit max. ${maxTime} Minuten.
+      const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+      const prompt = `Erstelle ein Fitness-Rezept auf ${targetLang} für: "${craving}".
+Maximal ${maxKcal} kcal, mindestens ${minProt}g Protein, max. ${maxTime} Minuten.
 Antworte AUSSCHLIESSLICH als JSON:
 {
   "title": "Rezeptname", "kcal": 540, "protein": 48, "carbs": 42, "fat": 16,
-  "ingredients": ["200g Hähnchenbrust"], "steps": ["Schritt 1", "Schritt 2"]
+  "ingredients": ["200g ..."], "steps": ["Schritt 1", "Schritt 2"]
 }`;
 
       const raw = await callGeminiRequest(prompt, null, 13500);
@@ -1672,20 +1912,18 @@ Antworte AUSSCHLIESSLICH als JSON:
             <span class="text-xs font-extrabold text-emerald-400 shrink-0">${r.kcal} kcal | ${r.protein}g P</span>
           </div>
           <div class="text-xs text-slate-300">
-            <strong class="text-purple-400">Zutaten:</strong>
             <ul class="list-disc pl-4 mt-1 space-y-0.5">${(r.ingredients || []).map(i => `<li>${i}</li>`).join('')}</ul>
           </div>
           <div class="text-xs text-slate-300">
-            <strong class="text-emerald-400">Zubereitung:</strong>
             <ol class="list-decimal pl-4 mt-1 space-y-1">${(r.steps || []).map(s => `<li>${s}</li>`).join('')}</ol>
           </div>
           <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.title || craving, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 35, sugar: 4, fat: r.fat || 15, fiber: 4 })})' class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">
-            + Rezept direkt ins Tagebuch eintragen (${r.kcal} kcal)
+            + (${r.kcal} kcal)
           </button>
         </div>
       `;
     } catch (err) {
-      showToast(err.message || 'Rezept-Generierung fehlgeschlagen.', 'error');
+      showToast(err.message || 'Fehler.', 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = orig;
@@ -1699,13 +1937,13 @@ Antworte AUSSCHLIESSLICH als JSON:
     const el = document.getElementById('profWeightDiffValue');
     if (!el) return;
     if (diff < 0) {
-      el.textContent = `${diff.toFixed(1)} kg (Abnahme-Ziel)`;
+      el.textContent = `${diff.toFixed(1)} kg`;
       el.className = 'font-extrabold text-emerald-400';
     } else if (diff > 0) {
-      el.textContent = `+${diff.toFixed(1)} kg (Aufbau-Ziel)`;
+      el.textContent = `+${diff.toFixed(1)} kg`;
       el.className = 'font-extrabold text-sky-400';
     } else {
-      el.textContent = `0.0 kg (Zielgewicht erreicht!)`;
+      el.textContent = `0.0 kg`;
       el.className = 'font-extrabold text-amber-400';
     }
   }
@@ -1743,7 +1981,7 @@ Antworte AUSSCHLIESSLICH als JSON:
     document.getElementById('profTargetFat').value = String(targetFat);
 
     updateWeightDiffBanner();
-    showToast(`Mifflin-St Jeor berechnet: ${targetKcal} kcal (${targetProt}g Protein)!`, 'success');
+    showToast(`Mifflin-St Jeor: ${targetKcal} kcal (${targetProt}g P)!`, 'success');
   }
 
   function syncProfileToUI() {
@@ -1781,11 +2019,13 @@ Antworte AUSSCHLIESSLICH als JSON:
 
     saveState();
     renderDiaryUI();
-    showToast('Profil & Zielgewicht dauerhaft gespeichert!', 'success');
+    showToast(state.lang === 'pl' ? 'Profil zapisany!' : 'Profil dauerhaft gespeichert!', 'success');
   }
 
   function exportBackupJSON() {
-    const dataStr = JSON.stringify(state, null, 2);
+    const exportObj = { ...state };
+    if (state.isGuestUser) delete exportObj.geminiApiKey;
+    const dataStr = JSON.stringify(exportObj, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1803,12 +2043,14 @@ Antworte AUSSCHLIESSLICH als JSON:
       try {
         const parsed = JSON.parse(ev.target.result);
         if (parsed && typeof parsed === 'object') {
-          state = { ...createDefaultState(), ...parsed };
+          const wasGuest = state.isGuestUser;
+          state = { ...createDefaultState(), ...parsed, isGuestUser: wasGuest || Boolean(parsed.isGuestUser) };
           saveState();
+          applyLanguage();
           syncProfileToUI();
           renderDiaryUI();
           updateApiKeyStatusUI();
-          showToast('Backup erfolgreich wiederhergestellt!', 'success');
+          showToast('Backup wiederhergestellt!', 'success');
         }
       } catch (_) {
         showToast('Ungültige Backup-Datei.', 'error');
@@ -1818,19 +2060,35 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   // ============================================================================
-  // API-KEY MODAL & GAST-CENTER (4-LAYER PERSISTENZ + WHATSAPP DIREKTVERSAND)
+  // ADMIN vs. GAST-ISOLATION (GÄSTE KÖNNEN WEDER EINLADEN NOCH KEY AUSLESEN)
   // ============================================================================
   function updateApiKeyStatusUI() {
     const hasKey = Boolean((state.geminiApiKey || recoverRedundantApiKey(state) || '').trim());
+    const isGuest = Boolean(state.isGuestUser);
+    const keyBtn = document.getElementById('headerKeyBtn');
     const dot = document.getElementById('apiKeyStatusDot');
     const lbl = document.getElementById('apiKeyBtnLabel');
+    const guestTxt = document.getElementById('guestBadgeText');
+
+    // Wenn eingeladener Gast: API-Key-Button oben rechts komplett ausblenden!
+    if (keyBtn) {
+      if (isGuest) keyBtn.classList.add('hidden');
+      else keyBtn.classList.remove('hidden');
+    }
+
     if (dot) dot.className = hasKey ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-rose-500';
     if (lbl) lbl.textContent = hasKey ? 'Key aktiv' : 'API-Key';
-    const guestTxt = document.getElementById('guestBadgeText');
-    if (guestTxt && state.guestCode) guestTxt.textContent = state.guestCode;
+
+    if (guestTxt) {
+      guestTxt.textContent = state.guestCode ? state.guestCode : (isGuest ? 'Gast-Aktiv' : 'Gast-Center');
+    }
   }
 
   function openApiKeyModal() {
+    if (state.isGuestUser) {
+      showToast('Gast-Modus aktiv: API-Key ist durch den Administrator geschützt.', 'info');
+      return;
+    }
     document.getElementById('apiKeyInput').value = state.geminiApiKey || recoverRedundantApiKey(state) || '';
     document.getElementById('apiKeyModal').classList.remove('hidden');
   }
@@ -1846,14 +2104,17 @@ Antworte AUSSCHLIESSLICH als JSON:
       return;
     }
     state.geminiApiKey = val;
+    state.isGuestUser = false;
+    persistGuestLock(false);
     persistApiKeyRedundant(val);
     saveState();
     updateApiKeyStatusUI();
     closeApiKeyModal();
-    showToast('API-Key 4-fach gesichert gespeichert!', 'success');
+    showToast('Admin API-Key 4-fach gesichert gespeichert!', 'success');
   }
 
   function clearSavedApiKey() {
+    if (state.isGuestUser) return;
     state.geminiApiKey = '';
     persistApiKeyRedundant('');
     saveState();
@@ -1863,8 +2124,26 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   function openInviteModal() {
-    document.getElementById('guestCodeInput').value = state.guestCode || '';
-    updateInvitePreview();
+    const isGuest = Boolean(state.isGuestUser);
+    const adminSec = document.getElementById('adminInviteGeneratorSection');
+    const guestLockedBox = document.getElementById('guestLockedInfoBox');
+    const guestActBox = document.getElementById('guestCodeActivationBox');
+    const guestCodeDisp = document.getElementById('guestActiveCodeDisplay');
+
+    if (isGuest) {
+      // Eingeladener Freund: Generator & WhatsApp-Teilen strikt ausblenden!
+      if (adminSec) adminSec.classList.add('hidden');
+      if (guestLockedBox) guestLockedBox.classList.remove('hidden');
+      if (guestActBox) guestActBox.classList.add('hidden');
+      if (guestCodeDisp) guestCodeDisp.textContent = state.guestCode || 'FIT-GAST';
+    } else {
+      // Admin: Voller Zugriff auf Code-Generator & WhatsApp-Einladungslink
+      if (adminSec) adminSec.classList.remove('hidden');
+      if (guestLockedBox) guestLockedBox.classList.add('hidden');
+      if (guestActBox) guestActBox.classList.remove('hidden');
+      document.getElementById('guestCodeInput').value = state.guestCode || '';
+      updateInvitePreview();
+    }
     document.getElementById('inviteModal').classList.remove('hidden');
   }
 
@@ -1884,12 +2163,28 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   function activateGuestCode() {
-    const code = (document.getElementById('guestCodeInput').value || '').trim().toUpperCase();
+    const rawInput = (document.getElementById('guestCodeInput').value || '').trim();
+    // Geheimer Admin-Unlock falls der Admin seinen eigenen AIza-Key hier eingibt
+    if (rawInput.startsWith('AIza') && rawInput.length > 25) {
+      state.geminiApiKey = rawInput;
+      state.isGuestUser = false;
+      persistGuestLock(false);
+      persistApiKeyRedundant(rawInput);
+      saveState();
+      updateApiKeyStatusUI();
+      closeInviteModal();
+      showToast('Admin-Modus erfolgreich freigeschaltet!', 'success');
+      return;
+    }
+
+    const code = rawInput.toUpperCase();
     if (!GUEST_REGEX.test(code)) {
       showToast('Format ungültig. Beispiel: FIT-ANNA-2025', 'error');
       return;
     }
     state.guestCode = code;
+    state.isGuestUser = true;
+    persistGuestLock(true);
     saveState();
     updateApiKeyStatusUI();
     closeInviteModal();
@@ -1906,6 +2201,7 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   function copySingleInviteCode() {
+    if (state.isGuestUser) return;
     const code = document.getElementById('generatedInviteCode').textContent;
     navigator.clipboard.writeText(code).then(() => {
       showToast(`Code ${code} kopiert!`, 'success');
@@ -1913,6 +2209,7 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   function copyFullInviteLink() {
+    if (state.isGuestUser) return;
     const url = buildFullInviteUrl();
     navigator.clipboard.writeText(url).then(() => {
       showToast('Komplettpaket-Einladungslink kopiert!', 'success');
@@ -1920,6 +2217,7 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   function shareInviteViaWhatsApp() {
+    if (state.isGuestUser) return;
     const code = document.getElementById('generatedInviteCode').textContent;
     const url = buildFullInviteUrl();
     const text = `Hallo! Hier ist dein persönlicher Zugang zu *CalSnap AI* 🚀\n\n🔑 Dein Gast-Code: *${code}*\n📲 Direkt starten (automatisch eingerichtet):\n${url}`;
@@ -1941,12 +2239,15 @@ Antworte AUSSCHLIESSLICH als JSON:
       }
       if (urlInvite && GUEST_REGEX.test(urlInvite)) {
         state.guestCode = urlInvite;
+        // Sobald jemand über einen ?invite= Link kommt -> Strikte Gast-Sperre aktivieren!
+        state.isGuestUser = true;
+        persistGuestLock(true);
         changed = true;
       }
       if (changed) {
         saveState();
         window.history.replaceState({}, document.title, window.location.pathname);
-        showToast('Einladungs-Konfiguration automatisch aktiviert!', 'success');
+        showToast('Persönlicher Gast-Zugang automatisch eingerichtet!', 'success');
       }
     } catch (_) {}
   }
@@ -1956,11 +2257,7 @@ Antworte AUSSCHLIESSLICH als JSON:
   // ============================================================================
   document.addEventListener('DOMContentLoaded', () => {
     checkUrlOnboardingParams();
-    const d = new Date();
-    const dateLbl = document.getElementById('currentDateLabel');
-    if (dateLbl) {
-      dateLbl.textContent = d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' });
-    }
+    applyLanguage();
     updateApiKeyStatusUI();
     syncProfileToUI();
     renderDiaryUI();
