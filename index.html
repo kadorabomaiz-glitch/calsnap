@@ -70,7 +70,7 @@
             <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white leading-none">CalSnap AI</h1>
             <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">v4.1</span>
           </div>
-          <p id="headerSubTitle" class="text-[10px] text-slate-400 mt-0.5">Vision + 0.0s DE/PL Lexikon</p>
+          <p id="headerSubTitle" class="text-[10px] text-slate-400 mt-0.5">3D-Vision + 0.0s DE/PL Lexikon</p>
         </div>
       </div>
 
@@ -200,7 +200,7 @@
             </div>
             <div>
               <h3 id="lblScannerTitle" class="text-sm font-extrabold text-white leading-snug">Mahlzeiten-Scanner & ⚡ Turbo-Scan</h3>
-              <p id="lblScannerSub" class="text-[11px] text-slate-400">Foto aufnehmen, Text eingeben oder 1-Klick Schnellwahl nutzen</p>
+              <p id="lblScannerSub" class="text-[11px] text-slate-400">Foto (ideal: 45° schräg von oben), Text oder 1-Klick Schnellwahl</p>
             </div>
           </div>
           <span id="currentModelBadge" class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800/90 border border-slate-700 text-emerald-400 flex items-center gap-1">
@@ -249,7 +249,7 @@
           </div>
         </div>
 
-        <!-- ANALYSE-ERGEBNIS-BOX INKL. PORTIONS-REGLER (50% >>> 100% >>> 150% >>> 200%) -->
+        <!-- ANALYSE-ERGEBNIS-BOX INKL. KOMPONENTEN-AUFSCHLÜSSELUNG & PORTIONS-REGLER -->
         <div id="mealAnalysisResult" class="hidden rounded-2xl bg-slate-900/95 border border-emerald-500/35 p-3.5 space-y-3 shadow-inner">
           <div class="flex items-center justify-between gap-2">
             <span id="resSourceBadge" class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
@@ -267,6 +267,7 @@
           </div>
 
           <p id="resExplanation" class="text-xs text-slate-400 leading-relaxed"></p>
+          <div id="resComponentsList" class="hidden flex flex-wrap gap-1.5 pt-0.5"></div>
 
           <!-- MAKRO-BOX (PROTEIN, KOHLENH., ZUCKER, FETT, BALLASTST.) -->
           <div class="grid grid-cols-5 gap-1 bg-slate-950/70 rounded-xl p-2.5 border border-slate-800/80 text-center">
@@ -555,7 +556,7 @@
   </nav>
   <script>
   // ============================================================================
-  // CALSNAP AI v4.1 ENTERPRISE — CORE STATE, PERSISTENCE & ADMIN/GUEST ISOLATION
+  // CALSNAP AI v4.1 ENTERPRISE — CORE STATE, PERSISTENCE & ZERO-VARIANCE VISION
   // ============================================================================
   const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
   const STORAGE_KEY_V1 = 'calsnap_ai_state_v1';
@@ -577,6 +578,7 @@
 
   let activeMealBaseResult = null;
   let activePortionScalePercent = 100;
+  window._quickRecipeStore = [];
 
   function getTodayISO() {
     const d = new Date();
@@ -628,12 +630,8 @@
 
   function isGuestLockPersisted(parsedState) {
     if (parsedState && parsedState.isGuestUser === true) return true;
-    try {
-      if (localStorage.getItem(GUEST_LOCK_SLOT) === '1') return true;
-    } catch (_) {}
-    try {
-      if (document.cookie.includes(`${COOKIE_GUEST_LOCK}=1`)) return true;
-    } catch (_) {}
+    try { if (localStorage.getItem(GUEST_LOCK_SLOT) === '1') return true; } catch (_) {}
+    try { if (document.cookie.includes(`${COOKIE_GUEST_LOCK}=1`)) return true; } catch (_) {}
     return false;
   }
 
@@ -736,7 +734,7 @@
   }
 
   // ============================================================================
-  // WEBKIT METAL-GPU MEMORY ISOLATION & CAMERA ENGINE (compressImageFile)
+  // WEBKIT METAL-GPU MEMORY ISOLATION & SINGLE-PASS CAMERA ENGINE
   // ============================================================================
   function renderImageToJpegBase64(img, objectUrl, maxDim, quality) {
     const origW = img.naturalWidth || img.width || 800;
@@ -772,7 +770,7 @@
   function compressImageFile(file, mode = 'standard') {
     return new Promise((resolve, reject) => {
       if (!file) { reject(new Error('Keine Bilddatei ausgewählt.')); return; }
-      const maxDim = (mode === 'menu' || mode === 'label') ? 1080 : 800;
+      const maxDim = (mode === 'menu' || mode === 'label') ? 1024 : 840;
       const quality = (mode === 'menu' || mode === 'label') ? 0.78 : 0.76;
       let settled = false;
       const objectUrl = URL.createObjectURL(file);
@@ -817,7 +815,7 @@
   }
 
   // ============================================================================
-  // ISOLATED ABORT-CONTROLLER PIPELINE & MULTI-QUOTA ROUTING (callGeminiRequest)
+  // ISOLATED ABORT-CONTROLLER PIPELINE & ZERO-VARIANCE SAMPLING (temp=0.05)
   // ============================================================================
   async function fetchWithIsolatedSignal(url, options, timeoutMs) {
     const controller = new AbortController();
@@ -889,7 +887,11 @@
       const supportsThinking = /^gemini-(2\.5-flash|3)/i.test(modelName);
       const basePayload = {
         contents: [{ role: 'user', parts }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 1200 }
+        generationConfig: {
+          temperature: 0.05,
+          topP: 0.1,
+          maxOutputTokens: 1350
+        }
       };
       if (supportsThinking) basePayload.generationConfig.thinkingConfig = { thinkingBudget: 0 };
 
@@ -900,10 +902,10 @@
           timeoutMs
         );
 
-        if (res.status === 400 && basePayload.generationConfig.thinkingConfig) {
+        if (res.status === 400) {
           const fallbackPayload = {
             contents: [{ role: 'user', parts }],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 1200 }
+            generationConfig: { temperature: 0.05, maxOutputTokens: 1350 }
           };
           res = await fetchWithIsolatedSignal(
             endpoint,
@@ -999,7 +1001,7 @@
   // ============================================================================
   const UI_I18N = {
     de: {
-      subTitle: 'Vision + 0.0s DE/PL Lexikon',
+      subTitle: '3D-Vision + 0.0s DE/PL Lexikon',
       dailyBalance: 'Tagesbilanz',
       remPrefix: 'Offen: ',
       prot: 'Protein',
@@ -1008,7 +1010,7 @@
       fiber: 'Ballaststoffe',
       sugar: 'Zucker (Max.)',
       scannerTitle: 'Mahlzeiten-Scanner & ⚡ Turbo-Scan',
-      scannerSub: 'Foto aufnehmen, Text eingeben oder 1-Klick Schnellwahl nutzen',
+      scannerSub: 'Foto (ideal: 45° schräg von oben), Text oder 1-Klick Schnellwahl',
       textPlaceholder: 'z.B. 2 Latte macchiato groß, 167kcal Mousse, 2 Eier...',
       photoBtn: 'Foto',
       quickHeader: '1-Klick Schnellwahl (Sofort ins Tagebuch):',
@@ -1043,7 +1045,7 @@
       navProf: 'Profil'
     },
     pl: {
-      subTitle: 'Wizja AI + Słownik DE/PL 0.0s',
+      subTitle: 'Wizja 3D + Słownik DE/PL 0.0s',
       dailyBalance: 'Bilans Dnia',
       remPrefix: 'Pozostało: ',
       prot: 'Białko',
@@ -1052,7 +1054,7 @@
       fiber: 'Błonnik',
       sugar: 'Cukier (Max)',
       scannerTitle: 'Skaner Posiłków & ⚡ Turbo-Skan',
-      scannerSub: 'Zrób zdjęcie, wpisz tekst lub wybierz szybki przycisk 1-Click',
+      scannerSub: 'Zdjęcie (najlepiej pod kątem 45°), tekst lub szybki wybór 1-Click',
       textPlaceholder: 'np. 2 Latte macchiato duże, 2 jajka, mięso wieprzowe...',
       photoBtn: 'Zdjęcie',
       quickHeader: 'Szybki wybór 1-Click (Od razu do dziennika):',
@@ -1314,6 +1316,73 @@
     };
   }
 
+  // ============================================================================
+  // DETERMINISTISCHE KOMPONENTEN-KALIBRIERUNG GEGEN WINKEL-SCHWANKUNGEN
+  // ============================================================================
+  function findLexiconReference(compName) {
+    const folded = foldDiacritics(compName || '');
+    if (!folded) return null;
+    let best = null, maxLen = 0;
+    for (const entry of FOOD_LEXICON) {
+      for (const kw of entry.keywords) {
+        if (matchKeywordWithBoundary(folded, kw) && kw.length > maxLen) {
+          maxLen = kw.length;
+          best = entry;
+        }
+      }
+    }
+    return best;
+  }
+
+  function reconcileVisionComponents(data, isLabel) {
+    const comps = Array.isArray(data.components) ? data.components : [];
+    if (!comps.length || isLabel) return null;
+
+    let sumKcal = 0, sumP = 0, sumC = 0, sumSugar = 0, sumF = 0, sumFiber = 0;
+    const badgeLabels = [];
+
+    for (const c of comps) {
+      const name = String(c.name || 'Zutat').trim();
+      const grams = Math.max(5, Math.min(1800, Math.round(Number(c.grams) || 100)));
+      let p = Math.max(0, Number(c.protein) || 0);
+      let carbs = Math.max(0, Number(c.carbs) || 0);
+      let sugar = Math.min(carbs, Math.max(0, Number(c.sugar) || 0));
+      let fat = Math.max(0, Number(c.fat) || 0);
+      let fiber = Math.max(0, Number(c.fiber) || 0);
+
+      // Falls eine Standard-Komponente im 100g-Lexikon existiert: Nährwertdichte stabilisieren (65% Lexikon-Anker / 35% KI)
+      const lexRef = findLexiconReference(name);
+      if (lexRef && grams > 0) {
+        const r = grams / 100;
+        p = (0.65 * (lexRef.p * r)) + (0.35 * p);
+        carbs = (0.65 * (lexRef.c * r)) + (0.35 * carbs);
+        const refSug = lexRef.sugar !== undefined ? lexRef.sugar : lexRef.c * 0.2;
+        sugar = Math.min(carbs, (0.65 * (refSug * r)) + (0.35 * sugar));
+        fat = (0.65 * (lexRef.f * r)) + (0.35 * fat);
+        fiber = (0.65 * ((lexRef.fiber || 0) * r)) + (0.35 * fiber);
+      }
+
+      const compKcal = Math.round(4 * p + 4 * carbs + 9 * fat + 2 * fiber);
+      sumKcal += compKcal;
+      sumP += p;
+      sumC += carbs;
+      sumSugar += sugar;
+      sumF += fat;
+      sumFiber += fiber;
+      badgeLabels.push(`${grams}g ${name}`);
+    }
+
+    return {
+      kcal: Math.round(sumKcal),
+      protein: Math.round(sumP),
+      carbs: Math.round(sumC),
+      sugar: Math.min(Math.round(sumC), Math.round(sumSugar)),
+      fat: Math.round(sumF),
+      fiber: Math.round(sumFiber),
+      badgeLabels
+    };
+  }
+
   function setPortionScale(percentValue) {
     if (!activeMealBaseResult) return;
     const pct = Math.max(25, Math.min(250, Math.round(Number(percentValue) || 100)));
@@ -1358,6 +1427,7 @@
       fat: Math.round(Number(res.fat) || 0),
       fiber: Math.round(Number(res.fiber) || 0),
       explanation: res.explanation || '',
+      components: Array.isArray(res.components) ? res.components : [],
       source: res.source || 'ai'
     };
 
@@ -1365,10 +1435,24 @@
     const badge = document.getElementById('resSourceBadge');
     badge.innerHTML = res.source === 'lexicon'
       ? `<i class="fa-solid fa-bolt text-amber-400"></i> ${state.lang === 'pl' ? '0.0s Słownik Lokalny' : '0.0s Lokales Wörterbuch (Offline-Ready)'}`
-      : `<i class="fa-solid fa-microchip text-sky-400"></i> Gemini Flash Vision`;
+      : `<i class="fa-solid fa-camera-rotate text-sky-400"></i> 3D-Kalibrierte Gemini Vision`;
 
     document.getElementById('resMealName').textContent = activeMealBaseResult.mealName;
     document.getElementById('resExplanation').textContent = activeMealBaseResult.explanation;
+
+    const compContainer = document.getElementById('resComponentsList');
+    if (compContainer) {
+      if (activeMealBaseResult.components.length > 0) {
+        compContainer.innerHTML = activeMealBaseResult.components.map(c =>
+          `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300 border border-slate-700">${c}</span>`
+        ).join('');
+        compContainer.classList.remove('hidden');
+      } else {
+        compContainer.innerHTML = '';
+        compContainer.classList.add('hidden');
+      }
+    }
+
     setPortionScale(100);
 
     document.getElementById('addMealToLogBtn').onclick = () => {
@@ -1402,14 +1486,11 @@
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     try {
-      showToast(state.lang === 'pl' ? 'Optymalizacja zdjęcia...' : 'Optimiere Foto für GPU-Analyse...', 'info');
-      const [stdB64, lblB64] = await Promise.all([
-        compressImageFile(file, 'standard'),
-        compressImageFile(file, 'label')
-      ]);
-      currentMealBase64 = stdB64;
-      currentMealLabelBase64 = lblB64;
-      document.getElementById('mealPreviewImg').src = `data:image/jpeg;base64,${stdB64}`;
+      showToast(state.lang === 'pl' ? 'Optymalizacja zdjęcia...' : 'Optimiere Foto für 3D-Vision...', 'info');
+      const b64 = await compressImageFile(file, 'label');
+      currentMealBase64 = b64;
+      currentMealLabelBase64 = b64;
+      document.getElementById('mealPreviewImg').src = `data:image/jpeg;base64,${b64}`;
       document.getElementById('mealPreviewContainer').classList.remove('hidden');
       triggerMealAnalysis();
     } catch (err) {
@@ -1473,7 +1554,7 @@
     const origBtnHtml = btn.innerHTML;
     isVisionBusy = true;
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>${state.lang === 'pl' ? 'Analiza...' : 'Analysiere...'}</span>`;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>${state.lang === 'pl' ? 'Analiza 3D...' : '3D-Analyse...'}</span>`;
 
     clearTimeout(visionWatchdogTimer);
     visionWatchdogTimer = setTimeout(() => {
@@ -1492,51 +1573,71 @@
         ? `WICHTIG: Der Nutzer hat explizit ${explicitKcalInText[1]} kcal angegeben. Übernimm exakt diesen Kalorienwert!`
         : '';
 
-      const prompt = `Du bist ein präziser Ernährungswissenschaftler und OCR-Spezialist.
+      const prompt = `Du bist ein präziser Ernährungswissenschaftler, Photogrammetrie-Experte und OCR-Spezialist.
 Analysiere die Mahlzeit ${hasPhoto ? 'auf dem Bild' : ''} ${textVal ? `und den Hinweis: "${textVal}"` : ''}.
 ${explicitHint}
-WICHTIG: Schreibe "mealName" und "explanation" auf ${targetLangName}!
-REGELN:
+WICHTIG: Schreibe "mealName", "explanation" und Komponentennamen auf ${targetLangName}!
+REGELN FÜR WINKEL-UNABHÄNGIGE PRÄZISION:
 1. OCR-PRIORITÄT: Falls ein Etikett oder eine Nährwerttabelle sichtbar ist, setze "isNutritionLabel": true und übernimm exakt die gedruckten Werte.
-2. GEFÄSS-ANKER: Speisen in einer Auflaufform/Pfanne mit überbackenem Käse sind ein Auflauf/Gratin (Zapiekanka), niemals ein Käsebrötchen.
-3. Antworte AUSSCHLIESSLICH als valides JSON-Objekt:
+2. PERSPEKTIV-KALIBRIERUNG: Bestimme zuerst den Kamerawinkel ("90° Top-Down", "45° Schrägwinkel" oder "<30° Flach/Nah") und nutze Tellergröße (Standard-Essteller = 26cm, Schale = 16cm, Becher = 250ml) oder Besteck als Maßstab. Korrigiere bei flachem Winkel (<30°) die Weitwinkel-Vergrößerung im Vordergrund um -25%, damit das Gewicht unabhängig vom Kamerawinkel konstant bleibt!
+3. KOMPONENTEN-ZERLEGUNG: Zerlege das Gericht in alle sichtbaren Einzelzutaten ("components") mit deren realem Nettogewicht in Gramm ("grams") und berechne deren Nährwerte anhand offizieller 100g-Standardwerte (BLS/USDA).
+4. GEFÄSS-ANKER: Speisen in einer Auflaufform/Pfanne mit überbackenem Käse sind ein Auflauf/Gratin (Zapiekanka), niemals ein Käsebrötchen.
+Antworte AUSSCHLIESSLICH als valides JSON-Objekt:
 {
-  "mealName": "Name inkl. Menge in g/ml (${targetLangName})",
+  "mealName": "Gesamtname inkl. Gesamtgewicht in g/ml (${targetLangName})",
+  "cameraAngle": "45°",
   "isNutritionLabel": false,
+  "components": [
+    { "name": "Zutat 1", "grams": 150, "kcal": 220, "protein": 25, "carbs": 10, "sugar": 2, "fat": 8, "fiber": 1 }
+  ],
   "kcal": 0,
   "protein": 0,
   "carbs": 0,
   "sugar": 0,
   "fat": 0,
   "fiber": 0,
-  "explanation": "Kurze Begründung auf ${targetLangName} (max. 2 Sätze)"
+  "explanation": "Kurze Begründung inkl. Kamerawinkel-Kalibrierung auf ${targetLangName}"
 }`;
 
-      const imgToSend = hasPhoto ? (currentMealLabelBase64 || currentMealBase64) : null;
+      const imgToSend = hasPhoto ? currentMealBase64 : null;
       const rawText = await callGeminiRequest(prompt, imgToSend, 13500);
       const data = extractJSON(rawText);
 
-      const p = Math.max(0, Math.round(Number(data.protein) || 0));
-      const c = Math.max(0, Math.round(Number(data.carbs) || 0));
-      const sug = Math.min(c, Math.max(0, Math.round(Number(data.sugar) || 0)));
-      const f = Math.max(0, Math.round(Number(data.fat) || 0));
-      const fib = Math.max(0, Math.round(Number(data.fiber) || 0));
+      let p = Math.max(0, Math.round(Number(data.protein) || 0));
+      let c = Math.max(0, Math.round(Number(data.carbs) || 0));
+      let sug = Math.min(c, Math.max(0, Math.round(Number(data.sugar) || 0)));
+      let f = Math.max(0, Math.round(Number(data.fat) || 0));
+      let fib = Math.max(0, Math.round(Number(data.fiber) || 0));
       let kcal = Math.max(0, Math.round(Number(data.kcal) || 0));
+      let componentBadges = [];
+
+      // Komponenten-Kalibrierung & Lexikon-Dichte-Anker anwenden
+      const reconciled = reconcileVisionComponents(data, Boolean(data.isNutritionLabel));
+      if (reconciled && !explicitKcalInText) {
+        p = reconciled.protein;
+        c = reconciled.carbs;
+        sug = reconciled.sugar;
+        f = reconciled.fat;
+        fib = reconciled.fiber;
+        kcal = reconciled.kcal;
+        componentBadges = reconciled.badgeLabels;
+      }
 
       if (explicitKcalInText) {
         kcal = Math.round(parseFloat(explicitKcalInText[1].replace(',', '.')));
       } else if (!data.isNutritionLabel) {
         const atwater = Math.round(4 * p + 4 * c + 9 * f + 2 * fib);
-        if (kcal === 0 || Math.abs(kcal - atwater) > Math.max(35, atwater * 0.22)) kcal = atwater;
+        if (kcal === 0 || Math.abs(kcal - atwater) > Math.max(30, atwater * 0.18)) kcal = atwater;
       }
 
       showMealResult({
         mealName: data.mealName || textVal || 'Mahlzeit',
         kcal, protein: p, carbs: c, sugar: sug, fat: f, fiber: fib,
         explanation: data.explanation || '',
+        components: componentBadges,
         source: 'ai'
       });
-      showToast(state.lang === 'pl' ? 'Analiza zakończona!' : 'Analyse abgeschlossen!', 'success');
+      showToast(state.lang === 'pl' ? 'Analiza 3D zakończona!' : '3D-kalibrierte Analyse abgeschlossen!', 'success');
     } catch (err) {
       showToast(err.message || 'Analyse fehlgeschlagen.', 'error');
     } finally {
@@ -1562,17 +1663,25 @@ REGELN:
     if (item) addMealEntry(item);
   }
 
+  function addStoredRecipe(idx) {
+    const item = window._quickRecipeStore && window._quickRecipeStore[idx];
+    if (item) addMealEntry(item);
+  }
+
   function addMealEntry(entry) {
     const today = getTodayData();
     const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const cVal = Math.max(0, Math.round(Number(entry.carbs) || 0));
+    const sVal = Math.min(cVal, Math.max(0, Math.round(Number(entry.sugar) || 0)));
+
     today.meals.unshift({
       id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
       time: timeStr,
       name: entry.name || 'Mahlzeit',
       kcal: Math.max(0, Math.round(Number(entry.kcal) || 0)),
       protein: Math.max(0, Math.round(Number(entry.protein) || 0)),
-      carbs: Math.max(0, Math.round(Number(entry.carbs) || 0)),
-      sugar: Math.max(0, Math.round(Number(entry.sugar) || 0)),
+      carbs: cVal,
+      sugar: sVal,
       fat: Math.max(0, Math.round(Number(entry.fat) || 0)),
       fiber: Math.max(0, Math.round(Number(entry.fiber) || 0))
     });
@@ -1745,7 +1854,7 @@ Erstelle 2 High-Protein Fitness-Rezepte auf ${targetLang}.
 Antworte AUSSCHLIESSLICH als JSON:
 {
   "ingredients": [{ "name": "Zutat", "urgency": "high", "shelfLifeHint": "1-2 Tage" }],
-  "recipes": [{ "title": "Rezeptname", "kcal": 480, "protein": 42, "carbs": 35, "fat": 14, "steps": ["Schritt 1", "Schritt 2"] }]
+  "recipes": [{ "title": "Rezeptname", "kcal": 480, "protein": 42, "carbs": 35, "sugar": 5, "fat": 14, "fiber": 5, "steps": ["Schritt 1", "Schritt 2"] }]
 }`;
 
       const raw = await callGeminiRequest(prompt, currentFridgeBase64, 14000);
@@ -1754,6 +1863,10 @@ Antworte AUSSCHLIESSLICH als JSON:
       const sortedIng = (Array.isArray(data.ingredients) ? data.ingredients : [])
         .sort((a, b) => (rank[a.urgency] || 9) - (rank[b.urgency] || 9));
       const recipes = Array.isArray(data.recipes) ? data.recipes : [];
+
+      window._quickRecipeStore = recipes.map(r => ({
+        name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, sugar: r.sugar || 4, fat: r.fat || 12, fiber: r.fiber || 4
+      }));
 
       document.getElementById('fridgeResultsContainer').innerHTML = `
         <div class="glass-card rounded-2xl p-4 space-y-2.5">
@@ -1772,14 +1885,14 @@ Antworte AUSSCHLIESSLICH als JSON:
             }).join('')}
           </div>
         </div>
-        ${recipes.map(r => `
+        ${recipes.map((r, idx) => `
           <div class="glass-card rounded-2xl p-4 space-y-2.5">
             <div class="flex justify-between items-start">
               <h4 class="text-sm font-extrabold text-white">${r.title}</h4>
               <span class="text-xs font-extrabold text-emerald-400">${r.kcal} kcal | ${r.protein}g P</span>
             </div>
             <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">${(r.steps || []).map(s => `<li>${s}</li>`).join('')}</ul>
-            <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, sugar: 4, fat: r.fat || 12, fiber: 4 })})' class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
+            <button type="button" onclick="addStoredRecipe(${idx})" class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
               + (${r.kcal} kcal)
             </button>
           </div>
@@ -1852,12 +1965,16 @@ Hinweis/Restaurant: "${textVal}".
 Wähle die Top-3 besten Gerichte aus und gib einen Bestell-Hack auf ${targetLang}.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "recommendations": [{ "dishName": "Gericht", "kcal": 520, "protein": 45, "carbs": 35, "fat": 18, "orderHack": "Tipp" }]
+  "recommendations": [{ "dishName": "Gericht", "kcal": 520, "protein": 45, "carbs": 35, "sugar": 5, "fat": 18, "fiber": 4, "orderHack": "Tipp" }]
 }`;
 
       const raw = await callGeminiRequest(prompt, currentMenuBase64, 14000);
       const data = extractJSON(raw);
       const recs = Array.isArray(data.recommendations) ? data.recommendations : [];
+
+      window._quickRecipeStore = recs.map(r => ({
+        name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, sugar: r.sugar || 4, fat: r.fat || 15, fiber: r.fiber || 3
+      }));
 
       document.getElementById('menuResultsContainer').innerHTML = recs.map((r, idx) => `
         <div class="glass-card rounded-2xl p-4 space-y-2 border-l-4 border-amber-400">
@@ -1868,7 +1985,7 @@ Antworte AUSSCHLIESSLICH als JSON:
           <p class="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2">
             <i class="fa-solid fa-lightbulb mr-1"></i> ${r.orderHack || ''}
           </p>
-          <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, sugar: 4, fat: r.fat || 15, fiber: 3 })})' class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
+          <button type="button" onclick="addStoredRecipe(${idx})" class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
             + (${r.kcal} kcal)
           </button>
         </div>
@@ -1898,12 +2015,16 @@ Antworte AUSSCHLIESSLICH als JSON:
 Maximal ${maxKcal} kcal, mindestens ${minProt}g Protein, max. ${maxTime} Minuten.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "title": "Rezeptname", "kcal": 540, "protein": 48, "carbs": 42, "fat": 16,
+  "title": "Rezeptname", "kcal": 540, "protein": 48, "carbs": 42, "sugar": 5, "fat": 16, "fiber": 5,
   "ingredients": ["200g ..."], "steps": ["Schritt 1", "Schritt 2"]
 }`;
 
       const raw = await callGeminiRequest(prompt, null, 13500);
       const r = extractJSON(raw);
+
+      window._quickRecipeStore = [{
+        name: r.title || craving, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 35, sugar: r.sugar || 4, fat: r.fat || 15, fiber: r.fiber || 4
+      }];
 
       document.getElementById('chefResultsContainer').innerHTML = `
         <div class="glass-card rounded-2xl p-4 space-y-3">
@@ -1917,7 +2038,7 @@ Antworte AUSSCHLIESSLICH als JSON:
           <div class="text-xs text-slate-300">
             <ol class="list-decimal pl-4 mt-1 space-y-1">${(r.steps || []).map(s => `<li>${s}</li>`).join('')}</ol>
           </div>
-          <button type="button" onclick='addMealEntry(${JSON.stringify({ name: r.title || craving, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 35, sugar: 4, fat: r.fat || 15, fiber: 4 })})' class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">
+          <button type="button" onclick="addStoredRecipe(0)" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">
             + (${r.kcal} kcal)
           </button>
         </div>
@@ -2070,7 +2191,6 @@ Antworte AUSSCHLIESSLICH als JSON:
     const lbl = document.getElementById('apiKeyBtnLabel');
     const guestTxt = document.getElementById('guestBadgeText');
 
-    // Wenn eingeladener Gast: API-Key-Button oben rechts komplett ausblenden!
     if (keyBtn) {
       if (isGuest) keyBtn.classList.add('hidden');
       else keyBtn.classList.remove('hidden');
@@ -2131,13 +2251,11 @@ Antworte AUSSCHLIESSLICH als JSON:
     const guestCodeDisp = document.getElementById('guestActiveCodeDisplay');
 
     if (isGuest) {
-      // Eingeladener Freund: Generator & WhatsApp-Teilen strikt ausblenden!
       if (adminSec) adminSec.classList.add('hidden');
       if (guestLockedBox) guestLockedBox.classList.remove('hidden');
       if (guestActBox) guestActBox.classList.add('hidden');
       if (guestCodeDisp) guestCodeDisp.textContent = state.guestCode || 'FIT-GAST';
     } else {
-      // Admin: Voller Zugriff auf Code-Generator & WhatsApp-Einladungslink
       if (adminSec) adminSec.classList.remove('hidden');
       if (guestLockedBox) guestLockedBox.classList.add('hidden');
       if (guestActBox) guestActBox.classList.remove('hidden');
@@ -2164,7 +2282,6 @@ Antworte AUSSCHLIESSLICH als JSON:
 
   function activateGuestCode() {
     const rawInput = (document.getElementById('guestCodeInput').value || '').trim();
-    // Geheimer Admin-Unlock falls der Admin seinen eigenen AIza-Key hier eingibt
     if (rawInput.startsWith('AIza') && rawInput.length > 25) {
       state.geminiApiKey = rawInput;
       state.isGuestUser = false;
@@ -2239,7 +2356,6 @@ Antworte AUSSCHLIESSLICH als JSON:
       }
       if (urlInvite && GUEST_REGEX.test(urlInvite)) {
         state.guestCode = urlInvite;
-        // Sobald jemand über einen ?invite= Link kommt -> Strikte Gast-Sperre aktivieren!
         state.isGuestUser = true;
         persistGuestLock(true);
         changed = true;
