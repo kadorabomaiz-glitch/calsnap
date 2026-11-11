@@ -360,7 +360,7 @@
           <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400"><i class="fa-solid fa-utensils"></i></div>
           <div>
             <h2 id="lblMenuTitle" class="text-sm font-extrabold text-white">Restaurant & Speisekarten-Kompass</h2>
-            <p id="lblMenuSub" class="text-[11px] text-slate-400">Findet die besten Gerichte passend zu deinem Restbudget</p>
+            <p id="lblMenuSub" class="text-[11px] text-slate-400">Findet in Sekunden die besten Gerichte für dein Restbudget</p>
           </div>
         </div>
         <div id="menuBudgetBanner" class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs">
@@ -380,7 +380,7 @@
         <div class="flex gap-2.5">
           <input id="menuPhotoInput" type="file" accept="image/*" class="hidden" onchange="handleMenuPhotoSelect(event)" />
           <button type="button" onclick="document.getElementById('menuPhotoInput').click()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-camera text-amber-400"></i> <span>Speisekarte</span></button>
-          <button id="scanMenuBtn" type="button" onclick="runMenuScannerAI()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-compass"></i> <span id="lblMenuBtn">Top-3 Auswahl berechnen</span></button>
+          <button id="scanMenuBtn" type="button" onclick="runMenuScannerAI()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"><i class="fa-solid fa-compass"></i> <span id="lblMenuBtn">Top-3 Auswahl berechnen (Turbo)</span></button>
         </div>
       </div>
       <div id="menuResultsContainer" class="space-y-3"></div>
@@ -463,10 +463,10 @@
   <div id="apiKeyModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl max-w-md w-full p-5 border border-slate-700 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-key text-emerald-400"></i> Admin API-Key Tresor (4-Layer)</h3>
+        <h3 class="text-base font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-key text-emerald-400"></i> Admin API-Key Tresor (6-Layer)</h3>
         <button type="button" onclick="closeApiKeyModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <p class="text-xs text-slate-300 leading-relaxed">Dein API-Schlüssel wird mehrfach gesichert lokal auf deinem Admin-Gerät gespeichert. Eingeladene Gäste können diesen Tresor nicht öffnen und deinen Schlüssel niemals auslesen.</p>
+      <p class="text-xs text-slate-300 leading-relaxed">Dein API-Schlüssel wird 6-fach lokal auf deinem Admin-Gerät verankert (inkl. Home-Screen-Anker & System-Cache). Eingeladene Gäste können diesen Tresor nicht öffnen.</p>
       <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none focus:border-emerald-500" />
       <div class="flex gap-2">
         <button type="button" onclick="clearSavedApiKey()" class="px-3.5 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-xs font-bold text-rose-300">Löschen</button>
@@ -556,7 +556,7 @@
   </nav>
   <script>
   // ============================================================================
-  // CALSNAP AI v4.1 ENTERPRISE — CORE STATE, PERSISTENCE & ZERO-VARIANCE VISION
+  // CALSNAP AI v4.1 ENTERPRISE — 6-LAYER ADMIN VAULT & TURBO VISION PIPELINE
   // ============================================================================
   const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
   const STORAGE_KEY_V1 = 'calsnap_ai_state_v1';
@@ -565,6 +565,7 @@
   const COOKIE_KEY_NAME = 'calsnap_k';
   const COOKIE_GUEST_LOCK = 'calsnap_gl';
   const FAST_MODEL_KEY = 'calsnap_fast_model_v41';
+  const VAULT_CACHE_NAME = 'calsnap_admin_vault_v41';
   const GUEST_REGEX = /^FIT-[A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]{1,12}-\d{2,6}$/i;
 
   let currentMealBase64 = null;
@@ -602,10 +603,11 @@
     };
   }
 
+  // Layer 3: 10-Jahres-Cookie (315.360.000 Sekunden)
   function setKeyCookie(val) {
     try {
       if (!val) document.cookie = `${COOKIE_KEY_NAME}=; path=/; max-age=0; SameSite=Lax`;
-      else document.cookie = `${COOKIE_KEY_NAME}=${encodeURIComponent(val)}; path=/; max-age=31536000; SameSite=Lax`;
+      else document.cookie = `${COOKIE_KEY_NAME}=${encodeURIComponent(val)}; path=/; max-age=315360000; SameSite=Lax`;
     } catch (_) {}
   }
 
@@ -616,11 +618,63 @@
     } catch (_) { return ''; }
   }
 
+  // Layer 4: URL-Hash-Anker (#csa=...) für dauerhafte iPhone Home-Screen-Speicherung (nur für Admin!)
+  function syncAdminHashAnchor(key, isGuest) {
+    try {
+      if (isGuest) return;
+      if (key && key.startsWith('AIza')) {
+        const encoded = btoa(unescape(encodeURIComponent(key)));
+        if (window.location.hash !== `#csa=${encoded}`) {
+          window.history.replaceState({}, document.title, window.location.pathname + `#csa=${encoded}`);
+        }
+      } else if (window.location.hash.startsWith('#csa=')) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } catch (_) {}
+  }
+
+  function readAdminHashAnchor() {
+    try {
+      const h = window.location.hash || '';
+      if (h.startsWith('#csa=')) {
+        const decoded = decodeURIComponent(escape(atob(h.slice(5))));
+        if (decoded && decoded.startsWith('AIza')) return decoded.trim();
+      }
+    } catch (_) {}
+    return '';
+  }
+
+  // Layer 5: Browser CacheStorage Tresor (Überlebt normale Tab-Resets auf iOS/Android)
+  async function saveKeyToCacheVault(key) {
+    try {
+      if (!('caches' in window)) return;
+      const cache = await caches.open(VAULT_CACHE_NAME);
+      if (key) {
+        await cache.put('/__calsnap_vault_key', new Response(key, { headers: { 'Content-Type': 'text/plain' } }));
+      } else {
+        await cache.delete('/__calsnap_vault_key');
+      }
+    } catch (_) {}
+  }
+
+  async function restoreKeyFromCacheVault() {
+    try {
+      if (!('caches' in window)) return '';
+      const cache = await caches.open(VAULT_CACHE_NAME);
+      const res = await cache.match('/__calsnap_vault_key');
+      if (res) {
+        const txt = (await res.text() || '').trim();
+        if (txt && txt.startsWith('AIza')) return txt;
+      }
+    } catch (_) {}
+    return '';
+  }
+
   function persistGuestLock(isGuest) {
     try {
       if (isGuest) {
         localStorage.setItem(GUEST_LOCK_SLOT, '1');
-        document.cookie = `${COOKIE_GUEST_LOCK}=1; path=/; max-age=31536000; SameSite=Lax`;
+        document.cookie = `${COOKIE_GUEST_LOCK}=1; path=/; max-age=315360000; SameSite=Lax`;
       } else {
         localStorage.removeItem(GUEST_LOCK_SLOT);
         document.cookie = `${COOKIE_GUEST_LOCK}=; path=/; max-age=0; SameSite=Lax`;
@@ -638,8 +692,15 @@
   function persistApiKeyRedundant(key) {
     const clean = (key || '').trim();
     try {
-      if (clean) { localStorage.setItem(API_KEY_BACKUP_SLOT, clean); setKeyCookie(clean); }
-      else { localStorage.removeItem(API_KEY_BACKUP_SLOT); setKeyCookie(''); }
+      if (clean) {
+        localStorage.setItem(API_KEY_BACKUP_SLOT, clean);
+        setKeyCookie(clean);
+        saveKeyToCacheVault(clean);
+      } else {
+        localStorage.removeItem(API_KEY_BACKUP_SLOT);
+        setKeyCookie('');
+        saveKeyToCacheVault('');
+      }
     } catch (_) {}
   }
 
@@ -647,6 +708,7 @@
     let k = (parsedState && typeof parsedState.geminiApiKey === 'string') ? parsedState.geminiApiKey.trim() : '';
     if (!k) { try { k = (localStorage.getItem(API_KEY_BACKUP_SLOT) || '').trim(); } catch (_) {} }
     if (!k) k = (getKeyCookie() || '').trim();
+    if (!k) k = readAdminHashAnchor();
     return k;
   }
 
@@ -687,7 +749,10 @@
 
   function saveState() {
     try {
-      if (state.geminiApiKey) persistApiKeyRedundant(state.geminiApiKey);
+      if (state.geminiApiKey) {
+        persistApiKeyRedundant(state.geminiApiKey);
+        syncAdminHashAnchor(state.geminiApiKey, Boolean(state.isGuestUser));
+      }
       persistGuestLock(Boolean(state.isGuestUser));
       localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state));
     } catch (e) { console.error('State-Speicherfehler:', e); }
@@ -734,7 +799,7 @@
   }
 
   // ============================================================================
-  // WEBKIT METAL-GPU MEMORY ISOLATION & SINGLE-PASS CAMERA ENGINE
+  // WEBKIT METAL-GPU MEMORY ISOLATION & TURBO-IMAGE ENGINE
   // ============================================================================
   function renderImageToJpegBase64(img, objectUrl, maxDim, quality) {
     const origW = img.naturalWidth || img.width || 800;
@@ -770,8 +835,9 @@
   function compressImageFile(file, mode = 'standard') {
     return new Promise((resolve, reject) => {
       if (!file) { reject(new Error('Keine Bilddatei ausgewählt.')); return; }
-      const maxDim = (mode === 'menu' || mode === 'label') ? 1024 : 840;
-      const quality = (mode === 'menu' || mode === 'label') ? 0.78 : 0.76;
+      // Optimierte Dimensionen: 960px/0.74 für schnellen Speisekarten-Upload ohne Qualitätsverlust
+      const maxDim = mode === 'menu' ? 960 : (mode === 'label' ? 1000 : 820);
+      const quality = mode === 'menu' ? 0.74 : (mode === 'label' ? 0.77 : 0.75);
       let settled = false;
       const objectUrl = URL.createObjectURL(file);
       const img = new Image();
@@ -815,7 +881,7 @@
   }
 
   // ============================================================================
-  // ISOLATED ABORT-CONTROLLER PIPELINE & ZERO-VARIANCE SAMPLING (temp=0.05)
+  // TURBO-INFERENZ-PIPELINE (KEIN HTTP-400 DOPPEL-UPLOAD, NATIVE JSON-STREAMING)
   // ============================================================================
   async function fetchWithIsolatedSignal(url, options, timeoutMs) {
     const controller = new AbortController();
@@ -872,7 +938,7 @@
     return queue;
   }
 
-  async function callGeminiRequest(promptText, base64Image = null, timeoutMs = 14000) {
+  async function callGeminiRequest(promptText, base64Image = null, timeoutMs = 18000) {
     const apiKey = (state.geminiApiKey || recoverRedundantApiKey(state) || '').trim();
     if (!apiKey) throw new Error(state.lang === 'pl' ? 'Brak klucza API Gemini.' : 'Kein Gemini API-Key hinterlegt.');
 
@@ -884,16 +950,26 @@
 
     for (const modelName of modelsQueue) {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const supportsThinking = /^gemini-(2\.5-flash|3)/i.test(modelName);
+      // Exakt nur 2.5-flash und 2.5-flash-lite akzeptieren thinkingBudget: 0 ohne HTTP 400!
+      const supportsZeroThinkingBudget = /^gemini-2\.5-flash(-lite)?$/i.test(modelName);
+      const isGemma = /^gemma/i.test(modelName);
+
+      const genConfig = {
+        temperature: 0.05,
+        topP: 0.1,
+        maxOutputTokens: 1150
+      };
+      if (!isGemma) {
+        genConfig.responseMimeType = 'application/json';
+      }
+      if (supportsZeroThinkingBudget) {
+        genConfig.thinkingConfig = { thinkingBudget: 0 };
+      }
+
       const basePayload = {
         contents: [{ role: 'user', parts }],
-        generationConfig: {
-          temperature: 0.05,
-          topP: 0.1,
-          maxOutputTokens: 1350
-        }
+        generationConfig: genConfig
       };
-      if (supportsThinking) basePayload.generationConfig.thinkingConfig = { thinkingBudget: 0 };
 
       try {
         let res = await fetchWithIsolatedSignal(
@@ -905,7 +981,7 @@
         if (res.status === 400) {
           const fallbackPayload = {
             contents: [{ role: 'user', parts }],
-            generationConfig: { temperature: 0.05, maxOutputTokens: 1350 }
+            generationConfig: { temperature: 0.05, maxOutputTokens: 1150 }
           };
           res = await fetchWithIsolatedSignal(
             endpoint,
@@ -1031,9 +1107,9 @@
       fridgeSub: 'Kühlschrank fotografieren — Frische-Check & High-Protein Rezepte',
       fridgeBtn: 'Frische-Check & Rezepte',
       menuTitle: 'Restaurant & Speisekarten-Kompass',
-      menuSub: 'Findet die besten Gerichte passend zu deinem Restbudget',
+      menuSub: 'Findet in Sekunden die besten Gerichte für dein Restbudget',
       menuRem: 'Verbleibendes Tagesbudget:',
-      menuBtn: 'Top-3 Auswahl berechnen',
+      menuBtn: 'Top-3 Auswahl berechnen (Turbo)',
       chefTitle: 'KI-Kochstudio (Macro Chef)',
       chefSub: 'Maßgeschneiderte Fitness-Rezepte nach deinen Ziel-Makros',
       chefBtn: 'Fitness-Rezept generieren',
@@ -1075,9 +1151,9 @@
       fridgeSub: 'Zrób zdjęcie lodówki — kontrola świeżości i przepisy High-Protein',
       fridgeBtn: 'Sprawdź świeżość i przepisy',
       menuTitle: 'Restauracja & Kompas Menu',
-      menuSub: 'Znajduje najlepsze dania dopasowane do Twojego budżetu dnia',
+      menuSub: 'Znajduje w kilka sekund najlepsze dania dla Twojego budżetu',
       menuRem: 'Pozostały budżet na dziś:',
-      menuBtn: 'Oblicz Top-3 dania z karty',
+      menuBtn: 'Oblicz Top-3 dania (Turbo)',
       chefTitle: 'Studio Kulinarne AI (Macro Chef)',
       chefSub: 'Przepisy fitness dopasowane do Twoich makroskładników',
       chefBtn: 'Generuj przepis fitness',
@@ -1350,7 +1426,6 @@
       let fat = Math.max(0, Number(c.fat) || 0);
       let fiber = Math.max(0, Number(c.fiber) || 0);
 
-      // Falls eine Standard-Komponente im 100g-Lexikon existiert: Nährwertdichte stabilisieren (65% Lexikon-Anker / 35% KI)
       const lexRef = findLexiconReference(name);
       if (lexRef && grams > 0) {
         const r = grams / 100;
@@ -1582,7 +1657,7 @@ REGELN FÜR WINKEL-UNABHÄNGIGE PRÄZISION:
 2. PERSPEKTIV-KALIBRIERUNG: Bestimme zuerst den Kamerawinkel ("90° Top-Down", "45° Schrägwinkel" oder "<30° Flach/Nah") und nutze Tellergröße (Standard-Essteller = 26cm, Schale = 16cm, Becher = 250ml) oder Besteck als Maßstab. Korrigiere bei flachem Winkel (<30°) die Weitwinkel-Vergrößerung im Vordergrund um -25%, damit das Gewicht unabhängig vom Kamerawinkel konstant bleibt!
 3. KOMPONENTEN-ZERLEGUNG: Zerlege das Gericht in alle sichtbaren Einzelzutaten ("components") mit deren realem Nettogewicht in Gramm ("grams") und berechne deren Nährwerte anhand offizieller 100g-Standardwerte (BLS/USDA).
 4. GEFÄSS-ANKER: Speisen in einer Auflaufform/Pfanne mit überbackenem Käse sind ein Auflauf/Gratin (Zapiekanka), niemals ein Käsebrötchen.
-Antworte AUSSCHLIESSLICH als valides JSON-Objekt:
+Antworte AUSSCHLIESSLICH als JSON:
 {
   "mealName": "Gesamtname inkl. Gesamtgewicht in g/ml (${targetLangName})",
   "cameraAngle": "45°",
@@ -1600,7 +1675,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Objekt:
 }`;
 
       const imgToSend = hasPhoto ? currentMealBase64 : null;
-      const rawText = await callGeminiRequest(prompt, imgToSend, 13500);
+      const rawText = await callGeminiRequest(prompt, imgToSend, 15000);
       const data = extractJSON(rawText);
 
       let p = Math.max(0, Math.round(Number(data.protein) || 0));
@@ -1611,7 +1686,6 @@ Antworte AUSSCHLIESSLICH als valides JSON-Objekt:
       let kcal = Math.max(0, Math.round(Number(data.kcal) || 0));
       let componentBadges = [];
 
-      // Komponenten-Kalibrierung & Lexikon-Dichte-Anker anwenden
       const reconciled = reconcileVisionComponents(data, Boolean(data.isNutritionLabel));
       if (reconciled && !explicitKcalInText) {
         p = reconciled.protein;
@@ -1857,7 +1931,7 @@ Antworte AUSSCHLIESSLICH als JSON:
   "recipes": [{ "title": "Rezeptname", "kcal": 480, "protein": 42, "carbs": 35, "sugar": 5, "fat": 14, "fiber": 5, "steps": ["Schritt 1", "Schritt 2"] }]
 }`;
 
-      const raw = await callGeminiRequest(prompt, currentFridgeBase64, 14000);
+      const raw = await callGeminiRequest(prompt, currentFridgeBase64, 16000);
       const data = extractJSON(raw);
       const rank = { high: 1, medium: 2, low: 3 };
       const sortedIng = (Array.isArray(data.ingredients) ? data.ingredients : [])
@@ -1906,6 +1980,9 @@ Antworte AUSSCHLIESSLICH als JSON:
     }
   }
 
+  // ============================================================================
+  // TURBO SPEISEKARTEN-KOMPASS (4-7 SEKUNDEN VISUAL SKIMMING OHNE QUALITÄTSVERLUST)
+  // ============================================================================
   function updateMenuBudgetBanner() {
     const today = getTodayData();
     const prof = state.profile;
@@ -1923,11 +2000,12 @@ Antworte AUSSCHLIESSLICH als JSON:
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     try {
+      showToast(state.lang === 'pl' ? 'Szybkie ładowanie karty...' : 'Optimiere Speisekarte für Turbo-OCR...', 'info');
       const b64 = await compressImageFile(file, 'menu');
       currentMenuBase64 = b64;
       document.getElementById('menuPreviewImg').src = `data:image/jpeg;base64,${b64}`;
       document.getElementById('menuPreviewContainer').classList.remove('hidden');
-      showToast('Speisekarte geladen!', 'success');
+      runMenuScannerAI();
     } catch (err) { showToast(err.message || 'Bildfehler.', 'error'); }
   }
 
@@ -1954,21 +2032,25 @@ Antworte AUSSCHLIESSLICH als JSON:
     const btn = document.getElementById('scanMenuBtn');
     const orig = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt fa-beat text-amber-950"></i> <span>${state.lang === 'pl' ? 'Szybka analiza Top-3...' : 'Turbo-Scan läuft...'}</span>`;
 
     try {
       const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
-      const prompt = `Du bist ein Ernährungs-Coach im Restaurant. Antworte auf ${targetLang}.
-Offenes Tagesbudget: ${remKcal} kcal, noch ${remProt}g Protein offen. Ziel: ${goal}.
-${isDamageControl ? 'DAMAGE-CONTROL-MODUS: Empfiehl extrem kalorienarme, magere Protein-Optionen.' : ''}
-Hinweis/Restaurant: "${textVal}".
-Wähle die Top-3 besten Gerichte aus und gib einen Bestell-Hack auf ${targetLang}.
+      const prompt = `FAST VISUAL MENU SKIMMING: Du bist ein Elite-Ernährungscoach im Restaurant. Antworte auf ${targetLang}.
+Transkribiere NICHT die gesamte Speisekarte! Scanne gezielt nur die Hauptgerichte/Protein-Sektionen passend zu:
+- Offenes Tagesbudget: ${remKcal} kcal | Noch offen: ${remProt}g Protein
+- Strategie: ${goal}
+${isDamageControl ? '- DAMAGE-CONTROL: Budget fast leer! Wähle die kalorienärmsten, magersten Protein-Gerichte.' : ''}
+${textVal ? `- Hinweis: "${textVal}"` : ''}
+Wähle direkt die Top-3 besten Gerichte aus, berechne exakte Nährwerte (inkl. Zucker & Ballaststoffe) und gib je 1 kurzen Bestell-Hack.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "recommendations": [{ "dishName": "Gericht", "kcal": 520, "protein": 45, "carbs": 35, "sugar": 5, "fat": 18, "fiber": 4, "orderHack": "Tipp" }]
+  "recommendations": [
+    { "dishName": "Gericht", "kcal": 520, "protein": 45, "carbs": 35, "sugar": 4, "fat": 18, "fiber": 5, "orderHack": "Konkreter Tipp bei der Bestellung" }
+  ]
 }`;
 
-      const raw = await callGeminiRequest(prompt, currentMenuBase64, 14000);
+      const raw = await callGeminiRequest(prompt, currentMenuBase64, 18000);
       const data = extractJSON(raw);
       const recs = Array.isArray(data.recommendations) ? data.recommendations : [];
 
@@ -1982,6 +2064,12 @@ Antworte AUSSCHLIESSLICH als JSON:
             <h4 class="text-sm font-extrabold text-white">#${idx + 1} ${r.dishName}</h4>
             <span class="text-xs font-extrabold text-emerald-400 shrink-0">${r.kcal} kcal | ${r.protein}g P</span>
           </div>
+          <div class="text-[11px] text-slate-400 flex gap-2.5">
+            <span class="text-sky-400 font-bold">P: ${r.protein || 0}g</span>
+            <span class="text-amber-400 font-bold">K: ${r.carbs || 0}g</span>
+            <span class="text-fuchsia-400 font-bold">Z: ${r.sugar || 0}g</span>
+            <span class="text-rose-400 font-bold">F: ${r.fat || 0}g</span>
+          </div>
           <p class="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2">
             <i class="fa-solid fa-lightbulb mr-1"></i> ${r.orderHack || ''}
           </p>
@@ -1990,6 +2078,7 @@ Antworte AUSSCHLIESSLICH als JSON:
           </button>
         </div>
       `).join('');
+      showToast(state.lang === 'pl' ? 'Top-3 dania gotowe!' : 'Top-3 Empfehlungen berechnet!', 'success');
     } catch (err) {
       showToast(err.message || 'Fehler.', 'error');
     } finally {
@@ -2019,7 +2108,7 @@ Antworte AUSSCHLIESSLICH als JSON:
   "ingredients": ["200g ..."], "steps": ["Schritt 1", "Schritt 2"]
 }`;
 
-      const raw = await callGeminiRequest(prompt, null, 13500);
+      const raw = await callGeminiRequest(prompt, null, 15000);
       const r = extractJSON(raw);
 
       window._quickRecipeStore = [{
@@ -2181,7 +2270,7 @@ Antworte AUSSCHLIESSLICH als JSON:
   }
 
   // ============================================================================
-  // ADMIN vs. GAST-ISOLATION (GÄSTE KÖNNEN WEDER EINLADEN NOCH KEY AUSLESEN)
+  // ADMIN vs. GAST-ISOLATION & 6-LAYER ADMIN-KEY TRESOR
   // ============================================================================
   function updateApiKeyStatusUI() {
     const hasKey = Boolean((state.geminiApiKey || recoverRedundantApiKey(state) || '').trim());
@@ -2227,16 +2316,18 @@ Antworte AUSSCHLIESSLICH als JSON:
     state.isGuestUser = false;
     persistGuestLock(false);
     persistApiKeyRedundant(val);
+    syncAdminHashAnchor(val, false);
     saveState();
     updateApiKeyStatusUI();
     closeApiKeyModal();
-    showToast('Admin API-Key 4-fach gesichert gespeichert!', 'success');
+    showToast('Admin API-Key permanent (6-Layer + Home-Screen-Anker) gespeichert!', 'success');
   }
 
   function clearSavedApiKey() {
     if (state.isGuestUser) return;
     state.geminiApiKey = '';
     persistApiKeyRedundant('');
+    syncAdminHashAnchor('', false);
     saveState();
     document.getElementById('apiKeyInput').value = '';
     updateApiKeyStatusUI();
@@ -2287,6 +2378,7 @@ Antworte AUSSCHLIESSLICH als JSON:
       state.isGuestUser = false;
       persistGuestLock(false);
       persistApiKeyRedundant(rawInput);
+      syncAdminHashAnchor(rawInput, false);
       saveState();
       updateApiKeyStatusUI();
       closeInviteModal();
@@ -2364,15 +2456,26 @@ Antworte AUSSCHLIESSLICH als JSON:
         saveState();
         window.history.replaceState({}, document.title, window.location.pathname);
         showToast('Persönlicher Gast-Zugang automatisch eingerichtet!', 'success');
+      } else if (!state.isGuestUser && state.geminiApiKey) {
+        syncAdminHashAnchor(state.geminiApiKey, false);
       }
     } catch (_) {}
   }
 
   // ============================================================================
-  // SYSTEM BOOTSTRAP
+  // SYSTEM BOOTSTRAP (INKL. CACHE-VAULT AUTO-RESTORE FÜR ADMIN)
   // ============================================================================
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     checkUrlOnboardingParams();
+    if (!state.geminiApiKey) {
+      const cachedVaultKey = await restoreKeyFromCacheVault();
+      if (cachedVaultKey) {
+        state.geminiApiKey = cachedVaultKey;
+        saveState();
+      }
+    } else {
+      saveKeyToCacheVault(state.geminiApiKey);
+    }
     applyLanguage();
     updateApiKeyStatusUI();
     syncProfileToUI();
