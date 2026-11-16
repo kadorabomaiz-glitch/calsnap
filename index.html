@@ -1136,6 +1136,9 @@
     // ============================================================================
   // 100g-NORMIERTES DE/PL-LEXIKON & MULTI-PASS PARSER ("OHNE"/"MIT"-LOGIK)
   // ============================================================================
+// ============================================================================
+  // 100g-NORMIERTES DE/PL-LEXIKON & MULTI-PASS PARSER ("OHNE"/"MIT"-LOGIK)
+  // ============================================================================
   const FOOD_LEXICON = [
     { name: 'Latte Macchiato', keywords: ['latte macchiato', 'macchiato', 'latte'], kcal: 46, p: 2.8, c: 4.2, sugar: 4.1, f: 1.9, fiber: 0, defaultPortion: 300 },
     { name: 'Kaffee Schwarz / Kawa czarna', keywords: ['kaffee schwarz', 'schwarzer kaffee', 'espresso', 'americano', 'kawa czarna', 'czarna kawa'], kcal: 2, p: 0.2, c: 0.2, sugar: 0, f: 0, fiber: 0, defaultPortion: 250 },
@@ -1165,7 +1168,8 @@
     { name: 'Banane / Banan', keywords: ['banane', 'bananen', 'banan'], kcal: 89, p: 1.1, c: 20.0, sugar: 14.2, f: 0.3, fiber: 2.6, defaultPortion: 120 },
     { name: 'Beeren / Owoce leśne', keywords: ['blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'beeren', 'truskawki', 'borowki', 'maliny'], kcal: 42, p: 0.8, c: 7.6, sugar: 5.8, f: 0.3, fiber: 2.4, defaultPortion: 125 },
     { name: 'Gemischter Salat / Sałatka', keywords: ['gemischter salat', 'beilagensalat', 'gurkensalat', 'tomatensalat', 'tomate', 'gurke', 'salatka', 'pomidor', 'ogorek'], kcal: 32, p: 1.2, c: 3.8, sugar: 2.4, f: 1.2, fiber: 1.5, defaultPortion: 180 },
-    { name: 'Hähnchenbrustfilet / Pierś z kurczaka', keywords: ['hahnchenbrustfilet', 'hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'piers z kurczaka', 'kurczak'], kcal: 152, p: 29.5, c: 0.5, sugar: 0, f: 3.2, fiber: 0, defaultPortion: 200 },
+    { name: 'Hähnchenbrustfilet (mager) / Pierś z kurczaka', keywords: ['hahnchenbrustfilet', 'hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'piers z kurczaka', 'kurczak'], kcal: 145, p: 29.5, c: 0.5, sugar: 0, f: 2.2, fiber: 0, defaultPortion: 200 },
+    { name: 'Rinderhack mager / Tatar / Selbst gewolft', keywords: ['rinderhack mager', 'tatar', 'selbst gewolft', 'mageres hackfleisch', 'hackfleisch mager', 'wolowina mielona chuda'], kcal: 132, p: 21.5, c: 0, sugar: 0, f: 2.8, fiber: 0, defaultPortion: 200 },
     { name: 'Schweinefleisch in Soße / Mięso wieprzowe w sosie', keywords: ['mieso wieprzowe w sosie', 'wieprzowina w sosie', 'schweinefleisch in sosse', 'schweinebraten in sosse', 'schweinegulasch', 'gulasz wieprzowy', 'schweinefleisch', 'wieprzowina'], kcal: 178, p: 18.5, c: 3.8, sugar: 1.2, f: 9.8, fiber: 0.4, defaultPortion: 220 },
     { name: 'Rindergulasch / Gulasz wołowy', keywords: ['rindergulasch', 'gulasch', 'gulasz wolowy', 'gulasz', 'rindfleisch in sosse'], kcal: 158, p: 19.8, c: 3.5, sugar: 1.4, f: 7.0, fiber: 0.5, defaultPortion: 250 },
     { name: 'Schnitzel paniert / Kotlet schabowy', keywords: ['kotlet schabowy', 'schabowy', 'schweineschnitzel', 'wiener schnitzel', 'schnitzel'], kcal: 255, p: 21.0, c: 13.5, sugar: 0.8, f: 13.0, fiber: 0.8, defaultPortion: 180 },
@@ -1183,6 +1187,23 @@
     { name: 'Pommes Frites / Frytki', keywords: ['pommes frites', 'pommes', 'frytki'], kcal: 292, p: 3.4, c: 36.5, sugar: 0.5, f: 14.2, fiber: 3.2, defaultPortion: 160 },
     { name: 'Apfelschorle / Saftschorle', keywords: ['apfelschorle', 'saftschorle', 'apfelsaftschorle'], kcal: 26, p: 0.1, c: 6.2, sugar: 5.9, f: 0, fiber: 0, defaultPortion: 330 }
   ];
+
+  // ============================================================================
+  // GLOBAL NUTRITIONAL RIGOR LAYER (UNIFIED ACROSS ALL 4 MULTIMODAL SCANNERS)
+  // ============================================================================
+  function buildGlobalNutritionalRigorRules(targetLang, userHint = '') {
+    const cleanHint = (userHint || '').trim();
+    return `GLOBAL NUTRITIONAL RIGOR LAYER (VERBINDLICHE MATHEMATISCHE GESETZE):
+1. SUBSTITUTION OVER ADDITION (Ersetzung statt Addition):
+   Falls der Nutzertext ("${cleanHint}") Zubereitungsfette oder Modifikatoren nennt (z.B. "in etwas Olivenöl angebraten", "mit 1 TL Butter", "ohne Butter/Öl"), ERSETZT diese Angabe das standardmäßig vermutete Koch-/Bratfett des Gerichts vollständig! Addiere NIEMALS Standard-Restaurantfette auf vom Nutzer genannte Fette obendrauf.
+2. LEAN PROTEIN & INGREDIENT OVERRIDE (Mager-Override & 5g-Öl-Cap):
+   Erkenne magere Zuschnitte ("Hähnchenbrust", "Putenbrust", "mager", "selbst gewolft", "Tatar", "Filet", "pierś", "chude") in Bild oder Text und zwinge das reine Fleisch-Fettprofil strikt auf < 3,0g Fett pro 100g!
+   Vage Kochfett-Angaben ("etwas Öl", "ein Schuss Öl", "leicht angebraten", "wenig Fett") dürfen pro Einzelportion MAXIMAL mit 5g Fett (ca. 45 kcal) berechnet werden.
+3. VISUAL SCALE & FILL-LEVEL ANCHORING (Maßstabs- & Füllstands-Kalibrierung):
+   Nutze zwingend visuelle Referenz-Anker im Bild (Besteck = 19cm, Tellerrand = 26cm, Brötchen = 70g, Standard-Kühlschrankpackungen wie 250g/500g Becher oder 1L Tetrapak, Topfdurchmesser 20-24cm & reale Fülltiefe), um das wahre Nettogewicht in Gramm und den Rest-Füllstand vor der Makroberechnung zu kalibrieren. Ignoriere feuchten Oberflächenglanz oder Alufolien-Reflexionen als Fettquelle.
+4. CONTEXTUAL PREPARATION RIGOR (Garmethoden-Trennschärfe):
+   Differenziere strikt zwischen fettarmen Garmethoden ("gedünstet", "gegrillt", "gekocht", "im eigenen Saft", "Natur" = 0-3g Zusatzfett) und fettreichen Methoden ("paniert", "frittiert", "cremig", "in Sahnesauce" = höheres Fett), um falsche Makro-Inflation zu verhindern.`;
+  }
 
   const UI_I18N = {
     de: {
@@ -1213,14 +1234,14 @@
       clearDay: 'Tag leeren',
       emptyMeals: 'Noch keine Mahlzeiten für heute eingetragen.',
       fridgeTitle: 'Resteküche & Smart Expiry Guard',
-      fridgeSub: 'Kühlschrank fotografieren — Frische-Check & High-Protein Rezepte',
+      fridgeSub: 'Kühlschrank fotografieren — Füllstands-Check & High-Protein Rezepte',
       fridgeBtn: 'Frische-Check & Rezepte',
       menuTitle: 'Restaurant & Speisekarten-Kompass',
       menuSub: 'Findet in Sekunden die besten Gerichte für dein Restbudget',
       menuRem: 'Verbleibendes Tagesbudget:',
       menuBtn: 'Top-3 Auswahl berechnen (Turbo)',
-      chefTitle: 'KI-Kochstudio (Macro Chef)',
-      chefSub: 'Maßgeschneiderte Fitness-Rezepte nach deinen Ziel-Makros',
+      chefTitle: 'KI-Kochstudio & Topf-Scanner',
+      chefSub: 'Maßgeschneiderte Fitness-Rezepte & präzise Garmethoden-Logik',
       chefBtn: 'Fitness-Rezept generieren',
       profTitle: '<i class="fa-solid fa-user-gear text-emerald-400"></i> Körperdaten & Kalorienrechner',
       navDiary: 'Tagebuch',
@@ -1257,7 +1278,7 @@
       clearDay: 'Wyczyść dzień',
       emptyMeals: 'Brak zapisanych posiłków na dzisiaj.',
       fridgeTitle: 'Lodówka & Smart Expiry Guard',
-      fridgeSub: 'Zrób zdjęcie lodówki — kontrola świeżości i przepisy High-Protein',
+      fridgeSub: 'Zrób zdjęcie lodówki — kontrola ilości i przepisy High-Protein',
       fridgeBtn: 'Sprawdź świeżość i przepisy',
       menuTitle: 'Restauracja & Kompas Menu',
       menuSub: 'Znajduje w kilka sekund najlepsze dania dla Twojego budżetu',
@@ -1548,7 +1569,7 @@
   }
 
   // ============================================================================
-  // DETERMINISTISCHE KOMPONENTEN-KALIBRIERUNG GEGEN WINKEL-SCHWANKUNGEN
+  // DETERMINISTISCHE KOMPONENTEN-KALIBRIERUNG & LEAN/FAT-CAP ENFORCEMENT
   // ============================================================================
   function findLexiconReference(compName) {
     const folded = foldDiacritics(compName || '');
@@ -1565,24 +1586,48 @@
     return best;
   }
 
-  function reconcileVisionComponents(data, isLabel) {
+  function reconcileVisionComponents(data, isLabel, userTextHint = '') {
     const comps = Array.isArray(data.components) ? data.components : [];
     if (!comps.length || isLabel) return null;
 
+    const foldedHint = foldDiacritics(userTextHint || '');
+    const hasVagueOilHint = /\b(?:etwas|wenig|leicht|schuss|bisschen|hauch|odrobin[ae])\s+(?:olivenol|rapsol|ol|olej|fett|butter|maslo)\b/i.test(foldedHint)
+      || /\b(?:in\s+etwas|leicht\s+angebraten)\b/i.test(foldedHint);
+    const hasGlobalLeanOverride = /\b(?:hahnchenbrust|putenbrust|mager|mageres|selbst\s+gewolft|tatar|filet|piers|chud[ey])\b/i.test(foldedHint);
+
     let sumKcal = 0, sumP = 0, sumC = 0, sumSugar = 0, sumF = 0, sumFiber = 0;
     const badgeLabels = [];
+    let cookingFatAlreadyCounted = false;
 
     for (const c of comps) {
       const name = String(c.name || 'Zutat').trim();
-      const grams = Math.max(5, Math.min(1800, Math.round(Number(c.grams) || 100)));
+      const foldedName = foldDiacritics(name);
+      let grams = Math.max(2, Math.min(1800, Math.round(Number(c.grams) || 100)));
       let p = Math.max(0, Number(c.protein) || 0);
       let carbs = Math.max(0, Number(c.carbs) || 0);
       let sugar = Math.min(carbs, Math.max(0, Number(c.sugar) || 0));
       let fat = Math.max(0, Number(c.fat) || 0);
       let fiber = Math.max(0, Number(c.fiber) || 0);
 
+      const isCookingFatComp = /\b(?:olivenol|rapsol|sonnenblumenol|kokosol|bratol|speiseol|bratfett|ol|olej|butter|maslo|schmalz)\b/i.test(foldedName);
+      const isMeatComp = /\b(?:hahnchen|pute|puten|fleisch|rind|schwein|hack|tatar|filet|schnitzel|gulasch|kurczak|wolow|wieprz|mieso|piers)\b/i.test(foldedName);
+      const isLeanComp = hasGlobalLeanOverride || /\b(?:hahnchenbrust|putenbrust|mager|selbst\s+gewolft|tatar|filet|piers|chud)\b/i.test(foldedName);
+
+      // Regel 1 & 2: Substitution over Addition & 5g-Cap bei vagen Kochfett-Angaben
+      if (isCookingFatComp) {
+        if (cookingFatAlreadyCounted && hasVagueOilHint) {
+          continue;
+        }
+        cookingFatAlreadyCounted = true;
+        if (hasVagueOilHint || grams <= 8) {
+          grams = Math.min(grams, 5);
+          fat = Math.min(fat, 5.0);
+          p = 0; carbs = 0; sugar = 0; fiber = 0;
+        }
+      }
+
       const lexRef = findLexiconReference(name);
-      if (lexRef && grams > 0) {
+      if (lexRef && grams > 0 && !isCookingFatComp) {
         const r = grams / 100;
         p = (0.65 * (lexRef.p * r)) + (0.35 * p);
         carbs = (0.65 * (lexRef.c * r)) + (0.35 * carbs);
@@ -1590,6 +1635,14 @@
         sugar = Math.min(carbs, (0.65 * (refSug * r)) + (0.35 * sugar));
         fat = (0.65 * (lexRef.f * r)) + (0.35 * fat);
         fiber = (0.65 * ((lexRef.fiber || 0) * r)) + (0.35 * fiber);
+      }
+
+      // Regel 2: Lean Protein Override erzwingt < 3.0g Fett / 100g für mageres Fleisch
+      if (isMeatComp && isLeanComp && !/\b(?:paniert|schabowy|frikadelle|mielony)\b/i.test(foldedName)) {
+        const maxLeanFat = (grams / 100) * 2.8;
+        if (fat > maxLeanFat) {
+          fat = maxLeanFat;
+        }
       }
 
       const compKcal = Math.round(4 * p + 4 * carbs + 9 * fat + 2 * fiber);
@@ -1754,6 +1807,9 @@
     if (input) input.value = '';
   }
 
+  // ============================================================================
+  // SCANNER 1: MAHLZEITEN- & 3D-VISION-SCANNER (triggerMealAnalysis / callGeminiVisionAPI)
+  // ============================================================================
   async function triggerMealAnalysis() {
     if (isVisionBusy) return;
     const textVal = (document.getElementById('mealTextInput').value || '').trim();
@@ -1811,16 +1867,16 @@
       const explicitHint = explicitKcalInText
         ? `WICHTIG: Der Nutzer hat explizit ${explicitKcalInText[1]} kcal angegeben. Übernimm exakt diesen Kalorienwert!`
         : '';
+      const rigorLayer = buildGlobalNutritionalRigorRules(targetLangName, textVal);
 
       const prompt = `Du bist ein präziser Ernährungswissenschaftler, Photogrammetrie-Experte und OCR-Spezialist.
-Analysiere die Mahlzeit ${hasPhoto ? 'auf dem Bild' : ''} ${textVal ? `und den Hinweis: "${textVal}"` : ''}.
+Analysiere die Mahlzeit ${hasPhoto ? 'auf dem Bild' : ''} ${textVal ? `und den Nutzer-Hinweis: "${textVal}"` : ''}.
 ${explicitHint}
+${rigorLayer}
 WICHTIG: Schreibe "mealName", "explanation" und Komponentennamen auf ${targetLangName}!
-REGELN FÜR WINKEL-UNABHÄNGIGE PRÄZISION:
-1. OCR-PRIORITÄT: Falls ein Etikett oder eine Nährwerttabelle sichtbar ist, setze "isNutritionLabel": true und übernimm exakt die gedruckten Werte.
-2. PERSPEKTIV- & REFLEXIONS-KALIBRIERUNG: Bestimme den Kamerawinkel ("90° Top-Down", "45°" oder "<30° Flach") anhand Teller (26cm), Brötchen (ca. 70g), Aufstrichdicke (ca. 3-5mm = 25-35g) oder Besteck. Ignoriere glänzende Reflexionen auf Alufolie/Verpackungen und korrigiere bei <30° die Vordergrund-Vergrößerung um -25%.
-3. KOMPONENTEN-ZERLEGUNG: Zerlege das Gericht in alle sichtbaren Einzelzutaten ("components") mit Nettogewicht in Gramm ("grams") und berechne Nährwerte nach 100g-Standardwerten (BLS/USDA).
-4. GEFÄSS-ANKER: Speisen in Auflaufform/Pfanne mit überbackenem Käse sind Auflauf/Gratin (Zapiekanka), niemals ein Käsebrötchen.
+ZUSATZ-REGELN:
+- OCR-PRIORITÄT: Falls ein Etikett oder eine Nährwerttabelle sichtbar ist, setze "isNutritionLabel": true und übernimm exakt die gedruckten Werte.
+- GEFÄSS-ANKER: Speisen in Auflaufform/Pfanne mit überbackenem Käse sind Auflauf/Gratin (Zapiekanka), niemals ein Käsebrötchen.
 Antworte AUSSCHLIESSLICH als kompaktes JSON:
 {
   "mealName": "Gesamtname inkl. Gewicht (${targetLangName})",
@@ -1835,7 +1891,7 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
   "sugar": 0,
   "fat": 0,
   "fiber": 0,
-  "explanation": "Kurze Begründung (max. 2 Sätze) auf ${targetLangName}"
+  "explanation": "Kurze Begründung inkl. Maßstabs-/Garmethoden-Kalibrierung auf ${targetLangName}"
 }`;
 
       const imgToSend = hasPhoto ? currentMealBase64 : null;
@@ -1850,7 +1906,7 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
       let kcal = Math.max(0, Math.round(Number(data.kcal) || 0));
       let componentBadges = [];
 
-      const reconciled = reconcileVisionComponents(data, Boolean(data.isNutritionLabel));
+      const reconciled = reconcileVisionComponents(data, Boolean(data.isNutritionLabel), textVal);
       if (reconciled && !explicitKcalInText) {
         p = reconciled.protein;
         c = reconciled.carbs;
@@ -1887,6 +1943,7 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
       resetAnalyzeButtonUI();
     }
   }
+  const callGeminiVisionAPI = triggerMealAnalysis;
 
   function quickAddPreset(presetId) {
     const isPl = state.lang === 'pl';
@@ -2052,6 +2109,9 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
     }
   }
 
+  // ============================================================================
+  // SCANNER 2: RESTEKÜCHE & SMART EXPIRY GUARD (runFridgeLeftoverAI)
+  // ============================================================================
   async function handleFridgePhotoSelect(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -2087,17 +2147,19 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
 
     try {
       const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+      const rigorLayer = buildGlobalNutritionalRigorRules(targetLang, extra);
+
       const prompt = `Du bist ein Lebensmittelsicherheits-Experte und Fitness-Koch. Antworte auf ${targetLang}.
 Analysiere die Zutaten ${currentFridgeBase64 ? 'auf dem Kühlschrank-Foto' : ''} ${extra ? `sowie: "${extra}"` : ''}.
-WICHTIG (Smart Expiry Guard): Halluziniere KEINE unlesbaren MHD-Daten! Bewerte den biologischen Reifegrad:
-- "high" (1-2 Tage)
-- "medium" (3-4 Tage)
-- "low" (>5 Tage)
-Erstelle 2 High-Protein Fitness-Rezepte auf ${targetLang}.
+${rigorLayer}
+ZUSATZ-REGELN (Smart Expiry & Fill-Level Guard):
+1. Halluziniere KEINE unlesbaren MHD-Daten! Bewerte den biologischen Reifegrad: "high" (1-2 Tage), "medium" (3-4 Tage), "low" (>5 Tage).
+2. Kalibriere anhand der Standard-Packungsgrößen im Kühlschrank (z.B. 250g/500g Quarkbecher, 1L Milch, 200g Aufschnitt) den realen Rest-Füllstand in Gramm!
+3. Erstelle 2 High-Protein Fitness-Rezepte (fettarme Zubereitung, max. 5g Bratöl pro Portion) auf ${targetLang}.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "ingredients": [{ "name": "Zutat", "urgency": "high", "shelfLifeHint": "1-2 Tage" }],
-  "recipes": [{ "title": "Rezeptname", "kcal": 480, "protein": 42, "carbs": 35, "sugar": 5, "fat": 14, "fiber": 5, "steps": ["Schritt 1", "Schritt 2"] }]
+  "ingredients": [{ "name": "Zutat inkl. geschätzter Restmenge in g/ml", "urgency": "high", "shelfLifeHint": "1-2 Tage" }],
+  "recipes": [{ "title": "Rezeptname", "kcal": 460, "protein": 45, "carbs": 35, "sugar": 5, "fat": 11, "fiber": 5, "steps": ["Schritt 1", "Schritt 2"] }]
 }`;
 
       const raw = await callGeminiRequest(prompt, currentFridgeBase64, 13000, { expectJson: true, masterSignal: ctrl.signal });
@@ -2108,12 +2170,12 @@ Antworte AUSSCHLIESSLICH als JSON:
       const recipes = Array.isArray(data.recipes) ? data.recipes : [];
 
       window._quickRecipeStore = recipes.map(r => ({
-        name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, sugar: r.sugar || 4, fat: r.fat || 12, fiber: r.fiber || 4
+        name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, sugar: r.sugar || 4, fat: r.fat || 11, fiber: r.fiber || 4
       }));
 
       document.getElementById('fridgeResultsContainer').innerHTML = `
         <div class="glass-card rounded-2xl p-4 space-y-2.5">
-          <h3 class="text-xs font-extrabold uppercase text-teal-400">Smart Expiry Guard</h3>
+          <h3 class="text-xs font-extrabold uppercase text-teal-400">Smart Expiry & Fill-Level Guard</h3>
           <div class="space-y-1.5">
             ${sortedIng.map(i => {
               const badgeClass = i.urgency === 'high'
@@ -2150,6 +2212,9 @@ Antworte AUSSCHLIESSLICH als JSON:
     }
   }
 
+  // ============================================================================
+  // SCANNER 3: RESTAURANT & CONTEXTUAL MENU COMPANION (runMenuScannerAI)
+  // ============================================================================
   function updateMenuBudgetBanner() {
     const today = getTodayData();
     const prof = state.profile;
@@ -2206,17 +2271,21 @@ Antworte AUSSCHLIESSLICH als JSON:
 
     try {
       const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
+      const rigorLayer = buildGlobalNutritionalRigorRules(targetLang, textVal);
+
       const prompt = `FAST VISUAL MENU SKIMMING: Du bist ein Elite-Ernährungscoach im Restaurant. Antworte auf ${targetLang}.
+${rigorLayer}
 Scanne gezielt nur die Hauptgerichte/Protein-Sektionen passend zu:
 - Offenes Tagesbudget: ${remKcal} kcal | Noch offen: ${remProt}g Protein
 - Strategie: ${goal}
-${isDamageControl ? '- DAMAGE-CONTROL: Budget fast leer! Wähle die kalorienärmsten, magersten Protein-Gerichte.' : ''}
-${textVal ? `- Hinweis: "${textVal}"` : ''}
-Wähle direkt die Top-3 besten Gerichte aus, berechne exakte Nährwerte (inkl. Zucker & Ballaststoffe) und gib je 1 kurzen Bestell-Hack.
+${isDamageControl ? '- DAMAGE-CONTROL: Budget fast leer! Wähle die kalorienärmsten, magersten Protein-Gerichte (gedünstet/gegrillt).' : ''}
+${textVal ? `- Nutzer-Vorgabe: "${textVal}"` : ''}
+WICHTIG (CONTEXTUAL PREPARATION RIGOR): Unterscheide strikt zwischen "gegrillt/gedünstet/Natur" (minimales Zusatzfett, mageres Fleisch <3g Fett/100g) und "paniert/frittiert/cremig/Sahnesauce" (hohes Fett). Blähe magere Grillgerichte niemals künstlich mit Fett auf!
+Wähle direkt die Top-3 besten Gerichte aus und gib je 1 Bestell-Hack.
 Antworte AUSSCHLIESSLICH als JSON:
 {
   "recommendations": [
-    { "dishName": "Gericht", "kcal": 520, "protein": 45, "carbs": 35, "sugar": 4, "fat": 18, "fiber": 5, "orderHack": "Konkreter Tipp bei der Bestellung" }
+    { "dishName": "Gericht", "kcal": 490, "protein": 48, "carbs": 35, "sugar": 4, "fat": 14, "fiber": 5, "orderHack": "Konkreter Tipp bei der Bestellung" }
   ]
 }`;
 
@@ -2225,7 +2294,7 @@ Antworte AUSSCHLIESSLICH als JSON:
       const recs = Array.isArray(data.recommendations) ? data.recommendations : [];
 
       window._quickRecipeStore = recs.map(r => ({
-        name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, sugar: r.sugar || 4, fat: r.fat || 15, fiber: r.fiber || 3
+        name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, sugar: r.sugar || 4, fat: r.fat || 14, fiber: r.fiber || 3
       }));
 
       document.getElementById('menuResultsContainer').innerHTML = recs.map((r, idx) => `
@@ -2258,6 +2327,9 @@ Antworte AUSSCHLIESSLICH als JSON:
     }
   }
 
+  // ============================================================================
+  // SCANNER 4: KOCHSTUDIO & TOPF-/PFANNEN-ENGINE (runChefRecipeAI / runPotScannerAI)
+  // ============================================================================
   async function runChefRecipeAI() {
     const craving = (document.getElementById('chefCravingInput').value || 'High-Protein Pfannengericht').trim();
     const maxKcal = Number(document.getElementById('chefKcalLimit').value) || 600;
@@ -2274,19 +2346,23 @@ Antworte AUSSCHLIESSLICH als JSON:
 
     try {
       const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
-      const prompt = `Erstelle ein Fitness-Rezept auf ${targetLang} für: "${craving}".
-Maximal ${maxKcal} kcal, mindestens ${minProt}g Protein, max. ${maxTime} Minuten.
+      const rigorLayer = buildGlobalNutritionalRigorRules(targetLang, craving);
+
+      const prompt = `Erstelle ein präzises Fitness-Rezept / Topf- & Pfannengericht auf ${targetLang} für: "${craving}".
+${rigorLayer}
+Vorgaben: Maximal ${maxKcal} kcal, mindestens ${minProt}g Protein, max. ${maxTime} Minuten.
+WICHTIG: Nutze magere Proteinquellen (<3g Fett/100g bei Hähnchenbrust/Putenbrust/magerem Fleisch), deckle Bratöl auf max. 5g (45 kcal) pro Portion und differenziere exakt zwischen gedünstet/gegrillt und cremig/paniert.
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "title": "Rezeptname", "kcal": 540, "protein": 48, "carbs": 42, "sugar": 5, "fat": 16, "fiber": 5,
-  "ingredients": ["200g ..."], "steps": ["Schritt 1", "Schritt 2"]
+  "title": "Rezeptname", "kcal": 520, "protein": 48, "carbs": 42, "sugar": 5, "fat": 12, "fiber": 5,
+  "ingredients": ["200g Hähnchenbrustfilet (mager)", "..."], "steps": ["Schritt 1", "Schritt 2"]
 }`;
 
       const raw = await callGeminiRequest(prompt, null, 14000, { expectJson: true, masterSignal: ctrl.signal });
       const r = extractJSON(raw);
 
       window._quickRecipeStore = [{
-        name: r.title || craving, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 35, sugar: r.sugar || 4, fat: r.fat || 15, fiber: r.fiber || 4
+        name: r.title || craving, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 35, sugar: r.sugar || 4, fat: r.fat || 12, fiber: r.fiber || 4
       }];
 
       document.getElementById('chefResultsContainer').innerHTML = `
@@ -2314,6 +2390,7 @@ Antworte AUSSCHLIESSLICH als JSON:
       btn.innerHTML = orig;
     }
   }
+  const runPotScannerAI = runChefRecipeAI;
 
   function updateWeightDiffBanner() {
     const curW = parseFloat(document.getElementById('profWeight').value) || 90;
