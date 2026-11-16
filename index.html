@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b1120" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>CalSnap AI v4.2 Enterprise — Smart Nutrition & Vision</title>
+  <title>CalSnap AI v4.3 Enterprise — Adaptive Metabolic Coach & 3D Vision</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -68,9 +68,9 @@
         <div>
           <div class="flex items-center gap-1.5">
             <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white leading-none">CalSnap AI</h1>
-            <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">v4.2</span>
+            <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">v4.3</span>
           </div>
-          <p id="headerSubTitle" class="text-[10px] text-slate-400 mt-0.5">3D-Vision + 0.0s DE/PL Lexikon</p>
+          <p id="headerSubTitle" class="text-[10px] text-slate-400 mt-0.5">Metabolic Coach + 3D-Vision</p>
         </div>
       </div>
 
@@ -188,6 +188,89 @@
         </div>
       </div>
 
+      <!-- ==================== ADAPTIVE METABOLIC COACH ENGINE CARD ==================== -->
+      <div id="metabolicCoachCard" class="glass-card rounded-2xl p-4 shadow-xl space-y-3 border border-emerald-500/20">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+              <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <div>
+              <h3 id="lblCoachTitle" class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">Adaptive Metabolic Coach</h3>
+              <p id="lblCoachSub" class="text-[11px] text-slate-400">7d-Trend, TDEE-Autokalibrierung & Plateau-Schutz</p>
+            </div>
+          </div>
+          <span id="coachStatusBadge" class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+            🟢 Auf Kurs
+          </span>
+        </div>
+
+        <!-- GEWICHTS-CHECK-IN & 7-TAGE-TREND-METRIKEN -->
+        <div class="grid grid-cols-12 gap-2 items-center bg-slate-900/80 rounded-xl p-2.5 border border-slate-800/80">
+          <div class="col-span-5 flex items-center gap-1.5">
+            <input id="dailyWeightInput" type="number" step="0.1" placeholder="kg heute" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-lg px-2.5 py-1.5 text-xs font-bold text-white outline-none" onkeydown="if(event.key==='Enter'){event.preventDefault();logDailyWeight();}" />
+            <button id="btnLogWeight" type="button" onclick="logDailyWeight()" class="px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shrink-0 transition" title="Tagesgewicht speichern">
+              <i class="fa-solid fa-check"></i>
+            </button>
+          </div>
+          <div class="col-span-7 grid grid-cols-3 gap-1 text-center border-l border-slate-800 pl-2">
+            <div>
+              <div id="lblCoachTrend" class="text-[9px] font-bold uppercase text-slate-400">7d-Trend</div>
+              <div id="coachTrendValue" class="text-xs font-extrabold text-white">--.- kg</div>
+            </div>
+            <div>
+              <div id="lblCoachBase" class="text-[9px] font-bold uppercase text-slate-400">Basis</div>
+              <div id="coachBaseValue" class="text-xs font-bold text-slate-300">--.- kg</div>
+            </div>
+            <div>
+              <div id="lblCoachFloor" class="text-[9px] font-bold uppercase text-amber-400">BMR-Boden</div>
+              <div id="coachFloorValue" class="text-xs font-extrabold text-amber-300">1500</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BANNER 1: DYNAMIC TDEE RE-CALIBRATION INFO -->
+        <div id="coachRecalBanner" class="hidden bg-sky-950/50 border border-sky-500/40 rounded-xl p-2.5 text-xs text-sky-200 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-arrows-rotate text-sky-400"></i>
+            <span id="coachRecalText" class="leading-snug">TDEE automatisch an neuen Gewichtstrend angepasst.</span>
+          </div>
+          <button type="button" onclick="dismissCoachRecalBanner()" class="text-slate-400 hover:text-white text-xs px-1"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- BANNER 2: ADAPTIVE PLATEAU-BREAKER (ERSCHEINT BEI 14d STAGNATION TROTZ >=85% ADHÄRENZ) -->
+        <div id="coachPlateauBanner" class="hidden bg-amber-950/50 border border-amber-500/40 rounded-xl p-3 space-y-2">
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-Compass-drafting text-amber-400 mt-0.5"></i>
+            <p id="coachPlateauText" class="text-xs text-amber-100 leading-relaxed">
+              <strong>Plateau erkannt:</strong> Hohe Kalorien-Disziplin (&ge;85%) über 14 Tage, aber der Gewichtstrend stagniert. Wähle deine Stoffwechsel-Intervention:
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="applyPlateauAction('cut100')" class="py-2 px-2.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-[11px] font-extrabold text-amber-300 flex items-center justify-center gap-1 transition">
+              <i class="fa-solid fa-fire"></i> <span id="lblPlateauCutBtn">-100 kcal Anpassung</span>
+            </button>
+            <button type="button" onclick="applyPlateauAction('refeed2d')" class="py-2 px-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-[11px] font-extrabold text-emerald-300 flex items-center justify-center gap-1 transition">
+              <i class="fa-solid fa-bolt"></i> <span id="lblPlateauRefeedBtn">2-Tage Refeed (TDEE)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- BANNER 3: SMART CHEAT-RESCUE 2.0 (WASSER vs. FETT SEPARATION BEI ÜBER-NACHT-SPIKE) -->
+        <div id="coachCheatBanner" class="hidden bg-indigo-950/50 border border-indigo-500/40 rounded-xl p-3 space-y-2">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-start gap-2">
+              <i class="fa-solid fa-droplet text-sky-400 mt-0.5"></i>
+              <p id="coachCheatText" class="text-xs text-indigo-100 leading-relaxed"></p>
+            </div>
+            <button type="button" onclick="dismissCheatRescue()" class="text-slate-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <button id="btnApplyCheatCut" type="button" onclick="applyCheatRescueCut()" class="w-full py-2 px-3 rounded-lg bg-indigo-500/25 hover:bg-indigo-500/35 border border-indigo-400/40 text-[11px] font-extrabold text-indigo-200 flex items-center justify-center gap-1.5 transition">
+            <i class="fa-solid fa-scale-balanced"></i> <span id="lblCheatCutBtn">Moderaten 5-Tage-Ausgleich aktivieren</span>
+          </button>
+        </div>
+      </div>
+
       <!-- MAHLZEITEN-SCANNER & TURBO-SCAN -->
       <div class="glass-card rounded-2xl p-4 shadow-xl space-y-3">
         <div class="flex items-start justify-between gap-2">
@@ -215,7 +298,7 @@
 
         <!-- TEXT-EINGABE -->
         <div class="relative">
-          <input id="mealTextInput" type="text" placeholder="z.B. 2 Latte macchiato groß, 167kcal Mousse, 2 Eier..." class="w-full bg-slate-900/90 border border-slate-700/90 focus:border-emerald-500 rounded-xl pl-3.5 pr-9 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition" onkeydown="if(event.key==='Enter'){event.preventDefault();triggerMealAnalysis();}" />
+          <input id="mealTextInput" type="text" placeholder="z.B. 2 Latte macchiato groß, Vollkornbrötchen mit Fleischwurst..." class="w-full bg-slate-900/90 border border-slate-700/90 focus:border-emerald-500 rounded-xl pl-3.5 pr-9 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition" onkeydown="if(event.key==='Enter'){event.preventDefault();triggerMealAnalysis();}" />
           <button id="clearMealTextBtn" type="button" onclick="clearMealText()" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-700/80 hover:bg-slate-600 text-slate-300 flex items-center justify-center text-[10px]" title="Text löschen">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -333,7 +416,7 @@
           <div class="w-9 h-9 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400"><i class="fa-solid fa-temperature-arrow-down"></i></div>
           <div>
             <h2 id="lblFridgeTitle" class="text-sm font-extrabold text-white">Resteküche & Smart Expiry Guard</h2>
-            <p id="lblFridgeSub" class="text-[11px] text-slate-400">Kühlschrank fotografieren — Frische-Check & High-Protein Rezepte</p>
+            <p id="lblFridgeSub" class="text-[11px] text-slate-400">Kühlschrank fotografieren — Füllstands-Check & High-Protein Rezepte</p>
           </div>
         </div>
         <div id="fridgePreviewContainer" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
@@ -389,8 +472,8 @@
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400"><i class="fa-solid fa-hat-chef"></i></div>
           <div>
-            <h2 id="lblChefTitle" class="text-sm font-extrabold text-white">KI-Kochstudio (Macro Chef)</h2>
-            <p id="lblChefSub" class="text-[11px] text-slate-400">Maßgeschneiderte Fitness-Rezepte nach deinen Ziel-Makros</p>
+            <h2 id="lblChefTitle" class="text-sm font-extrabold text-white">KI-Kochstudio & Topf-Scanner</h2>
+            <p id="lblChefSub" class="text-[11px] text-slate-400">Maßgeschneiderte Fitness-Rezepte & präzise Garmethoden-Logik</p>
           </div>
         </div>
         <input id="chefCravingInput" type="text" placeholder="Worauf hast du Lust? (z.B. Pfannengericht mit Hähnchen, süßes Quark-Dessert)..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500" />
@@ -550,7 +633,7 @@
   </nav>
   <script>
   // ============================================================================
-  // CALSNAP AI v4.2 ENTERPRISE — 6-LAYER VAULT, MASTER-ABORT & SELF-HEALING JSON
+  // CALSNAP AI v4.3 ENTERPRISE — 6-LAYER VAULT, STATE BRIDGE & VISION PIPELINE
   // ============================================================================
   const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
   const STORAGE_KEY_V1 = 'calsnap_ai_state_v1';
@@ -576,14 +659,25 @@
   let activePortionScalePercent = 100;
   window._quickRecipeStore = [];
 
+  function numOr(val, fallback) {
+    const n = Number(val);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
   function getTodayISO() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
+  function getOffsetISO(daysOffset) {
+    const d = new Date();
+    d.setDate(d.getDate() + daysOffset);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
   function createDefaultState() {
     return {
-      version: 4.2,
+      version: 4.3,
       lang: 'de',
       geminiApiKey: '',
       guestCode: '',
@@ -594,8 +688,32 @@
         targetKcal: 2000, targetProt: 150, targetCarbs: 180, targetFat: 65,
         targetFiber: 30, targetSugar: 35, waterTarget: 2500
       },
+      goals: {
+        kcal: 2000, prot: 150, carbs: 180, fat: 65, fiber: 30, sugar: 35
+      },
+      weightLog: [],
+      metabolicCoach: {
+        lastCalibratedWeight: 90,
+        refeedUntilISO: null,
+        baseKcalBeforeRefeed: null,
+        activeDailyCut: 0,
+        cheatRescueUntilISO: null,
+        dismissedSpikeISO: null,
+        lastRecalMsg: ''
+      },
       days: {}
     };
+  }
+
+  function syncGoalsBridge(st) {
+    if (!st || !st.profile) return;
+    if (!st.goals || typeof st.goals !== 'object') st.goals = {};
+    st.goals.kcal = numOr(st.profile.targetKcal, 2000);
+    st.goals.prot = numOr(st.profile.targetProt, 150);
+    st.goals.carbs = numOr(st.profile.targetCarbs, 180);
+    st.goals.fat = numOr(st.profile.targetFat, 65);
+    st.goals.fiber = numOr(st.profile.targetFiber, 30);
+    st.goals.sugar = numOr(st.profile.targetSugar, 35);
   }
 
   function escapeHTML(str) {
@@ -728,18 +846,39 @@
       const recovered = recoverRedundantApiKey(null);
       if (recovered) def.geminiApiKey = recovered;
       def.isGuestUser = isGuestLockPersisted(null);
+      syncGoalsBridge(def);
       return def;
     }
 
+    const mergedProfile = { ...def.profile, ...(loaded.profile || {}) };
+    mergedProfile.weight = numOr(mergedProfile.weight, 90);
+    mergedProfile.targetWeight = numOr(mergedProfile.targetWeight, mergedProfile.weight);
+    mergedProfile.targetKcal = numOr(mergedProfile.targetKcal, 2000);
+    mergedProfile.targetProt = numOr(mergedProfile.targetProt, 150);
+    mergedProfile.targetCarbs = numOr(mergedProfile.targetCarbs, 180);
+    mergedProfile.targetFat = numOr(mergedProfile.targetFat, 65);
+
+    const mergedCoach = {
+      ...def.metabolicCoach,
+      ...(loaded.metabolicCoach || {})
+    };
+    mergedCoach.lastCalibratedWeight = numOr(mergedCoach.lastCalibratedWeight, mergedProfile.weight);
+    mergedCoach.activeDailyCut = numOr(mergedCoach.activeDailyCut, 0);
+
     const merged = {
-      ...def, ...loaded,
+      ...def,
+      ...loaded,
       lang: loaded.lang === 'pl' ? 'pl' : 'de',
       isGuestUser: isGuestLockPersisted(loaded),
-      profile: { ...def.profile, ...(loaded.profile || {}) },
+      profile: mergedProfile,
+      weightLog: Array.isArray(loaded.weightLog) ? loaded.weightLog : [],
+      metabolicCoach: mergedCoach,
       days: (loaded.days && typeof loaded.days === 'object') ? loaded.days : {}
     };
     delete merged.steps;
     delete merged.cycling;
+
+    syncGoalsBridge(merged);
 
     const recoveredKey = recoverRedundantApiKey(merged);
     if (recoveredKey) {
@@ -753,6 +892,7 @@
 
   function saveState() {
     try {
+      syncGoalsBridge(state);
       if (state.geminiApiKey) {
         persistApiKeyRedundant(state.geminiApiKey);
         syncAdminHashAnchor(state.geminiApiKey, Boolean(state.isGuestUser));
@@ -1050,7 +1190,6 @@
           continue;
         }
 
-        // Strikte JSON-Validierung VOR dem Cachen von FAST_MODEL_KEY!
         if (expectJson) {
           try {
             const validatedObj = extractJSON(textOut);
@@ -1136,9 +1275,6 @@
     // ============================================================================
   // 100g-NORMIERTES DE/PL-LEXIKON & MULTI-PASS PARSER ("OHNE"/"MIT"-LOGIK)
   // ============================================================================
-// ============================================================================
-  // 100g-NORMIERTES DE/PL-LEXIKON & MULTI-PASS PARSER ("OHNE"/"MIT"-LOGIK)
-  // ============================================================================
   const FOOD_LEXICON = [
     { name: 'Latte Macchiato', keywords: ['latte macchiato', 'macchiato', 'latte'], kcal: 46, p: 2.8, c: 4.2, sugar: 4.1, f: 1.9, fiber: 0, defaultPortion: 300 },
     { name: 'Kaffee Schwarz / Kawa czarna', keywords: ['kaffee schwarz', 'schwarzer kaffee', 'espresso', 'americano', 'kawa czarna', 'czarna kawa'], kcal: 2, p: 0.2, c: 0.2, sugar: 0, f: 0, fiber: 0, defaultPortion: 250 },
@@ -1207,7 +1343,7 @@
 
   const UI_I18N = {
     de: {
-      subTitle: '3D-Vision + 0.0s DE/PL Lexikon',
+      subTitle: 'Metabolic Coach + 3D-Vision',
       dailyBalance: 'Tagesbilanz',
       remPrefix: 'Offen: ',
       prot: 'Protein',
@@ -1215,6 +1351,11 @@
       fat: 'Fett',
       fiber: 'Ballaststoffe',
       sugar: 'Zucker (Max.)',
+      coachTitle: 'Adaptive Metabolic Coach',
+      coachSub: '7d-Trend, TDEE-Autokalibrierung & Plateau-Schutz',
+      coachOnTrack: '🟢 Auf Kurs',
+      coachRefeedActive: '⚡ Refeed aktiv',
+      coachPlateauWarn: '🟠 Plateau-Check',
       scannerTitle: 'Mahlzeiten-Scanner & ⚡ Turbo-Scan',
       scannerSub: 'Foto (ideal: 45° schräg von oben), Text oder 1-Klick Schnellwahl',
       textPlaceholder: 'z.B. 2 Latte macchiato groß, Vollkornbrötchen mit Fleischwurst...',
@@ -1251,7 +1392,7 @@
       navProf: 'Profil'
     },
     pl: {
-      subTitle: 'Wizja 3D + Słownik DE/PL 0.0s',
+      subTitle: 'Metabolic Coach + Wizja 3D',
       dailyBalance: 'Bilans Dnia',
       remPrefix: 'Pozostało: ',
       prot: 'Białko',
@@ -1259,6 +1400,11 @@
       fat: 'Tłuszcz',
       fiber: 'Błonnik',
       sugar: 'Cukier (Max)',
+      coachTitle: 'Adaptive Metabolic Coach',
+      coachSub: 'Trend 7d, autokalibracja TDEE i ochrona przed stagnacją',
+      coachOnTrack: '🟢 W normie',
+      coachRefeedActive: '⚡ Refeed aktywny',
+      coachPlateauWarn: '🟠 Stagnacja',
       scannerTitle: 'Skaner Posiłków & ⚡ Turbo-Skan',
       scannerSub: 'Zdjęcie (najlepiej pod kątem 45°), tekst lub szybki wybór 1-Click',
       textPlaceholder: 'np. 2 Latte macchiato duże, 2 jajka, mięso wieprzowe...',
@@ -1324,6 +1470,8 @@
     setTxt('lblMacroFat', t.fat);
     setTxt('lblMacroFiber', t.fiber);
     setTxt('lblMacroSugar', t.sugar);
+    setTxt('lblCoachTitle', t.coachTitle);
+    setTxt('lblCoachSub', t.coachSub);
     setTxt('lblScannerTitle', t.scannerTitle);
     setTxt('lblScannerSub', t.scannerSub);
     setTxt('lblPhotoBtn', t.photoBtn);
@@ -1368,6 +1516,383 @@
     if (activeMealBaseResult) setPortionScale(activePortionScalePercent);
   }
 
+  // ============================================================================
+  // ADAPTIVE METABOLIC COACH ENGINE (TDEE RE-CALIBRATION, PLATEAU & CHEAT-RESCUE)
+  // ============================================================================
+  function computeBmrTdeeAndFloor(weightKg, prof = state.profile) {
+    const w = numOr(weightKg, numOr(prof.weight, 90));
+    const h = numOr(prof.height, 180);
+    const a = numOr(prof.age, 35);
+    const act = numOr(prof.activity, 1.375);
+    const isMale = (prof.gender || 'male') === 'male';
+
+    const bmr = (10 * w) + (6.25 * h) - (5 * a) + (isMale ? 5 : -161);
+    const tdee = Math.round(bmr * act);
+    const minSexFloor = isMale ? 1500 : 1200;
+    const floor = Math.max(minSexFloor, Math.round(bmr * 0.90));
+    return { bmr: Math.round(bmr), tdee, floor };
+  }
+
+  function getSortedWeightLog() {
+    const map = new Map();
+    if (Array.isArray(state.weightLog)) {
+      for (const item of state.weightLog) {
+        if (item && item.date && Number.isFinite(Number(item.weight)) && Number(item.weight) > 25) {
+          map.set(String(item.date), Number(item.weight));
+        }
+      }
+    }
+    if (state.days && typeof state.days === 'object') {
+      for (const [iso, dObj] of Object.entries(state.days)) {
+        if (dObj && Number.isFinite(Number(dObj.weight)) && Number(dObj.weight) > 25) {
+          map.set(iso, Number(dObj.weight));
+        }
+      }
+    }
+    if (map.size === 0 && numOr(state.profile.weight, 0) > 25) {
+      map.set(getTodayISO(), numOr(state.profile.weight, 90));
+    }
+    const arr = Array.from(map.entries())
+      .map(([date, weight]) => ({ date, weight }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    state.weightLog = arr;
+    return arr;
+  }
+
+  function computeSmoothedWeightTrend() {
+    const log = getSortedWeightLog();
+    if (!log.length) return numOr(state.profile.weight, 90);
+    const alpha = 0.25; // 7-Tage EWMA Glättung
+    let trend = log[0].weight;
+    for (let i = 1; i < log.length; i++) {
+      trend = (alpha * log[i].weight) + ((1 - alpha) * trend);
+    }
+    return Math.round(trend * 10) / 10;
+  }
+
+  function applyDynamicMacrosForKcal(newKcal, currentWeight) {
+    const p = state.profile;
+    const tarW = numOr(p.targetWeight, currentWeight);
+    const effectiveRefWeight = (tarW < currentWeight)
+      ? Math.round(tarW + (currentWeight - tarW) * 0.25)
+      : currentWeight;
+
+    const protPerKg = p.goal === 'cut' ? 2.0 : 1.8;
+    const newProt = Math.round(effectiveRefWeight * protPerKg);
+    const newFat = Math.max(45, Math.round(effectiveRefWeight * 0.8));
+    const remKcal = Math.max(160, newKcal - (newProt * 4 + newFat * 9));
+    const newCarbs = Math.round(remKcal / 4);
+
+    p.targetKcal = Math.round(newKcal);
+    p.targetProt = newProt;
+    p.targetCarbs = newCarbs;
+    p.targetFat = newFat;
+    syncGoalsBridge(state);
+  }
+
+  function logDailyWeight() {
+    const inp = document.getElementById('dailyWeightInput');
+    const val = parseFloat(inp ? inp.value : '');
+    if (!Number.isFinite(val) || val < 30 || val > 350) {
+      showToast(state.lang === 'pl' ? 'Podaj prawidłową wagę (30-350 kg).' : 'Bitte ein gültiges Gewicht (30–350 kg) eingeben.', 'warning');
+      return;
+    }
+
+    const todayISO = getTodayISO();
+    const rounded = Math.round(val * 10) / 10;
+    const todayData = getTodayData();
+    todayData.weight = rounded;
+    state.profile.weight = rounded;
+
+    const log = getSortedWeightLog();
+    const existingIdx = log.findIndex(x => x.date === todayISO);
+    if (existingIdx >= 0) log[existingIdx].weight = rounded;
+    else log.push({ date: todayISO, weight: rounded });
+    state.weightLog = log.sort((a, b) => a.date.localeCompare(b.date));
+
+    // Modul 1: Prüfe Dynamic TDEE Re-Calibration (|W_trend - W_base| >= 1.5 kg)
+    const wTrend = computeSmoothedWeightTrend();
+    const wBase = numOr(state.metabolicCoach.lastCalibratedWeight, rounded);
+    if (Math.abs(wTrend - wBase) >= 1.5) {
+      const { tdee, floor } = computeBmrTdeeAndFloor(wTrend, state.profile);
+      const goalDelta = state.profile.goal === 'cut' ? -500 : (state.profile.goal === 'bulk' ? 300 : 0);
+      const newKcal = Math.max(floor, tdee + goalDelta);
+      const oldKcal = numOr(state.profile.targetKcal, 2000);
+
+      applyDynamicMacrosForKcal(newKcal, wTrend);
+      state.metabolicCoach.lastCalibratedWeight = wTrend;
+      state.metabolicCoach.lastRecalMsg = state.lang === 'pl'
+        ? `TDEE zaktualizowane (${wBase.toFixed(1)} → ${wTrend.toFixed(1)} kg): ${oldKcal} → ${newKcal} kcal (BMR-Floor: ${floor} kcal).`
+        : `TDEE automatisch rekalibriert (Trend ${wBase.toFixed(1)} → ${wTrend.toFixed(1)} kg): ${oldKcal} → ${newKcal} kcal (Schutzboden: ${floor} kcal).`;
+    }
+
+    saveState();
+    syncProfileToUI();
+    renderDiaryUI();
+    showToast(state.lang === 'pl' ? `Waga ${rounded} kg zapisana!` : `Tagesgewicht ${rounded} kg gespeichert!`, 'success');
+  }
+
+  function dismissCoachRecalBanner() {
+    state.metabolicCoach.lastRecalMsg = '';
+    saveState();
+    renderMetabolicCoachUI();
+  }
+
+  function evaluatePlateauBreaker() {
+    const log = getSortedWeightLog();
+    if (log.length < 5) return { isPlateau: false };
+
+    const todayISO = getTodayISO();
+    if (state.metabolicCoach.lastPlateauActionISO === todayISO) return { isPlateau: false };
+
+    const tKcal = numOr(state.profile.targetKcal, 2000);
+    let validLoggedDays = 0;
+    let adherentDays = 0;
+
+    for (let i = 0; i < 14; i++) {
+      const iso = getOffsetISO(-i);
+      const dayObj = state.days[iso];
+      if (dayObj && Array.isArray(dayObj.meals) && dayObj.meals.length > 0) {
+        const dayKcal = dayObj.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0);
+        if (dayKcal >= 600) {
+          validLoggedDays++;
+          if (dayKcal <= tKcal * 1.05) adherentDays++;
+        }
+      }
+    }
+
+    if (validLoggedDays < 6) return { isPlateau: false };
+    const adherence = adherentDays / validLoggedDays;
+
+    const firstInWindow = log[0];
+    const latest = log[log.length - 1];
+    const wTrendNow = computeSmoothedWeightTrend();
+    const delta14 = wTrendNow - firstInWindow.weight;
+
+    if (state.profile.goal === 'cut' && adherence >= 0.85 && delta14 > -0.10) {
+      return {
+        isPlateau: true,
+        adherencePct: Math.round(adherence * 100),
+        delta14: Math.round(delta14 * 10) / 10
+      };
+    }
+    return { isPlateau: false, delta14: Math.round(delta14 * 10) / 10 };
+  }
+
+  function applyPlateauAction(actionType) {
+    const wTrend = computeSmoothedWeightTrend();
+    const { tdee, floor } = computeBmrTdeeAndFloor(wTrend, state.profile);
+    const currentTarget = numOr(state.profile.targetKcal, 2000);
+
+    if (actionType === 'cut100') {
+      const nextKcal = Math.max(floor, currentTarget - 100);
+      applyDynamicMacrosForKcal(nextKcal, wTrend);
+      state.metabolicCoach.lastPlateauActionISO = getTodayISO();
+      saveState();
+      syncProfileToUI();
+      renderDiaryUI();
+      showToast(state.lang === 'pl' ? `Cel zmniejszony do ${nextKcal} kcal!` : `Plateau-Anpassung aktiv: Neues Ziel ${nextKcal} kcal (Boden ${floor} kcal geschützt)!`, 'success');
+    } else if (actionType === 'refeed2d') {
+      state.metabolicCoach.baseKcalBeforeRefeed = currentTarget;
+      state.metabolicCoach.refeedUntilISO = getOffsetISO(2);
+      state.metabolicCoach.lastPlateauActionISO = getTodayISO();
+      applyDynamicMacrosForKcal(tdee, wTrend);
+      saveState();
+      syncProfileToUI();
+      renderDiaryUI();
+      showToast(state.lang === 'pl' ? `2-dniowy Refeed (${tdee} kcal) aktywowany!` : `2-Tage Maintenance-Refeed (${tdee} kcal) für Leptin-Reset aktiviert!`, 'success');
+    }
+  }
+
+  function evaluateCheatRescue() {
+    const log = getSortedWeightLog();
+    if (log.length < 2) return null;
+
+    const latest = log[log.length - 1];
+    const prev = log[log.length - 2];
+    const todayISO = getTodayISO();
+
+    if (state.metabolicCoach.dismissedSpikeISO === latest.date) return null;
+    const spikeKg = Math.round((latest.weight - prev.weight) * 10) / 10;
+    if (spikeKg < 0.6) return null;
+
+    const { tdee, floor } = computeBmrTdeeAndFloor(prev.weight, state.profile);
+    let surplusKcal = 0;
+
+    for (let i = 1; i <= 2; i++) {
+      const iso = getOffsetISO(-i);
+      const dObj = state.days[iso];
+      if (dObj && Array.isArray(dObj.meals)) {
+        const dayKcal = dObj.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0);
+        if (dayKcal > tdee) {
+          surplusKcal += (dayKcal - tdee);
+        }
+      }
+    }
+
+    const realFatKg = Math.min(spikeKg, Math.round((surplusKcal / 7000) * 100) / 100);
+    const waterGlycogenKg = Math.max(0, Math.round((spikeKg - realFatKg) * 100) / 100);
+    const suggestedDailyCut = surplusKcal > 250
+      ? Math.min(150, Math.max(50, Math.round(surplusKcal / 5)))
+      : 0;
+
+    return {
+      spikeDate: latest.date,
+      spikeKg,
+      surplusKcal: Math.round(surplusKcal),
+      realFatKg,
+      waterGlycogenKg,
+      suggestedDailyCut,
+      floor
+    };
+  }
+
+  function applyCheatRescueCut() {
+    const rescue = evaluateCheatRescue();
+    if (!rescue || rescue.suggestedDailyCut <= 0) {
+      dismissCheatRescue();
+      return;
+    }
+    const wTrend = computeSmoothedWeightTrend();
+    const { floor } = computeBmrTdeeAndFloor(wTrend, state.profile);
+    const currentKcal = numOr(state.profile.targetKcal, 2000);
+    const newKcal = Math.max(floor, currentKcal - rescue.suggestedDailyCut);
+
+    state.metabolicCoach.activeDailyCut = rescue.suggestedDailyCut;
+    state.metabolicCoach.cheatRescueUntilISO = getOffsetISO(5);
+    state.metabolicCoach.dismissedSpikeISO = rescue.spikeDate;
+
+    applyDynamicMacrosForKcal(newKcal, wTrend);
+    saveState();
+    syncProfileToUI();
+    renderDiaryUI();
+    showToast(`Smart Cheat-Rescue aktiv: Moderater Ausgleich (-${rescue.suggestedDailyCut} kcal/Tag für 5 Tage)!`, 'success');
+  }
+
+  function dismissCheatRescue() {
+    const log = getSortedWeightLog();
+    if (log.length > 0) {
+      state.metabolicCoach.dismissedSpikeISO = log[log.length - 1].date;
+      saveState();
+    }
+    renderMetabolicCoachUI();
+  }
+
+  function checkExpiredCoachInterventions() {
+    const todayISO = getTodayISO();
+    const mc = state.metabolicCoach;
+    let changed = false;
+
+    if (mc.refeedUntilISO && todayISO > mc.refeedUntilISO) {
+      const restoreKcal = numOr(mc.baseKcalBeforeRefeed, 2000);
+      applyDynamicMacrosForKcal(restoreKcal, computeSmoothedWeightTrend());
+      mc.refeedUntilISO = null;
+      mc.baseKcalBeforeRefeed = null;
+      changed = true;
+    }
+    if (mc.cheatRescueUntilISO && todayISO > mc.cheatRescueUntilISO) {
+      const restoreKcal = numOr(state.profile.targetKcal, 2000) + numOr(mc.activeDailyCut, 0);
+      applyDynamicMacrosForKcal(restoreKcal, computeSmoothedWeightTrend());
+      mc.activeDailyCut = 0;
+      mc.cheatRescueUntilISO = null;
+      changed = true;
+    }
+    if (changed) saveState();
+  }
+
+  function renderMetabolicCoachUI() {
+    checkExpiredCoachInterventions();
+    const wTrend = computeSmoothedWeightTrend();
+    const wBase = numOr(state.metabolicCoach.lastCalibratedWeight, numOr(state.profile.weight, 90));
+    const { floor } = computeBmrTdeeAndFloor(wTrend, state.profile);
+    const todayData = getTodayData();
+    const lang = state.lang === 'pl' ? 'pl' : 'de';
+    const t = UI_I18N[lang];
+
+    const inp = document.getElementById('dailyWeightInput');
+    if (inp && document.activeElement !== inp) {
+      inp.value = todayData.weight ? String(todayData.weight) : String(numOr(state.profile.weight, 90));
+    }
+
+    const trendEl = document.getElementById('coachTrendValue');
+    const baseEl = document.getElementById('coachBaseValue');
+    const floorEl = document.getElementById('coachFloorValue');
+    if (trendEl) trendEl.textContent = `${wTrend.toFixed(1)} kg`;
+    if (baseEl) baseEl.textContent = `${wBase.toFixed(1)} kg`;
+    if (floorEl) floorEl.textContent = `${floor} kcal`;
+
+    // 1. Recalibration Banner
+    const recalBanner = document.getElementById('coachRecalBanner');
+    const recalTxt = document.getElementById('coachRecalText');
+    if (recalBanner && recalTxt) {
+      if (state.metabolicCoach.lastRecalMsg) {
+        recalTxt.textContent = state.metabolicCoach.lastRecalMsg;
+        recalBanner.classList.remove('hidden');
+      } else {
+        recalBanner.classList.add('hidden');
+      }
+    }
+
+    // 2. Plateau-Breaker Banner & Status Badge
+    const plateauRes = evaluatePlateauBreaker();
+    const plateauBanner = document.getElementById('coachPlateauBanner');
+    const statusBadge = document.getElementById('coachStatusBadge');
+
+    if (state.metabolicCoach.refeedUntilISO) {
+      if (statusBadge) {
+        statusBadge.textContent = t.coachRefeedActive;
+        statusBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 shrink-0';
+      }
+      if (plateauBanner) plateauBanner.classList.add('hidden');
+    } else if (plateauRes.isPlateau) {
+      if (statusBadge) {
+        statusBadge.textContent = t.coachPlateauWarn;
+        statusBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0';
+      }
+      if (plateauBanner) plateauBanner.classList.remove('hidden');
+    } else {
+      const deltaTxt = Number.isFinite(plateauRes.delta14) && plateauRes.delta14 !== 0
+        ? ` (${plateauRes.delta14 > 0 ? '+' : ''}${plateauRes.delta14.toFixed(1)}kg)`
+        : '';
+      if (statusBadge) {
+        statusBadge.textContent = `${t.coachOnTrack}${deltaTxt}`;
+        statusBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0';
+      }
+      if (plateauBanner) plateauBanner.classList.add('hidden');
+    }
+
+    // 3. Smart Cheat-Rescue 2.0 Banner
+    const cheatRes = evaluateCheatRescue();
+    const cheatBanner = document.getElementById('coachCheatBanner');
+    const cheatTxt = document.getElementById('coachCheatText');
+    const cheatBtn = document.getElementById('btnApplyCheatCut');
+
+    if (cheatBanner && cheatTxt) {
+      if (cheatRes) {
+        cheatTxt.innerHTML = lang === 'pl'
+          ? `<strong>Smart Cheat-Rescue 2.0:</strong> Skok wagi o <strong>+${cheatRes.spikeKg.toFixed(1)} kg</strong> przez noc. Zgodnie z zasadą 7000 kcal/kg aż <strong>${cheatRes.waterGlycogenKg.toFixed(2)} kg to sama woda i glikogen</strong>, a max. <strong>${cheatRes.realFatKg.toFixed(2)} kg</strong> to tkanka!`
+          : `<strong>Smart Cheat-Rescue 2.0 (Entwarnung):</strong> Über-Nacht-Anstieg um <strong>+${cheatRes.spikeKg.toFixed(1)} kg</strong>. Nach der 7.000-kcal/kg-Regel sind <strong>${cheatRes.waterGlycogenKg.toFixed(2)} kg nur Wasser & Glykogen</strong> und maximal <strong>${cheatRes.realFatKg.toFixed(2)} kg echtes Gewebe</strong>!`;
+
+        if (cheatBtn) {
+          if (cheatRes.suggestedDailyCut > 0) {
+            cheatBtn.classList.remove('hidden');
+            document.getElementById('lblCheatCutBtn').textContent = lang === 'pl'
+              ? `Aktywuj łagodną korektę (-${cheatRes.suggestedDailyCut} kcal przez 5 dni)`
+              : `Moderaten 5-Tage-Ausgleich (-${cheatRes.suggestedDailyCut} kcal/Tag) aktivieren`;
+          } else {
+            cheatBtn.classList.add('hidden');
+          }
+        }
+        cheatBanner.classList.remove('hidden');
+      } else {
+        cheatBanner.classList.add('hidden');
+      }
+    }
+  }
+
+  // ============================================================================
+  // TEXT- & LEXIKON-ENGINE
+  // ============================================================================
   function foldDiacritics(str) {
     if (!str) return '';
     return String(str).toLowerCase()
@@ -1613,7 +2138,6 @@
       const isMeatComp = /\b(?:hahnchen|pute|puten|fleisch|rind|schwein|hack|tatar|filet|schnitzel|gulasch|kurczak|wolow|wieprz|mieso|piers)\b/i.test(foldedName);
       const isLeanComp = hasGlobalLeanOverride || /\b(?:hahnchenbrust|putenbrust|mager|selbst\s+gewolft|tatar|filet|piers|chud)\b/i.test(foldedName);
 
-      // Regel 1 & 2: Substitution over Addition & 5g-Cap bei vagen Kochfett-Angaben
       if (isCookingFatComp) {
         if (cookingFatAlreadyCounted && hasVagueOilHint) {
           continue;
@@ -1637,7 +2161,6 @@
         fiber = (0.65 * ((lexRef.fiber || 0) * r)) + (0.35 * fiber);
       }
 
-      // Regel 2: Lean Protein Override erzwingt < 3.0g Fett / 100g für mageres Fleisch
       if (isMeatComp && isLeanComp && !/\b(?:paniert|schabowy|frikadelle|mielony)\b/i.test(foldedName)) {
         const maxLeanFat = (grams / 100) * 2.8;
         if (fat > maxLeanFat) {
@@ -2012,6 +2535,7 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
   }
 
   function renderDiaryUI() {
+    renderMetabolicCoachUI();
     const today = getTodayData();
     const prof = state.profile;
     let sumKcal = 0, sumP = 0, sumC = 0, sumSugar = 0, sumF = 0, sumFiber = 0;
@@ -2419,11 +2943,10 @@ Antworte AUSSCHLIESSLICH als JSON:
     const activity = parseFloat(document.getElementById('profActivity').value) || 1.375;
     const goal = document.getElementById('profGoal').value;
 
-    const bmr = (10 * weight) + (6.25 * height) - (5 * age) + (gender === 'male' ? 5 : -161);
-    const tdee = Math.round(bmr * activity);
+    const { tdee, floor } = computeBmrTdeeAndFloor(weight, { gender, age, height, weight, activity });
 
     let targetKcal = tdee;
-    if (goal === 'cut') targetKcal = Math.max(1200, tdee - 500);
+    if (goal === 'cut') targetKcal = Math.max(floor, tdee - 500);
     if (goal === 'bulk') targetKcal = tdee + 300;
 
     const effectiveRefWeight = (targetWeight < weight)
@@ -2434,7 +2957,7 @@ Antworte AUSSCHLIESSLICH als JSON:
     const fatPerKg = 0.8;
     const targetProt = Math.round(effectiveRefWeight * protPerKg);
     const targetFat = Math.max(45, Math.round(effectiveRefWeight * fatPerKg));
-    const remKcalForCarbs = Math.max(200, targetKcal - (targetProt * 4 + targetFat * 9));
+    const remKcalForCarbs = Math.max(160, targetKcal - (targetProt * 4 + targetFat * 9));
     const targetCarbs = Math.round(remKcalForCarbs / 4);
 
     document.getElementById('profTargetKcal').value = String(targetKcal);
@@ -2443,7 +2966,7 @@ Antworte AUSSCHLIESSLICH als JSON:
     document.getElementById('profTargetFat').value = String(targetFat);
 
     updateWeightDiffBanner();
-    showToast(`Mifflin-St Jeor: ${targetKcal} kcal (${targetProt}g P)!`, 'success');
+    showToast(`Mifflin-St Jeor: ${targetKcal} kcal (BMR-Boden: ${floor} kcal)!`, 'success');
   }
 
   function syncProfileToUI() {
@@ -2471,7 +2994,9 @@ Antworte AUSSCHLIESSLICH als JSON:
     p.targetWeight = parseFloat(document.getElementById('profTargetWeight').value) || p.weight;
     p.activity = parseFloat(document.getElementById('profActivity').value) || 1.375;
     p.goal = document.getElementById('profGoal').value;
-    p.targetKcal = Math.max(800, parseInt(document.getElementById('profTargetKcal').value, 10) || 2000);
+
+    const { floor } = computeBmrTdeeAndFloor(p.weight, p);
+    p.targetKcal = Math.max(floor, parseInt(document.getElementById('profTargetKcal').value, 10) || 2000);
     p.targetProt = Math.max(30, parseInt(document.getElementById('profTargetProt').value, 10) || 150);
     p.targetCarbs = Math.max(20, parseInt(document.getElementById('profTargetCarbs').value, 10) || 180);
     p.targetFat = Math.max(20, parseInt(document.getElementById('profTargetFat').value, 10) || 65);
@@ -2479,9 +3004,20 @@ Antworte AUSSCHLIESSLICH als JSON:
     p.targetSugar = 35;
     p.waterTarget = Math.max(1500, Math.round(p.weight * 35));
 
+    state.metabolicCoach.lastCalibratedWeight = p.weight;
+    const todayISO = getTodayISO();
+    const todayData = getTodayData();
+    todayData.weight = p.weight;
+    const log = getSortedWeightLog();
+    const idx = log.findIndex(x => x.date === todayISO);
+    if (idx >= 0) log[idx].weight = p.weight;
+    else log.push({ date: todayISO, weight: p.weight });
+    state.weightLog = log.sort((a, b) => a.date.localeCompare(b.date));
+
     saveState();
+    syncProfileToUI();
     renderDiaryUI();
-    showToast(state.lang === 'pl' ? 'Profil zapisany!' : 'Profil dauerhaft gespeichert!', 'success');
+    showToast(state.lang === 'pl' ? 'Profil zapisany!' : 'Profil & Kalibrierungs-Basis dauerhaft gespeichert!', 'success');
   }
 
   function exportBackupJSON() {
@@ -2545,191 +3081,4 @@ Antworte AUSSCHLIESSLICH als JSON:
     }
   }
 
-  function openApiKeyModal() {
-    if (state.isGuestUser) {
-      showToast('Gast-Modus aktiv: API-Key ist durch den Administrator geschützt.', 'info');
-      return;
-    }
-    document.getElementById('apiKeyInput').value = state.geminiApiKey || recoverRedundantApiKey(state) || '';
-    document.getElementById('apiKeyModal').classList.remove('hidden');
-  }
-
-  function closeApiKeyModal() {
-    document.getElementById('apiKeyModal').classList.add('hidden');
-  }
-
-  function saveApiKeyFromModal() {
-    const val = (document.getElementById('apiKeyInput').value || '').trim();
-    if (!val) {
-      showToast('Bitte einen gültigen Gemini API-Key eingeben.', 'warning');
-      return;
-    }
-    state.geminiApiKey = val;
-    state.isGuestUser = false;
-    persistGuestLock(false);
-    persistApiKeyRedundant(val);
-    syncAdminHashAnchor(val, false);
-    saveState();
-    updateApiKeyStatusUI();
-    closeApiKeyModal();
-    showToast('Admin API-Key permanent (6-Layer + Home-Screen-Anker) gespeichert!', 'success');
-  }
-
-  function clearSavedApiKey() {
-    if (state.isGuestUser) return;
-    state.geminiApiKey = '';
-    persistApiKeyRedundant('');
-    syncAdminHashAnchor('', false);
-    saveState();
-    document.getElementById('apiKeyInput').value = '';
-    updateApiKeyStatusUI();
-    showToast('API-Key gelöscht.', 'info');
-  }
-
-  function openInviteModal() {
-    const isGuest = Boolean(state.isGuestUser);
-    const adminSec = document.getElementById('adminInviteGeneratorSection');
-    const guestLockedBox = document.getElementById('guestLockedInfoBox');
-    const guestActBox = document.getElementById('guestCodeActivationBox');
-    const guestCodeDisp = document.getElementById('guestActiveCodeDisplay');
-
-    if (isGuest) {
-      if (adminSec) adminSec.classList.add('hidden');
-      if (guestLockedBox) guestLockedBox.classList.remove('hidden');
-      if (guestActBox) guestActBox.classList.add('hidden');
-      if (guestCodeDisp) guestCodeDisp.textContent = state.guestCode || 'FIT-GAST';
-    } else {
-      if (adminSec) adminSec.classList.remove('hidden');
-      if (guestLockedBox) guestLockedBox.classList.add('hidden');
-      if (guestActBox) guestActBox.classList.remove('hidden');
-      document.getElementById('guestCodeInput').value = state.guestCode || '';
-      updateInvitePreview();
-    }
-    document.getElementById('inviteModal').classList.remove('hidden');
-  }
-
-  function closeInviteModal() {
-    document.getElementById('inviteModal').classList.add('hidden');
-  }
-
-  function updateInvitePreview() {
-    const rawName = (document.getElementById('customGuestName').value || 'GAST')
-      .toUpperCase()
-      .replace(/[^A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]/gi, '')
-      .slice(0, 12) || 'GAST';
-    const rawYear = (document.getElementById('customGuestYear').value || '2025')
-      .replace(/\D/g, '')
-      .slice(0, 6) || '2025';
-    document.getElementById('generatedInviteCode').textContent = `FIT-${rawName}-${rawYear}`;
-  }
-
-  function activateGuestCode() {
-    const rawInput = (document.getElementById('guestCodeInput').value || '').trim();
-    if (rawInput.startsWith('AIza') && rawInput.length > 25) {
-      state.geminiApiKey = rawInput;
-      state.isGuestUser = false;
-      persistGuestLock(false);
-      persistApiKeyRedundant(rawInput);
-      syncAdminHashAnchor(rawInput, false);
-      saveState();
-      updateApiKeyStatusUI();
-      closeInviteModal();
-      showToast('Admin-Modus erfolgreich freigeschaltet!', 'success');
-      return;
-    }
-
-    const code = rawInput.toUpperCase();
-    if (!GUEST_REGEX.test(code)) {
-      showToast('Format ungültig. Beispiel: FIT-ANNA-2025', 'error');
-      return;
-    }
-    state.guestCode = code;
-    state.isGuestUser = true;
-    persistGuestLock(true);
-    saveState();
-    updateApiKeyStatusUI();
-    closeInviteModal();
-    showToast(`Gast-Zugang ${code} aktiviert!`, 'success');
-  }
-
-  function buildFullInviteUrl() {
-    const code = document.getElementById('generatedInviteCode').textContent;
-    const key = (state.geminiApiKey || recoverRedundantApiKey(state) || '').trim();
-    const baseUrl = window.location.origin + window.location.pathname;
-    return key
-      ? `${baseUrl}?invite=${encodeURIComponent(code)}&k=${encodeURIComponent(key)}`
-      : `${baseUrl}?invite=${encodeURIComponent(code)}`;
-  }
-
-  function copySingleInviteCode() {
-    if (state.isGuestUser) return;
-    const code = document.getElementById('generatedInviteCode').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-      showToast(`Code ${code} kopiert!`, 'success');
-    });
-  }
-
-  function copyFullInviteLink() {
-    if (state.isGuestUser) return;
-    const url = buildFullInviteUrl();
-    navigator.clipboard.writeText(url).then(() => {
-      showToast('Komplettpaket-Einladungslink kopiert!', 'success');
-    });
-  }
-
-  function shareInviteViaWhatsApp() {
-    if (state.isGuestUser) return;
-    const code = document.getElementById('generatedInviteCode').textContent;
-    const url = buildFullInviteUrl();
-    const text = `Hallo! Hier ist dein persönlicher Zugang zu *CalSnap AI* 🚀\n\n🔑 Dein Gast-Code: *${code}*\n📲 Direkt starten (automatisch eingerichtet):\n${url}`;
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
-  }
-
-  function checkUrlOnboardingParams() {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const urlKey = (params.get('k') || '').trim();
-      const urlInvite = (params.get('invite') || '').trim().toUpperCase();
-      let changed = false;
-
-      if (urlKey) {
-        state.geminiApiKey = urlKey;
-        persistApiKeyRedundant(urlKey);
-        changed = true;
-      }
-      if (urlInvite && GUEST_REGEX.test(urlInvite)) {
-        state.guestCode = urlInvite;
-        state.isGuestUser = true;
-        persistGuestLock(true);
-        changed = true;
-      }
-      if (changed) {
-        saveState();
-        window.history.replaceState({}, document.title, window.location.pathname);
-        showToast('Persönlicher Gast-Zugang automatisch eingerichtet!', 'success');
-      } else if (!state.isGuestUser && state.geminiApiKey) {
-        syncAdminHashAnchor(state.geminiApiKey, false);
-      }
-    } catch (_) {}
-  }
-
-  document.addEventListener('DOMContentLoaded', async () => {
-    checkUrlOnboardingParams();
-    if (!state.geminiApiKey) {
-      const cachedVaultKey = await restoreKeyFromCacheVault();
-      if (cachedVaultKey) {
-        state.geminiApiKey = cachedVaultKey;
-        saveState();
-      }
-    } else {
-      saveKeyToCacheVault(state.geminiApiKey);
-    }
-    applyLanguage();
-    updateApiKeyStatusUI();
-    syncProfileToUI();
-    renderDiaryUI();
-  });
-</script>
-</body>
-</html>
+  function open
