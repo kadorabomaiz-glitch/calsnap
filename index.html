@@ -3080,5 +3080,191 @@ Antworte AUSSCHLIESSLICH als JSON:
       guestTxt.textContent = state.guestCode ? state.guestCode : (isGuest ? 'Gast-Aktiv' : 'Gast-Center');
     }
   }
+    function openApiKeyModal() {
+    if (state.isGuestUser) {
+      showToast('Gast-Modus aktiv: API-Key ist durch den Administrator geschützt.', 'info');
+      return;
+    }
+    document.getElementById('apiKeyInput').value = state.geminiApiKey || recoverRedundantApiKey(state) || '';
+    document.getElementById('apiKeyModal').classList.remove('hidden');
+  }
 
-  function open
+  function closeApiKeyModal() {
+    document.getElementById('apiKeyModal').classList.add('hidden');
+  }
+
+  function saveApiKeyFromModal() {
+    const val = (document.getElementById('apiKeyInput').value || '').trim();
+    if (!val) {
+      showToast('Bitte einen gültigen Gemini API-Key eingeben.', 'warning');
+      return;
+    }
+    state.geminiApiKey = val;
+    state.isGuestUser = false;
+    persistGuestLock(false);
+    persistApiKeyRedundant(val);
+    syncAdminHashAnchor(val, false);
+    saveState();
+    updateApiKeyStatusUI();
+    closeApiKeyModal();
+    showToast('Admin API-Key permanent (6-Layer + Home-Screen-Anker) gespeichert!', 'success');
+  }
+
+  function clearSavedApiKey() {
+    if (state.isGuestUser) return;
+    state.geminiApiKey = '';
+    persistApiKeyRedundant('');
+    syncAdminHashAnchor('', false);
+    saveState();
+    document.getElementById('apiKeyInput').value = '';
+    updateApiKeyStatusUI();
+    showToast('API-Key gelöscht.', 'info');
+  }
+
+  function openInviteModal() {
+    const isGuest = Boolean(state.isGuestUser);
+    const adminSec = document.getElementById('adminInviteGeneratorSection');
+    const guestLockedBox = document.getElementById('guestLockedInfoBox');
+    const guestActBox = document.getElementById('guestCodeActivationBox');
+    const guestCodeDisp = document.getElementById('guestActiveCodeDisplay');
+
+    if (isGuest) {
+      if (adminSec) adminSec.classList.add('hidden');
+      if (guestLockedBox) guestLockedBox.classList.remove('hidden');
+      if (guestActBox) guestActBox.classList.add('hidden');
+      if (guestCodeDisp) guestCodeDisp.textContent = state.guestCode || 'FIT-GAST';
+    } else {
+      if (adminSec) adminSec.classList.remove('hidden');
+      if (guestLockedBox) guestLockedBox.classList.add('hidden');
+      if (guestActBox) guestActBox.classList.remove('hidden');
+      document.getElementById('guestCodeInput').value = state.guestCode || '';
+      updateInvitePreview();
+    }
+    document.getElementById('inviteModal').classList.remove('hidden');
+  }
+
+  function closeInviteModal() {
+    document.getElementById('inviteModal').classList.add('hidden');
+  }
+
+  function updateInvitePreview() {
+    const rawName = (document.getElementById('customGuestName').value || 'GAST')
+      .toUpperCase()
+      .replace(/[^A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]/gi, '')
+      .slice(0, 12) || 'GAST';
+    const rawYear = (document.getElementById('customGuestYear').value || '2025')
+      .replace(/\D/g, '')
+      .slice(0, 6) || '2025';
+    document.getElementById('generatedInviteCode').textContent = `FIT-${rawName}-${rawYear}`;
+  }
+
+  function activateGuestCode() {
+    const rawInput = (document.getElementById('guestCodeInput').value || '').trim();
+    if (rawInput.startsWith('AIza') && rawInput.length > 25) {
+      state.geminiApiKey = rawInput;
+      state.isGuestUser = false;
+      persistGuestLock(false);
+      persistApiKeyRedundant(rawInput);
+      syncAdminHashAnchor(rawInput, false);
+      saveState();
+      updateApiKeyStatusUI();
+      closeInviteModal();
+      showToast('Admin-Modus erfolgreich freigeschaltet!', 'success');
+      return;
+    }
+
+    const code = rawInput.toUpperCase();
+    if (!GUEST_REGEX.test(code)) {
+      showToast('Format ungültig. Beispiel: FIT-ANNA-2025', 'error');
+      return;
+    }
+    state.guestCode = code;
+    state.isGuestUser = true;
+    persistGuestLock(true);
+    saveState();
+    updateApiKeyStatusUI();
+    closeInviteModal();
+    showToast(`Gast-Zugang ${code} aktiviert!`, 'success');
+  }
+
+  function buildFullInviteUrl() {
+    const code = document.getElementById('generatedInviteCode').textContent;
+    const key = (state.geminiApiKey || recoverRedundantApiKey(state) || '').trim();
+    const baseUrl = window.location.origin + window.location.pathname;
+    return key
+      ? `${baseUrl}?invite=${encodeURIComponent(code)}&k=${encodeURIComponent(key)}`
+      : `${baseUrl}?invite=${encodeURIComponent(code)}`;
+  }
+
+  function copySingleInviteCode() {
+    if (state.isGuestUser) return;
+    const code = document.getElementById('generatedInviteCode').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      showToast(`Code ${code} kopiert!`, 'success');
+    });
+  }
+
+  function copyFullInviteLink() {
+    if (state.isGuestUser) return;
+    const url = buildFullInviteUrl();
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('Komplettpaket-Einladungslink kopiert!', 'success');
+    });
+  }
+
+  function shareInviteViaWhatsApp() {
+    if (state.isGuestUser) return;
+    const code = document.getElementById('generatedInviteCode').textContent;
+    const url = buildFullInviteUrl();
+    const text = `Hallo! Hier ist dein persönlicher Zugang zu *CalSnap AI* 🚀\n\n🔑 Dein Gast-Code: *${code}*\n📲 Direkt starten (automatisch eingerichtet):\n${url}`;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  function checkUrlOnboardingParams() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlKey = (params.get('k') || '').trim();
+      const urlInvite = (params.get('invite') || '').trim().toUpperCase();
+      let changed = false;
+
+      if (urlKey) {
+        state.geminiApiKey = urlKey;
+        persistApiKeyRedundant(urlKey);
+        changed = true;
+      }
+      if (urlInvite && GUEST_REGEX.test(urlInvite)) {
+        state.guestCode = urlInvite;
+        state.isGuestUser = true;
+        persistGuestLock(true);
+        changed = true;
+      }
+      if (changed) {
+        saveState();
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showToast('Persönlicher Gast-Zugang automatisch eingerichtet!', 'success');
+      } else if (!state.isGuestUser && state.geminiApiKey) {
+        syncAdminHashAnchor(state.geminiApiKey, false);
+      }
+    } catch (_) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    checkUrlOnboardingParams();
+    if (!state.geminiApiKey) {
+      const cachedVaultKey = await restoreKeyFromCacheVault();
+      if (cachedVaultKey) {
+        state.geminiApiKey = cachedVaultKey;
+        saveState();
+      }
+    } else {
+      saveKeyToCacheVault(state.geminiApiKey);
+    }
+    applyLanguage();
+    updateApiKeyStatusUI();
+    syncProfileToUI();
+    renderDiaryUI();
+  });
+</script>
+</body>
+</html>
