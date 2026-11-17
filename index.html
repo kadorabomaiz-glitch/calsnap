@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b1120" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>CalSnap AI v4.3 Enterprise — Adaptive Metabolic Coach & 3D Vision</title>
+  <title>CalSnap AI v4.4 Enterprise — Smart Habits, Weekly Bank & 3D Vision</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -68,9 +68,9 @@
         <div>
           <div class="flex items-center gap-1.5">
             <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white leading-none">CalSnap AI</h1>
-            <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">v4.3</span>
+            <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">v4.4</span>
           </div>
-          <p id="headerSubTitle" class="text-[10px] text-slate-400 mt-0.5">Metabolic Coach + 3D-Vision</p>
+          <p id="headerSubTitle" class="text-[10px] text-slate-400 mt-0.5">Smart Habits + Wochen-Bank</p>
         </div>
       </div>
 
@@ -100,30 +100,48 @@
     <!-- ==================== TAB 1: TAGEBUCH ==================== -->
     <section id="tab-diary" class="tab-section active space-y-4">
 
-      <!-- TAGESBILANZ DASHBOARD -->
+      <!-- TAGES- & WOCHENBILANZ DASHBOARD -->
       <div class="glass-card rounded-2xl p-4 shadow-xl">
         <div class="flex items-center justify-between mb-3">
           <div>
-            <span id="lblDailyBalance" class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Tagesbilanz</span>
+            <span id="lblDailyBalance" class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Tages- & Wochenbilanz</span>
             <h2 id="currentDateLabel" class="text-sm font-bold text-slate-200">Heute</h2>
           </div>
           <div class="text-right">
-            <span id="lblRemainingPrefix" class="text-xs text-slate-400">Offen: </span>
+            <span id="lblRemainingPrefix" class="text-xs text-slate-400">Heute offen: </span>
             <span id="kcalRemaining" class="text-sm font-extrabold text-emerald-400">2000 kcal</span>
           </div>
         </div>
 
-        <!-- KCAL HAUPTBALKEN -->
-        <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800/80 mb-2.5">
-          <div class="flex items-baseline justify-between mb-1.5">
-            <div class="flex items-baseline gap-1.5">
-              <span id="kcalConsumed" class="text-2xl font-extrabold text-white">0</span>
-              <span class="text-xs text-slate-400">/ <span id="kcalTarget">2000</span> kcal</span>
+        <!-- KCAL HAUPTBALKEN + WOCHEN-KALORIEN-BANK (IDEE 2) -->
+        <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800/80 mb-2.5 space-y-2">
+          <div>
+            <div class="flex items-baseline justify-between mb-1.5">
+              <div class="flex items-baseline gap-1.5">
+                <span id="kcalConsumed" class="text-2xl font-extrabold text-white">0</span>
+                <span class="text-xs text-slate-400">/ <span id="kcalTarget">2000</span> kcal</span>
+              </div>
+              <span id="kcalPercentBadge" class="text-xs font-bold text-emerald-400">0%</span>
             </div>
-            <span id="kcalPercentBadge" class="text-xs font-bold text-emerald-400">0%</span>
+            <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+              <div id="kcalProgress" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
           </div>
-          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-            <div id="kcalProgress" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+
+          <!-- WOCHEN-BANK & ANTI-FRUST-SCHUTZSCHILD -->
+          <div id="weeklyBalanceBox" class="pt-2 border-t border-slate-800/90">
+            <div class="flex items-center justify-between gap-2 text-[11px]">
+              <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-calendar-week text-emerald-400"></i>
+                <span id="lblWeeklyBankTitle" class="text-slate-400 font-semibold">Wochen-Konto:</span>
+                <span id="weeklyBufferBadge" class="font-extrabold text-emerald-400">+0 kcal Puffer</span>
+              </div>
+              <span id="weeklyRemainingText" class="font-bold text-slate-300">Woche: 14.000 kcal offen</span>
+            </div>
+            <div id="weeklyShieldBanner" class="hidden mt-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-bold text-emerald-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-heart text-emerald-400 shrink-0"></i>
+              <span id="weeklyShieldText">Durch deinen Wochen-Puffer bist du über die Woche voll im grünen Bereich!</span>
+            </div>
           </div>
         </div>
 
@@ -238,10 +256,10 @@
           <button type="button" onclick="dismissCoachRecalBanner()" class="text-slate-400 hover:text-white text-xs px-1"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <!-- BANNER 2: ADAPTIVE PLATEAU-BREAKER (ERSCHEINT BEI 14d STAGNATION TROTZ >=85% ADHÄRENZ) -->
+        <!-- BANNER 2: ADAPTIVE PLATEAU-BREAKER -->
         <div id="coachPlateauBanner" class="hidden bg-amber-950/50 border border-amber-500/40 rounded-xl p-3 space-y-2">
           <div class="flex items-start gap-2">
-            <i class="fa-solid fa-Compass-drafting text-amber-400 mt-0.5"></i>
+            <i class="fa-solid fa-compass-drafting text-amber-400 mt-0.5"></i>
             <p id="coachPlateauText" class="text-xs text-amber-100 leading-relaxed">
               <strong>Plateau erkannt:</strong> Hohe Kalorien-Disziplin (&ge;85%) über 14 Tage, aber der Gewichtstrend stagniert. Wähle deine Stoffwechsel-Intervention:
             </p>
@@ -256,7 +274,7 @@
           </div>
         </div>
 
-        <!-- BANNER 3: SMART CHEAT-RESCUE 2.0 (WASSER vs. FETT SEPARATION BEI ÜBER-NACHT-SPIKE) -->
+        <!-- BANNER 3: SMART CHEAT-RESCUE 2.0 -->
         <div id="coachCheatBanner" class="hidden bg-indigo-950/50 border border-indigo-500/40 rounded-xl p-3 space-y-2">
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-start gap-2">
@@ -315,7 +333,16 @@
           </button>
         </div>
 
-        <!-- 1-KLICK SCHNELLWAHL -->
+        <!-- IDEE 1: INTELLIGENTES LERNEN (1-KLICK GEWOHNHEITEN & MORGENROUTINE) -->
+        <div id="smartHabitSection" class="hidden pt-1 border-t border-slate-800/80">
+          <p id="lblSmartHabitHeader" class="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 mb-1.5 flex items-center gap-1.5">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span id="smartHabitTitleText">Deine Gewohnheiten & Routine (1-Klick):</span>
+          </p>
+          <div id="smartHabitChips" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- STANDARD 1-KLICK SCHNELLWAHL -->
         <div class="pt-1">
           <p id="lblQuickAddHeader" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">1-Klick Schnellwahl (Sofort ins Tagebuch):</p>
           <div class="flex flex-wrap gap-1.5">
@@ -539,7 +566,7 @@
 
   </main>
 
-  <!-- ==================== MODAL 1: API-KEY TRESOR (NUR FÜR ADMIN ZUGÄNGLICH) ==================== -->
+  <!-- ==================== MODAL 1: API-KEY TRESOR ==================== -->
   <div id="apiKeyModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl max-w-md w-full p-5 border border-slate-700 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -1324,121 +1351,55 @@
     { name: 'Apfelschorle / Saftschorle', keywords: ['apfelschorle', 'saftschorle', 'apfelsaftschorle'], kcal: 26, p: 0.1, c: 6.2, sugar: 5.9, f: 0, fiber: 0, defaultPortion: 330 }
   ];
 
-  // ============================================================================
-  // GLOBAL NUTRITIONAL RIGOR LAYER (UNIFIED ACROSS ALL 4 MULTIMODAL SCANNERS)
-  // ============================================================================
   function buildGlobalNutritionalRigorRules(targetLang, userHint = '') {
     const cleanHint = (userHint || '').trim();
     return `GLOBAL NUTRITIONAL RIGOR LAYER (VERBINDLICHE MATHEMATISCHE GESETZE):
-1. SUBSTITUTION OVER ADDITION (Ersetzung statt Addition):
-   Falls der Nutzertext ("${cleanHint}") Zubereitungsfette oder Modifikatoren nennt (z.B. "in etwas Olivenöl angebraten", "mit 1 TL Butter", "ohne Butter/Öl"), ERSETZT diese Angabe das standardmäßig vermutete Koch-/Bratfett des Gerichts vollständig! Addiere NIEMALS Standard-Restaurantfette auf vom Nutzer genannte Fette obendrauf.
-2. LEAN PROTEIN & INGREDIENT OVERRIDE (Mager-Override & 5g-Öl-Cap):
-   Erkenne magere Zuschnitte ("Hähnchenbrust", "Putenbrust", "mager", "selbst gewolft", "Tatar", "Filet", "pierś", "chude") in Bild oder Text und zwinge das reine Fleisch-Fettprofil strikt auf < 3,0g Fett pro 100g!
-   Vage Kochfett-Angaben ("etwas Öl", "ein Schuss Öl", "leicht angebraten", "wenig Fett") dürfen pro Einzelportion MAXIMAL mit 5g Fett (ca. 45 kcal) berechnet werden.
-3. VISUAL SCALE & FILL-LEVEL ANCHORING (Maßstabs- & Füllstands-Kalibrierung):
-   Nutze zwingend visuelle Referenz-Anker im Bild (Besteck = 19cm, Tellerrand = 26cm, Brötchen = 70g, Standard-Kühlschrankpackungen wie 250g/500g Becher oder 1L Tetrapak, Topfdurchmesser 20-24cm & reale Fülltiefe), um das wahre Nettogewicht in Gramm und den Rest-Füllstand vor der Makroberechnung zu kalibrieren. Ignoriere feuchten Oberflächenglanz oder Alufolien-Reflexionen als Fettquelle.
-4. CONTEXTUAL PREPARATION RIGOR (Garmethoden-Trennschärfe):
-   Differenziere strikt zwischen fettarmen Garmethoden ("gedünstet", "gegrillt", "gekocht", "im eigenen Saft", "Natur" = 0-3g Zusatzfett) und fettreichen Methoden ("paniert", "frittiert", "cremig", "in Sahnesauce" = höheres Fett), um falsche Makro-Inflation zu verhindern.`;
+1. SUBSTITUTION OVER ADDITION: Falls der Nutzertext ("${cleanHint}") Zubereitungsfette/Modifikatoren nennt (z.B. "in etwas Olivenöl angebraten", "ohne Butter"), ERSETZT diese Angabe das Standard-Kochfett des Gerichts vollständig! Niemals aufaddieren.
+2. LEAN PROTEIN & 5g-ÖL-CAP: Erkenne magere Zuschnitte ("Hähnchenbrust", "Putenbrust", "mager", "selbst gewolft", "Tatar", "Filet", "pierś", "chude") und zwinge das reine Fleisch-Fettprofil auf < 3,0g Fett/100g! Vage Kochfett-Angaben ("etwas Öl", "leicht angebraten") dürfen pro Einzelportion MAXIMAL 5g Fett (45 kcal) betragen.
+3. VISUAL SCALE & FILL-LEVEL ANCHORING: Nutze Referenz-Anker (Besteck 19cm, Tellerrand 26cm, Brötchen 70g, Kühlschrankpackungen 250g/500g/1L, Topftiefe) für wahres Grammgewicht & Füllstand. Ignoriere Glanz/Alufolie als Fettquelle.
+4. CONTEXTUAL PREPARATION RIGOR: Differenziere strikt zwischen "gedünstet/gegrillt/gekocht/Natur" (0-3g Zusatzfett) und "paniert/frittiert/cremig/Sahnesauce" (höheres Fett).`;
   }
 
   const UI_I18N = {
     de: {
-      subTitle: 'Metabolic Coach + 3D-Vision',
-      dailyBalance: 'Tagesbilanz',
-      remPrefix: 'Offen: ',
-      prot: 'Protein',
-      carbs: 'Kohlenh.',
-      fat: 'Fett',
-      fiber: 'Ballaststoffe',
-      sugar: 'Zucker (Max.)',
-      coachTitle: 'Adaptive Metabolic Coach',
-      coachSub: '7d-Trend, TDEE-Autokalibrierung & Plateau-Schutz',
-      coachOnTrack: '🟢 Auf Kurs',
-      coachRefeedActive: '⚡ Refeed aktiv',
-      coachPlateauWarn: '🟠 Plateau-Check',
-      scannerTitle: 'Mahlzeiten-Scanner & ⚡ Turbo-Scan',
-      scannerSub: 'Foto (ideal: 45° schräg von oben), Text oder 1-Klick Schnellwahl',
-      textPlaceholder: 'z.B. 2 Latte macchiato groß, Vollkornbrötchen mit Fleischwurst...',
-      photoBtn: 'Foto',
-      quickHeader: '1-Klick Schnellwahl (Sofort ins Tagebuch):',
-      qaCoffee: '☕ Kaffee',
-      qaMilk: '🥛 Kaffee+Milch',
-      qaApple: '🍎 Apfel',
-      qaBanana: '🍌 Banane',
-      qaEggs: '🥚 2 Eier',
-      qaQuark: '🥣 250g Quark',
-      qaShake: '🥤 Protein-Shake',
-      portionAdjust: '<i class="fa-solid fa-sliders text-emerald-400"></i> Portionsgröße anpassen:',
-      cancelBtn: 'Abbrechen',
-      waterTitle: 'Wasser-Haushalt',
-      todayMeals: 'Heutige Mahlzeiten',
-      clearDay: 'Tag leeren',
-      emptyMeals: 'Noch keine Mahlzeiten für heute eingetragen.',
-      fridgeTitle: 'Resteküche & Smart Expiry Guard',
-      fridgeSub: 'Kühlschrank fotografieren — Füllstands-Check & High-Protein Rezepte',
-      fridgeBtn: 'Frische-Check & Rezepte',
-      menuTitle: 'Restaurant & Speisekarten-Kompass',
-      menuSub: 'Findet in Sekunden die besten Gerichte für dein Restbudget',
-      menuRem: 'Verbleibendes Tagesbudget:',
-      menuBtn: 'Top-3 Auswahl berechnen (Turbo)',
-      chefTitle: 'KI-Kochstudio & Topf-Scanner',
-      chefSub: 'Maßgeschneiderte Fitness-Rezepte & präzise Garmethoden-Logik',
-      chefBtn: 'Fitness-Rezept generieren',
-      profTitle: '<i class="fa-solid fa-user-gear text-emerald-400"></i> Körperdaten & Kalorienrechner',
-      navDiary: 'Tagebuch',
-      navFridge: 'Resteküche',
-      navMenu: 'Restaurant',
-      navChef: 'Kochstudio',
-      navProf: 'Profil'
+      subTitle: 'Smart Habits + Wochen-Bank', dailyBalance: 'Tages- & Wochenbilanz', remPrefix: 'Heute offen: ',
+      prot: 'Protein', carbs: 'Kohlenh.', fat: 'Fett', fiber: 'Ballaststoffe', sugar: 'Zucker (Max.)',
+      weeklyBankTitle: 'Wochen-Konto:', coachTitle: 'Adaptive Metabolic Coach', coachSub: '7d-Trend, TDEE-Autokalibrierung & Plateau-Schutz',
+      coachOnTrack: '🟢 Auf Kurs', coachRefeedActive: '⚡ Refeed aktiv', coachPlateauWarn: '🟠 Plateau-Check',
+      scannerTitle: 'Mahlzeiten-Scanner & ⚡ Turbo-Scan', scannerSub: 'Foto (ideal: 45° schräg von oben), Text oder 1-Klick Schnellwahl',
+      textPlaceholder: 'z.B. 2 Latte macchiato groß, Vollkornbrötchen mit Fleischwurst...', photoBtn: 'Foto',
+      smartHabitMorning: '☀️ Deine Morgen-Routine & Gewohnheiten (1-Klick):', smartHabitDay: '⚡ Deine persönlichen Top-Gewohnheiten (1-Klick):',
+      quickHeader: 'Standard 1-Klick Schnellwahl:', qaCoffee: '☕ Kaffee', qaMilk: '🥛 Kaffee+Milch', qaApple: '🍎 Apfel',
+      qaBanana: '🍌 Banane', qaEggs: '🥚 2 Eier', qaQuark: '🥣 250g Quark', qaShake: '🥤 Protein-Shake',
+      portionAdjust: '<i class="fa-solid fa-sliders text-emerald-400"></i> Portionsgröße anpassen:', cancelBtn: 'Abbrechen',
+      waterTitle: 'Wasser-Haushalt', todayMeals: 'Heutige Mahlzeiten', clearDay: 'Tag leeren',
+      emptyMeals: 'Noch keine Mahlzeiten für heute eingetragen.', fridgeTitle: 'Resteküche & Smart Expiry Guard',
+      fridgeSub: 'Kühlschrank fotografieren — Füllstands-Check & High-Protein Rezepte', fridgeBtn: 'Frische-Check & Rezepte',
+      menuTitle: 'Restaurant & Speisekarten-Kompass', menuSub: 'Findet in Sekunden die besten Gerichte für dein Restbudget',
+      menuRem: 'Verbleibendes Tagesbudget:', menuBtn: 'Top-3 Auswahl berechnen (Turbo)',
+      chefTitle: 'KI-Kochstudio & Topf-Scanner', chefSub: 'Maßgeschneiderte Fitness-Rezepte & präzise Garmethoden-Logik',
+      chefBtn: 'Fitness-Rezept generieren', profTitle: '<i class="fa-solid fa-user-gear text-emerald-400"></i> Körperdaten & Kalorienrechner',
+      navDiary: 'Tagebuch', navFridge: 'Resteküche', navMenu: 'Restaurant', navChef: 'Kochstudio', navProf: 'Profil'
     },
     pl: {
-      subTitle: 'Metabolic Coach + Wizja 3D',
-      dailyBalance: 'Bilans Dnia',
-      remPrefix: 'Pozostało: ',
-      prot: 'Białko',
-      carbs: 'Węglow.',
-      fat: 'Tłuszcz',
-      fiber: 'Błonnik',
-      sugar: 'Cukier (Max)',
-      coachTitle: 'Adaptive Metabolic Coach',
-      coachSub: 'Trend 7d, autokalibracja TDEE i ochrona przed stagnacją',
-      coachOnTrack: '🟢 W normie',
-      coachRefeedActive: '⚡ Refeed aktywny',
-      coachPlateauWarn: '🟠 Stagnacja',
-      scannerTitle: 'Skaner Posiłków & ⚡ Turbo-Skan',
-      scannerSub: 'Zdjęcie (najlepiej pod kątem 45°), tekst lub szybki wybór 1-Click',
-      textPlaceholder: 'np. 2 Latte macchiato duże, 2 jajka, mięso wieprzowe...',
-      photoBtn: 'Zdjęcie',
-      quickHeader: 'Szybki wybór 1-Click (Od razu do dziennika):',
-      qaCoffee: '☕ Kawa',
-      qaMilk: '🥛 Kawa+Mleko',
-      qaApple: '🍎 Jabłko',
-      qaBanana: '🍌 Banan',
-      qaEggs: '🥚 2 Jajka',
-      qaQuark: '🥣 250g Twaróg',
-      qaShake: '🥤 Shake Białkowy',
-      portionAdjust: '<i class="fa-solid fa-sliders text-emerald-400"></i> Dopasuj wielkość porcji:',
-      cancelBtn: 'Anuluj',
-      waterTitle: 'Nawodnienie (Woda)',
-      todayMeals: 'Dzisiejsze Posiłki',
-      clearDay: 'Wyczyść dzień',
-      emptyMeals: 'Brak zapisanych posiłków na dzisiaj.',
-      fridgeTitle: 'Lodówka & Smart Expiry Guard',
-      fridgeSub: 'Zrób zdjęcie lodówki — kontrola ilości i przepisy High-Protein',
-      fridgeBtn: 'Sprawdź świeżość i przepisy',
-      menuTitle: 'Restauracja & Kompas Menu',
-      menuSub: 'Znajduje w kilka sekund najlepsze dania dla Twojego budżetu',
-      menuRem: 'Pozostały budżet na dziś:',
-      menuBtn: 'Oblicz Top-3 dania (Turbo)',
-      chefTitle: 'Studio Kulinarne AI (Macro Chef)',
-      chefSub: 'Przepisy fitness dopasowane do Twoich makroskładników',
-      chefBtn: 'Generuj przepis fitness',
-      profTitle: '<i class="fa-solid fa-user-gear text-emerald-400"></i> Dane Ciała & Kalkulator Kalorii',
-      navDiary: 'Dziennik',
-      navFridge: 'Lodówka',
-      navMenu: 'Restauracja',
-      navChef: 'Kucharz AI',
-      navProf: 'Profil'
+      subTitle: 'Smart Habits + Bilans Tygodnia', dailyBalance: 'Bilans Dnia i Tygodnia', remPrefix: 'Dziś: ',
+      prot: 'Białko', carbs: 'Węglow.', fat: 'Tłuszcz', fiber: 'Błonnik', sugar: 'Cukier (Max)',
+      weeklyBankTitle: 'Bilans tygodnia:', coachTitle: 'Adaptive Metabolic Coach', coachSub: 'Trend 7d, autokalibracja TDEE i ochrona przed stagnacją',
+      coachOnTrack: '🟢 W normie', coachRefeedActive: '⚡ Refeed aktywny', coachPlateauWarn: '🟠 Stagnacja',
+      scannerTitle: 'Skaner Posiłków & ⚡ Turbo-Skan', scannerSub: 'Zdjęcie (najlepiej pod kątem 45°), tekst lub szybki wybór 1-Click',
+      textPlaceholder: 'np. 2 Latte macchiato duże, 2 jajka, mięso wieprzowe...', photoBtn: 'Zdjęcie',
+      smartHabitMorning: '☀️ Twoja poranna rutyna i nawyki (1-Click):', smartHabitDay: '⚡ Twoje ulubione posiłki (1-Click):',
+      quickHeader: 'Szybki wybór 1-Click:', qaCoffee: '☕ Kawa', qaMilk: '🥛 Kawa+Mleko', qaApple: '🍎 Jabłko',
+      qaBanana: '🍌 Banan', qaEggs: '🥚 2 Jajka', qaQuark: '🥣 250g Twaróg', qaShake: '🥤 Shake Białkowy',
+      portionAdjust: '<i class="fa-solid fa-sliders text-emerald-400"></i> Dopasuj wielkość porcji:', cancelBtn: 'Anuluj',
+      waterTitle: 'Nawodnienie (Woda)', todayMeals: 'Dzisiejsze Posiłki', clearDay: 'Wyczyść dzień',
+      emptyMeals: 'Brak zapisanych posiłków na dzisiaj.', fridgeTitle: 'Lodówka & Smart Expiry Guard',
+      fridgeSub: 'Zrób zdjęcie lodówki — kontrola ilości i przepisy High-Protein', fridgeBtn: 'Sprawdź świeżość i przepisy',
+      menuTitle: 'Restauracja & Kompas Menu', menuSub: 'Znajduje w kilka sekund najlepsze dania dla Twojego budżetu',
+      menuRem: 'Pozostały budżet na dziś:', menuBtn: 'Oblicz Top-3 dania (Turbo)',
+      chefTitle: 'Studio Kulinarne AI (Macro Chef)', chefSub: 'Przepisy fitness dopasowane do Twoich makroskładników',
+      chefBtn: 'Generuj przepis fitness', profTitle: '<i class="fa-solid fa-user-gear text-emerald-400"></i> Dane Ciała & Kalkulator Kalorii',
+      navDiary: 'Dziennik', navFridge: 'Lodówka', navMenu: 'Restauracja', navChef: 'Kucharz AI', navProf: 'Profil'
     }
   };
 
@@ -1453,18 +1414,15 @@
   function applyLanguage() {
     const lang = state.lang === 'pl' ? 'pl' : 'de';
     const t = UI_I18N[lang];
-
-    const flagEl = document.getElementById('langFlag');
-    const codeEl = document.getElementById('langCode');
-    if (flagEl) flagEl.textContent = lang === 'pl' ? '🇵🇱' : '🇩🇪';
-    if (codeEl) codeEl.textContent = lang.toUpperCase();
-
     const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     const setHtml = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
 
+    setTxt('langFlag', lang === 'pl' ? '🇵🇱' : '🇩🇪');
+    setTxt('langCode', lang.toUpperCase());
     setTxt('headerSubTitle', t.subTitle);
     setTxt('lblDailyBalance', t.dailyBalance);
     setTxt('lblRemainingPrefix', t.remPrefix);
+    setTxt('lblWeeklyBankTitle', t.weeklyBankTitle);
     setTxt('lblMacroProt', t.prot);
     setTxt('lblMacroCarbs', t.carbs);
     setTxt('lblMacroFat', t.fat);
@@ -1507,17 +1465,233 @@
 
     const inp = document.getElementById('mealTextInput');
     if (inp) inp.placeholder = t.textPlaceholder;
-
-    const d = new Date();
     const dateLbl = document.getElementById('currentDateLabel');
-    if (dateLbl) {
-      dateLbl.textContent = d.toLocaleDateString(lang === 'pl' ? 'pl-PL' : 'de-DE', { weekday: 'long', day: '2-digit', month: 'long' });
-    }
+    if (dateLbl) dateLbl.textContent = new Date().toLocaleDateString(lang === 'pl' ? 'pl-PL' : 'de-DE', { weekday: 'long', day: '2-digit', month: 'long' });
     if (activeMealBaseResult) setPortionScale(activePortionScalePercent);
   }
 
   // ============================================================================
-  // ADAPTIVE METABOLIC COACH ENGINE (TDEE RE-CALIBRATION, PLATEAU & CHEAT-RESCUE)
+  // IDEE 1: INTELLIGENTES LERNEN (1-KLICK GEWOHNHEITS- & MORGENROUTINE-MINING)
+  // ============================================================================
+  window._smartHabitList = [];
+
+  function renderSmartHabitChips() {
+    const sec = document.getElementById('smartHabitSection');
+    const container = document.getElementById('smartHabitChips');
+    const titleEl = document.getElementById('smartHabitTitleText');
+    if (!sec || !container) return;
+
+    const curHour = new Date().getHours();
+    const isMorning = curHour >= 5 && curHour < 11;
+    const lang = state.lang === 'pl' ? 'pl' : 'de';
+    if (titleEl) titleEl.textContent = isMorning ? UI_I18N[lang].smartHabitMorning : UI_I18N[lang].smartHabitDay;
+
+    const map = new Map();
+    const morningCombos = [];
+
+    for (let i = 0; i < 14; i++) {
+      const iso = getOffsetISO(-i);
+      const dObj = state.days && state.days[iso];
+      if (!dObj || !Array.isArray(dObj.meals) || !dObj.meals.length) continue;
+
+      const dayMorningMeals = [];
+      for (const m of dObj.meals) {
+        if (!m || !m.name) continue;
+        const cleanName = String(m.name).replace(/\s*\[\d+%\]$/, '').trim();
+        const key = foldDiacritics(cleanName);
+        if (!key) continue;
+
+        const mHour = m.time ? parseInt(String(m.time).split(':')[0], 10) : 12;
+        const wasMorning = Number.isFinite(mHour) && mHour >= 5 && mHour <= 11;
+        if (wasMorning && i > 0) dayMorningMeals.push(m);
+
+        const prev = map.get(key) || {
+          name: cleanName, count: 0, morningCount: 0, lastSeenOffset: i,
+          sumKcal: 0, sumP: 0, sumC: 0, sumSugar: 0, sumF: 0, sumFiber: 0
+        };
+        prev.count++;
+        if (wasMorning) prev.morningCount++;
+        if (i < prev.lastSeenOffset) prev.lastSeenOffset = i;
+        prev.sumKcal += Number(m.kcal) || 0;
+        prev.sumP += Number(m.protein) || 0;
+        prev.sumC += Number(m.carbs) || 0;
+        prev.sumSugar += Number(m.sugar) || 0;
+        prev.sumF += Number(m.fat) || 0;
+        prev.sumFiber += Number(m.fiber) || 0;
+        map.set(key, prev);
+      }
+
+      if (dayMorningMeals.length >= 2 && dayMorningMeals.length <= 3) {
+        const sortedNames = dayMorningMeals.map(x => String(x.name).replace(/\s*\[\d+%\]$/, '').trim()).sort();
+        const comboKey = foldDiacritics(sortedNames.join(' + '));
+        morningCombos.push({
+          key: comboKey,
+          name: sortedNames.join(' + '),
+          kcal: dayMorningMeals.reduce((a, x) => a + (Number(x.kcal) || 0), 0),
+          protein: dayMorningMeals.reduce((a, x) => a + (Number(x.protein) || 0), 0),
+          carbs: dayMorningMeals.reduce((a, x) => a + (Number(x.carbs) || 0), 0),
+          sugar: dayMorningMeals.reduce((a, x) => a + (Number(x.sugar) || 0), 0),
+          fat: dayMorningMeals.reduce((a, x) => a + (Number(x.fat) || 0), 0),
+          fiber: dayMorningMeals.reduce((a, x) => a + (Number(x.fiber) || 0), 0)
+        });
+      }
+    }
+
+    const candidates = Array.from(map.values()).map(item => ({
+      name: item.name,
+      count: item.count,
+      morningCount: item.morningCount,
+      isHabit: item.count >= 3,
+      score: (item.count * 10) + (isMorning ? item.morningCount * 8 : 0) - item.lastSeenOffset,
+      kcal: Math.round(item.sumKcal / item.count),
+      protein: Math.round(item.sumP / item.count),
+      carbs: Math.round(item.sumC / item.count),
+      sugar: Math.round(item.sumSugar / item.count),
+      fat: Math.round(item.sumF / item.count),
+      fiber: Math.round(item.sumFiber / item.count)
+    }));
+
+    // Prüfe auf wiederkehrende Morgen-Kombo (>= 2x in 14 Tagen)
+    if (isMorning && morningCombos.length >= 2) {
+      const comboCounts = new Map();
+      for (const c of morningCombos) {
+        const entry = comboCounts.get(c.key) || { ...c, count: 0 };
+        entry.count++;
+        comboCounts.set(c.key, entry);
+      }
+      for (const c of comboCounts.values()) {
+        if (c.count >= 2) {
+          candidates.unshift({
+            name: `☕ Morgen-Kombo: ${c.name}`,
+            count: c.count,
+            isHabit: true,
+            score: 999,
+            kcal: Math.round(c.kcal),
+            protein: Math.round(c.protein),
+            carbs: Math.round(c.carbs),
+            sugar: Math.round(c.sugar),
+            fat: Math.round(c.fat),
+            fiber: Math.round(c.fiber)
+          });
+        }
+      }
+    }
+
+    candidates.sort((a, b) => b.score - a.score);
+    const topItems = candidates.slice(0, 4);
+    window._smartHabitList = topItems;
+
+    if (!topItems.length) {
+      sec.classList.add('hidden');
+      return;
+    }
+
+    sec.classList.remove('hidden');
+    container.innerHTML = topItems.map((h, idx) => {
+      const badgeIcon = h.isHabit ? `⭐ ${h.count}x` : `🕒`;
+      const shortName = h.name.length > 28 ? h.name.slice(0, 26) + '…' : h.name;
+      return `<button type="button" onclick="logSmartHabit(${idx})" class="px-2.5 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-xs font-bold text-amber-200 flex items-center gap-1.5 transition shadow-sm">
+        <span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/30 text-amber-300 font-extrabold">${badgeIcon}</span>
+        <span>${escapeHTML(shortName)}</span>
+        <span class="text-emerald-400 font-extrabold">+${h.kcal} kcal</span>
+      </button>`;
+    }).join('');
+  }
+
+  function logSmartHabit(idx) {
+    const item = window._smartHabitList && window._smartHabitList[idx];
+    if (!item) return;
+    addMealEntry({
+      name: item.name.replace(/^☕ Morgen-Kombo:\s*/, ''),
+      kcal: item.kcal,
+      protein: item.protein,
+      carbs: item.carbs,
+      sugar: item.sugar,
+      fat: item.fat,
+      fiber: item.fiber
+    });
+  }
+
+  // ============================================================================
+  // IDEE 2: WOCHEN-BILANZ & ANTI-FRUST-SCHUTZSCHILD (WEEKLY CALORIE BANKING)
+  // ============================================================================
+  function computeAndRenderWeeklyBank(sumKcalToday, tKcal) {
+    const lang = state.lang === 'pl' ? 'pl' : 'de';
+    let pastSavedBuffer = 0;
+    let totalWeekConsumed = sumKcalToday;
+
+    // Berechne aktuelle Woche (Montag bis Sonntag)
+    const now = new Date();
+    const dayOfWeek = (now.getDay() + 6) % 7; // 0 = Montag, 6 = Sonntag
+    const remainingDaysAfterToday = 6 - dayOfWeek;
+
+    for (let i = 1; i <= dayOfWeek; i++) {
+      const iso = getOffsetISO(-i);
+      const dObj = state.days && state.days[iso];
+      if (dObj && Array.isArray(dObj.meals) && dObj.meals.length > 0) {
+        const dayKcal = dObj.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0);
+        // Nur valide geloggte Tage (>= 600 kcal) zählen für den echten Puffer (verhindert Leere-Tage-Falle!)
+        if (dayKcal >= 600) {
+          pastSavedBuffer += (tKcal - dayKcal);
+          totalWeekConsumed += dayKcal;
+        } else {
+          totalWeekConsumed += tKcal;
+        }
+      } else {
+        totalWeekConsumed += tKcal;
+      }
+    }
+
+    const todayDelta = sumKcalToday > 0 ? (tKcal - sumKcalToday) : 0;
+    const netWeeklyBuffer = Math.round(pastSavedBuffer + todayDelta);
+    const weeklyRemaining = Math.max(0, Math.round((remainingDaysAfterToday * tKcal) + Math.max(0, tKcal - sumKcalToday) + pastSavedBuffer));
+
+    const bufBadge = document.getElementById('weeklyBufferBadge');
+    const remTxt = document.getElementById('weeklyRemainingText');
+    const shieldBanner = document.getElementById('weeklyShieldBanner');
+    const shieldTxt = document.getElementById('weeklyShieldText');
+    const kcalProg = document.getElementById('kcalProgress');
+
+    if (bufBadge) {
+      if (netWeeklyBuffer >= 0) {
+        bufBadge.textContent = lang === 'pl' ? `+${netWeeklyBuffer} kcal zapasu` : `+${netWeeklyBuffer} kcal Puffer`;
+        bufBadge.className = 'font-extrabold text-emerald-400';
+      } else {
+        bufBadge.textContent = `${netWeeklyBuffer} kcal`;
+        bufBadge.className = 'font-extrabold text-amber-400';
+      }
+    }
+
+    if (remTxt) {
+      remTxt.textContent = lang === 'pl'
+        ? `Pozostało w tyg.: ${weeklyRemaining.toLocaleString('pl-PL')} kcal`
+        : `Woche offen: ${weeklyRemaining.toLocaleString('de-DE')} kcal`;
+    }
+
+    const todayOver = sumKcalToday - tKcal;
+    if (todayOver > 0 && netWeeklyBuffer >= 0) {
+      // Anti-Frust-Schutzschild aktiv: Heute drüber, aber durch Wochen-Puffer voll im grünen Bereich!
+      if (shieldBanner && shieldTxt) {
+        shieldTxt.textContent = lang === 'pl'
+          ? `Dziś +${todayOver} kcal ponad cel, ale dzięki zapasowi z tygodnia (+${netWeeklyBuffer} kcal netto) jesteś w 100% na zielono!`
+          : `Heute +${todayOver} kcal über Tagesziel, aber durch deinen Wochen-Puffer (+${netWeeklyBuffer} kcal Netto) bist du voll im grünen Bereich!`;
+        shieldBanner.classList.remove('hidden');
+      }
+      if (kcalProg) {
+        kcalProg.className = 'h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full transition-all duration-300';
+      }
+    } else {
+      if (shieldBanner) shieldBanner.classList.add('hidden');
+      if (kcalProg) {
+        kcalProg.className = todayOver > 0
+          ? 'h-full bg-gradient-to-r from-amber-500 to-rose-500 rounded-full transition-all duration-300'
+          : 'h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300';
+      }
+    }
+  }
+
+  // ============================================================================
+  // ADAPTIVE METABOLIC COACH ENGINE
   // ============================================================================
   function computeBmrTdeeAndFloor(weightKg, prof = state.profile) {
     const w = numOr(weightKg, numOr(prof.weight, 90));
@@ -1528,8 +1702,7 @@
 
     const bmr = (10 * w) + (6.25 * h) - (5 * a) + (isMale ? 5 : -161);
     const tdee = Math.round(bmr * act);
-    const minSexFloor = isMale ? 1500 : 1200;
-    const floor = Math.max(minSexFloor, Math.round(bmr * 0.90));
+    const floor = Math.max(isMale ? 1500 : 1200, Math.round(bmr * 0.90));
     return { bmr: Math.round(bmr), tdee, floor };
   }
 
@@ -1552,9 +1725,7 @@
     if (map.size === 0 && numOr(state.profile.weight, 0) > 25) {
       map.set(getTodayISO(), numOr(state.profile.weight, 90));
     }
-    const arr = Array.from(map.entries())
-      .map(([date, weight]) => ({ date, weight }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+    const arr = Array.from(map.entries()).map(([date, weight]) => ({ date, weight })).sort((a, b) => a.date.localeCompare(b.date));
     state.weightLog = arr;
     return arr;
   }
@@ -1562,27 +1733,18 @@
   function computeSmoothedWeightTrend() {
     const log = getSortedWeightLog();
     if (!log.length) return numOr(state.profile.weight, 90);
-    const alpha = 0.25; // 7-Tage EWMA Glättung
     let trend = log[0].weight;
-    for (let i = 1; i < log.length; i++) {
-      trend = (alpha * log[i].weight) + ((1 - alpha) * trend);
-    }
+    for (let i = 1; i < log.length; i++) trend = (0.25 * log[i].weight) + (0.75 * trend);
     return Math.round(trend * 10) / 10;
   }
 
   function applyDynamicMacrosForKcal(newKcal, currentWeight) {
     const p = state.profile;
     const tarW = numOr(p.targetWeight, currentWeight);
-    const effectiveRefWeight = (tarW < currentWeight)
-      ? Math.round(tarW + (currentWeight - tarW) * 0.25)
-      : currentWeight;
-
-    const protPerKg = p.goal === 'cut' ? 2.0 : 1.8;
-    const newProt = Math.round(effectiveRefWeight * protPerKg);
+    const effectiveRefWeight = (tarW < currentWeight) ? Math.round(tarW + (currentWeight - tarW) * 0.25) : currentWeight;
+    const newProt = Math.round(effectiveRefWeight * (p.goal === 'cut' ? 2.0 : 1.8));
     const newFat = Math.max(45, Math.round(effectiveRefWeight * 0.8));
-    const remKcal = Math.max(160, newKcal - (newProt * 4 + newFat * 9));
-    const newCarbs = Math.round(remKcal / 4);
-
+    const newCarbs = Math.round(Math.max(160, newKcal - (newProt * 4 + newFat * 9)) / 4);
     p.targetKcal = Math.round(newKcal);
     p.targetProt = newProt;
     p.targetCarbs = newCarbs;
@@ -1597,20 +1759,17 @@
       showToast(state.lang === 'pl' ? 'Podaj prawidłową wagę (30-350 kg).' : 'Bitte ein gültiges Gewicht (30–350 kg) eingeben.', 'warning');
       return;
     }
-
     const todayISO = getTodayISO();
     const rounded = Math.round(val * 10) / 10;
-    const todayData = getTodayData();
-    todayData.weight = rounded;
+    getTodayData().weight = rounded;
     state.profile.weight = rounded;
 
     const log = getSortedWeightLog();
-    const existingIdx = log.findIndex(x => x.date === todayISO);
-    if (existingIdx >= 0) log[existingIdx].weight = rounded;
+    const idx = log.findIndex(x => x.date === todayISO);
+    if (idx >= 0) log[idx].weight = rounded;
     else log.push({ date: todayISO, weight: rounded });
     state.weightLog = log.sort((a, b) => a.date.localeCompare(b.date));
 
-    // Modul 1: Prüfe Dynamic TDEE Re-Calibration (|W_trend - W_base| >= 1.5 kg)
     const wTrend = computeSmoothedWeightTrend();
     const wBase = numOr(state.metabolicCoach.lastCalibratedWeight, rounded);
     if (Math.abs(wTrend - wBase) >= 1.5) {
@@ -1618,18 +1777,15 @@
       const goalDelta = state.profile.goal === 'cut' ? -500 : (state.profile.goal === 'bulk' ? 300 : 0);
       const newKcal = Math.max(floor, tdee + goalDelta);
       const oldKcal = numOr(state.profile.targetKcal, 2000);
-
       applyDynamicMacrosForKcal(newKcal, wTrend);
       state.metabolicCoach.lastCalibratedWeight = wTrend;
-      state.metabolicCoach.lastRecalMsg = state.lang === 'pl'
-        ? `TDEE zaktualizowane (${wBase.toFixed(1)} → ${wTrend.toFixed(1)} kg): ${oldKcal} → ${newKcal} kcal (BMR-Floor: ${floor} kcal).`
-        : `TDEE automatisch rekalibriert (Trend ${wBase.toFixed(1)} → ${wTrend.toFixed(1)} kg): ${oldKcal} → ${newKcal} kcal (Schutzboden: ${floor} kcal).`;
+      state.metabolicCoach.lastRecalMsg = `TDEE automatisch rekalibriert (${wBase.toFixed(1)} → ${wTrend.toFixed(1)} kg): ${oldKcal} → ${newKcal} kcal (Boden: ${floor} kcal).`;
     }
 
     saveState();
     syncProfileToUI();
     renderDiaryUI();
-    showToast(state.lang === 'pl' ? `Waga ${rounded} kg zapisana!` : `Tagesgewicht ${rounded} kg gespeichert!`, 'success');
+    showToast(`Tagesgewicht ${rounded} kg gespeichert!`, 'success');
   }
 
   function dismissCoachRecalBanner() {
@@ -1640,18 +1796,12 @@
 
   function evaluatePlateauBreaker() {
     const log = getSortedWeightLog();
-    if (log.length < 5) return { isPlateau: false };
-
-    const todayISO = getTodayISO();
-    if (state.metabolicCoach.lastPlateauActionISO === todayISO) return { isPlateau: false };
-
+    if (log.length < 5 || state.metabolicCoach.lastPlateauActionISO === getTodayISO()) return { isPlateau: false };
     const tKcal = numOr(state.profile.targetKcal, 2000);
-    let validLoggedDays = 0;
-    let adherentDays = 0;
+    let validLoggedDays = 0, adherentDays = 0;
 
     for (let i = 0; i < 14; i++) {
-      const iso = getOffsetISO(-i);
-      const dayObj = state.days[iso];
+      const dayObj = state.days[getOffsetISO(-i)];
       if (dayObj && Array.isArray(dayObj.meals) && dayObj.meals.length > 0) {
         const dayKcal = dayObj.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0);
         if (dayKcal >= 600) {
@@ -1660,23 +1810,13 @@
         }
       }
     }
-
     if (validLoggedDays < 6) return { isPlateau: false };
     const adherence = adherentDays / validLoggedDays;
-
-    const firstInWindow = log[0];
-    const latest = log[log.length - 1];
-    const wTrendNow = computeSmoothedWeightTrend();
-    const delta14 = wTrendNow - firstInWindow.weight;
-
+    const delta14 = Math.round((computeSmoothedWeightTrend() - log[0].weight) * 10) / 10;
     if (state.profile.goal === 'cut' && adherence >= 0.85 && delta14 > -0.10) {
-      return {
-        isPlateau: true,
-        adherencePct: Math.round(adherence * 100),
-        delta14: Math.round(delta14 * 10) / 10
-      };
+      return { isPlateau: true, adherencePct: Math.round(adherence * 100), delta14 };
     }
-    return { isPlateau: false, delta14: Math.round(delta14 * 10) / 10 };
+    return { isPlateau: false, delta14 };
   }
 
   function applyPlateauAction(actionType) {
@@ -1688,114 +1828,71 @@
       const nextKcal = Math.max(floor, currentTarget - 100);
       applyDynamicMacrosForKcal(nextKcal, wTrend);
       state.metabolicCoach.lastPlateauActionISO = getTodayISO();
-      saveState();
-      syncProfileToUI();
-      renderDiaryUI();
-      showToast(state.lang === 'pl' ? `Cel zmniejszony do ${nextKcal} kcal!` : `Plateau-Anpassung aktiv: Neues Ziel ${nextKcal} kcal (Boden ${floor} kcal geschützt)!`, 'success');
+      saveState(); syncProfileToUI(); renderDiaryUI();
+      showToast(`Plateau-Anpassung: Neues Ziel ${nextKcal} kcal!`, 'success');
     } else if (actionType === 'refeed2d') {
       state.metabolicCoach.baseKcalBeforeRefeed = currentTarget;
       state.metabolicCoach.refeedUntilISO = getOffsetISO(2);
       state.metabolicCoach.lastPlateauActionISO = getTodayISO();
       applyDynamicMacrosForKcal(tdee, wTrend);
-      saveState();
-      syncProfileToUI();
-      renderDiaryUI();
-      showToast(state.lang === 'pl' ? `2-dniowy Refeed (${tdee} kcal) aktywowany!` : `2-Tage Maintenance-Refeed (${tdee} kcal) für Leptin-Reset aktiviert!`, 'success');
+      saveState(); syncProfileToUI(); renderDiaryUI();
+      showToast(`2-Tage Maintenance-Refeed (${tdee} kcal) aktiviert!`, 'success');
     }
   }
 
   function evaluateCheatRescue() {
     const log = getSortedWeightLog();
     if (log.length < 2) return null;
-
-    const latest = log[log.length - 1];
-    const prev = log[log.length - 2];
-    const todayISO = getTodayISO();
-
+    const latest = log[log.length - 1], prev = log[log.length - 2];
     if (state.metabolicCoach.dismissedSpikeISO === latest.date) return null;
     const spikeKg = Math.round((latest.weight - prev.weight) * 10) / 10;
     if (spikeKg < 0.6) return null;
 
     const { tdee, floor } = computeBmrTdeeAndFloor(prev.weight, state.profile);
     let surplusKcal = 0;
-
     for (let i = 1; i <= 2; i++) {
-      const iso = getOffsetISO(-i);
-      const dObj = state.days[iso];
+      const dObj = state.days[getOffsetISO(-i)];
       if (dObj && Array.isArray(dObj.meals)) {
         const dayKcal = dObj.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0);
-        if (dayKcal > tdee) {
-          surplusKcal += (dayKcal - tdee);
-        }
+        if (dayKcal > tdee) surplusKcal += (dayKcal - tdee);
       }
     }
-
     const realFatKg = Math.min(spikeKg, Math.round((surplusKcal / 7000) * 100) / 100);
     const waterGlycogenKg = Math.max(0, Math.round((spikeKg - realFatKg) * 100) / 100);
-    const suggestedDailyCut = surplusKcal > 250
-      ? Math.min(150, Math.max(50, Math.round(surplusKcal / 5)))
-      : 0;
-
-    return {
-      spikeDate: latest.date,
-      spikeKg,
-      surplusKcal: Math.round(surplusKcal),
-      realFatKg,
-      waterGlycogenKg,
-      suggestedDailyCut,
-      floor
-    };
+    const suggestedDailyCut = surplusKcal > 250 ? Math.min(150, Math.max(50, Math.round(surplusKcal / 5))) : 0;
+    return { spikeDate: latest.date, spikeKg, surplusKcal: Math.round(surplusKcal), realFatKg, waterGlycogenKg, suggestedDailyCut, floor };
   }
 
   function applyCheatRescueCut() {
     const rescue = evaluateCheatRescue();
-    if (!rescue || rescue.suggestedDailyCut <= 0) {
-      dismissCheatRescue();
-      return;
-    }
+    if (!rescue || rescue.suggestedDailyCut <= 0) { dismissCheatRescue(); return; }
     const wTrend = computeSmoothedWeightTrend();
     const { floor } = computeBmrTdeeAndFloor(wTrend, state.profile);
-    const currentKcal = numOr(state.profile.targetKcal, 2000);
-    const newKcal = Math.max(floor, currentKcal - rescue.suggestedDailyCut);
-
+    const newKcal = Math.max(floor, numOr(state.profile.targetKcal, 2000) - rescue.suggestedDailyCut);
     state.metabolicCoach.activeDailyCut = rescue.suggestedDailyCut;
     state.metabolicCoach.cheatRescueUntilISO = getOffsetISO(5);
     state.metabolicCoach.dismissedSpikeISO = rescue.spikeDate;
-
     applyDynamicMacrosForKcal(newKcal, wTrend);
-    saveState();
-    syncProfileToUI();
-    renderDiaryUI();
-    showToast(`Smart Cheat-Rescue aktiv: Moderater Ausgleich (-${rescue.suggestedDailyCut} kcal/Tag für 5 Tage)!`, 'success');
+    saveState(); syncProfileToUI(); renderDiaryUI();
+    showToast(`Smart Cheat-Rescue aktiv: -${rescue.suggestedDailyCut} kcal/Tag für 5 Tage!`, 'success');
   }
 
   function dismissCheatRescue() {
     const log = getSortedWeightLog();
-    if (log.length > 0) {
-      state.metabolicCoach.dismissedSpikeISO = log[log.length - 1].date;
-      saveState();
-    }
+    if (log.length > 0) { state.metabolicCoach.dismissedSpikeISO = log[log.length - 1].date; saveState(); }
     renderMetabolicCoachUI();
   }
 
   function checkExpiredCoachInterventions() {
-    const todayISO = getTodayISO();
-    const mc = state.metabolicCoach;
+    const todayISO = getTodayISO(), mc = state.metabolicCoach;
     let changed = false;
-
     if (mc.refeedUntilISO && todayISO > mc.refeedUntilISO) {
-      const restoreKcal = numOr(mc.baseKcalBeforeRefeed, 2000);
-      applyDynamicMacrosForKcal(restoreKcal, computeSmoothedWeightTrend());
-      mc.refeedUntilISO = null;
-      mc.baseKcalBeforeRefeed = null;
-      changed = true;
+      applyDynamicMacrosForKcal(numOr(mc.baseKcalBeforeRefeed, 2000), computeSmoothedWeightTrend());
+      mc.refeedUntilISO = null; mc.baseKcalBeforeRefeed = null; changed = true;
     }
     if (mc.cheatRescueUntilISO && todayISO > mc.cheatRescueUntilISO) {
-      const restoreKcal = numOr(state.profile.targetKcal, 2000) + numOr(mc.activeDailyCut, 0);
-      applyDynamicMacrosForKcal(restoreKcal, computeSmoothedWeightTrend());
-      mc.activeDailyCut = 0;
-      mc.cheatRescueUntilISO = null;
-      changed = true;
+      applyDynamicMacrosForKcal(numOr(state.profile.targetKcal, 2000) + numOr(mc.activeDailyCut, 0), computeSmoothedWeightTrend());
+      mc.activeDailyCut = 0; mc.cheatRescueUntilISO = null; changed = true;
     }
     if (changed) saveState();
   }
@@ -1810,83 +1907,46 @@
     const t = UI_I18N[lang];
 
     const inp = document.getElementById('dailyWeightInput');
-    if (inp && document.activeElement !== inp) {
-      inp.value = todayData.weight ? String(todayData.weight) : String(numOr(state.profile.weight, 90));
-    }
+    if (inp && document.activeElement !== inp) inp.value = todayData.weight ? String(todayData.weight) : String(numOr(state.profile.weight, 90));
 
-    const trendEl = document.getElementById('coachTrendValue');
-    const baseEl = document.getElementById('coachBaseValue');
-    const floorEl = document.getElementById('coachFloorValue');
+    const trendEl = document.getElementById('coachTrendValue'), baseEl = document.getElementById('coachBaseValue'), floorEl = document.getElementById('coachFloorValue');
     if (trendEl) trendEl.textContent = `${wTrend.toFixed(1)} kg`;
     if (baseEl) baseEl.textContent = `${wBase.toFixed(1)} kg`;
     if (floorEl) floorEl.textContent = `${floor} kcal`;
 
-    // 1. Recalibration Banner
-    const recalBanner = document.getElementById('coachRecalBanner');
-    const recalTxt = document.getElementById('coachRecalText');
+    const recalBanner = document.getElementById('coachRecalBanner'), recalTxt = document.getElementById('coachRecalText');
     if (recalBanner && recalTxt) {
-      if (state.metabolicCoach.lastRecalMsg) {
-        recalTxt.textContent = state.metabolicCoach.lastRecalMsg;
-        recalBanner.classList.remove('hidden');
-      } else {
-        recalBanner.classList.add('hidden');
-      }
+      if (state.metabolicCoach.lastRecalMsg) { recalTxt.textContent = state.metabolicCoach.lastRecalMsg; recalBanner.classList.remove('hidden'); }
+      else recalBanner.classList.add('hidden');
     }
 
-    // 2. Plateau-Breaker Banner & Status Badge
     const plateauRes = evaluatePlateauBreaker();
-    const plateauBanner = document.getElementById('coachPlateauBanner');
-    const statusBadge = document.getElementById('coachStatusBadge');
-
+    const plateauBanner = document.getElementById('coachPlateauBanner'), statusBadge = document.getElementById('coachStatusBadge');
     if (state.metabolicCoach.refeedUntilISO) {
-      if (statusBadge) {
-        statusBadge.textContent = t.coachRefeedActive;
-        statusBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 shrink-0';
-      }
+      if (statusBadge) { statusBadge.textContent = t.coachRefeedActive; statusBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 shrink-0'; }
       if (plateauBanner) plateauBanner.classList.add('hidden');
     } else if (plateauRes.isPlateau) {
-      if (statusBadge) {
-        statusBadge.textContent = t.coachPlateauWarn;
-        statusBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0';
-      }
+      if (statusBadge) { statusBadge.textContent = t.coachPlateauWarn; statusBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0'; }
       if (plateauBanner) plateauBanner.classList.remove('hidden');
     } else {
-      const deltaTxt = Number.isFinite(plateauRes.delta14) && plateauRes.delta14 !== 0
-        ? ` (${plateauRes.delta14 > 0 ? '+' : ''}${plateauRes.delta14.toFixed(1)}kg)`
-        : '';
-      if (statusBadge) {
-        statusBadge.textContent = `${t.coachOnTrack}${deltaTxt}`;
-        statusBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0';
-      }
+      const deltaTxt = Number.isFinite(plateauRes.delta14) && plateauRes.delta14 !== 0 ? ` (${plateauRes.delta14 > 0 ? '+' : ''}${plateauRes.delta14.toFixed(1)}kg)` : '';
+      if (statusBadge) { statusBadge.textContent = `${t.coachOnTrack}${deltaTxt}`; statusBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0'; }
       if (plateauBanner) plateauBanner.classList.add('hidden');
     }
 
-    // 3. Smart Cheat-Rescue 2.0 Banner
     const cheatRes = evaluateCheatRescue();
-    const cheatBanner = document.getElementById('coachCheatBanner');
-    const cheatTxt = document.getElementById('coachCheatText');
-    const cheatBtn = document.getElementById('btnApplyCheatCut');
-
+    const cheatBanner = document.getElementById('coachCheatBanner'), cheatTxt = document.getElementById('coachCheatText'), cheatBtn = document.getElementById('btnApplyCheatCut');
     if (cheatBanner && cheatTxt) {
       if (cheatRes) {
-        cheatTxt.innerHTML = lang === 'pl'
-          ? `<strong>Smart Cheat-Rescue 2.0:</strong> Skok wagi o <strong>+${cheatRes.spikeKg.toFixed(1)} kg</strong> przez noc. Zgodnie z zasadą 7000 kcal/kg aż <strong>${cheatRes.waterGlycogenKg.toFixed(2)} kg to sama woda i glikogen</strong>, a max. <strong>${cheatRes.realFatKg.toFixed(2)} kg</strong> to tkanka!`
-          : `<strong>Smart Cheat-Rescue 2.0 (Entwarnung):</strong> Über-Nacht-Anstieg um <strong>+${cheatRes.spikeKg.toFixed(1)} kg</strong>. Nach der 7.000-kcal/kg-Regel sind <strong>${cheatRes.waterGlycogenKg.toFixed(2)} kg nur Wasser & Glykogen</strong> und maximal <strong>${cheatRes.realFatKg.toFixed(2)} kg echtes Gewebe</strong>!`;
-
+        cheatTxt.innerHTML = `<strong>Smart Cheat-Rescue 2.0 (Entwarnung):</strong> Über-Nacht-Anstieg um <strong>+${cheatRes.spikeKg.toFixed(1)} kg</strong>. Nach der 7.000-kcal/kg-Regel sind <strong>${cheatRes.waterGlycogenKg.toFixed(2)} kg nur Wasser & Glykogen</strong> und maximal <strong>${cheatRes.realFatKg.toFixed(2)} kg echtes Gewebe</strong>!`;
         if (cheatBtn) {
           if (cheatRes.suggestedDailyCut > 0) {
             cheatBtn.classList.remove('hidden');
-            document.getElementById('lblCheatCutBtn').textContent = lang === 'pl'
-              ? `Aktywuj łagodną korektę (-${cheatRes.suggestedDailyCut} kcal przez 5 dni)`
-              : `Moderaten 5-Tage-Ausgleich (-${cheatRes.suggestedDailyCut} kcal/Tag) aktivieren`;
-          } else {
-            cheatBtn.classList.add('hidden');
-          }
+            document.getElementById('lblCheatCutBtn').textContent = `Moderaten 5-Tage-Ausgleich (-${cheatRes.suggestedDailyCut} kcal/Tag) aktivieren`;
+          } else cheatBtn.classList.add('hidden');
         }
         cheatBanner.classList.remove('hidden');
-      } else {
-        cheatBanner.classList.add('hidden');
-      }
+      } else cheatBanner.classList.add('hidden');
     }
   }
 
@@ -1902,58 +1962,44 @@
       .replace(/\s+/g, ' ').trim();
   }
 
-  function escapeRegExp(s) {
-    return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
+  function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
   function matchKeywordWithBoundary(foldedText, kw) {
     const cleanKw = foldDiacritics(kw);
     if (!cleanKw) return false;
-    const pattern = new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(cleanKw)}(?=$|[^a-z0-9])`, 'i');
-    return pattern.test(foldedText);
+    return new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(cleanKw)}(?=$|[^a-z0-9])`, 'i').test(foldedText);
   }
 
   function stripExclusions(foldedText) {
     const stop = '(?:mit|und|oder|oraz|dazu|plus|ohne|bez|auf|z|ze)';
-    const re = new RegExp(`\\b(?:ohne|bez)\\s+(?!${stop}\\b)[a-z0-9]+(?:\\s+(?!${stop}\\b)[a-z0-9]+)?`, 'gi');
-    return foldedText.replace(re, ' ').replace(/\s+/g, ' ').trim();
+    return foldedText.replace(new RegExp(`\\b(?:ohne|bez)\\s+(?!${stop}\\b)[a-z0-9]+(?:\\s+(?!${stop}\\b)[a-z0-9]+)?`, 'gi'), ' ').replace(/\s+/g, ' ').trim();
   }
 
   function resolveSingleSegment(foldedSeg) {
     if (!foldedSeg) return null;
-
     let explicitKcal = null;
     const kcalMatch = foldedSeg.match(/(?:^|\s)(\d{1,4}(?:[.,]\d+)?)\s*kcal(?=$|\s)/i);
     if (kcalMatch) explicitKcal = parseFloat(kcalMatch[1].replace(',', '.'));
 
-    let spoonGrams = null;
-    let spoonLabel = '';
+    let spoonGrams = null, spoonLabel = '';
     const tspMatch = foldedSeg.match(/(?:(\d+(?:[.,]\d+)?)\s*)?(?:kleine\s+loffel|kleiner\s+loffel|kleine\s+loeffel|teeloffel|tl|lyzeczk[ai]|loffel|loeffel)\b/i);
     const tbspMatch = foldedSeg.match(/(?:(\d+(?:[.,]\d+)?)\s*)?(?:grosse\s+loffel|grosser\s+loffel|essloffel|el|lyzk[ai])\b/i);
-
     if (tbspMatch) {
       const count = tbspMatch[1] ? parseFloat(tbspMatch[1].replace(',', '.')) : 1;
-      spoonGrams = Math.round(count * 15);
-      spoonLabel = `${count} EL (${spoonGrams}g)`;
+      spoonGrams = Math.round(count * 15); spoonLabel = `${count} EL (${spoonGrams}g)`;
     } else if (tspMatch) {
       const count = tspMatch[1] ? parseFloat(tspMatch[1].replace(',', '.')) : 1;
-      spoonGrams = Math.round(count * 5);
-      spoonLabel = `${count} TL (${spoonGrams}g)`;
+      spoonGrams = Math.round(count * 5); spoonLabel = `${count} TL (${spoonGrams}g)`;
     }
 
     let bestEntry = null, bestKwLen = 0, matchedKeyword = '';
     for (const entry of FOOD_LEXICON) {
       for (const kw of entry.keywords) {
-        if (matchKeywordWithBoundary(foldedSeg, kw)) {
-          if (kw.length > bestKwLen) {
-            bestKwLen = kw.length;
-            bestEntry = entry;
-            matchedKeyword = foldDiacritics(kw);
-          }
+        if (matchKeywordWithBoundary(foldedSeg, kw) && kw.length > bestKwLen) {
+          bestKwLen = kw.length; bestEntry = entry; matchedKeyword = foldDiacritics(kw);
         }
       }
     }
-
     if (!bestEntry && spoonGrams !== null) {
       bestEntry = FOOD_LEXICON.find(e => e.name.startsWith('Zucker')) || null;
       matchedKeyword = 'zucker';
@@ -1965,40 +2011,24 @@
       .replace(/\b\d+(?:[.,]\d+)?\s*(?:kcal|g|gramm|ml|l|tl|el|st|stk|stuck|x)?\b/gi, ' ')
       .replace(/\b(?:kleine|kleiner|klein|grosse|grosser|gross|duze|duzy|male|maly|loffel|loeffel|teeloffel|essloffel|lyzeczka|lyzeczki|lyzka|lyzki|portion|tasse|tassen|glas|glaser|becher|teller|scheibe|scheiben|mit|ohne|und|oder|frisch|gekocht|gebraten|gr|m|l|high|protein|yoghurt|joghurt|jogurt|mousse|schoko|vanille)\b/gi, ' ')
       .replace(/[^a-z0-9\s]/g, ' ').trim();
+    if (remainder.split(/\s+/).filter(w => w.length >= 3).length > 0) return null;
 
-    const unknownWords = remainder.split(/\s+/).filter(w => w.length >= 3);
-    if (unknownWords.length > 0) return null;
-
-    let grams = bestEntry.defaultPortion || 100;
-    let portionLabel = `${grams}g`;
-    let sizeMult = 1.0;
+    let grams = bestEntry.defaultPortion || 100, portionLabel = `${grams}g`, sizeMult = 1.0;
     if (/\b(?:gross|grosse|grosser|large|duzy|duza|duze)\b/i.test(foldedSeg)) sizeMult = 1.4;
     else if (/\b(?:klein|kleiner|small|maly|mala|male)\b/i.test(foldedSeg) && spoonGrams === null) sizeMult = 0.7;
 
-    const cleanSegWithoutKcal = foldedSeg.replace(/\b\d+(?:[.,]\d+)?\s*kcal\b/gi, '');
-    const gramMatch = cleanSegWithoutKcal.match(/(\d+(?:[.,]\d+)?)\s*(g|gramm|ml)\b/i);
-    const literMatch = cleanSegWithoutKcal.match(/(\d+(?:[.,]\d+)?)\s*(l|liter)\b/i);
-    const countMatch = cleanSegWithoutKcal.match(/(?:^|\s)(\d+(?:[.,]\d+)?)\s*(?:x|st|stk|stuck|tassen?|glaser|becher|scheiben?)?\b/i);
+    const cleanSeg = foldedSeg.replace(/\b\d+(?:[.,]\d+)?\s*kcal\b/gi, '');
+    const gramMatch = cleanSeg.match(/(\d+(?:[.,]\d+)?)\s*(g|gramm|ml)\b/i);
+    const literMatch = cleanSeg.match(/(\d+(?:[.,]\d+)?)\s*(l|liter)\b/i);
+    const countMatch = cleanSeg.match(/(?:^|\s)(\d+(?:[.,]\d+)?)\s*(?:x|st|stk|stuck|tassen?|glaser|becher|scheiben?)?\b/i);
 
-    if (spoonGrams !== null) {
-      grams = spoonGrams;
-      portionLabel = spoonLabel;
-    } else if (gramMatch) {
-      grams = Math.round(parseFloat(gramMatch[1].replace(',', '.')));
-      portionLabel = `${grams}${gramMatch[2].toLowerCase() === 'ml' ? 'ml' : 'g'}`;
-    } else if (literMatch) {
-      grams = Math.round(parseFloat(literMatch[1].replace(',', '.')) * 1000);
-      portionLabel = `${grams}ml`;
-    } else if (countMatch) {
-      const countVal = parseFloat(countMatch[1].replace(',', '.'));
-      if (countVal > 0 && countVal <= 25) {
-        grams = Math.round(countVal * (bestEntry.defaultPortion || 100) * sizeMult);
-        portionLabel = `${countVal}x (${grams}g)`;
-      }
-    } else if (sizeMult !== 1.0) {
-      grams = Math.round((bestEntry.defaultPortion || 100) * sizeMult);
-      portionLabel = `${grams}g`;
-    }
+    if (spoonGrams !== null) { grams = spoonGrams; portionLabel = spoonLabel; }
+    else if (gramMatch) { grams = Math.round(parseFloat(gramMatch[1].replace(',', '.'))); portionLabel = `${grams}${gramMatch[2].toLowerCase() === 'ml' ? 'ml' : 'g'}`; }
+    else if (literMatch) { grams = Math.round(parseFloat(literMatch[1].replace(',', '.')) * 1000); portionLabel = `${grams}ml`; }
+    else if (countMatch) {
+      const cVal = parseFloat(countMatch[1].replace(',', '.'));
+      if (cVal > 0 && cVal <= 25) { grams = Math.round(cVal * (bestEntry.defaultPortion || 100) * sizeMult); portionLabel = `${cVal}x (${grams}g)`; }
+    } else if (sizeMult !== 1.0) { grams = Math.round((bestEntry.defaultPortion || 100) * sizeMult); portionLabel = `${grams}g`; }
 
     const ratio = grams / 100;
     let segKcal = Math.round(bestEntry.kcal * ratio);
@@ -2009,49 +2039,27 @@
     let segFiber = Math.round((bestEntry.fiber || 0) * ratio * 10) / 10;
 
     if (explicitKcal !== null && explicitKcal > 0) {
-      const kcalScale = segKcal > 0 ? (explicitKcal / segKcal) : 1;
-      segKcal = Math.round(explicitKcal);
-      segP = Math.round(segP * kcalScale * 10) / 10;
-      segC = Math.round(segC * kcalScale * 10) / 10;
-      segSugar = Math.round(segSugar * kcalScale * 10) / 10;
-      segF = Math.round(segF * kcalScale * 10) / 10;
-      segFiber = Math.round(segFiber * kcalScale * 10) / 10;
+      const ks = segKcal > 0 ? (explicitKcal / segKcal) : 1;
+      segKcal = Math.round(explicitKcal); segP = Math.round(segP * ks * 10) / 10; segC = Math.round(segC * ks * 10) / 10;
+      segSugar = Math.round(segSugar * ks * 10) / 10; segF = Math.round(segF * ks * 10) / 10; segFiber = Math.round(segFiber * ks * 10) / 10;
       portionLabel = `${segKcal} kcal`;
     }
-
-    return {
-      partLabel: `${bestEntry.name} (${portionLabel})`,
-      kcal: segKcal,
-      p: segP,
-      c: segC,
-      sugar: segSugar,
-      f: segF,
-      fiber: segFiber
-    };
+    return { partLabel: `${bestEntry.name} (${portionLabel})`, kcal: segKcal, p: segP, c: segC, sugar: segSugar, f: segF, fiber: segFiber };
   }
 
   function resolveFromLexicon(rawQuery) {
     const raw = (rawQuery || '').trim();
     if (!raw || raw.length < 2) return null;
-
     const cleanedQuery = stripExclusions(foldDiacritics(raw));
     if (!cleanedQuery || cleanedQuery.length < 2) return null;
 
-    const primarySegments = cleanedQuery
-      .split(/\s*(?:\+|,|\bund\b|\boraz\b|\bdazu\b)\s*/i)
-      .map(s => s.trim())
-      .filter(Boolean);
-
-    if (primarySegments.length === 0) return null;
+    const primarySegments = cleanedQuery.split(/\s*(?:\+|,|\bund\b|\boraz\b|\bdazu\b)\s*/i).map(s => s.trim()).filter(Boolean);
+    if (!primarySegments.length) return null;
 
     const resolvedItems = [];
     for (const seg of primarySegments) {
       const wholeHit = resolveSingleSegment(seg);
-      if (wholeHit) {
-        resolvedItems.push(wholeHit);
-        continue;
-      }
-
+      if (wholeHit) { resolvedItems.push(wholeHit); continue; }
       if (/\b(?:mit|auf|z|ze)\b/i.test(seg)) {
         const subSegs = seg.split(/\s+\b(?:mit|auf|z|ze)\b\s+/i).map(s => s.trim()).filter(Boolean);
         if (subSegs.length > 1) {
@@ -2070,42 +2078,24 @@
     const matchedParts = [];
     for (const item of resolvedItems) {
       matchedParts.push(item.partLabel);
-      totalKcal += item.kcal;
-      totalP += item.p;
-      totalC += item.c;
-      totalSugar += item.sugar;
-      totalF += item.f;
-      totalFiber += item.fiber;
+      totalKcal += item.kcal; totalP += item.p; totalC += item.c; totalSugar += item.sugar; totalF += item.f; totalFiber += item.fiber;
     }
-
     return {
       mealName: matchedParts.join(' + '),
-      kcal: Math.round(totalKcal),
-      protein: Math.round(totalP),
-      carbs: Math.round(totalC),
-      sugar: Math.round(totalSugar),
-      fat: Math.round(totalF),
-      fiber: Math.round(totalFiber),
-      explanation: state.lang === 'pl'
-        ? '0.0s Natychmiastowe obliczenie ze zweryfikowanego słownika DE/PL.'
-        : '0.0s Sofort-Berechnung aus dem verifizierten DE/PL-Wörterbuch.',
+      kcal: Math.round(totalKcal), protein: Math.round(totalP), carbs: Math.round(totalC),
+      sugar: Math.round(totalSugar), fat: Math.round(totalF), fiber: Math.round(totalFiber),
+      explanation: state.lang === 'pl' ? '0.0s Natychmiastowe obliczenie ze słownika DE/PL.' : '0.0s Sofort-Berechnung aus dem verifizierten DE/PL-Wörterbuch.',
       source: 'lexicon'
     };
   }
 
-  // ============================================================================
-  // DETERMINISTISCHE KOMPONENTEN-KALIBRIERUNG & LEAN/FAT-CAP ENFORCEMENT
-  // ============================================================================
   function findLexiconReference(compName) {
     const folded = foldDiacritics(compName || '');
     if (!folded) return null;
     let best = null, maxLen = 0;
     for (const entry of FOOD_LEXICON) {
       for (const kw of entry.keywords) {
-        if (matchKeywordWithBoundary(folded, kw) && kw.length > maxLen) {
-          maxLen = kw.length;
-          best = entry;
-        }
+        if (matchKeywordWithBoundary(folded, kw) && kw.length > maxLen) { maxLen = kw.length; best = entry; }
       }
     }
     return best;
@@ -2116,42 +2106,30 @@
     if (!comps.length || isLabel) return null;
 
     const foldedHint = foldDiacritics(userTextHint || '');
-    const hasVagueOilHint = /\b(?:etwas|wenig|leicht|schuss|bisschen|hauch|odrobin[ae])\s+(?:olivenol|rapsol|ol|olej|fett|butter|maslo)\b/i.test(foldedHint)
-      || /\b(?:in\s+etwas|leicht\s+angebraten)\b/i.test(foldedHint);
+    const hasVagueOilHint = /\b(?:etwas|wenig|leicht|schuss|bisschen|hauch|odrobin[ae])\s+(?:olivenol|rapsol|ol|olej|fett|butter|maslo)\b/i.test(foldedHint) || /\b(?:in\s+etwas|leicht\s+angebraten)\b/i.test(foldedHint);
     const hasGlobalLeanOverride = /\b(?:hahnchenbrust|putenbrust|mager|mageres|selbst\s+gewolft|tatar|filet|piers|chud[ey])\b/i.test(foldedHint);
 
-    let sumKcal = 0, sumP = 0, sumC = 0, sumSugar = 0, sumF = 0, sumFiber = 0;
+    let sumKcal = 0, sumP = 0, sumC = 0, sumSugar = 0, sumF = 0, sumFiber = 0, cookingFatCounted = false;
     const badgeLabels = [];
-    let cookingFatAlreadyCounted = false;
 
     for (const c of comps) {
-      const name = String(c.name || 'Zutat').trim();
-      const foldedName = foldDiacritics(name);
+      const name = String(c.name || 'Zutat').trim(), foldedName = foldDiacritics(name);
       let grams = Math.max(2, Math.min(1800, Math.round(Number(c.grams) || 100)));
-      let p = Math.max(0, Number(c.protein) || 0);
-      let carbs = Math.max(0, Number(c.carbs) || 0);
-      let sugar = Math.min(carbs, Math.max(0, Number(c.sugar) || 0));
-      let fat = Math.max(0, Number(c.fat) || 0);
-      let fiber = Math.max(0, Number(c.fiber) || 0);
+      let p = Math.max(0, Number(c.protein) || 0), carbs = Math.max(0, Number(c.carbs) || 0);
+      let sugar = Math.min(carbs, Math.max(0, Number(c.sugar) || 0)), fat = Math.max(0, Number(c.fat) || 0), fiber = Math.max(0, Number(c.fiber) || 0);
 
-      const isCookingFatComp = /\b(?:olivenol|rapsol|sonnenblumenol|kokosol|bratol|speiseol|bratfett|ol|olej|butter|maslo|schmalz)\b/i.test(foldedName);
-      const isMeatComp = /\b(?:hahnchen|pute|puten|fleisch|rind|schwein|hack|tatar|filet|schnitzel|gulasch|kurczak|wolow|wieprz|mieso|piers)\b/i.test(foldedName);
-      const isLeanComp = hasGlobalLeanOverride || /\b(?:hahnchenbrust|putenbrust|mager|selbst\s+gewolft|tatar|filet|piers|chud)\b/i.test(foldedName);
+      const isCookingFat = /\b(?:olivenol|rapsol|sonnenblumenol|kokosol|bratol|speiseol|bratfett|ol|olej|butter|maslo|schmalz)\b/i.test(foldedName);
+      const isMeat = /\b(?:hahnchen|pute|puten|fleisch|rind|schwein|hack|tatar|filet|schnitzel|gulasch|kurczak|wolow|wieprz|mieso|piers)\b/i.test(foldedName);
+      const isLean = hasGlobalLeanOverride || /\b(?:hahnchenbrust|putenbrust|mager|selbst\s+gewolft|tatar|filet|piers|chud)\b/i.test(foldedName);
 
-      if (isCookingFatComp) {
-        if (cookingFatAlreadyCounted && hasVagueOilHint) {
-          continue;
-        }
-        cookingFatAlreadyCounted = true;
-        if (hasVagueOilHint || grams <= 8) {
-          grams = Math.min(grams, 5);
-          fat = Math.min(fat, 5.0);
-          p = 0; carbs = 0; sugar = 0; fiber = 0;
-        }
+      if (isCookingFat) {
+        if (cookingFatCounted && hasVagueOilHint) continue;
+        cookingFatCounted = true;
+        if (hasVagueOilHint || grams <= 8) { grams = Math.min(grams, 5); fat = Math.min(fat, 5.0); p = 0; carbs = 0; sugar = 0; fiber = 0; }
       }
 
       const lexRef = findLexiconReference(name);
-      if (lexRef && grams > 0 && !isCookingFatComp) {
+      if (lexRef && grams > 0 && !isCookingFat) {
         const r = grams / 100;
         p = (0.65 * (lexRef.p * r)) + (0.35 * p);
         carbs = (0.65 * (lexRef.c * r)) + (0.35 * carbs);
@@ -2160,33 +2138,15 @@
         fat = (0.65 * (lexRef.f * r)) + (0.35 * fat);
         fiber = (0.65 * ((lexRef.fiber || 0) * r)) + (0.35 * fiber);
       }
-
-      if (isMeatComp && isLeanComp && !/\b(?:paniert|schabowy|frikadelle|mielony)\b/i.test(foldedName)) {
-        const maxLeanFat = (grams / 100) * 2.8;
-        if (fat > maxLeanFat) {
-          fat = maxLeanFat;
-        }
+      if (isMeat && isLean && !/\b(?:paniert|schabowy|frikadelle|mielony)\b/i.test(foldedName)) {
+        fat = Math.min(fat, (grams / 100) * 2.8);
       }
 
-      const compKcal = Math.round(4 * p + 4 * carbs + 9 * fat + 2 * fiber);
-      sumKcal += compKcal;
-      sumP += p;
-      sumC += carbs;
-      sumSugar += sugar;
-      sumF += fat;
-      sumFiber += fiber;
+      sumKcal += Math.round(4 * p + 4 * carbs + 9 * fat + 2 * fiber);
+      sumP += p; sumC += carbs; sumSugar += sugar; sumF += fat; sumFiber += fiber;
       badgeLabels.push(`${grams}g ${name}`);
     }
-
-    return {
-      kcal: Math.round(sumKcal),
-      protein: Math.round(sumP),
-      carbs: Math.round(sumC),
-      sugar: Math.min(Math.round(sumC), Math.round(sumSugar)),
-      fat: Math.round(sumF),
-      fiber: Math.round(sumFiber),
-      badgeLabels
-    };
+    return { kcal: Math.round(sumKcal), protein: Math.round(sumP), carbs: Math.round(sumC), sugar: Math.min(Math.round(sumC), Math.round(sumSugar)), fat: Math.round(sumF), fiber: Math.round(sumFiber), badgeLabels };
   }
 
   function setPortionScale(percentValue) {
@@ -2197,159 +2157,96 @@
 
     const slider = document.getElementById('portionScaleSlider');
     if (slider && Number(slider.value) !== pct) slider.value = String(pct);
-
-    document.querySelectorAll('.portion-pill-btn').forEach(btn => {
-      btn.classList.toggle('active', Number(btn.getAttribute('data-scale')) === pct);
-    });
+    document.querySelectorAll('.portion-pill-btn').forEach(btn => btn.classList.toggle('active', Number(btn.getAttribute('data-scale')) === pct));
 
     const scaledKcal = Math.round((activeMealBaseResult.kcal || 0) * factor);
-    const scaledProt = Math.round((activeMealBaseResult.protein || 0) * factor);
-    const scaledCarbs = Math.round((activeMealBaseResult.carbs || 0) * factor);
-    const scaledSugar = Math.round((activeMealBaseResult.sugar || 0) * factor);
-    const scaledFat = Math.round((activeMealBaseResult.fat || 0) * factor);
-    const scaledFiber = Math.round((activeMealBaseResult.fiber || 0) * factor);
-
     document.getElementById('portionScaleBadge').textContent = state.lang === 'pl' ? `Porcja: ${pct}%` : `Portion: ${pct}%`;
     document.getElementById('portionScaleHint').textContent = `${factor.toFixed(2).replace(/\.00$/, '.0')}x (${pct}%)`;
     document.getElementById('resKcal').textContent = String(scaledKcal);
-    document.getElementById('resProt').textContent = `${scaledProt}g`;
-    document.getElementById('resCarbs').textContent = `${scaledCarbs}g`;
+    document.getElementById('resProt').textContent = `${Math.round((activeMealBaseResult.protein || 0) * factor)}g`;
+    document.getElementById('resCarbs').textContent = `${Math.round((activeMealBaseResult.carbs || 0) * factor)}g`;
     const sugarEl = document.getElementById('resSugar');
-    if (sugarEl) sugarEl.textContent = `${scaledSugar}g`;
-    document.getElementById('resFat').textContent = `${scaledFat}g`;
-    document.getElementById('resFiber').textContent = `${scaledFiber}g`;
-    document.getElementById('addMealBtnText').textContent = state.lang === 'pl'
-      ? `Dodaj do dziennika (+${scaledKcal} kcal)`
-      : `Jetzt ins Tagebuch eintragen (+${scaledKcal} kcal)`;
+    if (sugarEl) sugarEl.textContent = `${Math.round((activeMealBaseResult.sugar || 0) * factor)}g`;
+    document.getElementById('resFat').textContent = `${Math.round((activeMealBaseResult.fat || 0) * factor)}g`;
+    document.getElementById('resFiber').textContent = `${Math.round((activeMealBaseResult.fiber || 0) * factor)}g`;
+    document.getElementById('addMealBtnText').textContent = state.lang === 'pl' ? `Dodaj do dziennika (+${scaledKcal} kcal)` : `Jetzt ins Tagebuch eintragen (+${scaledKcal} kcal)`;
   }
 
   function showMealResult(res) {
     activeMealBaseResult = {
-      mealName: res.mealName || 'Mahlzeit',
-      kcal: Math.round(Number(res.kcal) || 0),
-      protein: Math.round(Number(res.protein) || 0),
-      carbs: Math.round(Number(res.carbs) || 0),
-      sugar: Math.round(Number(res.sugar) || 0),
-      fat: Math.round(Number(res.fat) || 0),
-      fiber: Math.round(Number(res.fiber) || 0),
-      explanation: res.explanation || '',
-      components: Array.isArray(res.components) ? res.components : [],
-      source: res.source || 'ai'
+      mealName: res.mealName || 'Mahlzeit', kcal: Math.round(Number(res.kcal) || 0),
+      protein: Math.round(Number(res.protein) || 0), carbs: Math.round(Number(res.carbs) || 0),
+      sugar: Math.round(Number(res.sugar) || 0), fat: Math.round(Number(res.fat) || 0),
+      fiber: Math.round(Number(res.fiber) || 0), explanation: res.explanation || '',
+      components: Array.isArray(res.components) ? res.components : [], source: res.source || 'ai'
     };
 
     const box = document.getElementById('mealAnalysisResult');
-    const badge = document.getElementById('resSourceBadge');
-    badge.innerHTML = res.source === 'lexicon'
+    document.getElementById('resSourceBadge').innerHTML = res.source === 'lexicon'
       ? `<i class="fa-solid fa-bolt text-amber-400"></i> ${state.lang === 'pl' ? '0.0s Słownik Lokalny' : '0.0s Lokales Wörterbuch (Offline-Ready)'}`
       : `<i class="fa-solid fa-camera-rotate text-sky-400"></i> 3D-Kalibrierte Gemini Vision`;
-
     document.getElementById('resMealName').textContent = activeMealBaseResult.mealName;
     document.getElementById('resExplanation').textContent = activeMealBaseResult.explanation;
 
     const compContainer = document.getElementById('resComponentsList');
     if (compContainer) {
       if (activeMealBaseResult.components.length > 0) {
-        compContainer.innerHTML = activeMealBaseResult.components.map(c =>
-          `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300 border border-slate-700">${escapeHTML(c)}</span>`
-        ).join('');
+        compContainer.innerHTML = activeMealBaseResult.components.map(c => `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300 border border-slate-700">${escapeHTML(c)}</span>`).join('');
         compContainer.classList.remove('hidden');
-      } else {
-        compContainer.innerHTML = '';
-        compContainer.classList.add('hidden');
-      }
+      } else { compContainer.innerHTML = ''; compContainer.classList.add('hidden'); }
     }
-
     setPortionScale(100);
 
     document.getElementById('addMealToLogBtn').onclick = () => {
-      const factor = activePortionScalePercent / 100;
-      const finalName = activePortionScalePercent === 100
-        ? activeMealBaseResult.mealName
-        : `${activeMealBaseResult.mealName} [${activePortionScalePercent}%]`;
-
+      const f = activePortionScalePercent / 100;
+      const finalName = activePortionScalePercent === 100 ? activeMealBaseResult.mealName : `${activeMealBaseResult.mealName} [${activePortionScalePercent}%]`;
       addMealEntry({
-        name: finalName,
-        kcal: Math.round(activeMealBaseResult.kcal * factor),
-        protein: Math.round(activeMealBaseResult.protein * factor),
-        carbs: Math.round(activeMealBaseResult.carbs * factor),
-        sugar: Math.round(activeMealBaseResult.sugar * factor),
-        fat: Math.round(activeMealBaseResult.fat * factor),
-        fiber: Math.round(activeMealBaseResult.fiber * factor)
+        name: finalName, kcal: Math.round(activeMealBaseResult.kcal * f), protein: Math.round(activeMealBaseResult.protein * f),
+        carbs: Math.round(activeMealBaseResult.carbs * f), sugar: Math.round(activeMealBaseResult.sugar * f),
+        fat: Math.round(activeMealBaseResult.fat * f), fiber: Math.round(activeMealBaseResult.fiber * f)
       });
-      hideMealResult();
-      clearMealPhoto();
-      clearMealText();
+      hideMealResult(); clearMealPhoto(); clearMealText();
     };
     box.classList.remove('hidden');
   }
 
-  function hideMealResult() {
-    document.getElementById('mealAnalysisResult').classList.add('hidden');
-    activeMealBaseResult = null;
-  }
-
-  function resetAnalyzeButtonUI() {
-    const btn = document.getElementById('analyzeMealBtn');
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>Turbo-Scan</span>`;
-    }
-  }
+  function hideMealResult() { document.getElementById('mealAnalysisResult').classList.add('hidden'); activeMealBaseResult = null; }
+  function resetAnalyzeButtonUI() { const btn = document.getElementById('analyzeMealBtn'); if (btn) { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>Turbo-Scan</span>`; } }
 
   async function handleMealPhotoSelect(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    abortActiveVisionRequest();
-    resetAnalyzeButtonUI();
+    abortActiveVisionRequest(); resetAnalyzeButtonUI();
     try {
       showToast(state.lang === 'pl' ? 'Optymalizacja zdjęcia...' : 'Optimiere Foto für 3D-Vision...', 'info');
       const b64 = await compressImageFile(file, 'label');
-      currentMealBase64 = b64;
-      currentMealLabelBase64 = b64;
+      currentMealBase64 = b64; currentMealLabelBase64 = b64;
       document.getElementById('mealPreviewImg').src = `data:image/jpeg;base64,${b64}`;
       document.getElementById('mealPreviewContainer').classList.remove('hidden');
       triggerMealAnalysis();
-    } catch (err) {
-      showToast(err.message || 'Bildfehler.', 'error');
-    }
+    } catch (err) { showToast(err.message || 'Bildfehler.', 'error'); }
   }
 
   function clearMealPhoto() {
-    abortActiveVisionRequest();
-    resetAnalyzeButtonUI();
-    currentMealBase64 = null;
-    currentMealLabelBase64 = null;
+    abortActiveVisionRequest(); resetAnalyzeButtonUI();
+    currentMealBase64 = null; currentMealLabelBase64 = null;
     const input = document.getElementById('mealPhotoInput');
     if (input) input.value = '';
     document.getElementById('mealPreviewImg').src = '';
     document.getElementById('mealPreviewContainer').classList.add('hidden');
   }
 
-  function clearMealText() {
-    const input = document.getElementById('mealTextInput');
-    if (input) input.value = '';
-  }
+  function clearMealText() { const input = document.getElementById('mealTextInput'); if (input) input.value = ''; }
 
-  // ============================================================================
-  // SCANNER 1: MAHLZEITEN- & 3D-VISION-SCANNER (triggerMealAnalysis / callGeminiVisionAPI)
-  // ============================================================================
   async function triggerMealAnalysis() {
     if (isVisionBusy) return;
     const textVal = (document.getElementById('mealTextInput').value || '').trim();
     const hasPhoto = Boolean(currentMealBase64);
-
-    if (!hasPhoto && !textVal) {
-      showToast(state.lang === 'pl' ? 'Dodaj zdjęcie lub wpisz nazwę posiłku.' : 'Bitte ein Foto auswählen oder eine Mahlzeit eingeben.', 'warning');
-      return;
-    }
+    if (!hasPhoto && !textVal) { showToast('Bitte Foto auswählen oder Mahlzeit eingeben.', 'warning'); return; }
 
     if (!hasPhoto && textVal) {
       const lexHit = resolveFromLexicon(textVal);
-      if (lexHit) {
-        showMealResult(lexHit);
-        showToast(state.lang === 'pl' ? '0.0s Trafienie w słowniku!' : '0.0s Sofort-Treffer im lokalen Wörterbuch!', 'success');
-        return;
-      }
+      if (lexHit) { showMealResult(lexHit); showToast('0.0s Sofort-Treffer im lokalen Wörterbuch!', 'success'); return; }
       const hasApiKey = Boolean((state.geminiApiKey || recoverRedundantApiKey(state) || '').trim());
       if (!hasApiKey) {
         const explicitKcalMatch = textVal.match(/(\d{1,4}(?:[.,]\d+)?)\s*kcal\b/i);
@@ -2357,39 +2254,26 @@
           const kVal = Math.round(parseFloat(explicitKcalMatch[1].replace(',', '.')));
           const isHighProt = /protein|quark|skyr|mousse|shake|twarog|bialk/i.test(textVal);
           const pG = isHighProt ? Math.round((kVal * 0.45) / 4) : Math.round((kVal * 0.25) / 4);
-          const cG = Math.round((kVal * 0.35) / 4);
-          const sG = isHighProt ? Math.round(cG * 0.5) : Math.round(cG * 0.4);
-          const fG = Math.max(1, Math.round((kVal - (pG * 4 + cG * 4)) / 9));
-          showMealResult({
-            mealName: textVal.replace(/\s*\d+\s*kcal/i, '').trim() || 'Mahlzeit',
-            kcal: kVal, protein: pG, carbs: cG, sugar: sG, fat: fG, fiber: 1,
-            explanation: `Exakte Kalorienübernahme (${kVal} kcal).`,
-            source: 'lexicon'
-          });
+          const cG = Math.round((kVal * 0.35) / 4), sG = Math.round(cG * 0.4), fG = Math.max(1, Math.round((kVal - (pG * 4 + cG * 4)) / 9));
+          showMealResult({ mealName: textVal.replace(/\s*\d+\s*kcal/i, '').trim() || 'Mahlzeit', kcal: kVal, protein: pG, carbs: cG, sugar: sG, fat: fG, fiber: 1, explanation: `Exakte Kalorienübernahme (${kVal} kcal).`, source: 'lexicon' });
           return;
         }
       }
     }
 
     const btn = document.getElementById('analyzeMealBtn');
-    isVisionBusy = true;
-    btn.disabled = true;
+    isVisionBusy = true; btn.disabled = true;
     btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>${state.lang === 'pl' ? 'Analiza 3D...' : '3D-Analyse...'}</span>`;
 
     const masterCtrl = new AbortController();
     activeVisionController = masterCtrl;
-
     clearTimeout(visionWatchdogTimer);
-    visionWatchdogTimer = setTimeout(() => {
-      try { masterCtrl.abort(); } catch (_) {}
-    }, 26000);
+    visionWatchdogTimer = setTimeout(() => { try { masterCtrl.abort(); } catch (_) {} }, 26000);
 
     try {
       const targetLangName = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
       const explicitKcalInText = textVal.match(/(\d{1,4}(?:[.,]\d+)?)\s*kcal\b/i);
-      const explicitHint = explicitKcalInText
-        ? `WICHTIG: Der Nutzer hat explizit ${explicitKcalInText[1]} kcal angegeben. Übernimm exakt diesen Kalorienwert!`
-        : '';
+      const explicitHint = explicitKcalInText ? `WICHTIG: Der Nutzer hat explizit ${explicitKcalInText[1]} kcal angegeben. Übernimm exakt diesen Kalorienwert!` : '';
       const rigorLayer = buildGlobalNutritionalRigorRules(targetLangName, textVal);
 
       const prompt = `Du bist ein präziser Ernährungswissenschaftler, Photogrammetrie-Experte und OCR-Spezialist.
@@ -2397,73 +2281,43 @@ Analysiere die Mahlzeit ${hasPhoto ? 'auf dem Bild' : ''} ${textVal ? `und den N
 ${explicitHint}
 ${rigorLayer}
 WICHTIG: Schreibe "mealName", "explanation" und Komponentennamen auf ${targetLangName}!
-ZUSATZ-REGELN:
-- OCR-PRIORITÄT: Falls ein Etikett oder eine Nährwerttabelle sichtbar ist, setze "isNutritionLabel": true und übernimm exakt die gedruckten Werte.
+- OCR-PRIORITÄT: Falls ein Etikett sichtbar ist, setze "isNutritionLabel": true und übernimm exakt die gedruckten Werte.
 - GEFÄSS-ANKER: Speisen in Auflaufform/Pfanne mit überbackenem Käse sind Auflauf/Gratin (Zapiekanka), niemals ein Käsebrötchen.
 Antworte AUSSCHLIESSLICH als kompaktes JSON:
 {
   "mealName": "Gesamtname inkl. Gewicht (${targetLangName})",
   "cameraAngle": "45°",
   "isNutritionLabel": false,
-  "components": [
-    { "name": "Zutat 1", "grams": 75, "kcal": 195, "protein": 7, "carbs": 35, "sugar": 2, "fat": 3, "fiber": 5 }
-  ],
-  "kcal": 0,
-  "protein": 0,
-  "carbs": 0,
-  "sugar": 0,
-  "fat": 0,
-  "fiber": 0,
-  "explanation": "Kurze Begründung inkl. Maßstabs-/Garmethoden-Kalibrierung auf ${targetLangName}"
+  "components": [{ "name": "Zutat 1", "grams": 75, "kcal": 195, "protein": 7, "carbs": 35, "sugar": 2, "fat": 3, "fiber": 5 }],
+  "kcal": 0, "protein": 0, "carbs": 0, "sugar": 0, "fat": 0, "fiber": 0,
+  "explanation": "Kurze Begründung auf ${targetLangName}"
 }`;
 
-      const imgToSend = hasPhoto ? currentMealBase64 : null;
-      const rawText = await callGeminiRequest(prompt, imgToSend, 13000, { expectJson: true, masterSignal: masterCtrl.signal });
+      const rawText = await callGeminiRequest(prompt, hasPhoto ? currentMealBase64 : null, 13000, { expectJson: true, masterSignal: masterCtrl.signal });
       const data = extractJSON(rawText);
 
-      let p = Math.max(0, Math.round(Number(data.protein) || 0));
-      let c = Math.max(0, Math.round(Number(data.carbs) || 0));
-      let sug = Math.min(c, Math.max(0, Math.round(Number(data.sugar) || 0)));
-      let f = Math.max(0, Math.round(Number(data.fat) || 0));
-      let fib = Math.max(0, Math.round(Number(data.fiber) || 0));
-      let kcal = Math.max(0, Math.round(Number(data.kcal) || 0));
-      let componentBadges = [];
+      let p = Math.max(0, Math.round(Number(data.protein) || 0)), c = Math.max(0, Math.round(Number(data.carbs) || 0));
+      let sug = Math.min(c, Math.max(0, Math.round(Number(data.sugar) || 0))), f = Math.max(0, Math.round(Number(data.fat) || 0));
+      let fib = Math.max(0, Math.round(Number(data.fiber) || 0)), kcal = Math.max(0, Math.round(Number(data.kcal) || 0)), componentBadges = [];
 
       const reconciled = reconcileVisionComponents(data, Boolean(data.isNutritionLabel), textVal);
       if (reconciled && !explicitKcalInText) {
-        p = reconciled.protein;
-        c = reconciled.carbs;
-        sug = reconciled.sugar;
-        f = reconciled.fat;
-        fib = reconciled.fiber;
-        kcal = reconciled.kcal;
-        componentBadges = reconciled.badgeLabels;
+        p = reconciled.protein; c = reconciled.carbs; sug = reconciled.sugar; f = reconciled.fat; fib = reconciled.fiber; kcal = reconciled.kcal; componentBadges = reconciled.badgeLabels;
       }
-
-      if (explicitKcalInText) {
-        kcal = Math.round(parseFloat(explicitKcalInText[1].replace(',', '.')));
-      } else if (!data.isNutritionLabel) {
+      if (explicitKcalInText) kcal = Math.round(parseFloat(explicitKcalInText[1].replace(',', '.')));
+      else if (!data.isNutritionLabel) {
         const atwater = Math.round(4 * p + 4 * c + 9 * f + 2 * fib);
         if (kcal === 0 || Math.abs(kcal - atwater) > Math.max(30, atwater * 0.18)) kcal = atwater;
       }
 
-      showMealResult({
-        mealName: data.mealName || textVal || 'Mahlzeit',
-        kcal, protein: p, carbs: c, sugar: sug, fat: f, fiber: fib,
-        explanation: data.explanation || '',
-        components: componentBadges,
-        source: 'ai'
-      });
-      showToast(state.lang === 'pl' ? 'Analiza 3D zakończona!' : '3D-kalibrierte Analyse abgeschlossen!', 'success');
+      showMealResult({ mealName: data.mealName || textVal || 'Mahlzeit', kcal, protein: p, carbs: c, sugar: sug, fat: f, fiber: fib, explanation: data.explanation || '', components: componentBadges, source: 'ai' });
+      showToast('3D-kalibrierte Analyse abgeschlossen!', 'success');
     } catch (err) {
-      if (activeVisionController === masterCtrl) {
-        showToast(err.message || 'Analyse fehlgeschlagen.', 'error');
-      }
+      if (activeVisionController === masterCtrl) showToast(err.message || 'Analyse fehlgeschlagen.', 'error');
     } finally {
       clearTimeout(visionWatchdogTimer);
       if (activeVisionController === masterCtrl) activeVisionController = null;
-      isVisionBusy = false;
-      resetAnalyzeButtonUI();
+      isVisionBusy = false; resetAnalyzeButtonUI();
     }
   }
   const callGeminiVisionAPI = triggerMealAnalysis;
@@ -2479,124 +2333,90 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
       quark_250: { name: isPl ? '🥣 Twaróg chudy (250g)' : '🥣 Magerquark (250g)', kcal: 170, protein: 30, carbs: 10, sugar: 10, fat: 1, fiber: 0 },
       protein_shake: { name: isPl ? '🥤 Shake Białkowy (30g)' : '🥤 Whey Protein-Shake (30g)', kcal: 120, protein: 24, carbs: 3, sugar: 1, fat: 2, fiber: 0 }
     };
-    const item = presets[presetId];
-    if (item) addMealEntry(item);
+    if (presets[presetId]) addMealEntry(presets[presetId]);
   }
 
-  function addStoredRecipe(idx) {
-    const item = window._quickRecipeStore && window._quickRecipeStore[idx];
-    if (item) addMealEntry(item);
-  }
+  function addStoredRecipe(idx) { const item = window._quickRecipeStore && window._quickRecipeStore[idx]; if (item) addMealEntry(item); }
 
   function addMealEntry(entry) {
     const today = getTodayData();
     const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
     const cVal = Math.max(0, Math.round(Number(entry.carbs) || 0));
-    const sVal = Math.min(cVal, Math.max(0, Math.round(Number(entry.sugar) || 0)));
-
     today.meals.unshift({
       id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-      time: timeStr,
-      name: entry.name || 'Mahlzeit',
-      kcal: Math.max(0, Math.round(Number(entry.kcal) || 0)),
-      protein: Math.max(0, Math.round(Number(entry.protein) || 0)),
-      carbs: cVal,
-      sugar: sVal,
-      fat: Math.max(0, Math.round(Number(entry.fat) || 0)),
-      fiber: Math.max(0, Math.round(Number(entry.fiber) || 0))
+      time: timeStr, name: entry.name || 'Mahlzeit', kcal: Math.max(0, Math.round(Number(entry.kcal) || 0)),
+      protein: Math.max(0, Math.round(Number(entry.protein) || 0)), carbs: cVal,
+      sugar: Math.min(cVal, Math.max(0, Math.round(Number(entry.sugar) || 0))),
+      fat: Math.max(0, Math.round(Number(entry.fat) || 0)), fiber: Math.max(0, Math.round(Number(entry.fiber) || 0))
     });
-    saveState();
-    renderDiaryUI();
+    saveState(); renderDiaryUI();
     showToast(`${entry.name} (+${entry.kcal} kcal)`, 'success');
   }
 
   function removeMealEntry(mealId) {
     const today = getTodayData();
     today.meals = today.meals.filter(m => m.id !== mealId);
-    saveState();
-    renderDiaryUI();
+    saveState(); renderDiaryUI();
     showToast(state.lang === 'pl' ? 'Usunięto wpis.' : 'Eintrag entfernt.', 'info');
   }
 
   function clearTodayMeals() {
     const today = getTodayData();
     if (!today.meals.length) return;
-    if (!confirm(state.lang === 'pl' ? 'Czy na pewno chcesz usunąć dzisiejsze posiłki?' : 'Möchtest du wirklich alle heutigen Mahlzeiten löschen?')) return;
-    today.meals = [];
-    saveState();
-    renderDiaryUI();
+    if (!confirm(state.lang === 'pl' ? 'Usunąć dzisiejsze posiłki?' : 'Alle heutigen Mahlzeiten löschen?')) return;
+    today.meals = []; saveState(); renderDiaryUI();
   }
 
   function addWater(deltaMl) {
     const today = getTodayData();
     today.waterMl = Math.max(0, (Number(today.waterMl) || 0) + Number(deltaMl));
-    saveState();
-    renderDiaryUI();
+    saveState(); renderDiaryUI();
   }
 
   function renderDiaryUI() {
     renderMetabolicCoachUI();
-    const today = getTodayData();
-    const prof = state.profile;
-    let sumKcal = 0, sumP = 0, sumC = 0, sumSugar = 0, sumF = 0, sumFiber = 0;
+    renderSmartHabitChips();
 
+    const today = getTodayData(), prof = state.profile;
+    let sumKcal = 0, sumP = 0, sumC = 0, sumSugar = 0, sumF = 0, sumFiber = 0;
     for (const m of today.meals) {
-      sumKcal += Number(m.kcal) || 0;
-      sumP += Number(m.protein) || 0;
-      sumC += Number(m.carbs) || 0;
-      sumSugar += Number(m.sugar) || 0;
-      sumF += Number(m.fat) || 0;
-      sumFiber += Number(m.fiber) || 0;
+      sumKcal += Number(m.kcal) || 0; sumP += Number(m.protein) || 0; sumC += Number(m.carbs) || 0;
+      sumSugar += Number(m.sugar) || 0; sumF += Number(m.fat) || 0; sumFiber += Number(m.fiber) || 0;
     }
 
-    const tKcal = Math.max(500, Number(prof.targetKcal) || 2000);
-    const tProt = Math.max(20, Number(prof.targetProt) || 140);
-    const tCarbs = Math.max(20, Number(prof.targetCarbs) || 180);
-    const tFat = Math.max(15, Number(prof.targetFat) || 65);
-    const tFiber = Math.max(10, Number(prof.targetFiber) || 30);
-    const tSugar = Math.max(10, Number(prof.targetSugar) || 35);
+    const tKcal = Math.max(500, Number(prof.targetKcal) || 2000), tProt = Math.max(20, Number(prof.targetProt) || 140);
+    const tCarbs = Math.max(20, Number(prof.targetCarbs) || 180), tFat = Math.max(15, Number(prof.targetFat) || 65);
+    const tFiber = Math.max(10, Number(prof.targetFiber) || 30), tSugar = Math.max(10, Number(prof.targetSugar) || 35);
 
-    const remKcal = tKcal - sumKcal;
-    const pctKcal = Math.min(100, Math.round((sumKcal / tKcal) * 100));
-
+    const remKcal = tKcal - sumKcal, pctKcal = Math.min(100, Math.round((sumKcal / tKcal) * 100));
     document.getElementById('kcalConsumed').textContent = String(sumKcal);
     document.getElementById('kcalTarget').textContent = String(tKcal);
     document.getElementById('kcalRemaining').textContent = `${remKcal >= 0 ? remKcal : 0} kcal`;
     document.getElementById('kcalPercentBadge').textContent = `${pctKcal}%`;
     document.getElementById('kcalProgress').style.width = `${pctKcal}%`;
 
+    computeAndRenderWeeklyBank(sumKcal, tKcal);
+
     document.getElementById('protConsumed').textContent = String(sumP);
     document.getElementById('protTarget').textContent = String(tProt);
     document.getElementById('protBar').style.width = `${Math.min(100, Math.round((sumP / tProt) * 100))}%`;
-
     document.getElementById('carbsConsumed').textContent = String(sumC);
     document.getElementById('carbsTarget').textContent = String(tCarbs);
     document.getElementById('carbsBar').style.width = `${Math.min(100, Math.round((sumC / tCarbs) * 100))}%`;
-
     document.getElementById('fatConsumed').textContent = String(sumF);
     document.getElementById('fatTarget').textContent = String(tFat);
     document.getElementById('fatBar').style.width = `${Math.min(100, Math.round((sumF / tFat) * 100))}%`;
 
-    const fibConsEl = document.getElementById('fiberConsumed');
-    const fibTargEl = document.getElementById('fiberTarget');
-    const fibBarEl = document.getElementById('fiberBar');
-    if (fibConsEl) fibConsEl.textContent = String(sumFiber);
-    if (fibTargEl) fibTargEl.textContent = String(tFiber);
-    if (fibBarEl) fibBarEl.style.width = `${Math.min(100, Math.round((sumFiber / tFiber) * 100))}%`;
+    document.getElementById('fiberConsumed').textContent = String(sumFiber);
+    document.getElementById('fiberTarget').textContent = String(tFiber);
+    document.getElementById('fiberBar').style.width = `${Math.min(100, Math.round((sumFiber / tFiber) * 100))}%`;
 
-    const sugConsEl = document.getElementById('sugarConsumed');
-    const sugTargEl = document.getElementById('sugarTarget');
-    const sugBarEl = document.getElementById('sugarBar');
-    if (sugConsEl) {
-      sugConsEl.textContent = String(sumSugar);
-      sugConsEl.className = sumSugar > tSugar ? 'text-rose-400 font-extrabold' : 'text-white font-bold';
-    }
-    if (sugTargEl) sugTargEl.textContent = String(tSugar);
+    const sugConsEl = document.getElementById('sugarConsumed'), sugBarEl = document.getElementById('sugarBar');
+    if (sugConsEl) { sugConsEl.textContent = String(sumSugar); sugConsEl.className = sumSugar > tSugar ? 'text-rose-400 font-extrabold' : 'text-white font-bold'; }
+    document.getElementById('sugarTarget').textContent = String(tSugar);
     if (sugBarEl) {
       sugBarEl.style.width = `${Math.min(100, Math.round((sumSugar / tSugar) * 100))}%`;
-      sugBarEl.className = sumSugar > tSugar
-        ? 'h-full bg-rose-500 rounded-full transition-all duration-300'
-        : 'h-full bg-fuchsia-400 rounded-full transition-all duration-300';
+      sugBarEl.className = sumSugar > tSugar ? 'h-full bg-rose-500 rounded-full transition-all duration-300' : 'h-full bg-fuchsia-400 rounded-full transition-all duration-300';
     }
 
     document.getElementById('waterConsumed').textContent = String(today.waterMl || 0);
@@ -2628,14 +2448,10 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
               <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
           </div>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
   }
 
-  // ============================================================================
-  // SCANNER 2: RESTEKÜCHE & SMART EXPIRY GUARD (runFridgeLeftoverAI)
-  // ============================================================================
   async function handleFridgePhotoSelect(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -2644,7 +2460,7 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
       currentFridgeBase64 = b64;
       document.getElementById('fridgePreviewImg').src = `data:image/jpeg;base64,${b64}`;
       document.getElementById('fridgePreviewContainer').classList.remove('hidden');
-      showToast(state.lang === 'pl' ? 'Zdjęcie lodówki gotowe!' : 'Kühlschrank-Foto bereit!', 'success');
+      showToast('Kühlschrank-Foto bereit!', 'success');
     } catch (err) { showToast(err.message || 'Bildfehler.', 'error'); }
   }
 
@@ -2657,97 +2473,54 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
 
   async function runFridgeLeftoverAI() {
     const extra = (document.getElementById('fridgeExtraText').value || '').trim();
-    if (!currentFridgeBase64 && !extra) {
-      showToast('Bitte Kühlschrank-Foto aufnehmen oder Vorräte eingeben.', 'warning');
-      return;
-    }
-    const btn = document.getElementById('scanFridgeBtn');
-    const orig = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ...`;
-
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => { try { ctrl.abort(); } catch (_) {} }, 26000);
+    if (!currentFridgeBase64 && !extra) { showToast('Bitte Foto aufnehmen oder Vorräte eingeben.', 'warning'); return; }
+    const btn = document.getElementById('scanFridgeBtn'), orig = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ...`;
+    const ctrl = new AbortController(), timer = setTimeout(() => { try { ctrl.abort(); } catch (_) {} }, 26000);
 
     try {
       const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
-      const rigorLayer = buildGlobalNutritionalRigorRules(targetLang, extra);
-
       const prompt = `Du bist ein Lebensmittelsicherheits-Experte und Fitness-Koch. Antworte auf ${targetLang}.
 Analysiere die Zutaten ${currentFridgeBase64 ? 'auf dem Kühlschrank-Foto' : ''} ${extra ? `sowie: "${extra}"` : ''}.
-${rigorLayer}
-ZUSATZ-REGELN (Smart Expiry & Fill-Level Guard):
-1. Halluziniere KEINE unlesbaren MHD-Daten! Bewerte den biologischen Reifegrad: "high" (1-2 Tage), "medium" (3-4 Tage), "low" (>5 Tage).
-2. Kalibriere anhand der Standard-Packungsgrößen im Kühlschrank (z.B. 250g/500g Quarkbecher, 1L Milch, 200g Aufschnitt) den realen Rest-Füllstand in Gramm!
-3. Erstelle 2 High-Protein Fitness-Rezepte (fettarme Zubereitung, max. 5g Bratöl pro Portion) auf ${targetLang}.
+${buildGlobalNutritionalRigorRules(targetLang, extra)}
+1. Halluziniere KEINE MHD-Daten! Bewerte Reifegrad: "high" (1-2d), "medium" (3-4d), "low" (>5d).
+2. Kalibriere anhand Standard-Packungsgrößen (250g/500g/1L) den Rest-Füllstand in Gramm!
+3. Erstelle 2 High-Protein Rezepte (max. 5g Öl/Portion).
 Antworte AUSSCHLIESSLICH als JSON:
 {
-  "ingredients": [{ "name": "Zutat inkl. geschätzter Restmenge in g/ml", "urgency": "high", "shelfLifeHint": "1-2 Tage" }],
-  "recipes": [{ "title": "Rezeptname", "kcal": 460, "protein": 45, "carbs": 35, "sugar": 5, "fat": 11, "fiber": 5, "steps": ["Schritt 1", "Schritt 2"] }]
+  "ingredients": [{ "name": "Zutat inkl. Restmenge", "urgency": "high", "shelfLifeHint": "1-2 Tage" }],
+  "recipes": [{ "title": "Rezept", "kcal": 460, "protein": 45, "carbs": 35, "sugar": 5, "fat": 11, "fiber": 5, "steps": ["Schritt 1"] }]
 }`;
-
       const raw = await callGeminiRequest(prompt, currentFridgeBase64, 13000, { expectJson: true, masterSignal: ctrl.signal });
       const data = extractJSON(raw);
       const rank = { high: 1, medium: 2, low: 3 };
-      const sortedIng = (Array.isArray(data.ingredients) ? data.ingredients : [])
-        .sort((a, b) => (rank[a.urgency] || 9) - (rank[b.urgency] || 9));
+      const sortedIng = (Array.isArray(data.ingredients) ? data.ingredients : []).sort((a, b) => (rank[a.urgency] || 9) - (rank[b.urgency] || 9));
       const recipes = Array.isArray(data.recipes) ? data.recipes : [];
-
-      window._quickRecipeStore = recipes.map(r => ({
-        name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, sugar: r.sugar || 4, fat: r.fat || 11, fiber: r.fiber || 4
-      }));
+      window._quickRecipeStore = recipes.map(r => ({ name: r.title, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 25, sugar: r.sugar || 4, fat: r.fat || 11, fiber: r.fiber || 4 }));
 
       document.getElementById('fridgeResultsContainer').innerHTML = `
         <div class="glass-card rounded-2xl p-4 space-y-2.5">
           <h3 class="text-xs font-extrabold uppercase text-teal-400">Smart Expiry & Fill-Level Guard</h3>
-          <div class="space-y-1.5">
-            ${sortedIng.map(i => {
-              const badgeClass = i.urgency === 'high'
-                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                : i.urgency === 'medium'
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-              return `<div class="flex items-center justify-between bg-slate-900/80 rounded-xl px-3 py-2 border border-slate-800 text-xs">
-                <span class="font-bold text-white">${escapeHTML(i.name)}</span>
-                <span class="px-2 py-0.5 rounded-full border text-[10px] font-bold ${badgeClass}">${escapeHTML(i.shelfLifeHint || i.urgency)}</span>
-              </div>`;
-            }).join('')}
-          </div>
+          <div class="space-y-1.5">${sortedIng.map(i => {
+            const bc = i.urgency === 'high' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : i.urgency === 'medium' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+            return `<div class="flex items-center justify-between bg-slate-900/80 rounded-xl px-3 py-2 border border-slate-800 text-xs"><span class="font-bold text-white">${escapeHTML(i.name)}</span><span class="px-2 py-0.5 rounded-full border text-[10px] font-bold ${bc}">${escapeHTML(i.shelfLifeHint || i.urgency)}</span></div>`;
+          }).join('')}</div>
         </div>
         ${recipes.map((r, idx) => `
           <div class="glass-card rounded-2xl p-4 space-y-2.5">
-            <div class="flex justify-between items-start gap-2">
-              <h4 class="text-sm font-extrabold text-white">${escapeHTML(r.title)}</h4>
-              <span class="text-xs font-extrabold text-emerald-400 shrink-0">${Number(r.kcal) || 0} kcal | ${Number(r.protein) || 0}g P</span>
-            </div>
+            <div class="flex justify-between items-start gap-2"><h4 class="text-sm font-extrabold text-white">${escapeHTML(r.title)}</h4><span class="text-xs font-extrabold text-emerald-400 shrink-0">${Number(r.kcal) || 0} kcal | ${Number(r.protein) || 0}g P</span></div>
             <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">${(r.steps || []).map(s => `<li>${escapeHTML(s)}</li>`).join('')}</ul>
-            <button type="button" onclick="addStoredRecipe(${idx})" class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
-              + (${Number(r.kcal) || 0} kcal)
-            </button>
-          </div>
-        `).join('')}
-      `;
-    } catch (err) {
-      showToast(err.message || 'Fehler.', 'error');
-    } finally {
-      clearTimeout(timer);
-      btn.disabled = false;
-      btn.innerHTML = orig;
-    }
+            <button type="button" onclick="addStoredRecipe(${idx})" class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">+ (${Number(r.kcal) || 0} kcal)</button>
+          </div>`).join('')}`;
+    } catch (err) { showToast(err.message || 'Fehler.', 'error'); }
+    finally { clearTimeout(timer); btn.disabled = false; btn.innerHTML = orig; }
   }
 
-  // ============================================================================
-  // SCANNER 3: RESTAURANT & CONTEXTUAL MENU COMPANION (runMenuScannerAI)
-  // ============================================================================
   function updateMenuBudgetBanner() {
-    const today = getTodayData();
-    const prof = state.profile;
-    const usedKcal = today.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0);
-    const usedProt = today.meals.reduce((a, m) => a + (Number(m.protein) || 0), 0);
-    const remKcal = Math.max(0, (Number(prof.targetKcal) || 2000) - usedKcal);
-    const remProt = Math.max(0, (Number(prof.targetProt) || 140) - usedProt);
-    const elK = document.getElementById('menuRemKcal');
-    const elP = document.getElementById('menuRemProt');
+    const today = getTodayData(), prof = state.profile;
+    const remKcal = Math.max(0, (Number(prof.targetKcal) || 2000) - today.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0));
+    const remProt = Math.max(0, (Number(prof.targetProt) || 140) - today.meals.reduce((a, m) => a + (Number(m.protein) || 0), 0));
+    const elK = document.getElementById('menuRemKcal'), elP = document.getElementById('menuRemProt');
     if (elK) elK.textContent = String(remKcal);
     if (elP) elP.textContent = String(remProt);
   }
@@ -2756,7 +2529,7 @@ Antworte AUSSCHLIESSLICH als JSON:
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     try {
-      showToast(state.lang === 'pl' ? 'Szybkie ładowanie karty...' : 'Optimiere Speisekarte für Turbo-OCR...', 'info');
+      showToast('Optimiere Speisekarte für Turbo-OCR...', 'info');
       const b64 = await compressImageFile(file, 'menu');
       currentMenuBase64 = b64;
       document.getElementById('menuPreviewImg').src = `data:image/jpeg;base64,${b64}`;
@@ -2775,196 +2548,99 @@ Antworte AUSSCHLIESSLICH als JSON:
   async function runMenuScannerAI() {
     const textVal = (document.getElementById('menuTextInput').value || '').trim();
     const goal = document.getElementById('menuGoalSelect').value;
-    if (!currentMenuBase64 && !textVal) {
-      showToast('Bitte Speisekarte fotografieren oder Restaurant-Typ eingeben.', 'warning');
-      return;
-    }
-    const today = getTodayData();
-    const prof = state.profile;
+    if (!currentMenuBase64 && !textVal) { showToast('Bitte Speisekarte fotografieren oder Restaurant-Typ eingeben.', 'warning'); return; }
+    const today = getTodayData(), prof = state.profile;
     const remKcal = Math.max(0, (Number(prof.targetKcal) || 2000) - today.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0));
     const remProt = Math.max(0, (Number(prof.targetProt) || 140) - today.meals.reduce((a, m) => a + (Number(m.protein) || 0), 0));
-    const isDamageControl = remKcal <= 120;
 
-    const btn = document.getElementById('scanMenuBtn');
-    const orig = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-bolt fa-beat text-amber-950"></i> <span>${state.lang === 'pl' ? 'Szybka analiza Top-3...' : 'Turbo-Scan läuft...'}</span>`;
-
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => { try { ctrl.abort(); } catch (_) {} }, 26000);
+    const btn = document.getElementById('scanMenuBtn'), orig = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-bolt fa-beat text-amber-950"></i> <span>Turbo-Scan läuft...</span>`;
+    const ctrl = new AbortController(), timer = setTimeout(() => { try { ctrl.abort(); } catch (_) {} }, 26000);
 
     try {
       const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
-      const rigorLayer = buildGlobalNutritionalRigorRules(targetLang, textVal);
-
       const prompt = `FAST VISUAL MENU SKIMMING: Du bist ein Elite-Ernährungscoach im Restaurant. Antworte auf ${targetLang}.
-${rigorLayer}
-Scanne gezielt nur die Hauptgerichte/Protein-Sektionen passend zu:
-- Offenes Tagesbudget: ${remKcal} kcal | Noch offen: ${remProt}g Protein
-- Strategie: ${goal}
-${isDamageControl ? '- DAMAGE-CONTROL: Budget fast leer! Wähle die kalorienärmsten, magersten Protein-Gerichte (gedünstet/gegrillt).' : ''}
+${buildGlobalNutritionalRigorRules(targetLang, textVal)}
+- Offenes Tagesbudget: ${remKcal} kcal | Noch offen: ${remProt}g Protein | Strategie: ${goal}
+${remKcal <= 120 ? '- DAMAGE-CONTROL: Budget fast leer! Wähle die kalorienärmsten, magersten Protein-Gerichte (gedünstet/gegrillt).' : ''}
 ${textVal ? `- Nutzer-Vorgabe: "${textVal}"` : ''}
-WICHTIG (CONTEXTUAL PREPARATION RIGOR): Unterscheide strikt zwischen "gegrillt/gedünstet/Natur" (minimales Zusatzfett, mageres Fleisch <3g Fett/100g) und "paniert/frittiert/cremig/Sahnesauce" (hohes Fett). Blähe magere Grillgerichte niemals künstlich mit Fett auf!
 Wähle direkt die Top-3 besten Gerichte aus und gib je 1 Bestell-Hack.
 Antworte AUSSCHLIESSLICH als JSON:
-{
-  "recommendations": [
-    { "dishName": "Gericht", "kcal": 490, "protein": 48, "carbs": 35, "sugar": 4, "fat": 14, "fiber": 5, "orderHack": "Konkreter Tipp bei der Bestellung" }
-  ]
-}`;
+{ "recommendations": [{ "dishName": "Gericht", "kcal": 490, "protein": 48, "carbs": 35, "sugar": 4, "fat": 14, "fiber": 5, "orderHack": "Tipp" }] }`;
 
       const raw = await callGeminiRequest(prompt, currentMenuBase64, 14000, { expectJson: true, masterSignal: ctrl.signal });
-      const data = extractJSON(raw);
-      const recs = Array.isArray(data.recommendations) ? data.recommendations : [];
-
-      window._quickRecipeStore = recs.map(r => ({
-        name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, sugar: r.sugar || 4, fat: r.fat || 14, fiber: r.fiber || 3
-      }));
+      const recs = Array.isArray(extractJSON(raw).recommendations) ? extractJSON(raw).recommendations : [];
+      window._quickRecipeStore = recs.map(r => ({ name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, sugar: r.sugar || 4, fat: r.fat || 14, fiber: r.fiber || 3 }));
 
       document.getElementById('menuResultsContainer').innerHTML = recs.map((r, idx) => `
         <div class="glass-card rounded-2xl p-4 space-y-2 border-l-4 border-amber-400">
-          <div class="flex items-start justify-between gap-2">
-            <h4 class="text-sm font-extrabold text-white">#${idx + 1} ${escapeHTML(r.dishName)}</h4>
-            <span class="text-xs font-extrabold text-emerald-400 shrink-0">${Number(r.kcal) || 0} kcal | ${Number(r.protein) || 0}g P</span>
-          </div>
-          <div class="text-[11px] text-slate-400 flex gap-2.5">
-            <span class="text-sky-400 font-bold">P: ${Number(r.protein) || 0}g</span>
-            <span class="text-amber-400 font-bold">K: ${Number(r.carbs) || 0}g</span>
-            <span class="text-fuchsia-400 font-bold">Z: ${Number(r.sugar) || 0}g</span>
-            <span class="text-rose-400 font-bold">F: ${Number(r.fat) || 0}g</span>
-          </div>
-          <p class="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2">
-            <i class="fa-solid fa-lightbulb mr-1"></i> ${escapeHTML(r.orderHack || '')}
-          </p>
-          <button type="button" onclick="addStoredRecipe(${idx})" class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">
-            + (${Number(r.kcal) || 0} kcal)
-          </button>
-        </div>
-      `).join('');
-      showToast(state.lang === 'pl' ? 'Top-3 dania gotowe!' : 'Top-3 Empfehlungen berechnet!', 'success');
-    } catch (err) {
-      showToast(err.message || 'Fehler.', 'error');
-    } finally {
-      clearTimeout(timer);
-      btn.disabled = false;
-      btn.innerHTML = orig;
-    }
+          <div class="flex items-start justify-between gap-2"><h4 class="text-sm font-extrabold text-white">#${idx + 1} ${escapeHTML(r.dishName)}</h4><span class="text-xs font-extrabold text-emerald-400 shrink-0">${Number(r.kcal) || 0} kcal | ${Number(r.protein) || 0}g P</span></div>
+          <div class="text-[11px] text-slate-400 flex gap-2.5"><span class="text-sky-400 font-bold">P: ${Number(r.protein) || 0}g</span><span class="text-amber-400 font-bold">K: ${Number(r.carbs) || 0}g</span><span class="text-fuchsia-400 font-bold">Z: ${Number(r.sugar) || 0}g</span><span class="text-rose-400 font-bold">F: ${Number(r.fat) || 0}g</span></div>
+          <p class="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2"><i class="fa-solid fa-lightbulb mr-1"></i> ${escapeHTML(r.orderHack || '')}</p>
+          <button type="button" onclick="addStoredRecipe(${idx})" class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-extrabold text-emerald-300">+ (${Number(r.kcal) || 0} kcal)</button>
+        </div>`).join('');
+      showToast('Top-3 Empfehlungen berechnet!', 'success');
+    } catch (err) { showToast(err.message || 'Fehler.', 'error'); }
+    finally { clearTimeout(timer); btn.disabled = false; btn.innerHTML = orig; }
   }
 
-  // ============================================================================
-  // SCANNER 4: KOCHSTUDIO & TOPF-/PFANNEN-ENGINE (runChefRecipeAI / runPotScannerAI)
-  // ============================================================================
   async function runChefRecipeAI() {
     const craving = (document.getElementById('chefCravingInput').value || 'High-Protein Pfannengericht').trim();
-    const maxKcal = Number(document.getElementById('chefKcalLimit').value) || 600;
-    const minProt = Number(document.getElementById('chefProtMin').value) || 45;
-    const maxTime = Number(document.getElementById('chefTimeMax').value) || 20;
-
-    const btn = document.getElementById('generateChefBtn');
-    const orig = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ...`;
-
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => { try { ctrl.abort(); } catch (_) {} }, 26000);
+    const maxKcal = Number(document.getElementById('chefKcalLimit').value) || 600, minProt = Number(document.getElementById('chefProtMin').value) || 45, maxTime = Number(document.getElementById('chefTimeMax').value) || 20;
+    const btn = document.getElementById('generateChefBtn'), orig = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ...`;
+    const ctrl = new AbortController(), timer = setTimeout(() => { try { ctrl.abort(); } catch (_) {} }, 26000);
 
     try {
       const targetLang = state.lang === 'pl' ? 'Polnisch (Polski)' : 'Deutsch';
-      const rigorLayer = buildGlobalNutritionalRigorRules(targetLang, craving);
-
-      const prompt = `Erstelle ein präzises Fitness-Rezept / Topf- & Pfannengericht auf ${targetLang} für: "${craving}".
-${rigorLayer}
-Vorgaben: Maximal ${maxKcal} kcal, mindestens ${minProt}g Protein, max. ${maxTime} Minuten.
-WICHTIG: Nutze magere Proteinquellen (<3g Fett/100g bei Hähnchenbrust/Putenbrust/magerem Fleisch), deckle Bratöl auf max. 5g (45 kcal) pro Portion und differenziere exakt zwischen gedünstet/gegrillt und cremig/paniert.
+      const prompt = `Erstelle ein Fitness-Rezept / Topf- & Pfannengericht auf ${targetLang} für: "${craving}".
+${buildGlobalNutritionalRigorRules(targetLang, craving)}
+Maximal ${maxKcal} kcal, mindestens ${minProt}g Protein, max. ${maxTime} Minuten.
 Antworte AUSSCHLIESSLICH als JSON:
-{
-  "title": "Rezeptname", "kcal": 520, "protein": 48, "carbs": 42, "sugar": 5, "fat": 12, "fiber": 5,
-  "ingredients": ["200g Hähnchenbrustfilet (mager)", "..."], "steps": ["Schritt 1", "Schritt 2"]
-}`;
+{ "title": "Rezeptname", "kcal": 520, "protein": 48, "carbs": 42, "sugar": 5, "fat": 12, "fiber": 5, "ingredients": ["200g ..."], "steps": ["Schritt 1"] }`;
 
-      const raw = await callGeminiRequest(prompt, null, 14000, { expectJson: true, masterSignal: ctrl.signal });
-      const r = extractJSON(raw);
-
-      window._quickRecipeStore = [{
-        name: r.title || craving, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 35, sugar: r.sugar || 4, fat: r.fat || 12, fiber: r.fiber || 4
-      }];
+      const r = extractJSON(await callGeminiRequest(prompt, null, 14000, { expectJson: true, masterSignal: ctrl.signal }));
+      window._quickRecipeStore = [{ name: r.title || craving, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 35, sugar: r.sugar || 4, fat: r.fat || 12, fiber: r.fiber || 4 }];
 
       document.getElementById('chefResultsContainer').innerHTML = `
         <div class="glass-card rounded-2xl p-4 space-y-3">
-          <div class="flex items-start justify-between gap-2">
-            <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.title || craving)}</h3>
-            <span class="text-xs font-extrabold text-emerald-400 shrink-0">${Number(r.kcal) || 0} kcal | ${Number(r.protein) || 0}g P</span>
-          </div>
-          <div class="text-xs text-slate-300">
-            <ul class="list-disc pl-4 mt-1 space-y-0.5">${(r.ingredients || []).map(i => `<li>${escapeHTML(i)}</li>`).join('')}</ul>
-          </div>
-          <div class="text-xs text-slate-300">
-            <ol class="list-decimal pl-4 mt-1 space-y-1">${(r.steps || []).map(s => `<li>${escapeHTML(s)}</li>`).join('')}</ol>
-          </div>
-          <button type="button" onclick="addStoredRecipe(0)" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">
-            + (${Number(r.kcal) || 0} kcal)
-          </button>
-        </div>
-      `;
-    } catch (err) {
-      showToast(err.message || 'Fehler.', 'error');
-    } finally {
-      clearTimeout(timer);
-      btn.disabled = false;
-      btn.innerHTML = orig;
-    }
+          <div class="flex items-start justify-between gap-2"><h3 class="text-sm font-extrabold text-white">${escapeHTML(r.title || craving)}</h3><span class="text-xs font-extrabold text-emerald-400 shrink-0">${Number(r.kcal) || 0} kcal | ${Number(r.protein) || 0}g P</span></div>
+          <div class="text-xs text-slate-300"><ul class="list-disc pl-4 mt-1 space-y-0.5">${(r.ingredients || []).map(i => `<li>${escapeHTML(i)}</li>`).join('')}</ul></div>
+          <div class="text-xs text-slate-300"><ol class="list-decimal pl-4 mt-1 space-y-1">${(r.steps || []).map(s => `<li>${escapeHTML(s)}</li>`).join('')}</ol></div>
+          <button type="button" onclick="addStoredRecipe(0)" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">+ (${Number(r.kcal) || 0} kcal)</button>
+        </div>`;
+    } catch (err) { showToast(err.message || 'Fehler.', 'error'); }
+    finally { clearTimeout(timer); btn.disabled = false; btn.innerHTML = orig; }
   }
   const runPotScannerAI = runChefRecipeAI;
 
   function updateWeightDiffBanner() {
-    const curW = parseFloat(document.getElementById('profWeight').value) || 90;
-    const tarW = parseFloat(document.getElementById('profTargetWeight').value) || curW;
-    const diff = Math.round((tarW - curW) * 10) / 10;
-    const el = document.getElementById('profWeightDiffValue');
+    const curW = parseFloat(document.getElementById('profWeight').value) || 90, tarW = parseFloat(document.getElementById('profTargetWeight').value) || curW;
+    const diff = Math.round((tarW - curW) * 10) / 10, el = document.getElementById('profWeightDiffValue');
     if (!el) return;
-    if (diff < 0) {
-      el.textContent = `${diff.toFixed(1)} kg`;
-      el.className = 'font-extrabold text-emerald-400';
-    } else if (diff > 0) {
-      el.textContent = `+${diff.toFixed(1)} kg`;
-      el.className = 'font-extrabold text-sky-400';
-    } else {
-      el.textContent = `0.0 kg`;
-      el.className = 'font-extrabold text-amber-400';
-    }
+    el.textContent = `${diff > 0 ? '+' : ''}${diff.toFixed(1)} kg`;
+    el.className = diff < 0 ? 'font-extrabold text-emerald-400' : (diff > 0 ? 'font-extrabold text-sky-400' : 'font-extrabold text-amber-400');
   }
 
   function calculateMifflinTargets() {
-    const gender = document.getElementById('profGender').value;
-    const age = parseFloat(document.getElementById('profAge').value) || 35;
-    const height = parseFloat(document.getElementById('profHeight').value) || 180;
-    const weight = parseFloat(document.getElementById('profWeight').value) || 90;
-    const targetWeight = parseFloat(document.getElementById('profTargetWeight').value) || weight;
-    const activity = parseFloat(document.getElementById('profActivity').value) || 1.375;
-    const goal = document.getElementById('profGoal').value;
-
+    const gender = document.getElementById('profGender').value, age = parseFloat(document.getElementById('profAge').value) || 35;
+    const height = parseFloat(document.getElementById('profHeight').value) || 180, weight = parseFloat(document.getElementById('profWeight').value) || 90;
+    const targetWeight = parseFloat(document.getElementById('profTargetWeight').value) || weight, activity = parseFloat(document.getElementById('profActivity').value) || 1.375, goal = document.getElementById('profGoal').value;
     const { tdee, floor } = computeBmrTdeeAndFloor(weight, { gender, age, height, weight, activity });
 
     let targetKcal = tdee;
     if (goal === 'cut') targetKcal = Math.max(floor, tdee - 500);
     if (goal === 'bulk') targetKcal = tdee + 300;
 
-    const effectiveRefWeight = (targetWeight < weight)
-      ? Math.round(targetWeight + (weight - targetWeight) * 0.25)
-      : weight;
-
-    const protPerKg = goal === 'cut' ? 2.0 : 1.8;
-    const fatPerKg = 0.8;
-    const targetProt = Math.round(effectiveRefWeight * protPerKg);
-    const targetFat = Math.max(45, Math.round(effectiveRefWeight * fatPerKg));
-    const remKcalForCarbs = Math.max(160, targetKcal - (targetProt * 4 + targetFat * 9));
-    const targetCarbs = Math.round(remKcalForCarbs / 4);
+    const effectiveRefWeight = (targetWeight < weight) ? Math.round(targetWeight + (weight - targetWeight) * 0.25) : weight;
+    const targetProt = Math.round(effectiveRefWeight * (goal === 'cut' ? 2.0 : 1.8));
+    const targetFat = Math.max(45, Math.round(effectiveRefWeight * 0.8));
+    const targetCarbs = Math.round(Math.max(160, targetKcal - (targetProt * 4 + targetFat * 9)) / 4);
 
     document.getElementById('profTargetKcal').value = String(targetKcal);
     document.getElementById('profTargetProt').value = String(targetProt);
     document.getElementById('profTargetCarbs').value = String(targetCarbs);
     document.getElementById('profTargetFat').value = String(targetFat);
-
     updateWeightDiffBanner();
     showToast(`Mifflin-St Jeor: ${targetKcal} kcal (BMR-Boden: ${floor} kcal)!`, 'success');
   }
@@ -3000,36 +2676,26 @@ Antworte AUSSCHLIESSLICH als JSON:
     p.targetProt = Math.max(30, parseInt(document.getElementById('profTargetProt').value, 10) || 150);
     p.targetCarbs = Math.max(20, parseInt(document.getElementById('profTargetCarbs').value, 10) || 180);
     p.targetFat = Math.max(20, parseInt(document.getElementById('profTargetFat').value, 10) || 65);
-    p.targetFiber = 30;
-    p.targetSugar = 35;
-    p.waterTarget = Math.max(1500, Math.round(p.weight * 35));
+    p.targetFiber = 30; p.targetSugar = 35; p.waterTarget = Math.max(1500, Math.round(p.weight * 35));
 
     state.metabolicCoach.lastCalibratedWeight = p.weight;
     const todayISO = getTodayISO();
-    const todayData = getTodayData();
-    todayData.weight = p.weight;
+    getTodayData().weight = p.weight;
     const log = getSortedWeightLog();
     const idx = log.findIndex(x => x.date === todayISO);
-    if (idx >= 0) log[idx].weight = p.weight;
-    else log.push({ date: todayISO, weight: p.weight });
+    if (idx >= 0) log[idx].weight = p.weight; else log.push({ date: todayISO, weight: p.weight });
     state.weightLog = log.sort((a, b) => a.date.localeCompare(b.date));
 
-    saveState();
-    syncProfileToUI();
-    renderDiaryUI();
-    showToast(state.lang === 'pl' ? 'Profil zapisany!' : 'Profil & Kalibrierungs-Basis dauerhaft gespeichert!', 'success');
+    saveState(); syncProfileToUI(); renderDiaryUI();
+    showToast('Profil & Kalibrierungs-Basis dauerhaft gespeichert!', 'success');
   }
 
   function exportBackupJSON() {
     const exportObj = { ...state };
     if (state.isGuestUser) delete exportObj.geminiApiKey;
-    const dataStr = JSON.stringify(exportObj, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `calsnap_backup_${getTodayISO()}.json`;
-    a.click();
+    const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = `calsnap_backup_${getTodayISO()}.json`; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
@@ -3057,9 +2723,6 @@ Antworte AUSSCHLIESSLICH als JSON:
     reader.readAsText(file);
   }
 
-  // ============================================================================
-  // ADMIN vs. GAST-ISOLATION & 6-LAYER ADMIN-KEY TRESOR
-  // ============================================================================
   function updateApiKeyStatusUI() {
     const hasKey = Boolean((state.geminiApiKey || recoverRedundantApiKey(state) || '').trim());
     const isGuest = Boolean(state.isGuestUser);
@@ -3072,15 +2735,12 @@ Antworte AUSSCHLIESSLICH als JSON:
       if (isGuest) keyBtn.classList.add('hidden');
       else keyBtn.classList.remove('hidden');
     }
-
     if (dot) dot.className = hasKey ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-rose-500';
     if (lbl) lbl.textContent = hasKey ? 'Key aktiv' : 'API-Key';
-
-    if (guestTxt) {
-      guestTxt.textContent = state.guestCode ? state.guestCode : (isGuest ? 'Gast-Aktiv' : 'Gast-Center');
-    }
+    if (guestTxt) guestTxt.textContent = state.guestCode ? state.guestCode : (isGuest ? 'Gast-Aktiv' : 'Gast-Center');
   }
-    function openApiKeyModal() {
+
+  function openApiKeyModal() {
     if (state.isGuestUser) {
       showToast('Gast-Modus aktiv: API-Key ist durch den Administrator geschützt.', 'info');
       return;
