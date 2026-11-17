@@ -2149,6 +2149,158 @@
     return { kcal: Math.round(sumKcal), protein: Math.round(sumP), carbs: Math.round(sumC), sugar: Math.min(Math.round(sumC), Math.round(sumSugar)), fat: Math.round(sumF), fiber: Math.round(sumFiber), badgeLabels };
   }
 
+ // ============================================================================
+  // IDEE 2: MAHLZEITEN-QUALITÄTS-SCORE (A bis D / 1-10 PUNKTE + OBST/QUARK-SCHUTZ)
+  // ============================================================================
+  function computeMealQualityScore(m) {
+    const kcal = Math.max(0, Number(m.kcal) || 0);
+    const p = Math.max(0, Number(m.protein) || 0);
+    const sugar = Math.max(0, Number(m.sugar) || 0);
+    const fat = Math.max(0, Number(m.fat) || 0);
+    const fiber = Math.max(0, Number(m.fiber) || 0);
+
+    // Kalorienfreie Getränke (Wasser, schwarzer Kaffee, ungesüßter Tee) -> Top-Score A
+    if (kcal <= 15 && sugar <= 1) {
+      return {
+        score: '9.5',
+        grade: 'A',
+        badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+      };
+    }
+
+    const safeKcal = Math.max(20, kcal);
+    const protCalRatio = (p * 4) / safeKcal;
+    const protBonus = Math.min(3.0, protCalRatio * 6.5);
+
+    const fiberPer100Kcal = fiber / (safeKcal / 100);
+    const fiberBonus = Math.min(2.0, fiberPer100Kcal * 0.85);
+
+    // Apfel-/Quark-Schutz: Natürlicher Frucht-/Milchzucker bei gleichzeitig hohem Ballaststoff- oder Proteingehalt wird geschützt
+    const isNaturalMatrix = (fiberBonus >= 0.85 || protBonus >= 1.5);
+    const sugarCalRatio = (sugar * 4) / safeKcal;
+    const sugarPenalty = Math.min(3.5, sugarCalRatio * (isNaturalMatrix ? 2.0 : 4.5));
+
+    const fatCalRatio = (fat * 9) / safeKcal;
+    const fatPenalty = (fatCalRatio > 0.65 && protCalRatio < 0.15)
+      ? Math.min(1.5, (fatCalRatio - 0.55) * 4.0)
+      : 0;
+
+    const raw = Math.max(1.0, Math.min(10.0, 6.0 + protBonus + fiberBonus - sugarPenalty - fatPenalty));
+    const rounded = (Math.round(raw * 10) / 10).toFixed(1);
+
+    if (raw >= 8.0) {
+      return { score: rounded, grade: 'A', badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' };
+    } else if (raw >= 6.0) {
+      return { score: rounded, grade: 'B', badgeClass: 'bg-sky-500/20 text-sky-300 border-sky-500/40' };
+    } else if (raw >= 4.0) {
+      return { score: rounded, grade: 'C', badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
+    }
+    // Kein Bestrafungs-Rot bei Score D, sondern ruhiges Indigo-Violett
+    return { score: rounded, grade: 'D', badgeClass: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' };
+  }
+
+  // ============================================================================
+  // IDEE 1: PSYCHOLOGISCHES 4-ZONEN FARB-SYSTEM (KEIN BESTRAFUNGS-ROT)
+  // ============================================================================
+  function computeAndRenderWeeklyBankV2(sumKcalToday, tKcal) {
+    const lang = state.lang === 'pl' ? 'pl' : 'de';
+    let pastSavedBuffer = 0;
+
+    const now = new Date();
+    const dayOfWeek = (now.getDay() + 6) % 7; // 0 = Montag, 6 = Sonntag
+    const remainingDaysAfterToday = 6 - dayOfWeek;
+
+    for (let i = 1; i <= dayOfWeek; i++) {
+      const iso = getOffsetISO(-i);
+      const dObj = state.days && state.days[iso];
+      if (dObj && Array.isArray(dObj.meals) && dObj.meals.length > 0) {
+        const dayKcal = dObj.meals.reduce((a, m) => a + (Number(m.kcal) || 0), 0);
+        if (dayKcal >= 600) {
+          pastSavedBuffer += (tKcal - dayKcal);
+        }
+      }
+    }
+
+    const todayDelta = sumKcalToday > 0 ? (tKcal - sumKcalToday) : 0;
+    const netWeeklyBuffer = Math.round(pastSavedBuffer + todayDelta);
+    const weeklyRemaining = Math.max(0, Math.round((remainingDaysAfterToday * tKcal) + Math.max(0, tKcal - sumKcalToday) + pastSavedBuffer));
+
+    const bufBadge = document.getElementById('weeklyBufferBadge');
+    const remTxt = document.getElementById('weeklyRemainingText');
+    const shieldBanner = document.getElementById('weeklyShieldBanner');
+    const shieldTxt = document.getElementById('weeklyShieldText');
+    const kcalProg = document.getElementById('kcalProgress');
+    const kcalRemEl = document.getElementById('kcalRemaining');
+    const kcalPctEl = document.getElementById('kcalPercentBadge');
+
+    if (bufBadge) {
+      if (netWeeklyBuffer >= 0) {
+        bufBadge.textContent = lang === 'pl' ? `+${netWeeklyBuffer} kcal zapasu` : `+${netWeeklyBuffer} kcal Puffer`;
+        bufBadge.className = 'font-extrabold text-emerald-400';
+      } else {
+        bufBadge.textContent = `${netWeeklyBuffer} kcal`;
+        bufBadge.className = 'font-extrabold text-sky-300';
+      }
+    }
+
+    if (remTxt) {
+      remTxt.textContent = lang === 'pl'
+        ? `Pozostało w tyg.: ${weeklyRemaining.toLocaleString('pl-PL')} kcal`
+        : `Woche offen: ${weeklyRemaining.toLocaleString('de-DE')} kcal`;
+    }
+
+    const todayOver = sumKcalToday - tKcal;
+    const toleranceLimit = Math.round(tKcal * 0.10); // +10% physiologische Toleranz-Zone
+
+    if (todayOver <= 0) {
+      // ZONE 1: Im Tagesziel (Smaragdgrün)
+      if (shieldBanner) shieldBanner.classList.add('hidden');
+      if (kcalProg) kcalProg.className = 'h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300';
+      if (kcalRemEl) {
+        kcalRemEl.textContent = `${tKcal - sumKcalToday} kcal`;
+        kcalRemEl.className = 'text-sm font-extrabold text-emerald-400';
+      }
+      if (kcalPctEl) kcalPctEl.className = 'text-xs font-bold text-emerald-400';
+    } else if (netWeeklyBuffer >= 0) {
+      // ZONE 2: Über Tagesziel, aber durch Wochen-Puffer gedeckt (Ozean-Türkis)
+      if (shieldBanner && shieldTxt) {
+        shieldTxt.textContent = lang === 'pl'
+          ? `Dziś +${todayOver} kcal, ale dzięki zapasowi z tygodnia (+${netWeeklyBuffer} kcal) jesteś w 100% w normie!`
+          : `Heute +${todayOver} kcal, aber durch deinen Wochen-Puffer (+${netWeeklyBuffer} kcal Netto) voll im grünen Bereich!`;
+        shieldBanner.classList.remove('hidden');
+      }
+      if (kcalProg) kcalProg.className = 'h-full bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full transition-all duration-300';
+      if (kcalRemEl) {
+        kcalRemEl.textContent = lang === 'pl' ? `+${todayOver} kcal (W buforze)` : `+${todayOver} kcal (Im Puffer)`;
+        kcalRemEl.className = 'text-sm font-extrabold text-cyan-300';
+      }
+      if (kcalPctEl) kcalPctEl.className = 'text-xs font-bold text-cyan-300';
+    } else if (todayOver <= toleranceLimit) {
+      // ZONE 3: Leichte Toleranz-Zone bis +10% (Ruhiges Blau-Bernstein statt Alarm-Rot!)
+      if (shieldBanner && shieldTxt) {
+        shieldTxt.textContent = lang === 'pl'
+          ? `Strefa tolerancji (+${todayOver} kcal, ≤10%) — nadal poniżej całkowitego spalania TDEE.`
+          : `Ruhige Toleranz-Zone (+${todayOver} kcal, ≤10%) — physiologisch weiterhin im grünen Bereich.`;
+        shieldBanner.classList.remove('hidden');
+      }
+      if (kcalProg) kcalProg.className = 'h-full bg-gradient-to-r from-sky-400 to-amber-400 rounded-full transition-all duration-300';
+      if (kcalRemEl) {
+        kcalRemEl.textContent = `+${todayOver} kcal (Toleranz)`;
+        kcalRemEl.className = 'text-sm font-extrabold text-amber-300';
+      }
+      if (kcalPctEl) kcalPctEl.className = 'text-xs font-bold text-amber-300';
+    } else {
+      // ZONE 4: Über +10% (Sanftes Coaching-Indigo/Bernstein statt Bestrafungs-Rot)
+      if (shieldBanner) shieldBanner.classList.add('hidden');
+      if (kcalProg) kcalProg.className = 'h-full bg-gradient-to-r from-amber-400 to-indigo-400 rounded-full transition-all duration-300';
+      if (kcalRemEl) {
+        kcalRemEl.textContent = `+${todayOver} kcal`;
+        kcalRemEl.className = 'text-sm font-extrabold text-indigo-300';
+      }
+      if (kcalPctEl) kcalPctEl.className = 'text-xs font-bold text-indigo-300';
+    }
+  }
+
   function setPortionScale(percentValue) {
     if (!activeMealBaseResult) return;
     const pct = Math.max(25, Math.min(250, Math.round(Number(percentValue) || 100)));
@@ -2181,10 +2333,17 @@
       components: Array.isArray(res.components) ? res.components : [], source: res.source || 'ai'
     };
 
+    const q = computeMealQualityScore(activeMealBaseResult);
     const box = document.getElementById('mealAnalysisResult');
-    document.getElementById('resSourceBadge').innerHTML = res.source === 'lexicon'
-      ? `<i class="fa-solid fa-bolt text-amber-400"></i> ${state.lang === 'pl' ? '0.0s Słownik Lokalny' : '0.0s Lokales Wörterbuch (Offline-Ready)'}`
-      : `<i class="fa-solid fa-camera-rotate text-sky-400"></i> 3D-Kalibrierte Gemini Vision`;
+    const srcText = res.source === 'lexicon'
+      ? (state.lang === 'pl' ? '0.0s Słownik' : '0.0s Wörterbuch')
+      : '3D Gemini Vision';
+
+    document.getElementById('resSourceBadge').innerHTML = `
+      <i class="fa-solid ${res.source === 'lexicon' ? 'fa-bolt text-amber-400' : 'fa-camera-rotate text-sky-400'}"></i>
+      <span>${srcText}</span>
+      <span class="ml-1 px-1.5 py-0.2 rounded border text-[10px] font-extrabold ${q.badgeClass}">Score ${q.grade} • ${q.score}/10</span>
+    `;
     document.getElementById('resMealName').textContent = activeMealBaseResult.mealName;
     document.getElementById('resExplanation').textContent = activeMealBaseResult.explanation;
 
@@ -2388,14 +2547,13 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
     const tCarbs = Math.max(20, Number(prof.targetCarbs) || 180), tFat = Math.max(15, Number(prof.targetFat) || 65);
     const tFiber = Math.max(10, Number(prof.targetFiber) || 30), tSugar = Math.max(10, Number(prof.targetSugar) || 35);
 
-    const remKcal = tKcal - sumKcal, pctKcal = Math.min(100, Math.round((sumKcal / tKcal) * 100));
+    const pctKcal = Math.min(100, Math.round((sumKcal / tKcal) * 100));
     document.getElementById('kcalConsumed').textContent = String(sumKcal);
     document.getElementById('kcalTarget').textContent = String(tKcal);
-    document.getElementById('kcalRemaining').textContent = `${remKcal >= 0 ? remKcal : 0} kcal`;
-    document.getElementById('kcalPercentBadge').textContent = `${pctKcal}%`;
+    document.getElementById('kcalPercentBadge').textContent = `${Math.round((sumKcal / tKcal) * 100)}%`;
     document.getElementById('kcalProgress').style.width = `${pctKcal}%`;
 
-    computeAndRenderWeeklyBank(sumKcal, tKcal);
+    computeAndRenderWeeklyBankV2(sumKcal, tKcal);
 
     document.getElementById('protConsumed').textContent = String(sumP);
     document.getElementById('protTarget').textContent = String(tProt);
@@ -2411,12 +2569,22 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
     document.getElementById('fiberTarget').textContent = String(tFiber);
     document.getElementById('fiberBar').style.width = `${Math.min(100, Math.round((sumFiber / tFiber) * 100))}%`;
 
+    // Nicht-bestrafende Farbpsychologie auch für den Zucker-Balken (Bernstein/Indigo statt Alarm-Rot)
     const sugConsEl = document.getElementById('sugarConsumed'), sugBarEl = document.getElementById('sugarBar');
-    if (sugConsEl) { sugConsEl.textContent = String(sumSugar); sugConsEl.className = sumSugar > tSugar ? 'text-rose-400 font-extrabold' : 'text-white font-bold'; }
+    if (sugConsEl) {
+      sugConsEl.textContent = String(sumSugar);
+      sugConsEl.className = sumSugar <= tSugar
+        ? 'text-white font-bold'
+        : (sumSugar <= tSugar * 1.2 ? 'text-amber-300 font-extrabold' : 'text-indigo-300 font-extrabold');
+    }
     document.getElementById('sugarTarget').textContent = String(tSugar);
     if (sugBarEl) {
       sugBarEl.style.width = `${Math.min(100, Math.round((sumSugar / tSugar) * 100))}%`;
-      sugBarEl.className = sumSugar > tSugar ? 'h-full bg-rose-500 rounded-full transition-all duration-300' : 'h-full bg-fuchsia-400 rounded-full transition-all duration-300';
+      sugBarEl.className = sumSugar <= tSugar
+        ? 'h-full bg-fuchsia-400 rounded-full transition-all duration-300'
+        : (sumSugar <= tSugar * 1.2
+          ? 'h-full bg-amber-400 rounded-full transition-all duration-300'
+          : 'h-full bg-indigo-400 rounded-full transition-all duration-300');
     }
 
     document.getElementById('waterConsumed').textContent = String(today.waterMl || 0);
@@ -2427,11 +2595,14 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
     if (!today.meals.length) {
       listEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">${escapeHTML(emptyMsg)}</div>`;
     } else {
-      listEl.innerHTML = today.meals.map(m => `
+      listEl.innerHTML = today.meals.map(m => {
+        const q = computeMealQualityScore(m);
+        return `
         <div class="bg-slate-900/80 border border-slate-800/90 rounded-xl p-3 flex items-center justify-between gap-2">
           <div class="min-w-0">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
               <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${escapeHTML(m.time || '')}</span>
+              <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded border ${q.badgeClass}" title="Mahlzeiten-Qualitäts-Score">${q.grade} • ${q.score}</span>
               <h4 class="text-xs font-extrabold text-white truncate">${escapeHTML(m.name)}</h4>
             </div>
             <div class="text-[11px] text-slate-400 mt-1 flex flex-wrap items-center gap-2">
@@ -2448,7 +2619,8 @@ Antworte AUSSCHLIESSLICH als kompaktes JSON:
               <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
           </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     }
   }
 
@@ -2569,7 +2741,8 @@ Antworte AUSSCHLIESSLICH als JSON:
 { "recommendations": [{ "dishName": "Gericht", "kcal": 490, "protein": 48, "carbs": 35, "sugar": 4, "fat": 14, "fiber": 5, "orderHack": "Tipp" }] }`;
 
       const raw = await callGeminiRequest(prompt, currentMenuBase64, 14000, { expectJson: true, masterSignal: ctrl.signal });
-      const recs = Array.isArray(extractJSON(raw).recommendations) ? extractJSON(raw).recommendations : [];
+      const parsed = extractJSON(raw);
+      const recs = Array.isArray(parsed.recommendations) ? parsed.recommendations : [];
       window._quickRecipeStore = recs.map(r => ({ name: r.dishName, kcal: r.kcal, protein: r.protein, carbs: r.carbs || 30, sugar: r.sugar || 4, fat: r.fat || 14, fiber: r.fiber || 3 }));
 
       document.getElementById('menuResultsContainer').innerHTML = recs.map((r, idx) => `
@@ -2709,16 +2882,10 @@ Antworte AUSSCHLIESSLICH als JSON:
         if (parsed && typeof parsed === 'object') {
           const wasGuest = state.isGuestUser;
           state = { ...createDefaultState(), ...parsed, isGuestUser: wasGuest || Boolean(parsed.isGuestUser) };
-          saveState();
-          applyLanguage();
-          syncProfileToUI();
-          renderDiaryUI();
-          updateApiKeyStatusUI();
+          saveState(); applyLanguage(); syncProfileToUI(); renderDiaryUI(); updateApiKeyStatusUI();
           showToast('Backup wiederhergestellt!', 'success');
         }
-      } catch (_) {
-        showToast('Ungültige Backup-Datei.', 'error');
-      }
+      } catch (_) { showToast('Ungültige Backup-Datei.', 'error'); }
     };
     reader.readAsText(file);
   }
@@ -2731,53 +2898,33 @@ Antworte AUSSCHLIESSLICH als JSON:
     const lbl = document.getElementById('apiKeyBtnLabel');
     const guestTxt = document.getElementById('guestBadgeText');
 
-    if (keyBtn) {
-      if (isGuest) keyBtn.classList.add('hidden');
-      else keyBtn.classList.remove('hidden');
-    }
+    if (keyBtn) { if (isGuest) keyBtn.classList.add('hidden'); else keyBtn.classList.remove('hidden'); }
     if (dot) dot.className = hasKey ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-rose-500';
     if (lbl) lbl.textContent = hasKey ? 'Key aktiv' : 'API-Key';
     if (guestTxt) guestTxt.textContent = state.guestCode ? state.guestCode : (isGuest ? 'Gast-Aktiv' : 'Gast-Center');
   }
 
   function openApiKeyModal() {
-    if (state.isGuestUser) {
-      showToast('Gast-Modus aktiv: API-Key ist durch den Administrator geschützt.', 'info');
-      return;
-    }
+    if (state.isGuestUser) { showToast('Gast-Modus aktiv: API-Key ist geschützt.', 'info'); return; }
     document.getElementById('apiKeyInput').value = state.geminiApiKey || recoverRedundantApiKey(state) || '';
     document.getElementById('apiKeyModal').classList.remove('hidden');
   }
 
-  function closeApiKeyModal() {
-    document.getElementById('apiKeyModal').classList.add('hidden');
-  }
+  function closeApiKeyModal() { document.getElementById('apiKeyModal').classList.add('hidden'); }
 
   function saveApiKeyFromModal() {
     const val = (document.getElementById('apiKeyInput').value || '').trim();
-    if (!val) {
-      showToast('Bitte einen gültigen Gemini API-Key eingeben.', 'warning');
-      return;
-    }
-    state.geminiApiKey = val;
-    state.isGuestUser = false;
-    persistGuestLock(false);
-    persistApiKeyRedundant(val);
-    syncAdminHashAnchor(val, false);
-    saveState();
-    updateApiKeyStatusUI();
-    closeApiKeyModal();
-    showToast('Admin API-Key permanent (6-Layer + Home-Screen-Anker) gespeichert!', 'success');
+    if (!val) { showToast('Bitte einen gültigen Gemini API-Key eingeben.', 'warning'); return; }
+    state.geminiApiKey = val; state.isGuestUser = false;
+    persistGuestLock(false); persistApiKeyRedundant(val); syncAdminHashAnchor(val, false);
+    saveState(); updateApiKeyStatusUI(); closeApiKeyModal();
+    showToast('Admin API-Key permanent gespeichert!', 'success');
   }
 
   function clearSavedApiKey() {
     if (state.isGuestUser) return;
-    state.geminiApiKey = '';
-    persistApiKeyRedundant('');
-    syncAdminHashAnchor('', false);
-    saveState();
-    document.getElementById('apiKeyInput').value = '';
-    updateApiKeyStatusUI();
+    state.geminiApiKey = ''; persistApiKeyRedundant(''); syncAdminHashAnchor('', false);
+    saveState(); document.getElementById('apiKeyInput').value = ''; updateApiKeyStatusUI();
     showToast('API-Key gelöscht.', 'info');
   }
 
@@ -2803,47 +2950,27 @@ Antworte AUSSCHLIESSLICH als JSON:
     document.getElementById('inviteModal').classList.remove('hidden');
   }
 
-  function closeInviteModal() {
-    document.getElementById('inviteModal').classList.add('hidden');
-  }
+  function closeInviteModal() { document.getElementById('inviteModal').classList.add('hidden'); }
 
   function updateInvitePreview() {
-    const rawName = (document.getElementById('customGuestName').value || 'GAST')
-      .toUpperCase()
-      .replace(/[^A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]/gi, '')
-      .slice(0, 12) || 'GAST';
-    const rawYear = (document.getElementById('customGuestYear').value || '2025')
-      .replace(/\D/g, '')
-      .slice(0, 6) || '2025';
+    const rawName = (document.getElementById('customGuestName').value || 'GAST').toUpperCase().replace(/[^A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]/gi, '').slice(0, 12) || 'GAST';
+    const rawYear = (document.getElementById('customGuestYear').value || '2025').replace(/\D/g, '').slice(0, 6) || '2025';
     document.getElementById('generatedInviteCode').textContent = `FIT-${rawName}-${rawYear}`;
   }
 
   function activateGuestCode() {
     const rawInput = (document.getElementById('guestCodeInput').value || '').trim();
     if (rawInput.startsWith('AIza') && rawInput.length > 25) {
-      state.geminiApiKey = rawInput;
-      state.isGuestUser = false;
-      persistGuestLock(false);
-      persistApiKeyRedundant(rawInput);
-      syncAdminHashAnchor(rawInput, false);
-      saveState();
-      updateApiKeyStatusUI();
-      closeInviteModal();
+      state.geminiApiKey = rawInput; state.isGuestUser = false;
+      persistGuestLock(false); persistApiKeyRedundant(rawInput); syncAdminHashAnchor(rawInput, false);
+      saveState(); updateApiKeyStatusUI(); closeInviteModal();
       showToast('Admin-Modus erfolgreich freigeschaltet!', 'success');
       return;
     }
-
     const code = rawInput.toUpperCase();
-    if (!GUEST_REGEX.test(code)) {
-      showToast('Format ungültig. Beispiel: FIT-ANNA-2025', 'error');
-      return;
-    }
-    state.guestCode = code;
-    state.isGuestUser = true;
-    persistGuestLock(true);
-    saveState();
-    updateApiKeyStatusUI();
-    closeInviteModal();
+    if (!GUEST_REGEX.test(code)) { showToast('Format ungültig. Beispiel: FIT-ANNA-2025', 'error'); return; }
+    state.guestCode = code; state.isGuestUser = true;
+    persistGuestLock(true); saveState(); updateApiKeyStatusUI(); closeInviteModal();
     showToast(`Gast-Zugang ${code} aktiviert!`, 'success');
   }
 
@@ -2851,25 +2978,17 @@ Antworte AUSSCHLIESSLICH als JSON:
     const code = document.getElementById('generatedInviteCode').textContent;
     const key = (state.geminiApiKey || recoverRedundantApiKey(state) || '').trim();
     const baseUrl = window.location.origin + window.location.pathname;
-    return key
-      ? `${baseUrl}?invite=${encodeURIComponent(code)}&k=${encodeURIComponent(key)}`
-      : `${baseUrl}?invite=${encodeURIComponent(code)}`;
+    return key ? `${baseUrl}?invite=${encodeURIComponent(code)}&k=${encodeURIComponent(key)}` : `${baseUrl}?invite=${encodeURIComponent(code)}`;
   }
 
   function copySingleInviteCode() {
     if (state.isGuestUser) return;
-    const code = document.getElementById('generatedInviteCode').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-      showToast(`Code ${code} kopiert!`, 'success');
-    });
+    navigator.clipboard.writeText(document.getElementById('generatedInviteCode').textContent).then(() => showToast('Code kopiert!', 'success'));
   }
 
   function copyFullInviteLink() {
     if (state.isGuestUser) return;
-    const url = buildFullInviteUrl();
-    navigator.clipboard.writeText(url).then(() => {
-      showToast('Komplettpaket-Einladungslink kopiert!', 'success');
-    });
+    navigator.clipboard.writeText(buildFullInviteUrl()).then(() => showToast('Komplettpaket-Einladungslink kopiert!', 'success'));
   }
 
   function shareInviteViaWhatsApp() {
@@ -2877,8 +2996,7 @@ Antworte AUSSCHLIESSLICH als JSON:
     const code = document.getElementById('generatedInviteCode').textContent;
     const url = buildFullInviteUrl();
     const text = `Hallo! Hier ist dein persönlicher Zugang zu *CalSnap AI* 🚀\n\n🔑 Dein Gast-Code: *${code}*\n📲 Direkt starten (automatisch eingerichtet):\n${url}`;
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   }
 
   function checkUrlOnboardingParams() {
@@ -2887,18 +3005,8 @@ Antworte AUSSCHLIESSLICH als JSON:
       const urlKey = (params.get('k') || '').trim();
       const urlInvite = (params.get('invite') || '').trim().toUpperCase();
       let changed = false;
-
-      if (urlKey) {
-        state.geminiApiKey = urlKey;
-        persistApiKeyRedundant(urlKey);
-        changed = true;
-      }
-      if (urlInvite && GUEST_REGEX.test(urlInvite)) {
-        state.guestCode = urlInvite;
-        state.isGuestUser = true;
-        persistGuestLock(true);
-        changed = true;
-      }
+      if (urlKey) { state.geminiApiKey = urlKey; persistApiKeyRedundant(urlKey); changed = true; }
+      if (urlInvite && GUEST_REGEX.test(urlInvite)) { state.guestCode = urlInvite; state.isGuestUser = true; persistGuestLock(true); changed = true; }
       if (changed) {
         saveState();
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -2913,10 +3021,7 @@ Antworte AUSSCHLIESSLICH als JSON:
     checkUrlOnboardingParams();
     if (!state.geminiApiKey) {
       const cachedVaultKey = await restoreKeyFromCacheVault();
-      if (cachedVaultKey) {
-        state.geminiApiKey = cachedVaultKey;
-        saveState();
-      }
+      if (cachedVaultKey) { state.geminiApiKey = cachedVaultKey; saveState(); }
     } else {
       saveKeyToCacheVault(state.geminiApiKey);
     }
