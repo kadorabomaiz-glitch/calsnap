@@ -693,6 +693,11 @@
     return String(rawKey || '').replace(/[\s\u200B-\u200D\uFEFF]/g, '').trim();
   }
 
+  function isValidGoogleApiKey(rawKey) {
+    const k = sanitizeApiKey(rawKey);
+    return k.length >= 25 && (k.startsWith('AIza') || k.startsWith('AQ.'));
+  }
+
   function numOr(val, fallback) {
     const n = Number(val);
     return Number.isFinite(n) ? n : fallback;
@@ -777,11 +782,11 @@
   }
 
   // Layer 4: URL-Hash-Anker (#csa=...) für dauerhafte iPhone Home-Screen-Speicherung (nur Admin)
-  function syncAdminHashAnchor(key, isGuest) {
+function syncAdminHashAnchor(key, isGuest) {
     try {
       if (isGuest) return;
       const clean = sanitizeApiKey(key);
-      if (clean && clean.startsWith('AIza')) {
+      if (isValidGoogleApiKey(clean)) {
         const encoded = btoa(unescape(encodeURIComponent(clean)));
         if (window.location.hash !== `#csa=${encoded}`) {
           window.history.replaceState({}, document.title, window.location.pathname + `#csa=${encoded}`);
@@ -797,13 +802,12 @@
       const h = window.location.hash || '';
       if (h.startsWith('#csa=')) {
         const decoded = sanitizeApiKey(decodeURIComponent(escape(atob(h.slice(5)))));
-        if (decoded && decoded.startsWith('AIza')) return decoded;
+        if (isValidGoogleApiKey(decoded)) return decoded;
       }
     } catch (_) {}
     return '';
   }
 
-  // Layer 5: Browser CacheStorage Tresor
   async function saveKeyToCacheVault(key) {
     try {
       if (!('caches' in window)) return;
@@ -824,7 +828,7 @@
       const res = await cache.match('/__calsnap_vault_key');
       if (res) {
         const txt = sanitizeApiKey(await res.text());
-        if (txt && txt.startsWith('AIza')) return txt;
+        if (isValidGoogleApiKey(txt)) return txt;
       }
     } catch (_) {}
     return '';
@@ -1100,16 +1104,12 @@
     }
   }
 
-  async function buildLiveResilientQueue(apiKey, masterSignal = null) {
-    // Echte, verifizierte Google AI Studio Free-Tier Endpunkte (Schnellste zuerst!)
-    const preferredOrder = [
-      'gemini-2.5-flash',
-      'gemini-2.5-flash-lite',
-      'gemini-3.1-flash-lite-preview',
-      'gemini-3-flash-preview',
-      'gemini-2.5-pro',
-      'gemma-3-27b-it'
-    ];
+async function buildLiveResilientQueue(apiKey, masterSignal = null) {
+    const isAQKey = apiKey.startsWith('AQ.');
+    const preferredOrder = isAQKey
+      ? ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro']
+      : ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview', 'gemini-2.5-pro', 'gemma-3-27b-it'];
+
     let cachedFast = null;
     try { cachedFast = localStorage.getItem(FAST_MODEL_KEY); } catch (_) {}
     if (cachedFast && (/1\.5|2\.0|3\.8/.test(cachedFast))) {
@@ -1117,7 +1117,7 @@
       try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
     }
 
-    if (!liveModelsCache) {
+    if (!isAQKey && !liveModelsCache) {
       try {
         const res = await fetchWithIsolatedSignal(
           `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
@@ -1125,9 +1125,7 @@
           3000,
           masterSignal
         );
-        if (res.status === 401 || res.status === 403) {
-          throw new Error('HTTP_AUTH_INVALID');
-        }
+        if (res.status === 401 || res.status === 403) throw new Error('HTTP_AUTH_INVALID');
         if (res.ok && res.text) {
           const data = JSON.parse(res.text);
           if (Array.isArray(data.models)) {
@@ -1146,13 +1144,129 @@
     const addUnique = (m) => { if (m && !/1\.5|2\.0|3\.8/.test(m) && !queue.includes(m)) queue.push(m); };
     if (cachedFast) addUnique(cachedFast);
     preferredOrder.forEach(addUnique);
-    if (Array.isArray(liveModelsCache)) liveModelsCache.forEach(addUnique);
+    if (!isAQKey && Array.isArray(liveModelsCache)) liveModelsCache.forEach(addUnique);
     return queue;
   }
 
   async function callGeminiRequest(promptText, base64Image = null, perModelTimeoutMs = 10000, opts = {}) {
     const apiKey = sanitizeApiKey(state.geminiApiKey || recoverRedundantApiKey(state));
     if (!apiKey) throw new Error(state.lang === 'pl' ? 'Brak klucza API Gemini.' : 'Kein Gemini API-Key hinterlegt. Bitte oben auf „API-Key" klicken.');
+
+    const isAQKey = apiKey.startsWith('AQ.');
+    const expectJson = opts.expectJson !== false;
+    const masterSignal = opts.masterSignal || null;
+    if (masterSignal && masterSignal.aborted) throw new Error('Zeitüberschreitung (Analyse abgebrochen).');
+
+    const parts = [{ text: promptText }];
+    if (base64Image) parts.push({ inlineData: { mimeType: 'image/jpeg', data: base64Image } });
+
+    let modelsQueue;
+    try {
+      modelsQueue = await buildLiveResilientQueue(apiKey, masterSignal);
+    } catch (authErr) {
+      if (authErr && authErr.message === 'HTTP_AUTH_INVALID') {
+        throw new Error('API-Key ungültig (HTTP 401/403). Bitte im API-Key-Tresor prüfen.');
+      }
+      throw authErr;
+    }
+
+    let lastError = 'Keine Antwort vom KI-Server.';
+
+    for (let i = 0; i < modelsQueue.length; i++) {
+      const modelName = modelsQueue[i];
+      if (masterSignal && masterSignal.aborted) throw new Error('Analyse-Zeitüberschreitung. Bitte erneut versuchen.');
+
+      const primaryEndpoint = isAQKey
+        ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`
+        : `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const altEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      const supportsZeroThinkingBudget = /^gemini-2\.5-flash(-lite)?$/i.test(modelName);
+      const isGemma = /^gemma/i.test(modelName);
+      const thisTimeout = i < 2 ? Math.max(8500, Math.min(perModelTimeoutMs, 11000)) : 7500;
+
+      const genConfig = { temperature: 0.05, topP: 0.1, maxOutputTokens: 4096 };
+      if (!isGemma && expectJson) genConfig.responseMimeType = 'application/json';
+      if (supportsZeroThinkingBudget) genConfig.thinkingConfig = { thinkingBudget: 0 };
+
+      const basePayload = { contents: [{ role: 'user', parts }], generationConfig: genConfig };
+
+      try {
+        let activeEndpoint = primaryEndpoint;
+        let res = await fetchWithIsolatedSignal(
+          activeEndpoint,
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(basePayload) },
+          thisTimeout,
+          masterSignal
+        );
+
+        // Dual-Fallback: Falls ein AQ.-Key über den AI-Studio-Endpunkt läuft
+        if (isAQKey && (res.status === 401 || res.status === 403 || res.status === 404)) {
+          activeEndpoint = altEndpoint;
+          res = await fetchWithIsolatedSignal(
+            activeEndpoint,
+            { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(basePayload) },
+            thisTimeout,
+            masterSignal
+          );
+        }
+
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('API-Key ungültig oder gesperrt (HTTP ' + res.status + '). Bitte im API-Key-Tresor testen.');
+        }
+
+        if (res.status === 400) {
+          const fallbackPayload = { contents: [{ role: 'user', parts }], generationConfig: { temperature: 0.05, maxOutputTokens: 4096 } };
+          res = await fetchWithIsolatedSignal(
+            activeEndpoint,
+            { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fallbackPayload) },
+            thisTimeout,
+            masterSignal
+          );
+        }
+
+        if (res.status === 404 || res.status === 429 || res.status === 503) {
+          try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
+          lastError = `HTTP ${res.status} (${modelName})`;
+          continue;
+        }
+        if (!res.ok) {
+          lastError = `HTTP ${res.status}: ${(res.text || '').slice(0, 120)}`;
+          continue;
+        }
+
+        const parsed = JSON.parse(res.text);
+        const candParts = parsed?.candidates?.[0]?.content?.parts || [];
+        const textOut = candParts.filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('\n').trim();
+        if (!textOut) {
+          try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
+          lastError = `Leere Antwort (${modelName})`;
+          continue;
+        }
+
+        if (expectJson) {
+          try {
+            const validatedObj = extractJSON(textOut);
+            try { localStorage.setItem(FAST_MODEL_KEY, modelName); } catch (_) {}
+            return JSON.stringify(validatedObj);
+          } catch (jsonErr) {
+            try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
+            lastError = `JSON-Fehler (${modelName}): ${jsonErr.message}`;
+            continue;
+          }
+        }
+
+        try { localStorage.setItem(FAST_MODEL_KEY, modelName); } catch (_) {}
+        return textOut;
+      } catch (err) {
+        if (err && /API-Key ungültig/i.test(err.message || '')) throw err;
+        if (masterSignal && masterSignal.aborted) throw new Error('Analyse-Zeitüberschreitung (26s). Bitte Netz oder Foto prüfen.');
+        lastError = err.name === 'AbortError' ? `Timeout (${modelName})` : (err.message || String(err));
+        continue;
+      }
+    }
+    throw new Error(`KI-Anfrage fehlgeschlagen (${lastError}).`);
+  }
 
     const expectJson = opts.expectJson !== false;
     const masterSignal = opts.masterSignal || null;
@@ -2714,34 +2828,61 @@ Antworte AUSSCHLIESSLICH als JSON:
 
   function closeApiKeyModal() { document.getElementById('apiKeyModal').classList.add('hidden'); }
 
-  async function testApiKeyLive() {
+async function testApiKeyLive() {
     const rawKey = sanitizeApiKey(document.getElementById('apiKeyInput').value);
     const resBox = document.getElementById('apiKeyTestResult');
     if (!resBox) return;
-    if (!rawKey || !rawKey.startsWith('AIza')) {
+    if (!isValidGoogleApiKey(rawKey)) {
       resBox.className = 'text-xs font-bold rounded-xl px-3 py-2 border bg-rose-950/60 border-rose-500/50 text-rose-200';
-      resBox.textContent = '❌ Ungültiges Format: Ein Google AI Studio Key beginnt immer mit „AIza...".';
+      resBox.textContent = '❌ Ungültiges Format: Ein Google API-Key beginnt mit „AIza..." oder „AQ....".';
       resBox.classList.remove('hidden');
       return;
     }
 
     resBox.className = 'text-xs font-bold rounded-xl px-3 py-2 border bg-slate-900 border-slate-700 text-slate-300';
-    resBox.textContent = '🔄 Prüfe Schlüssel live bei Google AI Studio...';
+    resBox.textContent = '🔄 Prüfe Schlüssel live bei Google...';
     resBox.classList.remove('hidden');
 
     try {
-      const res = await fetchWithIsolatedSignal(
-        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(rawKey)}`,
-        { method: 'GET' },
-        5000
-      );
-      if (res.ok) {
+      let ok = false;
+      let status = 0;
+
+      if (rawKey.startsWith('AQ.')) {
+        const pingPayload = JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: 'OK' }] }],
+          generationConfig: { maxOutputTokens: 4 }
+        });
+        let res = await fetchWithIsolatedSignal(
+          `https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(rawKey)}`,
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: pingPayload },
+          6500
+        );
+        if (!res.ok) {
+          res = await fetchWithIsolatedSignal(
+            `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(rawKey)}`,
+            { method: 'GET' },
+            5000
+          );
+        }
+        ok = res.ok;
+        status = res.status;
+      } else {
+        const res = await fetchWithIsolatedSignal(
+          `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(rawKey)}`,
+          { method: 'GET' },
+          5000
+        );
+        ok = res.ok;
+        status = res.status;
+      }
+
+      if (ok) {
         liveModelsCache = null;
         resBox.className = 'text-xs font-bold rounded-xl px-3 py-2 border bg-emerald-950/60 border-emerald-500/50 text-emerald-300';
-        resBox.textContent = '✅ Key ist 100 % gültig & Free-Tier-bereit! Jetzt auf „Speichern" tippen.';
+        resBox.textContent = '✅ Key ist 100 % gültig & einsatzbereit! Jetzt auf „Speichern" tippen.';
       } else {
         resBox.className = 'text-xs font-bold rounded-xl px-3 py-2 border bg-rose-950/60 border-rose-500/50 text-rose-200';
-        resBox.textContent = `❌ Von Google abgelehnt (HTTP ${res.status}). Bitte in AI Studio auf „Create API key" für einen NEUEN Key klicken!`;
+        resBox.textContent = `❌ Von Google abgelehnt (HTTP ${status}). Bitte Schlüssel prüfen oder neuen Key erstellen.`;
       }
     } catch (e) {
       resBox.className = 'text-xs font-bold rounded-xl px-3 py-2 border bg-amber-950/60 border-amber-500/50 text-amber-200';
@@ -2801,7 +2942,7 @@ Antworte AUSSCHLIESSLICH als JSON:
 
   function activateGuestCode() {
     const rawInput = sanitizeApiKey(document.getElementById('guestCodeInput').value);
-    if (rawInput.startsWith('AIza') && rawInput.length > 25) {
+    if (isValidGoogleApiKey(rawInput)) {
       state.geminiApiKey = rawInput; state.isGuestUser = false;
       persistGuestLock(false); persistApiKeyRedundant(rawInput); syncAdminHashAnchor(rawInput, false);
       saveState(); updateApiKeyStatusUI(); closeInviteModal();
