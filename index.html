@@ -634,7 +634,7 @@
   </nav>
   <script>
   // ============================================================================
-  // CALSNAP AI v4.6.1 ENTERPRISE — AQ./AIza DUAL-ROUTING & 6-LAYER VAULT
+  // CALSNAP AI v4.6.2 — REAL GOOGLE ENDPOINTS (2.0-FLASH & 1.5-FLASH) & 6-LAYER VAULT
   // ============================================================================
   const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
   const STORAGE_KEY_V1 = 'calsnap_ai_state_v1';
@@ -642,7 +642,7 @@
   const GUEST_LOCK_SLOT = 'calsnap_guest_lock_v41';
   const COOKIE_KEY_NAME = 'calsnap_k';
   const COOKIE_GUEST_LOCK = 'calsnap_gl';
-  const FAST_MODEL_KEY = 'calsnap_fast_model_v461';
+  const FAST_MODEL_KEY = 'calsnap_fast_model_v462';
   const VAULT_CACHE_NAME = 'calsnap_admin_vault_v41';
   const GUEST_REGEX = /^FIT-[A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]{1,12}-\d{2,6}$/i;
 
@@ -688,7 +688,7 @@
 
   function createDefaultState() {
     return {
-      version: 4.6,
+      version: 4.62,
       lang: 'de',
       geminiApiKey: '',
       guestCode: '',
@@ -1068,35 +1068,42 @@
     }
   }
 
+  // ============================================================================
+  // ECHTE GOOGLE AI STUDIO QUEUE (OHNE 1.5/2.0 SPERRE & OHNE 404 PHANTOME)
+  // ============================================================================
   async function buildLiveResilientQueue(apiKey, masterSignal = null) {
-    const isAQKey = apiKey.startsWith('AQ.');
-    const preferredOrder = isAQKey
-      ? ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro']
-      : ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview', 'gemini-2.5-pro', 'gemma-3-27b-it'];
+    // Reale, existierende Produktionsmodelle von Google AI Studio
+    const preferredOrder = [
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash-lite',
+      'gemini-1.5-pro'
+    ];
 
     let cachedFast = null;
     try { cachedFast = localStorage.getItem(FAST_MODEL_KEY); } catch (_) {}
-    if (cachedFast && (/1\.5|2\.0|3\.8/.test(cachedFast))) {
+    if (cachedFast && (/2\.5|3\.8/.test(cachedFast))) {
       cachedFast = null;
       try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
     }
 
-    if (!isAQKey && !liveModelsCache) {
+    if (!liveModelsCache) {
       try {
         const res = await fetchWithIsolatedSignal(
           `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
           { method: 'GET' },
-          3000,
+          3500,
           masterSignal
         );
         if (res.status === 401 || res.status === 403) throw new Error('HTTP_AUTH_INVALID');
         if (res.ok && res.text) {
           const data = JSON.parse(res.text);
           if (Array.isArray(data.models)) {
+            // ECHTE Modelle zulassen (Filter sperrt nur noch Nicht-Text/Vision-Tools)
             liveModelsCache = data.models
               .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
               .map(m => String(m.name || '').replace(/^models\//, ''))
-              .filter(name => name && !/1\.5|2\.0|3\.8|embedding|imagen|veo|tts|audio|live|robotics/i.test(name));
+              .filter(name => name && !/embedding|imagen|veo|tts|audio|live|robotics/i.test(name));
           }
         }
       } catch (e) {
@@ -1105,10 +1112,10 @@
     }
 
     const queue = [];
-    const addUnique = (m) => { if (m && !/1\.5|2\.0|3\.8/.test(m) && !queue.includes(m)) queue.push(m); };
+    const addUnique = (m) => { if (m && !queue.includes(m)) queue.push(m); };
     if (cachedFast) addUnique(cachedFast);
     preferredOrder.forEach(addUnique);
-    if (!isAQKey && Array.isArray(liveModelsCache)) liveModelsCache.forEach(addUnique);
+    if (Array.isArray(liveModelsCache)) liveModelsCache.forEach(addUnique);
     return queue;
   }
 
@@ -1129,7 +1136,7 @@
       modelsQueue = await buildLiveResilientQueue(apiKey, masterSignal);
     } catch (authErr) {
       if (authErr && authErr.message === 'HTTP_AUTH_INVALID') {
-        throw new Error('API-Key ungültig (HTTP 401/403). Bitte im API-Key-Tresor testen.');
+        throw new Error('API-Key ungültig (HTTP 401/403). Bitte im API-Key-Tresor prüfen.');
       }
       throw authErr;
     }
@@ -1140,18 +1147,17 @@
       const modelName = modelsQueue[i];
       if (masterSignal && masterSignal.aborted) throw new Error('Analyse-Zeitüberschreitung. Bitte erneut versuchen.');
 
+      // Standardisierter Endpunkt mit Fallback
       const primaryEndpoint = isAQKey
         ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`
         : `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
       const altEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-      const supportsZeroThinkingBudget = /^gemini-2\.5-flash(-lite)?$/i.test(modelName);
       const isGemma = /^gemma/i.test(modelName);
       const thisTimeout = i < 2 ? Math.max(8500, Math.min(perModelTimeoutMs, 11000)) : 7500;
 
       const genConfig = { temperature: 0.05, topP: 0.1, maxOutputTokens: 4096 };
       if (!isGemma && expectJson) genConfig.responseMimeType = 'application/json';
-      if (supportsZeroThinkingBudget) genConfig.thinkingConfig = { thinkingBudget: 0 };
 
       const basePayload = { contents: [{ role: 'user', parts }], generationConfig: genConfig };
 
@@ -1289,14 +1295,25 @@
     return repairTruncatedJSON(cleaned.slice(firstBrace));
   }
     // ============================================================================
-  // 100g-NORMIERTES DE/PL-LEXIKON & GLOBAL NUTRITIONAL RIGOR LAYER
+  // 100g-NORMIERTES DE/PL-LEXIKON (INKL. CHIPS, COLA ZERO & SOFTDRINKS)
   // ============================================================================
   const FOOD_LEXICON = [
+    // --- GETRÄNKE & SOFTDRINKS (OFFLINE 0.0s) ---
+    { name: 'Coca-Cola Zero / Cola Zero / Pepsi Max', keywords: ['coca cola zero', 'coca-cola zero', 'cola zero', 'coke zero', 'pepsi max', 'cola light', 'fanta zero', 'sprite zero', 'zero'], kcal: 0, p: 0, c: 0, sugar: 0, f: 0, fiber: 0, defaultPortion: 330 },
+    { name: 'Coca-Cola / Cola / Spezi / Fanta', keywords: ['coca cola', 'coca-cola', 'cola', 'coke', 'pepsi', 'fanta', 'sprite', 'spezi', 'mezzomix'], kcal: 42, p: 0, c: 10.6, sugar: 10.6, f: 0, fiber: 0, defaultPortion: 330 },
+    { name: 'Apfelschorle / Saftschorle', keywords: ['apfelschorle', 'saftschorle', 'apfelsaftschorle'], kcal: 26, p: 0.1, c: 6.2, sugar: 5.9, f: 0, fiber: 0, defaultPortion: 330 },
     { name: 'Latte Macchiato', keywords: ['latte macchiato', 'macchiato', 'latte'], kcal: 46, p: 2.8, c: 4.2, sugar: 4.1, f: 1.9, fiber: 0, defaultPortion: 300 },
     { name: 'Kaffee Schwarz / Kawa czarna', keywords: ['kaffee schwarz', 'schwarzer kaffee', 'espresso', 'americano', 'kawa czarna', 'czarna kawa'], kcal: 2, p: 0.2, c: 0.2, sugar: 0, f: 0, fiber: 0, defaultPortion: 250 },
     { name: 'Kaffee mit Milch / Kawa z mlekiem', keywords: ['cappuccino', 'kaffee mit milch', 'milchkaffee', 'kawa z mlekiem', 'flat white', 'kaffee', 'kawa'], kcal: 36, p: 1.9, c: 2.8, sugar: 2.7, f: 1.8, fiber: 0, defaultPortion: 250 },
+
+    // --- SNACKS & KNABBEREIEN ---
+    { name: 'Kartoffelchips / Chipsy', keywords: ['kartoffelchips', 'chips', 'stapelchips', 'chipsy', 'paprikachips'], kcal: 536, p: 6.5, c: 53.0, sugar: 1.5, f: 35.0, fiber: 4.2, defaultPortion: 40 },
+
+    // --- ZUCKER & SÜSSUNG ---
     { name: 'Zucker / Cukier', keywords: ['zucker', 'haushaltszucker', 'rohrzucker', 'brauner zucker', 'cukier'], kcal: 400, p: 0, c: 100, sugar: 100, f: 0, fiber: 0, defaultPortion: 5 },
     { name: 'Honig / Miód', keywords: ['honig', 'bienenhonig', 'miod'], kcal: 304, p: 0.3, c: 82, sugar: 81, f: 0, fiber: 0.2, defaultPortion: 15 },
+
+    // --- DESSERTS & MILCHPRODUKTE ---
     { name: 'High Protein Mousse / Pudding Schoko', keywords: ['high protein yoghurt mousse schoko', 'high protein mousse schoko', 'protein mousse schoko', 'protein mousse', 'high protein mousse', 'protein pudding schoko', 'high protein pudding', 'high protein yoghurt', 'high protein joghurt', 'protein joghurt', 'protein yoghurt', 'mousse schoko'], kcal: 84, p: 10.0, c: 5.5, sugar: 4.0, f: 2.0, fiber: 0.8, defaultPortion: 200 },
     { name: 'Magerquark / Twaróg chudy', keywords: ['magerquark', 'speisequark magerstufe', 'quark', 'twarog chudy', 'twarog'], kcal: 68, p: 12.2, c: 3.9, sugar: 3.9, f: 0.3, fiber: 0, defaultPortion: 250 },
     { name: 'Skyr Natur', keywords: ['skyr', 'skyr natur'], kcal: 64, p: 11.0, c: 4.0, sugar: 4.0, f: 0.2, fiber: 0, defaultPortion: 200 },
@@ -1306,6 +1323,8 @@
     { name: 'Vollmilch (3,5%) / Mleko', keywords: ['vollmilch', 'milch', 'mleko'], kcal: 64, p: 3.3, c: 4.8, sugar: 4.8, f: 3.5, fiber: 0, defaultPortion: 200 },
     { name: 'Gouda / Schnittkäse / Ser żółty', keywords: ['gouda', 'schnittkase', 'edamer', 'emmentaler', 'ser zolty', 'kase'], kcal: 356, p: 25.0, c: 0.1, sugar: 0.1, f: 28.0, fiber: 0, defaultPortion: 30 },
     { name: 'Mozzarella', keywords: ['mozzarella'], kcal: 245, p: 18.5, c: 1.0, sugar: 1.0, f: 18.5, fiber: 0, defaultPortion: 125 },
+
+    // --- BÄCKEREI, EIER & AUFSCHNITT ---
     { name: 'Hühnerei (Größe M/L) / Jajko', keywords: ['huhner ei', 'huhnerei', 'gekochtes ei', 'spiegelei', 'ruherei', 'jajko', 'jajka', 'eier', 'ei'], kcal: 143, p: 12.6, c: 0.7, sugar: 0.5, f: 9.5, fiber: 0, defaultPortion: 60 },
     { name: 'Haferflocken / Płatki owsiane', keywords: ['haferflocken', 'porridge', 'oatmeal', 'platki owsiane', 'owsianka'], kcal: 372, p: 13.5, c: 58.7, sugar: 1.1, f: 7.0, fiber: 10.0, defaultPortion: 60 },
     { name: 'Vollkornbrötchen / Körnerbrötchen / Bułka pełnoziarnista', keywords: ['vollkornbrotchen', 'vollkorn brotchen', 'kornerbrotchen', 'korner brotchen', 'mehrkornbrotchen', 'mehrkorn brotchen', 'sonnenblumenbrotchen', 'bulka pelnoziarnista', 'bulka z ziarnami'], kcal: 258, p: 9.5, c: 46.5, sugar: 2.8, f: 3.5, fiber: 7.2, defaultPortion: 75 },
@@ -1316,10 +1335,14 @@
     { name: 'Teewurst / Streichwurst / Leberwurst', keywords: ['teewurst', 'streichwurst', 'mettwurst', 'leberwurst', 'pasztet', 'metka'], kcal: 345, p: 13.5, c: 1.0, sugar: 0.5, f: 32.0, fiber: 0, defaultPortion: 35 },
     { name: 'Salami', keywords: ['salami'], kcal: 390, p: 22.0, c: 1.0, sugar: 0.5, f: 33.0, fiber: 0, defaultPortion: 30 },
     { name: 'Kochschinken / Putenschinken / Szynka', keywords: ['kochschinken', 'putenschinken', 'hahnchenschinken', 'lachsschinken', 'schinken', 'szynka'], kcal: 115, p: 20.5, c: 1.0, sugar: 0.5, f: 3.0, fiber: 0, defaultPortion: 40 },
-    { name: 'Apfel / Jabłko', keywords: ['apfel', 'apfel frisch', 'jablko'], kcal: 52, p: 0.3, c: 11.4, sugar: 10.3, f: 0.2, fiber: 2.4, defaultPortion: 150 },
+
+    // --- OBST & GEMÜSE ---
+    { name: 'Apfel / Jabłko', keywords: ['apfel', 'apfel frisch', 'apfeln', 'jablko', 'jablka'], kcal: 52, p: 0.3, c: 11.4, sugar: 10.3, f: 0.2, fiber: 2.4, defaultPortion: 150 },
     { name: 'Banane / Banan', keywords: ['banane', 'bananen', 'banan'], kcal: 89, p: 1.1, c: 20.0, sugar: 14.2, f: 0.3, fiber: 2.6, defaultPortion: 120 },
     { name: 'Beeren / Owoce leśne', keywords: ['blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'beeren', 'truskawki', 'borowki', 'maliny'], kcal: 42, p: 0.8, c: 7.6, sugar: 5.8, f: 0.3, fiber: 2.4, defaultPortion: 125 },
     { name: 'Gemischter Salat / Sałatka', keywords: ['gemischter salat', 'beilagensalat', 'gurkensalat', 'tomatensalat', 'tomate', 'gurke', 'salatka', 'pomidor', 'ogorek'], kcal: 32, p: 1.2, c: 3.8, sugar: 2.4, f: 1.2, fiber: 1.5, defaultPortion: 180 },
+
+    // --- HAUPTGERICHTE, FLEISCH & FISCH ---
     { name: 'Hähnchenbrustfilet (mager) / Pierś z kurczaka', keywords: ['hahnchenbrustfilet', 'hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'piers z kurczaka', 'kurczak'], kcal: 145, p: 29.5, c: 0.5, sugar: 0, f: 2.2, fiber: 0, defaultPortion: 200 },
     { name: 'Rinderhack mager / Tatar / Selbst gewolft', keywords: ['rinderhack mager', 'tatar', 'selbst gewolft', 'mageres hackfleisch', 'hackfleisch mager', 'wolowina mielona chuda'], kcal: 132, p: 21.5, c: 0, sugar: 0, f: 2.8, fiber: 0, defaultPortion: 200 },
     { name: 'Schweinefleisch in Soße / Mięso wieprzowe w sosie', keywords: ['mieso wieprzowe w sosie', 'wieprzowina w sosie', 'schweinefleisch in sosse', 'schweinebraten in sosse', 'schweinegulasch', 'gulasz wieprzowy', 'schweinefleisch', 'wieprzowina'], kcal: 178, p: 18.5, c: 3.8, sugar: 1.2, f: 9.8, fiber: 0.4, defaultPortion: 220 },
@@ -1336,8 +1359,7 @@
     { name: 'Reis gekocht / Ryż', keywords: ['reis gekocht', 'basmatireis', 'jasminreis', 'reis', 'ryz'], kcal: 130, p: 2.7, c: 28.2, sugar: 0.1, f: 0.3, fiber: 0.4, defaultPortion: 180 },
     { name: 'Nudeln gekocht / Makaron', keywords: ['spaghetti', 'nudeln gekocht', 'nudeln', 'pasta', 'makaron'], kcal: 152, p: 5.5, c: 30.2, sugar: 0.6, f: 0.9, fiber: 1.8, defaultPortion: 200 },
     { name: 'Kartoffeln gekocht / Ziemniaki', keywords: ['salzkartoffeln', 'pellkartoffeln', 'kartoffeln', 'kartoffel', 'ziemniaki'], kcal: 73, p: 2.0, c: 15.4, sugar: 0.8, f: 0.1, fiber: 1.8, defaultPortion: 220 },
-    { name: 'Pommes Frites / Frytki', keywords: ['pommes frites', 'pommes', 'frytki'], kcal: 292, p: 3.4, c: 36.5, sugar: 0.5, f: 14.2, fiber: 3.2, defaultPortion: 160 },
-    { name: 'Apfelschorle / Saftschorle', keywords: ['apfelschorle', 'saftschorle', 'apfelsaftschorle'], kcal: 26, p: 0.1, c: 6.2, sugar: 5.9, f: 0, fiber: 0, defaultPortion: 330 }
+    { name: 'Pommes Frites / Frytki', keywords: ['pommes frites', 'pommes', 'frytki'], kcal: 292, p: 3.4, c: 36.5, sugar: 0.5, f: 14.2, fiber: 3.2, defaultPortion: 160 }
   ];
 
   function buildGlobalNutritionalRigorRules(targetLang, userHint = '') {
@@ -1349,9 +1371,6 @@
 4. CONTEXTUAL PREPARATION RIGOR: Differenziere strikt zwischen "gedünstet/gegrillt/gekocht/Natur" (0-3g Zusatzfett) und "paniert/frittiert/cremig/Sahnesauce" (höheres Fett).`;
   }
 
-  // ============================================================================
-  // ZWEISPRACHIGES UI-SYSTEM (DEUTSCH <-> POLSKI)
-  // ============================================================================
   const UI_I18N = {
     de: {
       subTitle: 'Metabolic Coach + Free-Tier Turbo', dailyBalance: 'Tages- & Wochenbilanz', remPrefix: 'Heute offen: ',
@@ -1359,7 +1378,7 @@
       weeklyBankTitle: 'Wochen-Konto:', coachTitle: 'Adaptive Metabolic Coach', coachSub: '7d-Trend, TDEE-Autokalibrierung & Plateau-Schutz',
       coachOnTrack: '🟢 Auf Kurs', coachRefeedActive: '⚡ Refeed aktiv', coachPlateauWarn: '🟠 Plateau-Check',
       scannerTitle: 'Mahlzeiten-Scanner & ⚡ Turbo-Scan', scannerSub: 'Foto (ideal: 45° schräg von oben), Text oder 1-Klick Schnellwahl',
-      textPlaceholder: 'z.B. 2 Latte macchiato groß, Vollkornbrötchen mit Fleischwurst...', photoBtn: 'Foto',
+      textPlaceholder: 'z.B. 2 Latte macchiato groß, 2 Äpfel, Cola Zero, Chips...', photoBtn: 'Foto',
       smartHabitMorning: '☀️ Deine Morgen-Routine & Gewohnheiten (1-Klick):', smartHabitDay: '⚡ Deine persönlichen Top-Gewohnheiten (1-Klick):',
       quickHeader: 'Standard 1-Klick Schnellwahl:', qaCoffee: '☕ Kaffee', qaMilk: '🥛 Kaffee+Milch', qaApple: '🍎 Apfel',
       qaBanana: '🍌 Banane', qaEggs: '🥚 2 Eier', qaQuark: '🥣 250g Quark', qaShake: '🥤 Protein-Shake',
@@ -1379,7 +1398,7 @@
       weeklyBankTitle: 'Bilans tygodnia:', coachTitle: 'Adaptive Metabolic Coach', coachSub: 'Trend 7d, autokalibracja TDEE i ochrona przed stagnacją',
       coachOnTrack: '🟢 W normie', coachRefeedActive: '⚡ Refeed aktywny', coachPlateauWarn: '🟠 Stagnacja',
       scannerTitle: 'Skaner Posiłków & ⚡ Turbo-Skan', scannerSub: 'Zdjęcie (najlepiej pod kątem 45°), tekst lub szybki wybór 1-Click',
-      textPlaceholder: 'np. 2 Latte macchiato duże, 2 jajka, mięso wieprzowe...', photoBtn: 'Zdjęcie',
+      textPlaceholder: 'np. 2 Latte macchiato duże, 2 jabłka, Cola Zero, chipsy...', photoBtn: 'Zdjęcie',
       smartHabitMorning: '☀️ Twoja poranna rutyna i nawyki (1-Click):', smartHabitDay: '⚡ Twoje ulubione posiłki (1-Click):',
       quickHeader: 'Szybki wybór 1-Click:', qaCoffee: '☕ Kawa', qaMilk: '🥛 Kawa+Mleko', qaApple: '🍎 Jabłko',
       qaBanana: '🍌 Banan', qaEggs: '🥚 2 Jajka', qaQuark: '🥣 250g Twaróg', qaShake: '🥤 Shake Białkowy',
@@ -1874,8 +1893,22 @@
     }
   }
     // ============================================================================
-  // MULTI-PASS LEXIKON-PARSER ("OHNE"/"MIT") & KOMPONENTEN-RECONCILIATION
+  // MULTI-PASS LEXIKON-PARSER MIT ZAHLWORT-ÜBERSETZER ("ZWEI ÄPFEL" -> 0.0s)
   // ============================================================================
+  const WORD_NUMBERS = {
+    'ein': 1, 'eine': 1, 'einen': 1, 'einer': 1, 'einem': 1, 'eins': 1,
+    'zwei': 2, 'drei': 3, 'vier': 4, 'funf': 5, 'fuenf': 5, 'sechs': 6, 'sieben': 7, 'acht': 8, 'neun': 9, 'zehn': 10,
+    'jedna': 1, 'jedno': 1, 'jeden': 1, 'dwa': 2, 'dwie': 2, 'trzy': 3, 'cztery': 4, 'piec': 5, 'szesc': 6, 'siedem': 7, 'osiem': 8, 'dziewiec': 9, 'dziesiec': 10
+  };
+
+  function normalizeWordNumbers(text) {
+    if (!text) return '';
+    return String(text).replace(/\b(ein|eine|einen|einer|einem|eins|zwei|drei|vier|funf|fuenf|sechs|sieben|acht|neun|zehn|jedna|jedno|jeden|dwa|dwie|trzy|cztery|piec|szesc|siedem|osiem|dziewiec|dziesiec)\b/gi, (m) => {
+      const lower = m.toLowerCase();
+      return WORD_NUMBERS[lower] !== undefined ? WORD_NUMBERS[lower] : m;
+    });
+  }
+
   function foldDiacritics(str) {
     if (!str) return '';
     return String(str).toLowerCase()
@@ -1898,8 +1931,10 @@
     return foldedText.replace(new RegExp(`\\b(?:ohne|bez)\\s+(?!${stop}\\b)[a-z0-9]+(?:\\s+(?!${stop}\\b)[a-z0-9]+)?`, 'gi'), ' ').replace(/\s+/g, ' ').trim();
   }
 
-  function resolveSingleSegment(foldedSeg) {
-    if (!foldedSeg) return null;
+  function resolveSingleSegment(rawSeg) {
+    if (!rawSeg) return null;
+    const foldedSeg = normalizeWordNumbers(foldDiacritics(rawSeg));
+
     let explicitKcal = null;
     const kcalMatch = foldedSeg.match(/(?:^|\s)(\d{1,4}(?:[.,]\d+)?)\s*kcal(?=$|\s)/i);
     if (kcalMatch) explicitKcal = parseFloat(kcalMatch[1].replace(',', '.'));
@@ -1973,7 +2008,8 @@
   function resolveFromLexicon(rawQuery) {
     const raw = (rawQuery || '').trim();
     if (!raw || raw.length < 2) return null;
-    const cleanedQuery = stripExclusions(foldDiacritics(raw));
+    const normalized = normalizeWordNumbers(foldDiacritics(raw));
+    const cleanedQuery = stripExclusions(normalized);
     if (!cleanedQuery || cleanedQuery.length < 2) return null;
 
     const primarySegments = cleanedQuery.split(/\s*(?:\+|,|\bund\b|\boraz\b|\bdazu\b)\s*/i).map(s => s.trim()).filter(Boolean);
@@ -2113,7 +2149,7 @@
     document.getElementById('resSourceBadge').innerHTML = `
       <i class="fa-solid ${res.source === 'lexicon' ? 'fa-bolt text-amber-400' : 'fa-camera-rotate text-sky-400'}"></i>
       <span>${srcText}</span>
-      <span class="ml-1 px-1.5 py-0.5 rounded border text-[10px] font-extrabold ${q.badgeClass}">Score ${q.grade} • ${q.score}/10</span>
+      <span class="ml-1 px-1.5 py-0.2 rounded border text-[10px] font-extrabold ${q.badgeClass}">Score ${q.grade} • ${q.score}/10</span>
     `;
     document.getElementById('resMealName').textContent = activeMealBaseResult.mealName;
     document.getElementById('resExplanation').textContent = activeMealBaseResult.explanation;
@@ -2427,7 +2463,10 @@ ${buildGlobalNutritionalRigorRules(targetLang, extra)}
 2. Kalibriere anhand Standard-Packungsgrößen (250g/500g/1L) den Rest-Füllstand in Gramm!
 3. Erstelle 2 High-Protein Rezepte (max. 5g Öl/Portion).
 Antworte AUSSCHLIESSLICH als JSON:
-{ "ingredients": [{ "name": "Zutat inkl. Restmenge", "urgency": "high", "shelfLifeHint": "1-2 Tage" }], "recipes": [{ "title": "Rezept", "kcal": 460, "protein": 45, "carbs": 35, "sugar": 5, "fat": 11, "fiber": 5, "steps": ["Schritt 1"] }] }`;
+{
+  "ingredients": [{ "name": "Zutat inkl. Restmenge", "urgency": "high", "shelfLifeHint": "1-2 Tage" }],
+  "recipes": [{ "title": "Rezept", "kcal": 460, "protein": 45, "carbs": 35, "sugar": 5, "fat": 11, "fiber": 5, "steps": ["Schritt 1"] }]
+}`;
       const raw = await callGeminiRequest(prompt, currentFridgeBase64, 10000, { expectJson: true, masterSignal: ctrl.signal });
       const data = extractJSON(raw), rank = { high: 1, medium: 2, low: 3 };
       const sortedIng = (Array.isArray(data.ingredients) ? data.ingredients : []).sort((a, b) => (rank[a.urgency] || 9) - (rank[b.urgency] || 9));
@@ -2702,7 +2741,7 @@ Antworte AUSSCHLIESSLICH als JSON:
           generationConfig: { maxOutputTokens: 4 }
         });
         let res = await fetchWithIsolatedSignal(
-          `https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(rawKey)}`,
+          `https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(rawKey)}`,
           { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: pingPayload },
           6500
         );
