@@ -633,667 +633,993 @@
     </div>
   </nav>
   <script>
-  // ============================================================================
-  // CALSNAP AI v4.6.2 — REAL GOOGLE ENDPOINTS (2.0-FLASH & 1.5-FLASH) & 6-LAYER VAULT
-  // ============================================================================
-  const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
-  const STORAGE_KEY_V1 = 'calsnap_ai_state_v1';
-  const API_KEY_BACKUP_SLOT = 'calsnap_api_key_backup';
-  const GUEST_LOCK_SLOT = 'calsnap_guest_lock_v41';
-  const COOKIE_KEY_NAME = 'calsnap_k';
-  const COOKIE_GUEST_LOCK = 'calsnap_gl';
-  const FAST_MODEL_KEY = 'calsnap_fast_model_v462';
-  const VAULT_CACHE_NAME = 'calsnap_admin_vault_v41';
-  const GUEST_REGEX = /^FIT-[A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]{1,12}-\d{2,6}$/i;
+// ============================================================================
+// TEIL 2.1 — CORE STATE, 6-LAYER ADMIN VAULT, WEBKIT GPU PIPELINE &
+// FREE-TIER DIRECT ROUTING (4.5s MICRO-TIMEOUT / ZERO-LATENCY QUEUE)
+// ============================================================================
 
-  let currentMealBase64 = null;
-  let currentMealLabelBase64 = null;
-  let currentFridgeBase64 = null;
-  let currentMenuBase64 = null;
+const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
+const STORAGE_KEY_V1 = 'calsnap_ai_state_v1';
+const API_KEY_BACKUP_SLOT = 'calsnap_api_key_backup';
+const COOKIE_KEY_NAME = 'calsnap_k';
+const VAULT_CACHE_NAME = 'calsnap_admin_vault_v41';
+const VAULT_CACHE_PATH = '/__calsnap_vault_key';
+const GUEST_LOCK_STORAGE_KEY = 'calsnap_guest_lock_v41';
+const GUEST_LOCK_COOKIE_NAME = 'calsnap_gl';
+const GUEST_REGEX = /^FIT-[A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]{1,12}-\d{2,6}$/i;
 
-  let isVisionBusy = false;
-  let visionWatchdogTimer = null;
-  let activeVisionController = null;
-  let liveModelsCache = null;
+// Neuer Cache-Slot v463 + deterministisches Flushen aller veralteten Modell-Caches
+const FAST_MODEL_KEY = 'calsnap_fast_model_v463';
+const STALE_FAST_MODEL_KEYS = [
+  'calsnap_fast_model_v462',
+  'calsnap_fast_model_v461',
+  'calsnap_fast_model_v46',
+  'calsnap_fast_model'
+];
+const FREE_TIER_DIRECT_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-flash-latest',
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
+  'gemini-1.5-flash'
+];
+const ATTEMPT_TIMEOUT_MS = 4500;
+const MASTER_VISION_TIMEOUT_MS = 26000;
 
-  let activeMealBaseResult = null;
-  let activePortionScalePercent = 100;
-  window._quickRecipeStore = [];
-  window._smartHabitList = [];
+(function flushStaleModelCachesOnBoot() {
+  try {
+    for (let i = 0; i < STALE_FAST_MODEL_KEYS.length; i++) {
+      localStorage.removeItem(STALE_FAST_MODEL_KEYS[i]);
+    }
+    const currentCached = localStorage.getItem(FAST_MODEL_KEY);
+    if (currentCached && !FREE_TIER_DIRECT_MODELS.includes(currentCached)) {
+      localStorage.removeItem(FAST_MODEL_KEY);
+    }
+  } catch (_) {}
+})();
 
-  function sanitizeApiKey(rawKey) {
-    return String(rawKey || '').replace(/[\s\u200B-\u200D\uFEFF]/g, '').trim();
+let isVisionBusy = false;
+let activeVisionController = null;
+let activeVisionWatchdogTimer = null;
+
+function sanitizeApiKey(rawKey) {
+  if (!rawKey || typeof rawKey !== 'string') return '';
+  return rawKey.replace(/[\s\u200B-\u200D\uFEFF"']/g, '').trim();
+}
+
+function isValidGoogleApiKey(rawKey) {
+  const clean = sanitizeApiKey(rawKey);
+  if (clean.length < 25) return false;
+  return clean.startsWith('AIza') || clean.startsWith('AQ.');
+}
+
+function numOr(val, fallback = 0) {
+  if (val === null || val === undefined || val === '') return fallback;
+  const parsed = typeof val === 'number' ? val : parseFloat(String(val).replace(',', '.'));
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function getTodayISO() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function getOffsetISO(offsetDays = 0) {
+  const dt = new Date();
+  dt.setDate(dt.getDate() + Number(offsetDays || 0));
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const d = String(dt.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function createDefaultState() {
+  return {
+    version: '4.6.2',
+    lang: 'de',
+    geminiApiKey: '',
+    isGuestUser: false,
+    guestCode: '',
+    profile: {
+      name: '',
+      gender: 'male',
+      age: 30,
+      height: 178,
+      weight: 80,
+      targetWeight: 75,
+      activity: 1.55,
+      goalType: 'lose',
+      targetKcal: 2100,
+      targetProt: 150,
+      targetCarbs: 210,
+      targetFat: 70,
+      targetFiber: 30,
+      targetSugar: 50
+    },
+    goals: {
+      kcal: 2100,
+      prot: 150,
+      carbs: 210,
+      fat: 70,
+      fiber: 30,
+      sugar: 50
+    },
+    days: {},
+    weightLog: {},
+    coach: {
+      lastCalibratedWeight: 80,
+      lastRecalibrationDate: null,
+      baseTargetKcal: 2100,
+      activeIntervention: null,
+      refeedUntilISO: null,
+      cheatRescueUntilISO: null,
+      cheatRescueDailyCut: 0,
+      dismissedPlateauISO: null,
+      dismissedCheatISO: null,
+      recalBanner: null
+    },
+    savedRecipes: []
+  };
+}
+
+function syncGoalsBridge(targetState) {
+  if (!targetState || typeof targetState !== 'object') return targetState;
+  if (!targetState.profile || typeof targetState.profile !== 'object') {
+    targetState.profile = createDefaultState().profile;
+  }
+  if (!targetState.goals || typeof targetState.goals !== 'object') {
+    targetState.goals = createDefaultState().goals;
   }
 
-  function isValidGoogleApiKey(rawKey) {
-    const k = sanitizeApiKey(rawKey);
-    return k.length >= 25 && (k.startsWith('AIza') || k.startsWith('AQ.'));
-  }
+  const p = targetState.profile;
+  const g = targetState.goals;
 
-  function numOr(val, fallback) {
-    const n = Number(val);
-    return Number.isFinite(n) ? n : fallback;
-  }
+  const kcal = Math.round(numOr(p.targetKcal, numOr(g.kcal, 2100)));
+  const prot = Math.round(numOr(p.targetProt, numOr(g.prot, 150)));
+  const carbs = Math.round(numOr(p.targetCarbs, numOr(g.carbs, 210)));
+  const fat = Math.round(numOr(p.targetFat, numOr(g.fat, 70)));
+  const fiber = Math.round(numOr(p.targetFiber, numOr(g.fiber, 30)));
+  const sugar = Math.round(numOr(p.targetSugar, numOr(g.sugar, 50)));
 
-  function getTodayISO() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
+  p.targetKcal = kcal;
+  p.targetProt = prot;
+  p.targetCarbs = carbs;
+  p.targetFat = fat;
+  p.targetFiber = fiber;
+  p.targetSugar = sugar;
 
-  function getOffsetISO(daysOffset) {
-    const d = new Date();
-    d.setDate(d.getDate() + daysOffset);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
+  g.kcal = kcal;
+  g.prot = prot;
+  g.carbs = carbs;
+  g.fat = fat;
+  g.fiber = fiber;
+  g.sugar = sugar;
 
-  function createDefaultState() {
-    return {
-      version: 4.62,
-      lang: 'de',
-      geminiApiKey: '',
-      guestCode: '',
-      isGuestUser: false,
-      profile: {
-        gender: 'male', age: 35, height: 180, weight: 90, targetWeight: 80,
-        activity: 1.375, goal: 'cut',
-        targetKcal: 2000, targetProt: 150, targetCarbs: 180, targetFat: 65,
-        targetFiber: 30, targetSugar: 35, waterTarget: 2500
-      },
-      goals: {
-        kcal: 2000, prot: 150, carbs: 180, fat: 65, fiber: 30, sugar: 35
-      },
-      weightLog: [],
-      metabolicCoach: {
-        lastCalibratedWeight: 90,
-        refeedUntilISO: null,
-        baseKcalBeforeRefeed: null,
-        activeDailyCut: 0,
-        cheatRescueUntilISO: null,
-        dismissedSpikeISO: null,
-        lastPlateauActionISO: null,
-        lastRecalMsg: ''
-      },
-      days: {}
-    };
-  }
+  p.age = numOr(p.age, 30);
+  p.height = numOr(p.height, 178);
+  p.weight = numOr(p.weight, 80);
+  p.targetWeight = numOr(p.targetWeight, 75);
+  p.activity = numOr(p.activity, 1.55);
 
-  function syncGoalsBridge(st) {
-    if (!st || !st.profile) return;
-    if (!st.goals || typeof st.goals !== 'object') st.goals = {};
-    st.goals.kcal = numOr(st.profile.targetKcal, 2000);
-    st.goals.prot = numOr(st.profile.targetProt, 150);
-    st.goals.carbs = numOr(st.profile.targetCarbs, 180);
-    st.goals.fat = numOr(st.profile.targetFat, 65);
-    st.goals.fiber = numOr(st.profile.targetFiber, 30);
-    st.goals.sugar = numOr(st.profile.targetSugar, 35);
-  }
+  return targetState;
+}
 
-  function escapeHTML(str) {
-    return String(str == null ? '' : str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
-  function setKeyCookie(val) {
-    try {
-      const clean = sanitizeApiKey(val);
-      if (!clean) document.cookie = `${COOKIE_KEY_NAME}=; path=/; max-age=0; SameSite=Lax`;
-      else document.cookie = `${COOKIE_KEY_NAME}=${encodeURIComponent(clean)}; path=/; max-age=315360000; SameSite=Lax`;
-    } catch (_) {}
-  }
+function setKeyCookie(apiKey) {
+  try {
+    const clean = sanitizeApiKey(apiKey);
+    if (!clean) {
+      document.cookie = `${COOKIE_KEY_NAME}=; path=/; max-age=0; SameSite=Lax`;
+      return;
+    }
+    const encoded = encodeURIComponent(btoa(clean));
+    document.cookie = `${COOKIE_KEY_NAME}=${encoded}; path=/; max-age=315360000; SameSite=Lax`;
+  } catch (_) {}
+}
 
-  function getKeyCookie() {
-    try {
-      const m = document.cookie.match(new RegExp('(?:^|; )' + COOKIE_KEY_NAME + '=([^;]*)'));
-      return m ? sanitizeApiKey(decodeURIComponent(m[1])) : '';
-    } catch (_) { return ''; }
-  }
-
-  function syncAdminHashAnchor(key, isGuest) {
-    try {
-      if (isGuest) return;
-      const clean = sanitizeApiKey(key);
-      if (isValidGoogleApiKey(clean)) {
-        const encoded = btoa(unescape(encodeURIComponent(clean)));
-        if (window.location.hash !== `#csa=${encoded}`) {
-          window.history.replaceState({}, document.title, window.location.pathname + `#csa=${encoded}`);
-        }
-      } else if (window.location.hash.startsWith('#csa=')) {
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    } catch (_) {}
-  }
-
-  function readAdminHashAnchor() {
-    try {
-      const h = window.location.hash || '';
-      if (h.startsWith('#csa=')) {
-        const decoded = sanitizeApiKey(decodeURIComponent(escape(atob(h.slice(5)))));
-        if (isValidGoogleApiKey(decoded)) return decoded;
-      }
-    } catch (_) {}
+function getKeyCookie() {
+  try {
+    const match = document.cookie.match(new RegExp('(?:^|; )' + COOKIE_KEY_NAME + '=([^;]*)'));
+    if (!match || !match[1]) return '';
+    const decoded = atob(decodeURIComponent(match[1]));
+    const clean = sanitizeApiKey(decoded);
+    return isValidGoogleApiKey(clean) ? clean : '';
+  } catch (_) {
     return '';
   }
+}
 
-  async function saveKeyToCacheVault(key) {
-    try {
-      if (!('caches' in window)) return;
-      const cache = await caches.open(VAULT_CACHE_NAME);
-      const clean = sanitizeApiKey(key);
-      if (clean) {
-        await cache.put('/__calsnap_vault_key', new Response(clean, { headers: { 'Content-Type': 'text/plain' } }));
-      } else {
-        await cache.delete('/__calsnap_vault_key');
+function syncAdminHashAnchor(apiKey) {
+  try {
+    if (isGuestLockPersisted()) return;
+    const clean = sanitizeApiKey(apiKey);
+    if (!clean) {
+      if (window.location.hash && window.location.hash.includes('csa=')) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
       }
-    } catch (_) {}
-  }
+      return;
+    }
+    if (!isValidGoogleApiKey(clean)) return;
+    const encoded = btoa(clean).replace(/=+$/, '');
+    const newHash = `#csa=${encoded}`;
+    if (window.location.hash !== newHash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search + newHash);
+    }
+  } catch (_) {}
+}
 
-  async function restoreKeyFromCacheVault() {
-    try {
-      if (!('caches' in window)) return '';
-      const cache = await caches.open(VAULT_CACHE_NAME);
-      const res = await cache.match('/__calsnap_vault_key');
-      if (res) {
-        const txt = sanitizeApiKey(await res.text());
-        if (isValidGoogleApiKey(txt)) return txt;
-      }
-    } catch (_) {}
+function readAdminHashAnchor() {
+  try {
+    const h = window.location.hash || '';
+    const match = h.match(/csa=([A-Za-z0-9+/=_-]+)/);
+    if (!match || !match[1]) return '';
+    const decoded = atob(match[1]);
+    const clean = sanitizeApiKey(decoded);
+    return isValidGoogleApiKey(clean) ? clean : '';
+  } catch (_) {
     return '';
   }
+}
 
-  function persistGuestLock(isGuest) {
-    try {
-      if (isGuest) {
-        localStorage.setItem(GUEST_LOCK_SLOT, '1');
-        document.cookie = `${COOKIE_GUEST_LOCK}=1; path=/; max-age=315360000; SameSite=Lax`;
-      } else {
-        localStorage.removeItem(GUEST_LOCK_SLOT);
-        document.cookie = `${COOKIE_GUEST_LOCK}=; path=/; max-age=0; SameSite=Lax`;
+async function saveKeyToCacheVault(apiKey) {
+  try {
+    if (!('caches' in window)) return;
+    const cache = await caches.open(VAULT_CACHE_NAME);
+    const clean = sanitizeApiKey(apiKey);
+    if (!clean) {
+      await cache.delete(VAULT_CACHE_PATH);
+      return;
+    }
+    if (!isValidGoogleApiKey(clean)) return;
+    const resp = new Response(JSON.stringify({ k: clean, ts: Date.now() }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    await cache.put(VAULT_CACHE_PATH, resp);
+  } catch (_) {}
+}
+
+async function restoreKeyFromCacheVault() {
+  try {
+    if (!('caches' in window)) return '';
+    const cache = await caches.open(VAULT_CACHE_NAME);
+    const resp = await cache.match(VAULT_CACHE_PATH);
+    if (!resp) return '';
+    const data = await resp.json();
+    const clean = sanitizeApiKey(data && data.k ? data.k : '');
+    if (isValidGoogleApiKey(clean)) {
+      if (state && !state.geminiApiKey) {
+        state.geminiApiKey = clean;
+        persistApiKeyRedundant(clean);
+        saveState();
+        if (typeof updateApiKeyStatusUI === 'function') updateApiKeyStatusUI();
       }
-    } catch (_) {}
+      return clean;
+    }
+    return '';
+  } catch (_) {
+    return '';
   }
+}
 
-  function isGuestLockPersisted(parsedState) {
-    if (parsedState && parsedState.isGuestUser === true) return true;
-    try { if (localStorage.getItem(GUEST_LOCK_SLOT) === '1') return true; } catch (_) {}
-    try { if (document.cookie.includes(`${COOKIE_GUEST_LOCK}=1`)) return true; } catch (_) {}
+function persistGuestLock(isLocked) {
+  try {
+    if (isLocked) {
+      localStorage.setItem(GUEST_LOCK_STORAGE_KEY, '1');
+      document.cookie = `${GUEST_LOCK_COOKIE_NAME}=1; path=/; max-age=315360000; SameSite=Lax`;
+      if (window.location.hash && window.location.hash.includes('csa=')) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    } else {
+      localStorage.removeItem(GUEST_LOCK_STORAGE_KEY);
+      document.cookie = `${GUEST_LOCK_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+    }
+  } catch (_) {}
+}
+
+function isGuestLockPersisted() {
+  try {
+    if (localStorage.getItem(GUEST_LOCK_STORAGE_KEY) === '1') return true;
+    if (document.cookie.includes(`${GUEST_LOCK_COOKIE_NAME}=1`)) return true;
+    return false;
+  } catch (_) {
     return false;
   }
+}
 
-  function persistApiKeyRedundant(key) {
-    const clean = sanitizeApiKey(key);
-    try {
-      if (clean) {
-        localStorage.setItem(API_KEY_BACKUP_SLOT, clean);
-        setKeyCookie(clean);
-        saveKeyToCacheVault(clean);
-      } else {
-        localStorage.removeItem(API_KEY_BACKUP_SLOT);
-        setKeyCookie('');
-        saveKeyToCacheVault('');
-      }
-    } catch (_) {}
-  }
-
-  function recoverRedundantApiKey(parsedState) {
-    let k = (parsedState && typeof parsedState.geminiApiKey === 'string') ? sanitizeApiKey(parsedState.geminiApiKey) : '';
-    if (!k) { try { k = sanitizeApiKey(localStorage.getItem(API_KEY_BACKUP_SLOT)); } catch (_) {} }
-    if (!k) k = getKeyCookie();
-    if (!k) k = readAdminHashAnchor();
-    return k;
-  }
-
-  function loadState() {
-    const def = createDefaultState();
-    let loaded = null;
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY_V2) || localStorage.getItem(STORAGE_KEY_V1);
-      if (raw) loaded = JSON.parse(raw);
-    } catch (_) { loaded = null; }
-
-    if (!loaded || typeof loaded !== 'object') {
-      const recovered = recoverRedundantApiKey(null);
-      if (recovered) def.geminiApiKey = recovered;
-      def.isGuestUser = isGuestLockPersisted(null);
-      syncGoalsBridge(def);
-      return def;
+function persistApiKeyRedundant(apiKey) {
+  const clean = sanitizeApiKey(apiKey);
+  try {
+    if (!clean) {
+      localStorage.removeItem(API_KEY_BACKUP_SLOT);
+      setKeyCookie('');
+      syncAdminHashAnchor('');
+      saveKeyToCacheVault('');
+      return;
     }
+    if (!isValidGoogleApiKey(clean)) return;
+    localStorage.setItem(API_KEY_BACKUP_SLOT, clean);
+    setKeyCookie(clean);
+    if (!isGuestLockPersisted()) {
+      syncAdminHashAnchor(clean);
+    }
+    saveKeyToCacheVault(clean);
+  } catch (_) {}
+}
 
-    const mergedProfile = { ...def.profile, ...(loaded.profile || {}) };
-    mergedProfile.weight = numOr(mergedProfile.weight, 90);
-    mergedProfile.targetWeight = numOr(mergedProfile.targetWeight, mergedProfile.weight);
-    mergedProfile.targetKcal = numOr(mergedProfile.targetKcal, 2000);
-    mergedProfile.targetProt = numOr(mergedProfile.targetProt, 150);
-    mergedProfile.targetCarbs = numOr(mergedProfile.targetCarbs, 180);
-    mergedProfile.targetFat = numOr(mergedProfile.targetFat, 65);
+function recoverRedundantApiKey() {
+  try {
+    const fromBackup = sanitizeApiKey(localStorage.getItem(API_KEY_BACKUP_SLOT) || '');
+    if (isValidGoogleApiKey(fromBackup)) return fromBackup;
 
-    const mergedCoach = {
-      ...def.metabolicCoach,
-      ...(loaded.metabolicCoach || {})
-    };
-    mergedCoach.lastCalibratedWeight = numOr(mergedCoach.lastCalibratedWeight, mergedProfile.weight);
-    mergedCoach.activeDailyCut = numOr(mergedCoach.activeDailyCut, 0);
+    const fromCookie = getKeyCookie();
+    if (isValidGoogleApiKey(fromCookie)) return fromCookie;
 
-    const merged = {
-      ...def,
-      ...loaded,
-      lang: loaded.lang === 'pl' ? 'pl' : 'de',
-      isGuestUser: isGuestLockPersisted(loaded),
-      profile: mergedProfile,
-      weightLog: Array.isArray(loaded.weightLog) ? loaded.weightLog : [],
-      metabolicCoach: mergedCoach,
-      days: (loaded.days && typeof loaded.days === 'object') ? loaded.days : {}
-    };
-    delete merged.steps;
-    delete merged.cycling;
+    const fromHash = readAdminHashAnchor();
+    if (isValidGoogleApiKey(fromHash)) return fromHash;
 
-    syncGoalsBridge(merged);
+    return '';
+  } catch (_) {
+    return '';
+  }
+}
 
-    const recoveredKey = recoverRedundantApiKey(merged);
-    if (recoveredKey) {
-      merged.geminiApiKey = recoveredKey;
+let state = createDefaultState();
+
+function loadState() {
+  const defaults = createDefaultState();
+  try {
+    let raw = localStorage.getItem(STORAGE_KEY_V2);
+    if (!raw) {
+      raw = localStorage.getItem(STORAGE_KEY_V1);
+    }
+    const parsed = raw ? JSON.parse(raw) : {};
+    state = Object.assign({}, defaults, parsed || {});
+    state.profile = Object.assign({}, defaults.profile, (parsed && parsed.profile) || {});
+    state.goals = Object.assign({}, defaults.goals, (parsed && parsed.goals) || {});
+    state.coach = Object.assign({}, defaults.coach, (parsed && parsed.coach) || {});
+    state.days = (parsed && parsed.days && typeof parsed.days === 'object') ? parsed.days : {};
+    state.weightLog = (parsed && parsed.weightLog && typeof parsed.weightLog === 'object') ? parsed.weightLog : {};
+    state.savedRecipes = Array.isArray(parsed && parsed.savedRecipes) ? parsed.savedRecipes : [];
+
+    syncGoalsBridge(state);
+
+    const recoveredKey = sanitizeApiKey(state.geminiApiKey) || recoverRedundantApiKey();
+    if (isValidGoogleApiKey(recoveredKey)) {
+      state.geminiApiKey = recoveredKey;
       persistApiKeyRedundant(recoveredKey);
+    } else {
+      state.geminiApiKey = '';
+      restoreKeyFromCacheVault();
     }
-    return merged;
+
+    if (state.isGuestUser || isGuestLockPersisted()) {
+      state.isGuestUser = true;
+      persistGuestLock(true);
+    }
+  } catch (_) {
+    state = defaults;
   }
+  return state;
+}
 
-  let state = loadState();
+function saveState() {
+  try {
+    syncGoalsBridge(state);
+    if (isValidGoogleApiKey(state.geminiApiKey)) {
+      state.geminiApiKey = sanitizeApiKey(state.geminiApiKey);
+      persistApiKeyRedundant(state.geminiApiKey);
+    }
+    localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state));
+  } catch (_) {}
+}
 
-  function saveState() {
-    try {
-      syncGoalsBridge(state);
-      const cleanKey = sanitizeApiKey(state.geminiApiKey);
-      state.geminiApiKey = cleanKey;
-      persistApiKeyRedundant(cleanKey);
-      syncAdminHashAnchor(cleanKey, Boolean(state.isGuestUser));
-      persistGuestLock(Boolean(state.isGuestUser));
-      localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state));
-    } catch (e) { console.error('State-Speicherfehler:', e); }
+function getTodayData(isoDate) {
+  const targetISO = isoDate || getTodayISO();
+  if (!state.days || typeof state.days !== 'object') {
+    state.days = {};
   }
-
-  function getTodayData() {
-    const iso = getTodayISO();
-    if (!state.days[iso]) state.days[iso] = { meals: [], waterMl: 0 };
-    return state.days[iso];
-  }
-
-  function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    const colors = {
-      success: 'bg-emerald-950/95 border-emerald-500/60 text-emerald-200',
-      error: 'bg-rose-950/95 border-rose-500/60 text-rose-200',
-      warning: 'bg-amber-950/95 border-amber-500/60 text-amber-200',
-      info: 'bg-slate-900/95 border-slate-600/60 text-slate-100'
+  if (!state.days[targetISO] || typeof state.days[targetISO] !== 'object') {
+    state.days[targetISO] = {
+      meals: [],
+      waterMl: 0,
+      weight: null
     };
-    const icons = {
-      success: 'fa-circle-check text-emerald-400',
-      error: 'fa-triangle-exclamation text-rose-400',
-      warning: 'fa-circle-exclamation text-amber-400',
-      info: 'fa-bolt text-emerald-400'
-    };
-    const el = document.createElement('div');
-    el.className = `pointer-events-auto px-4 py-3 rounded-2xl border shadow-2xl flex items-center gap-2.5 text-xs font-bold backdrop-blur-md transition-all ${colors[type] || colors.info}`;
-    el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-sm shrink-0"></i><span class="leading-snug">${escapeHTML(message)}</span>`;
-    container.appendChild(el);
-    setTimeout(() => { if (el.parentNode === container) el.remove(); }, 3800);
   }
-
-  function switchTab(tabId) {
-    document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    const targetSec = document.getElementById(`tab-${tabId}`);
-    const targetNav = document.getElementById(`nav-${tabId}`);
-    if (targetSec) targetSec.classList.add('active');
-    if (targetNav) targetNav.classList.add('active');
-    if (tabId === 'menu') updateMenuBudgetBanner();
-    else if (tabId === 'profile') syncProfileToUI();
+  if (!Array.isArray(state.days[targetISO].meals)) {
+    state.days[targetISO].meals = [];
   }
+  state.days[targetISO].waterMl = numOr(state.days[targetISO].waterMl, 0);
+  return state.days[targetISO];
+}
 
-  function renderImageToJpegBase64(img, objectUrl, maxDim, quality) {
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  const colorMap = {
+    success: 'bg-emerald-600/95 border-emerald-400/40 text-white',
+    error: 'bg-amber-600/95 border-amber-400/40 text-white',
+    warning: 'bg-amber-500/95 border-amber-300/40 text-slate-950 font-semibold',
+    info: 'bg-slate-800/95 border-teal-500/40 text-slate-100'
+  };
+  const iconMap = {
+    success: 'fa-circle-check text-emerald-200',
+    error: 'fa-triangle-exclamation text-amber-100',
+    warning: 'fa-circle-exclamation text-slate-950',
+    info: 'fa-circle-info text-teal-400'
+  };
+
+  const cls = colorMap[type] || colorMap.info;
+  const icn = iconMap[type] || iconMap.info;
+
+  toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl border shadow-xl backdrop-blur-md text-xs sm:text-sm transition-all duration-300 transform translate-y-0 opacity-100 ${cls}`;
+  toast.innerHTML = `<i class="fa-solid ${icn} text-base shrink-0"></i><span class="leading-snug">${escapeHTML(message)}</span>`;
+
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-8px)';
+    setTimeout(() => {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 280);
+  }, 3400);
+}
+
+function switchTab(tabId) {
+  const cleanId = String(tabId || 'diary').replace(/^tab-/, '');
+  const allTabs = document.querySelectorAll('.tab-content, [id^="tab-"]');
+  allTabs.forEach(el => {
+    if (el.id === `tab-${cleanId}`) {
+      el.classList.remove('hidden');
+      el.classList.add('active');
+    } else if (el.id && el.id.startsWith('tab-')) {
+      el.classList.add('hidden');
+      el.classList.remove('active');
+    }
+  });
+
+  const navBtns = document.querySelectorAll('.nav-btn, [data-tab], [id^="nav-"]');
+  navBtns.forEach(btn => {
+    const btnTab = (btn.getAttribute('data-tab') || btn.id.replace(/^nav-/, '')).replace(/^tab-/, '');
+    const isMatch = btnTab === cleanId;
+    btn.classList.toggle('active', isMatch);
+    btn.classList.toggle('text-emerald-400', isMatch);
+    btn.classList.toggle('text-slate-400', !isMatch);
+  });
+
+  if (cleanId === 'menu' && typeof updateMenuBudgetBanner === 'function') {
+    updateMenuBudgetBanner();
+  } else if (cleanId === 'profile' && typeof syncProfileToUI === 'function') {
+    syncProfileToUI();
+  } else if (cleanId === 'diary' && typeof renderDiaryUI === 'function') {
+    renderDiaryUI();
+  }
+}
+
+function renderImageToJpegBase64(img, maxDim = 820, quality = 0.75, objectUrlToRevoke = null) {
+  const canvas = document.createElement('canvas');
+  let ctx = null;
+  try {
     const origW = img.naturalWidth || img.width || 800;
-    const origH = img.naturalHeight || img.height || 600;
-    let width = origW, height = origH;
-    if (width > maxDim || height > maxDim) {
-      if (width >= height) { height = Math.max(1, Math.round((height * maxDim) / width)); width = maxDim; }
-      else { width = Math.max(1, Math.round((width * maxDim) / height)); height = maxDim; }
+    const origH = img.naturalHeight || img.height || 800;
+    let targetW = origW;
+    let targetH = origH;
+
+    if (origW > maxDim || origH > maxDim) {
+      if (origW >= origH) {
+        targetW = maxDim;
+        targetH = Math.max(1, Math.round((origH * maxDim) / origW));
+      } else {
+        targetH = maxDim;
+        targetW = Math.max(1, Math.round((origW * maxDim) / origH));
+      }
     }
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d', { alpha: false });
+
+    canvas.width = targetW;
+    canvas.height = targetH;
+    ctx = canvas.getContext('2d', { alpha: false });
+
+    // 5-Stage WebKit Metal-GPU Lifecycle
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, targetW, targetH);
+    ctx.drawImage(img, 0, 0, targetW, targetH);
+
+    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+    if (objectUrlToRevoke) {
+      try { URL.revokeObjectURL(objectUrlToRevoke); } catch (_) {}
+    }
+
+    ctx.clearRect(0, 0, targetW, targetH);
+    canvas.width = 0;
+    canvas.height = 0;
+
+    const commaIdx = dataUrl.indexOf(',');
+    return commaIdx !== -1 ? dataUrl.slice(commaIdx + 1) : dataUrl;
+  } catch (err) {
+    if (objectUrlToRevoke) {
+      try { URL.revokeObjectURL(objectUrlToRevoke); } catch (_) {}
+    }
     try {
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, width, height);
-      ctx.drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL('image/jpeg', quality);
-      if (objectUrl) { try { URL.revokeObjectURL(objectUrl); } catch (_) {} }
-      ctx.clearRect(0, 0, width, height);
+      if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
       canvas.width = 0;
       canvas.height = 0;
-      const commaIdx = dataUrl.indexOf(',');
-      return commaIdx >= 0 ? dataUrl.slice(commaIdx + 1) : dataUrl;
-    } catch (err) {
-      if (objectUrl) { try { URL.revokeObjectURL(objectUrl); } catch (_) {} }
-      canvas.width = 0;
-      canvas.height = 0;
-      throw err;
+    } catch (_) {}
+    throw err;
+  }
+}
+
+function compressImageFile(file, mode = 'standard', explicitQuality = null) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new Error('Keine Bilddatei ausgewählt.'));
+      return;
+    }
+
+    let maxDim = 820;
+    let quality = 0.75;
+
+    if (typeof mode === 'number') {
+      maxDim = mode;
+      quality = typeof explicitQuality === 'number' ? explicitQuality : 0.75;
+    } else if (mode === 'menu') {
+      maxDim = 960;
+      quality = 0.74;
+    } else if (mode === 'label') {
+      maxDim = 1000;
+      quality = 0.77;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    let settled = false;
+
+    const cleanupImg = () => {
+      img.onload = null;
+      img.onerror = null;
+      try { img.removeAttribute('src'); } catch (_) {}
+    };
+
+    const watchdog = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      cleanupImg();
+      try { URL.revokeObjectURL(objectUrl); } catch (_) {}
+      reject(new Error('Bild-Dekodierung Timeout (8s WebKit Watchdog).'));
+    }, 8000);
+
+    img.onload = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(watchdog);
+      try {
+        const base64 = renderImageToJpegBase64(img, maxDim, quality, objectUrl);
+        cleanupImg();
+        resolve(base64);
+      } catch (err) {
+        cleanupImg();
+        reject(err);
+      }
+    };
+
+    img.onerror = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(watchdog);
+      cleanupImg();
+      try { URL.revokeObjectURL(objectUrl); } catch (_) {}
+      reject(new Error('Bilddatei konnte nicht gelesen werden.'));
+    };
+
+    img.src = objectUrl;
+  });
+}
+
+function abortActiveVisionRequest() {
+  if (activeVisionWatchdogTimer) {
+    clearTimeout(activeVisionWatchdogTimer);
+    activeVisionWatchdogTimer = null;
+  }
+  if (activeVisionController) {
+    try { activeVisionController.abort(); } catch (_) {}
+    activeVisionController = null;
+  }
+  isVisionBusy = false;
+}
+
+async function fetchWithIsolatedSignal(url, options = {}, timeoutMs = ATTEMPT_TIMEOUT_MS, masterSignal = null) {
+  const attemptController = new AbortController();
+  let timedOut = false;
+
+  const onMasterAbort = () => {
+    try { attemptController.abort(); } catch (_) {}
+  };
+
+  if (masterSignal) {
+    if (masterSignal.aborted) {
+      throw new Error('MASTER_ABORTED');
+    }
+    masterSignal.addEventListener('abort', onMasterAbort, { once: true });
+  }
+
+  const timerId = setTimeout(() => {
+    timedOut = true;
+    try { attemptController.abort(); } catch (_) {}
+  }, timeoutMs);
+
+  try {
+    const fetchOpts = Object.assign({}, options, { signal: attemptController.signal });
+    return await fetch(url, fetchOpts);
+  } catch (err) {
+    if (masterSignal && masterSignal.aborted) {
+      throw new Error('MASTER_ABORTED');
+    }
+    if (timedOut) {
+      throw new Error(`MICRO_TIMEOUT_${timeoutMs}MS`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timerId);
+    if (masterSignal) {
+      try { masterSignal.removeEventListener('abort', onMasterAbort); } catch (_) {}
+    }
+  }
+}
+
+async function buildLiveResilientQueue(apiKey = '') {
+  // Stale Caches deterministisch flushen
+  try {
+    for (let i = 0; i < STALE_FAST_MODEL_KEYS.length; i++) {
+      localStorage.removeItem(STALE_FAST_MODEL_KEYS[i]);
+    }
+  } catch (_) {}
+
+  const queue = [];
+  try {
+    const cachedFast = localStorage.getItem(FAST_MODEL_KEY);
+    if (cachedFast && FREE_TIER_DIRECT_MODELS.includes(cachedFast)) {
+      queue.push(cachedFast);
+    } else if (cachedFast) {
+      localStorage.removeItem(FAST_MODEL_KEY);
+    }
+  } catch (_) {}
+
+  for (let i = 0; i < FREE_TIER_DIRECT_MODELS.length; i++) {
+    const m = FREE_TIER_DIRECT_MODELS[i];
+    if (!queue.includes(m)) {
+      queue.push(m);
     }
   }
 
-  function compressImageFile(file, mode = 'standard') {
-    return new Promise((resolve, reject) => {
-      if (!file) { reject(new Error('Keine Bilddatei ausgewählt.')); return; }
-      const maxDim = mode === 'menu' ? 960 : (mode === 'label' ? 1000 : 820);
-      const quality = mode === 'menu' ? 0.74 : (mode === 'label' ? 0.77 : 0.75);
-      let settled = false;
-      const objectUrl = URL.createObjectURL(file);
-      const img = new Image();
+  return queue;
+}
 
-      const watchdog = setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        img.onload = null; img.onerror = null;
-        try { img.removeAttribute('src'); } catch (_) {}
-        try { URL.revokeObjectURL(objectUrl); } catch (_) {}
-        reject(new Error('Bildverarbeitung Zeitüberschreitung (8s).'));
-      }, 8000);
+async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOptions = null, maybeSignal = null) {
+  let promptText = '';
+  let rawBase64 = null;
+  let explicitKey = '';
+  let externalSignal = null;
 
-      img.onload = () => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(watchdog);
-        img.onload = null; img.onerror = null;
-        try {
-          const base64 = renderImageToJpegBase64(img, objectUrl, maxDim, quality);
-          try { img.removeAttribute('src'); } catch (_) {}
-          resolve(base64);
-        } catch (err) {
-          try { img.removeAttribute('src'); } catch (_) {}
-          reject(err);
-        }
-      };
+  if (promptOrConfig && typeof promptOrConfig === 'object') {
+    promptText = String(promptOrConfig.prompt || promptOrConfig.text || '');
+    rawBase64 = promptOrConfig.base64Image || promptOrConfig.imageBase64 || promptOrConfig.image || null;
+    explicitKey = promptOrConfig.apiKey || '';
+    externalSignal = promptOrConfig.signal || promptOrConfig.masterSignal || null;
+  } else if (typeof promptOrConfig === 'string' && isValidGoogleApiKey(promptOrConfig) && typeof base64Image === 'string') {
+    explicitKey = sanitizeApiKey(promptOrConfig);
+    promptText = base64Image;
+    rawBase64 = typeof signalOrOptions === 'string' ? signalOrOptions : null;
+    if (signalOrOptions && typeof signalOrOptions === 'object') {
+      externalSignal = signalOrOptions.signal || signalOrOptions;
+    } else if (maybeSignal && typeof maybeSignal === 'object') {
+      externalSignal = maybeSignal.signal || maybeSignal;
+    }
+  } else {
+    promptText = String(promptOrConfig || '');
+    if (typeof base64Image === 'string' && base64Image.length > 0) {
+      rawBase64 = base64Image;
+    } else if (base64Image && typeof base64Image === 'object') {
+      externalSignal = base64Image.signal || base64Image;
+    }
+    if (signalOrOptions && typeof signalOrOptions === 'object') {
+      externalSignal = signalOrOptions.signal || signalOrOptions;
+    }
+  }
 
-      img.onerror = () => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(watchdog);
-        img.onload = null; img.onerror = null;
-        try { img.removeAttribute('src'); } catch (_) {}
-        try { URL.revokeObjectURL(objectUrl); } catch (_) {}
-        reject(new Error('Bilddatei konnte nicht dekodiert werden.'));
-      };
+  const cleanKey = sanitizeApiKey(explicitKey || (state && state.geminiApiKey) || recoverRedundantApiKey());
+  if (!isValidGoogleApiKey(cleanKey)) {
+    throw new Error('Kein gültiger Gemini API-Key hinterlegt. Bitte im Schlüssel-Menü prüfen.');
+  }
 
-      img.src = objectUrl;
+  const cleanBase64 = rawBase64
+    ? String(rawBase64).replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, '').trim()
+    : '';
+
+  let localMasterController = null;
+  let localMasterTimer = null;
+  let effectiveMasterSignal = externalSignal || (activeVisionController ? activeVisionController.signal : null);
+
+  if (!effectiveMasterSignal) {
+    localMasterController = new AbortController();
+    effectiveMasterSignal = localMasterController.signal;
+    localMasterTimer = setTimeout(() => {
+      try { localMasterController.abort(); } catch (_) {}
+    }, MASTER_VISION_TIMEOUT_MS);
+  }
+
+  const parts = [{ text: promptText }];
+  if (cleanBase64) {
+    parts.push({
+      inlineData: {
+        mimeType: 'image/jpeg',
+        data: cleanBase64
+      }
     });
   }
 
-  function abortActiveVisionRequest() {
-    clearTimeout(visionWatchdogTimer);
-    if (activeVisionController) {
-      try { activeVisionController.abort(); } catch (_) {}
-      activeVisionController = null;
-    }
-    isVisionBusy = false;
-  }
+  const isAQKey = cleanKey.startsWith('AQ.');
+  const modelQueue = await buildLiveResilientQueue(cleanKey);
+  let lastErrorMsg = 'Keine Antwort von der Gemini API erhalten.';
 
-  async function fetchWithIsolatedSignal(url, options, timeoutMs, masterSignal = null) {
-    if (masterSignal && masterSignal.aborted) {
-      const abortErr = new Error('Master-Abort ausgelöst.');
-      abortErr.name = 'AbortError';
-      throw abortErr;
-    }
-
-    const controller = new AbortController();
-    let onMasterAbort = null;
-    if (masterSignal) {
-      onMasterAbort = () => { try { controller.abort(); } catch (_) {} };
-      masterSignal.addEventListener('abort', onMasterAbort, { once: true });
-    }
-
-    const timer = setTimeout(() => { try { controller.abort(); } catch (_) {} }, timeoutMs);
-    try {
-      const response = await fetch(url, { ...options, signal: controller.signal });
-      const text = await response.text();
-      return { ok: response.ok, status: response.status, text };
-    } finally {
-      clearTimeout(timer);
-      if (masterSignal && onMasterAbort) {
-        masterSignal.removeEventListener('abort', onMasterAbort);
+  try {
+    for (let i = 0; i < modelQueue.length; i++) {
+      if (effectiveMasterSignal && effectiveMasterSignal.aborted) {
+        throw new Error('Zeitüberschreitung (26s Master-Watchdog) oder Abbruch.');
       }
-    }
-  }
 
-  // ============================================================================
-  // ECHTE GOOGLE AI STUDIO QUEUE (OHNE 1.5/2.0 SPERRE & OHNE 404 PHANTOME)
-  // ============================================================================
-  async function buildLiveResilientQueue(apiKey, masterSignal = null) {
-    // Reale, existierende Produktionsmodelle von Google AI Studio
-    const preferredOrder = [
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash-lite',
-      'gemini-1.5-pro'
-    ];
+      const modelName = modelQueue[i];
+      const isGemma = modelName.toLowerCase().includes('gemma');
 
-    let cachedFast = null;
-    try { cachedFast = localStorage.getItem(FAST_MODEL_KEY); } catch (_) {}
-    if (cachedFast && (/2\.5|3\.8/.test(cachedFast))) {
-      cachedFast = null;
-      try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
-    }
+      const endpoints = isAQKey
+        ? [
+            `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(cleanKey)}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(cleanKey)}`
+          ]
+        : [
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(cleanKey)}`
+          ];
 
-    if (!liveModelsCache) {
-      try {
-        const res = await fetchWithIsolatedSignal(
-          `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
-          { method: 'GET' },
-          3500,
-          masterSignal
-        );
-        if (res.status === 401 || res.status === 403) throw new Error('HTTP_AUTH_INVALID');
-        if (res.ok && res.text) {
-          const data = JSON.parse(res.text);
-          if (Array.isArray(data.models)) {
-            // ECHTE Modelle zulassen (Filter sperrt nur noch Nicht-Text/Vision-Tools)
-            liveModelsCache = data.models
-              .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
-              .map(m => String(m.name || '').replace(/^models\//, ''))
-              .filter(name => name && !/embedding|imagen|veo|tts|audio|live|robotics/i.test(name));
+      for (let eIdx = 0; eIdx < endpoints.length; eIdx++) {
+        const endpointUrl = endpoints[eIdx];
+
+        const primaryPayload = {
+          contents: [{ role: 'user', parts }],
+          generationConfig: isGemma
+            ? { temperature: 0.05, maxOutputTokens: 4096 }
+            : { temperature: 0.05, topP: 0.1, maxOutputTokens: 4096, responseMimeType: 'application/json' }
+        };
+
+        let response = null;
+        try {
+          response = await fetchWithIsolatedSignal(
+            endpointUrl,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(primaryPayload)
+            },
+            ATTEMPT_TIMEOUT_MS,
+            effectiveMasterSignal
+          );
+        } catch (netErr) {
+          if (netErr && netErr.message === 'MASTER_ABORTED') {
+            throw new Error('Anfrage abgebrochen (Master-Timeout erreicht).');
           }
-        }
-      } catch (e) {
-        if (e && e.message === 'HTTP_AUTH_INVALID') throw e;
-      }
-    }
-
-    const queue = [];
-    const addUnique = (m) => { if (m && !queue.includes(m)) queue.push(m); };
-    if (cachedFast) addUnique(cachedFast);
-    preferredOrder.forEach(addUnique);
-    if (Array.isArray(liveModelsCache)) liveModelsCache.forEach(addUnique);
-    return queue;
-  }
-
-  async function callGeminiRequest(promptText, base64Image = null, perModelTimeoutMs = 10000, opts = {}) {
-    const apiKey = sanitizeApiKey(state.geminiApiKey || recoverRedundantApiKey(state));
-    if (!apiKey) throw new Error(state.lang === 'pl' ? 'Brak klucza API Gemini.' : 'Kein Gemini API-Key hinterlegt. Bitte oben auf „API-Key" klicken.');
-
-    const isAQKey = apiKey.startsWith('AQ.');
-    const expectJson = opts.expectJson !== false;
-    const masterSignal = opts.masterSignal || null;
-    if (masterSignal && masterSignal.aborted) throw new Error('Zeitüberschreitung (Analyse abgebrochen).');
-
-    const parts = [{ text: promptText }];
-    if (base64Image) parts.push({ inlineData: { mimeType: 'image/jpeg', data: base64Image } });
-
-    let modelsQueue;
-    try {
-      modelsQueue = await buildLiveResilientQueue(apiKey, masterSignal);
-    } catch (authErr) {
-      if (authErr && authErr.message === 'HTTP_AUTH_INVALID') {
-        throw new Error('API-Key ungültig (HTTP 401/403). Bitte im API-Key-Tresor prüfen.');
-      }
-      throw authErr;
-    }
-
-    let lastError = 'Keine Antwort vom KI-Server.';
-
-    for (let i = 0; i < modelsQueue.length; i++) {
-      const modelName = modelsQueue[i];
-      if (masterSignal && masterSignal.aborted) throw new Error('Analyse-Zeitüberschreitung. Bitte erneut versuchen.');
-
-      // Standardisierter Endpunkt mit Fallback
-      const primaryEndpoint = isAQKey
-        ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`
-        : `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const altEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-      const isGemma = /^gemma/i.test(modelName);
-      const thisTimeout = i < 2 ? Math.max(8500, Math.min(perModelTimeoutMs, 11000)) : 7500;
-
-      const genConfig = { temperature: 0.05, topP: 0.1, maxOutputTokens: 4096 };
-      if (!isGemma && expectJson) genConfig.responseMimeType = 'application/json';
-
-      const basePayload = { contents: [{ role: 'user', parts }], generationConfig: genConfig };
-
-      try {
-        let activeEndpoint = primaryEndpoint;
-        let res = await fetchWithIsolatedSignal(
-          activeEndpoint,
-          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(basePayload) },
-          thisTimeout,
-          masterSignal
-        );
-
-        if (isAQKey && (res.status === 401 || res.status === 403 || res.status === 404)) {
-          activeEndpoint = altEndpoint;
-          res = await fetchWithIsolatedSignal(
-            activeEndpoint,
-            { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(basePayload) },
-            thisTimeout,
-            masterSignal
-          );
-        }
-
-        if (res.status === 401 || res.status === 403) {
-          throw new Error('API-Key ungültig oder gesperrt (HTTP ' + res.status + '). Bitte im API-Key-Tresor testen.');
-        }
-
-        if (res.status === 400) {
-          const fallbackPayload = { contents: [{ role: 'user', parts }], generationConfig: { temperature: 0.05, maxOutputTokens: 4096 } };
-          res = await fetchWithIsolatedSignal(
-            activeEndpoint,
-            { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fallbackPayload) },
-            thisTimeout,
-            masterSignal
-          );
-        }
-
-        if (res.status === 404 || res.status === 429 || res.status === 503) {
-          try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
-          lastError = `HTTP ${res.status} (${modelName})`;
-          continue;
-        }
-        if (!res.ok) {
-          lastError = `HTTP ${res.status}: ${(res.text || '').slice(0, 120)}`;
-          continue;
-        }
-
-        const parsed = JSON.parse(res.text);
-        const candParts = parsed?.candidates?.[0]?.content?.parts || [];
-        const textOut = candParts.filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('\n').trim();
-        if (!textOut) {
-          try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
-          lastError = `Leere Antwort (${modelName})`;
-          continue;
-        }
-
-        if (expectJson) {
+          lastErrorMsg = `${modelName}: Timeout nach 4.5s (${netErr.message || 'Netzwerk'})`;
           try {
-            const validatedObj = extractJSON(textOut);
-            try { localStorage.setItem(FAST_MODEL_KEY, modelName); } catch (_) {}
-            return JSON.stringify(validatedObj);
-          } catch (jsonErr) {
-            try { localStorage.removeItem(FAST_MODEL_KEY); } catch (_) {}
-            lastError = `JSON-Fehler (${modelName}): ${jsonErr.message}`;
+            if (localStorage.getItem(FAST_MODEL_KEY) === modelName) {
+              localStorage.removeItem(FAST_MODEL_KEY);
+            }
+          } catch (_) {}
+          continue;
+        }
+
+        // HTTP 400 Fallback ohne responseMimeType / topP innerhalb des 4.5s Micro-Timeouts
+        if (response.status === 400 && !isGemma) {
+          try {
+            const fallbackPayload = {
+              contents: [{ role: 'user', parts }],
+              generationConfig: { temperature: 0.05, maxOutputTokens: 4096 }
+            };
+            response = await fetchWithIsolatedSignal(
+              endpointUrl,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fallbackPayload)
+              },
+              ATTEMPT_TIMEOUT_MS,
+              effectiveMasterSignal
+            );
+          } catch (fbErr) {
+            if (fbErr && fbErr.message === 'MASTER_ABORTED') {
+              throw new Error('Anfrage abgebrochen (Master-Timeout erreicht).');
+            }
+            lastErrorMsg = `${modelName}: 400-Fallback Timeout`;
             continue;
           }
         }
 
-        try { localStorage.setItem(FAST_MODEL_KEY, modelName); } catch (_) {}
-        return textOut;
-      } catch (err) {
-        if (err && /API-Key ungültig/i.test(err.message || '')) throw err;
-        if (masterSignal && masterSignal.aborted) throw new Error('Analyse-Zeitüberschreitung (26s). Bitte Netz oder Foto prüfen.');
-        lastError = err.name === 'AbortError' ? `Timeout (${modelName})` : (err.message || String(err));
-        continue;
-      }
-    }
-    throw new Error(`KI-Anfrage fehlgeschlagen (${lastError}).`);
-  }
+        if (response.status === 401 || response.status === 403) {
+          if (isAQKey && eIdx === 0 && endpoints.length > 1) {
+            continue;
+          }
+          throw new Error(`API-Key abgelehnt (HTTP ${response.status}). Bitte Key im Tresor prüfen.`);
+        }
 
-  function repairTruncatedJSON(rawSlice) {
-    let s = rawSlice.replace(/,\s*([}\]])/g, '$1').trim();
-    const stack = [];
-    let inString = false;
-    let escapeNext = false;
+        if (response.status === 404 || response.status === 429 || response.status >= 500) {
+          lastErrorMsg = `${modelName}: HTTP ${response.status}`;
+          try {
+            if (localStorage.getItem(FAST_MODEL_KEY) === modelName) {
+              localStorage.removeItem(FAST_MODEL_KEY);
+            }
+          } catch (_) {}
+          continue;
+        }
 
-    for (let i = 0; i < s.length; i++) {
-      const ch = s[i];
-      if (escapeNext) { escapeNext = false; continue; }
-      if (inString) {
-        if (ch === '\\') escapeNext = true;
-        else if (ch === '"') inString = false;
-      } else {
-        if (ch === '"') inString = true;
-        else if (ch === '{') stack.push('}');
-        else if (ch === '[') stack.push(']');
-        else if (ch === '}' || ch === ']') {
-          if (stack.length > 0 && stack[stack.length - 1] === ch) stack.pop();
+        if (!response.ok) {
+          lastErrorMsg = `${modelName}: HTTP ${response.status}`;
+          continue;
+        }
+
+        let data = null;
+        try {
+          data = await response.json();
+        } catch (_) {
+          lastErrorMsg = `${modelName}: Ungültige JSON-Antwort vom Server`;
+          continue;
+        }
+
+        const candidateParts = data?.candidates?.[0]?.content?.parts;
+        if (!Array.isArray(candidateParts) || candidateParts.length === 0) {
+          lastErrorMsg = `${modelName}: Leere Kandidaten-Antwort`;
+          continue;
+        }
+
+        const rawText = candidateParts.map(p => p.text || '').join('\n').trim();
+        if (!rawText) {
+          lastErrorMsg = `${modelName}: Leerer Text-Output`;
+          continue;
+        }
+
+        // Self-Healing JSON Extraktion VOR dem Caching von FAST_MODEL_KEY
+        try {
+          const parsedJSON = extractJSON(rawText);
+          if (parsedJSON && typeof parsedJSON === 'object') {
+            try {
+              if (FREE_TIER_DIRECT_MODELS.includes(modelName)) {
+                localStorage.setItem(FAST_MODEL_KEY, modelName);
+              }
+            } catch (_) {}
+            return parsedJSON;
+          }
+        } catch (parseErr) {
+          lastErrorMsg = `${modelName}: JSON-Reparatur fehlgeschlagen (${parseErr.message})`;
+          continue;
         }
       }
     }
 
-    if (inString) {
-      if (escapeNext) s = s.slice(0, -1);
-      s += '"';
+    throw new Error(`KI-Analyse fehlgeschlagen (${lastErrorMsg}).`);
+  } finally {
+    if (localMasterTimer) {
+      clearTimeout(localMasterTimer);
     }
+  }
+}
 
-    if (stack.length > 0 && stack[stack.length - 1] === '}') {
-      s = s.replace(/,\s*"[^"]*"\s*:\s*$/, '');
-      s = s.replace(/,\s*"[^"]*"\s*$/, '');
-      if (/:\s*[-.]?\s*$/.test(s)) s = s.replace(/:\s*[-.]?\s*$/, ': 0');
+function repairTruncatedJSON(rawSlice) {
+  if (!rawSlice || typeof rawSlice !== 'string') return '';
+  let s = rawSlice.trim();
+
+  // Entferne evtl. abgeschnittene Escape-Sequenz am Ende
+  s = s.replace(/\\+$/, '');
+
+  let inString = false;
+  let escaped = false;
+  const stack = [];
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (escaped) {
+      escaped = false;
+      continue;
     }
+    if (ch === '\\') {
+      if (inString) escaped = true;
+      continue;
+    }
+    if (ch === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+
+    if (ch === '{') {
+      stack.push('}');
+    } else if (ch === '[') {
+      stack.push(']');
+    } else if (ch === '}' || ch === ']') {
+      if (stack.length > 0 && stack[stack.length - 1] === ch) {
+        stack.pop();
+      }
+    }
+  }
+
+  if (inString) {
+    s += '"';
+  }
+
+  // Bereinige hängende Kommata oder unvollständige Key-Doppelpunkte vor dem Schließen
+  s = s.replace(/,\s*$/, '');
+  s = s.replace(/:\s*$/, ': null');
+  s = s.replace(/,\s*"[^"]*"\s*$/, '');
+
+  while (stack.length > 0) {
+    const closer = stack.pop();
     s = s.replace(/,\s*$/, '');
-
-    while (stack.length > 0) {
-      s += stack.pop();
-    }
-    s = s.replace(/,\s*([}\]])/g, '$1');
-    return JSON.parse(s);
+    s += closer;
   }
 
-  function extractJSON(raw) {
-    if (!raw || typeof raw !== 'string') throw new Error('Keine gültige Textantwort für JSON-Extraktion.');
-    const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
-    try { return JSON.parse(cleaned); } catch (_) {}
+  return s;
+}
 
-    const firstBrace = cleaned.indexOf('{');
-    if (firstBrace === -1) throw new Error('JSON-Startklammer fehlt.');
-
-    const lastBrace = cleaned.lastIndexOf('}');
-    if (lastBrace > firstBrace) {
-      const directCandidate = cleaned.slice(firstBrace, lastBrace + 1).replace(/,\s*([}\]])/g, '$1');
-      try { return JSON.parse(directCandidate); } catch (_) {}
-    }
-
-    return repairTruncatedJSON(cleaned.slice(firstBrace));
+function extractJSON(raw) {
+  if (raw && typeof raw === 'object') return raw;
+  if (!raw || typeof raw !== 'string') {
+    throw new Error('Leere KI-Antwort.');
   }
+
+  let cleaned = raw
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (_) {}
+
+  const firstObj = cleaned.indexOf('{');
+  const firstArr = cleaned.indexOf('[');
+  let startIdx = -1;
+
+  if (firstObj !== -1 && firstArr !== -1) {
+    startIdx = Math.min(firstObj, firstArr);
+  } else {
+    startIdx = firstObj !== -1 ? firstObj : firstArr;
+  }
+
+  if (startIdx === -1) {
+    throw new Error('Kein JSON-Startzeichen gefunden.');
+  }
+
+  const lastObj = cleaned.lastIndexOf('}');
+  const lastArr = cleaned.lastIndexOf(']');
+  const endIdx = Math.max(lastObj, lastArr);
+
+  if (endIdx > startIdx) {
+    const candidate = cleaned.slice(startIdx, endIdx + 1);
+    try {
+      return JSON.parse(candidate);
+    } catch (_) {}
+  }
+
+  const repaired = repairTruncatedJSON(cleaned.slice(startIdx));
+  return JSON.parse(repaired);
+}
     // ============================================================================
   // 100g-NORMIERTES DE/PL-LEXIKON (INKL. CHIPS, COLA ZERO & SOFTDRINKS)
   // ============================================================================
