@@ -782,9 +782,10 @@
     </div>
   </nav>
   <script>
+<script>
 // ============================================================================
 // TEIL 2.1 — CORE STATE, 6-LAYER ADMIN VAULT, WEBKIT GPU PIPELINE &
-// FREE-TIER DIRECT ROUTING (4.5s MICRO-TIMEOUT / ZERO-LATENCY QUEUE)
+// VERIFIED FREE-TIER ROUTING (THINKING-BYPASS + LIVE MODEL DISCOVERY)
 // ============================================================================
 
 const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
@@ -797,21 +798,26 @@ const GUEST_LOCK_STORAGE_KEY = 'calsnap_guest_lock_v41';
 const GUEST_LOCK_COOKIE_NAME = 'calsnap_gl';
 const GUEST_REGEX = /^FIT-[A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]{1,12}-\d{2,6}$/i;
 
-const FAST_MODEL_KEY = 'calsnap_fast_model_v463';
+const FAST_MODEL_KEY = 'calsnap_fast_model_v465';
 const STALE_FAST_MODEL_KEYS = [
+  'calsnap_fast_model_v464',
+  'calsnap_fast_model_v463',
   'calsnap_fast_model_v462',
   'calsnap_fast_model_v461',
   'calsnap_fast_model_v46',
   'calsnap_fast_model'
 ];
+
+// Nur aktive Google-Modelle (abgeschaltetes gemini-1.5-flash komplett entfernt)
 const FREE_TIER_DIRECT_MODELS = [
   'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
   'gemini-flash-latest',
   'gemini-2.0-flash',
-  'gemini-2.0-flash-lite',
-  'gemini-1.5-flash'
+  'gemini-2.0-flash-lite'
 ];
-const ATTEMPT_TIMEOUT_MS = 4500;
+
+const ATTEMPT_TIMEOUT_MS = 10000;
 const MASTER_VISION_TIMEOUT_MS = 26000;
 
 (function flushStaleModelCachesOnBoot() {
@@ -820,7 +826,7 @@ const MASTER_VISION_TIMEOUT_MS = 26000;
       localStorage.removeItem(STALE_FAST_MODEL_KEYS[i]);
     }
     const currentCached = localStorage.getItem(FAST_MODEL_KEY);
-    if (currentCached && !FREE_TIER_DIRECT_MODELS.includes(currentCached)) {
+    if (currentCached && currentCached.includes('1.5')) {
       localStorage.removeItem(FAST_MODEL_KEY);
     }
   } catch (_) {}
@@ -835,6 +841,7 @@ let currentFridgePhotoBase64 = null;
 let currentMenuPhotoBase64 = null;
 let pendingMealAnalysis = null;
 let currentPortionScale = 100;
+let liveDiscoveredModelsCache = null;
 
 function sanitizeApiKey(rawKey) {
   if (!rawKey || typeof rawKey !== 'string') return '';
@@ -988,7 +995,6 @@ function getKeyCookie() {
     const match = document.cookie.match(new RegExp('(?:^|; )' + COOKIE_KEY_NAME + '=([^;]*)'));
     if (!match || !match[1]) return '';
     const rawVal = decodeURIComponent(match[1]);
-    // Rückwärtskompatibel: prüfe erst Klartext-Cookie, dann Base64
     const directClean = sanitizeApiKey(rawVal);
     if (isValidGoogleApiKey(directClean)) return directClean;
     const decoded = atob(rawVal);
@@ -1237,7 +1243,7 @@ function showToast(message, type = 'info') {
     setTimeout(() => {
       if (toast.parentNode) toast.parentNode.removeChild(toast);
     }, 280);
-  }, 3400);
+  }, 3600);
 }
 
 function switchTab(tabId) {
@@ -1294,7 +1300,6 @@ function renderImageToJpegBase64(img, maxDim = 820, quality = 0.75, objectUrlToR
     canvas.height = targetH;
     ctx = canvas.getContext('2d', { alpha: false });
 
-    // 5-Stage WebKit Metal-GPU Lifecycle
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, targetW, targetH);
     ctx.drawImage(img, 0, 0, targetW, targetH);
@@ -1433,7 +1438,7 @@ async function fetchWithIsolatedSignal(url, options = {}, timeoutMs = ATTEMPT_TI
       throw new Error('MASTER_ABORTED');
     }
     if (timedOut) {
-      throw new Error(`MICRO_TIMEOUT_${timeoutMs}MS`);
+      throw new Error(`TIMEOUT_${timeoutMs}MS`);
     }
     throw err;
   } finally {
@@ -1454,7 +1459,7 @@ async function buildLiveResilientQueue(apiKey = '') {
   const queue = [];
   try {
     const cachedFast = localStorage.getItem(FAST_MODEL_KEY);
-    if (cachedFast && FREE_TIER_DIRECT_MODELS.includes(cachedFast)) {
+    if (cachedFast && !cachedFast.includes('1.5')) {
       queue.push(cachedFast);
     } else if (cachedFast) {
       localStorage.removeItem(FAST_MODEL_KEY);
@@ -1465,6 +1470,48 @@ async function buildLiveResilientQueue(apiKey = '') {
     const m = FREE_TIER_DIRECT_MODELS[i];
     if (!queue.includes(m)) {
       queue.push(m);
+    }
+  }
+
+  // Live-Modell-Erkennung von Google (/v1beta/models), damit garantiert jedes für den Key freigeschaltete Modell gefunden wird
+  const cleanKey = sanitizeApiKey(apiKey || (state && state.geminiApiKey) || recoverRedundantApiKey());
+  if (isValidGoogleApiKey(cleanKey)) {
+    if (Array.isArray(liveDiscoveredModelsCache) && liveDiscoveredModelsCache.length > 0) {
+      liveDiscoveredModelsCache.forEach(m => {
+        if (!queue.includes(m)) queue.push(m);
+      });
+    } else {
+      try {
+        const resp = await fetchWithIsolatedSignal(
+          `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(cleanKey)}`,
+          { method: 'GET' },
+          3500
+        );
+        if (resp.ok) {
+          const data = await resp.json();
+          const models = Array.isArray(data && data.models) ? data.models : [];
+          const discovered = [];
+          models.forEach(item => {
+            const rawName = String((item && item.name) || '').replace(/^models\//, '');
+            const methods = Array.isArray(item && item.supportedGenerationMethods) ? item.supportedGenerationMethods : [];
+            if (!rawName || !methods.includes('generateContent')) return;
+            if (/embedding|imagen|veo|tts|audio|live|robotics|aqa|1\.0|1\.5/i.test(rawName)) return;
+            discovered.push(rawName);
+          });
+          // Sortiere Flash-Modelle nach vorne
+          discovered.sort((a, b) => {
+            const aFlash = a.includes('flash') ? 0 : 1;
+            const bFlash = b.includes('flash') ? 0 : 1;
+            return aFlash - bFlash;
+          });
+          if (discovered.length > 0) {
+            liveDiscoveredModelsCache = discovered;
+            discovered.forEach(m => {
+              if (!queue.includes(m)) queue.push(m);
+            });
+          }
+        }
+      } catch (_) {}
     }
   }
 
@@ -1536,7 +1583,7 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
 
   const isAQKey = cleanKey.startsWith('AQ.');
   const modelQueue = await buildLiveResilientQueue(cleanKey);
-  let lastErrorMsg = 'Keine Antwort von der Gemini API erhalten.';
+  const errorHistory = [];
 
   try {
     for (let i = 0; i < modelQueue.length; i++) {
@@ -1545,7 +1592,9 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
       }
 
       const modelName = modelQueue[i];
-      const isGemma = modelName.toLowerCase().includes('gemma');
+      const lowerModel = modelName.toLowerCase();
+      const isGemma = lowerModel.includes('gemma');
+      const supportsThinkingBypass = lowerModel.includes('2.5') || lowerModel.includes('flash-latest');
 
       const endpoints = isAQKey
         ? [
@@ -1559,11 +1608,22 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
       for (let eIdx = 0; eIdx < endpoints.length; eIdx++) {
         const endpointUrl = endpoints[eIdx];
 
+        const genConfig = isGemma
+          ? { temperature: 0.05, maxOutputTokens: 4096 }
+          : {
+              temperature: 0.05,
+              topP: 0.1,
+              maxOutputTokens: 4096,
+              responseMimeType: 'application/json'
+            };
+
+        if (supportsThinkingBypass && !isGemma) {
+          genConfig.thinkingConfig = { thinkingBudget: 0 };
+        }
+
         const primaryPayload = {
           contents: [{ role: 'user', parts }],
-          generationConfig: isGemma
-            ? { temperature: 0.05, maxOutputTokens: 4096 }
-            : { temperature: 0.05, topP: 0.1, maxOutputTokens: 4096, responseMimeType: 'application/json' }
+          generationConfig: genConfig
         };
 
         let response = null;
@@ -1582,7 +1642,7 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
           if (netErr && netErr.message === 'MASTER_ABORTED') {
             throw new Error('Anfrage wurde abgebrochen.');
           }
-          lastErrorMsg = `${modelName}: Timeout nach 4.5s`;
+          errorHistory.push(`${modelName}: Timeout`);
           try {
             if (localStorage.getItem(FAST_MODEL_KEY) === modelName) {
               localStorage.removeItem(FAST_MODEL_KEY);
@@ -1591,6 +1651,7 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
           continue;
         }
 
+        // HTTP 400 Fallback (ohne thinkingConfig / responseMimeType / topP)
         if (response.status === 400 && !isGemma) {
           try {
             const fallbackPayload = {
@@ -1611,7 +1672,7 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
             if (fbErr && fbErr.message === 'MASTER_ABORTED') {
               throw new Error('Anfrage wurde abgebrochen.');
             }
-            lastErrorMsg = `${modelName}: 400-Fallback Timeout`;
+            errorHistory.push(`${modelName}: 400-Fallback Timeout`);
             continue;
           }
         }
@@ -1624,7 +1685,7 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
         }
 
         if (response.status === 404 || response.status === 429 || response.status >= 500) {
-          lastErrorMsg = `${modelName}: HTTP ${response.status}`;
+          errorHistory.push(`${modelName}: HTTP ${response.status}`);
           try {
             if (localStorage.getItem(FAST_MODEL_KEY) === modelName) {
               localStorage.removeItem(FAST_MODEL_KEY);
@@ -1634,7 +1695,7 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
         }
 
         if (!response.ok) {
-          lastErrorMsg = `${modelName}: HTTP ${response.status}`;
+          errorHistory.push(`${modelName}: HTTP ${response.status}`);
           continue;
         }
 
@@ -1642,19 +1703,23 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
         try {
           data = await response.json();
         } catch (_) {
-          lastErrorMsg = `${modelName}: Ungültige Server-Antwort`;
+          errorHistory.push(`${modelName}: Ungültige Server-Antwort`);
           continue;
         }
 
         const candidateParts = data?.candidates?.[0]?.content?.parts;
         if (!Array.isArray(candidateParts) || candidateParts.length === 0) {
-          lastErrorMsg = `${modelName}: Leere Antwort`;
+          errorHistory.push(`${modelName}: Leere Antwort`);
           continue;
         }
 
-        const rawText = candidateParts.map(p => p.text || '').join('\n').trim();
+        // Ignoriere interne thought:true Parts bei Gemini 2.5 Modellen
+        const nonThoughtParts = candidateParts.filter(p => !p.thought);
+        const effectiveParts = nonThoughtParts.length > 0 ? nonThoughtParts : candidateParts;
+        const rawText = effectiveParts.map(p => p.text || '').join('\n').trim();
+
         if (!rawText) {
-          lastErrorMsg = `${modelName}: Leerer Text-Output`;
+          errorHistory.push(`${modelName}: Leerer Text-Output`);
           continue;
         }
 
@@ -1662,20 +1727,19 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
           const parsedJSON = extractJSON(rawText);
           if (parsedJSON && typeof parsedJSON === 'object') {
             try {
-              if (FREE_TIER_DIRECT_MODELS.includes(modelName)) {
-                localStorage.setItem(FAST_MODEL_KEY, modelName);
-              }
+              localStorage.setItem(FAST_MODEL_KEY, modelName);
             } catch (_) {}
             return parsedJSON;
           }
         } catch (parseErr) {
-          lastErrorMsg = `${modelName}: JSON-Fehler (${parseErr.message})`;
+          errorHistory.push(`${modelName}: JSON-Fehler`);
           continue;
         }
       }
     }
 
-    throw new Error(`KI-Anfrage fehlgeschlagen (${lastErrorMsg}).`);
+    const summary = errorHistory.length > 0 ? errorHistory.slice(0, 3).join(' | ') : 'Keine Antwort';
+    throw new Error(`KI-Anfrage fehlgeschlagen (${summary}).`);
   } finally {
     if (localMasterTimer) {
       clearTimeout(localMasterTimer);
