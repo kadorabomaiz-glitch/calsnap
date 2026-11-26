@@ -782,10 +782,9 @@
     </div>
   </nav>
   <script>
-<script>
 // ============================================================================
 // TEIL 2.1 — CORE STATE, 6-LAYER ADMIN VAULT, WEBKIT GPU PIPELINE &
-// VERIFIED FREE-TIER ROUTING (THINKING-BYPASS + LIVE MODEL DISCOVERY)
+// FREE-TIER ROUTING (14s VISION WINDOW + LIVE MODEL DISCOVERY)
 // ============================================================================
 
 const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
@@ -798,8 +797,9 @@ const GUEST_LOCK_STORAGE_KEY = 'calsnap_guest_lock_v41';
 const GUEST_LOCK_COOKIE_NAME = 'calsnap_gl';
 const GUEST_REGEX = /^FIT-[A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]{1,12}-\d{2,6}$/i;
 
-const FAST_MODEL_KEY = 'calsnap_fast_model_v465';
+const FAST_MODEL_KEY = 'calsnap_fast_model_v466';
 const STALE_FAST_MODEL_KEYS = [
+  'calsnap_fast_model_v465',
   'calsnap_fast_model_v464',
   'calsnap_fast_model_v463',
   'calsnap_fast_model_v462',
@@ -808,16 +808,16 @@ const STALE_FAST_MODEL_KEYS = [
   'calsnap_fast_model'
 ];
 
-// Nur aktive Google-Modelle (abgeschaltetes gemini-1.5-flash komplett entfernt)
+// Aktive Free-Tier-Modelle (abgeschaltetes gemini-1.5-flash komplett entfernt)
 const FREE_TIER_DIRECT_MODELS = [
-  'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
+  'gemini-2.5-flash',
   'gemini-flash-latest',
   'gemini-2.0-flash',
   'gemini-2.0-flash-lite'
 ];
 
-const ATTEMPT_TIMEOUT_MS = 10000;
+const ATTEMPT_TIMEOUT_MS = 14000;
 const MASTER_VISION_TIMEOUT_MS = 26000;
 
 (function flushStaleModelCachesOnBoot() {
@@ -1473,7 +1473,7 @@ async function buildLiveResilientQueue(apiKey = '') {
     }
   }
 
-  // Live-Modell-Erkennung von Google (/v1beta/models), damit garantiert jedes für den Key freigeschaltete Modell gefunden wird
+  // Live-Discovery der für diesen Key freigeschalteten Modelle als Sicherheitsnetz
   const cleanKey = sanitizeApiKey(apiKey || (state && state.geminiApiKey) || recoverRedundantApiKey());
   if (isValidGoogleApiKey(cleanKey)) {
     if (Array.isArray(liveDiscoveredModelsCache) && liveDiscoveredModelsCache.length > 0) {
@@ -1485,7 +1485,7 @@ async function buildLiveResilientQueue(apiKey = '') {
         const resp = await fetchWithIsolatedSignal(
           `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(cleanKey)}`,
           { method: 'GET' },
-          3500
+          3000
         );
         if (resp.ok) {
           const data = await resp.json();
@@ -1498,12 +1498,7 @@ async function buildLiveResilientQueue(apiKey = '') {
             if (/embedding|imagen|veo|tts|audio|live|robotics|aqa|1\.0|1\.5/i.test(rawName)) return;
             discovered.push(rawName);
           });
-          // Sortiere Flash-Modelle nach vorne
-          discovered.sort((a, b) => {
-            const aFlash = a.includes('flash') ? 0 : 1;
-            const bFlash = b.includes('flash') ? 0 : 1;
-            return aFlash - bFlash;
-          });
+          discovered.sort((a, b) => (a.includes('flash') ? 0 : 1) - (b.includes('flash') ? 0 : 1));
           if (discovered.length > 0) {
             liveDiscoveredModelsCache = discovered;
             discovered.forEach(m => {
@@ -1592,9 +1587,8 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
       }
 
       const modelName = modelQueue[i];
-      const lowerModel = modelName.toLowerCase();
-      const isGemma = lowerModel.includes('gemma');
-      const supportsThinkingBypass = lowerModel.includes('2.5') || lowerModel.includes('flash-latest');
+      const isGemma = modelName.toLowerCase().includes('gemma');
+      const perAttemptTimeout = i < 2 ? ATTEMPT_TIMEOUT_MS : 8000;
 
       const endpoints = isAQKey
         ? [
@@ -1608,22 +1602,11 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
       for (let eIdx = 0; eIdx < endpoints.length; eIdx++) {
         const endpointUrl = endpoints[eIdx];
 
-        const genConfig = isGemma
-          ? { temperature: 0.05, maxOutputTokens: 4096 }
-          : {
-              temperature: 0.05,
-              topP: 0.1,
-              maxOutputTokens: 4096,
-              responseMimeType: 'application/json'
-            };
-
-        if (supportsThinkingBypass && !isGemma) {
-          genConfig.thinkingConfig = { thinkingBudget: 0 };
-        }
-
         const primaryPayload = {
           contents: [{ role: 'user', parts }],
-          generationConfig: genConfig
+          generationConfig: isGemma
+            ? { temperature: 0.05, maxOutputTokens: 4096 }
+            : { temperature: 0.05, topP: 0.1, maxOutputTokens: 4096, responseMimeType: 'application/json' }
         };
 
         let response = null;
@@ -1635,7 +1618,7 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(primaryPayload)
             },
-            ATTEMPT_TIMEOUT_MS,
+            perAttemptTimeout,
             effectiveMasterSignal
           );
         } catch (netErr) {
@@ -1651,7 +1634,6 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
           continue;
         }
 
-        // HTTP 400 Fallback (ohne thinkingConfig / responseMimeType / topP)
         if (response.status === 400 && !isGemma) {
           try {
             const fallbackPayload = {
@@ -1665,7 +1647,7 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(fallbackPayload)
               },
-              ATTEMPT_TIMEOUT_MS,
+              perAttemptTimeout,
               effectiveMasterSignal
             );
           } catch (fbErr) {
@@ -1713,7 +1695,6 @@ async function callGeminiRequest(promptOrConfig, base64Image = null, signalOrOpt
           continue;
         }
 
-        // Ignoriere interne thought:true Parts bei Gemini 2.5 Modellen
         const nonThoughtParts = candidateParts.filter(p => !p.thought);
         const effectiveParts = nonThoughtParts.length > 0 ? nonThoughtParts : candidateParts;
         const rawText = effectiveParts.map(p => p.text || '').join('\n').trim();
@@ -1856,7 +1837,7 @@ const FOOD_LEXICON = [
   { id: 'milk_15', name: 'Milch 1,5% Fett', unitG: 200, kcal100: 47, prot100: 3.4, carbs100: 4.8, fat100: 1.5, fiber100: 0, sugar100: 4.8, naturalMatrix: true, kw: ['milch', 'fettarme milch', 'mleko'] },
   { id: 'latte_macchiato', name: 'Latte Macchiato (ungesüßt)', unitG: 300, kcal100: 36, prot100: 2.5, carbs100: 3.6, fat100: 1.2, fiber100: 0, sugar100: 3.6, naturalMatrix: true, kw: ['latte macchiato', 'cappuccino', 'milchkaffee', 'kawa z mlekiem', 'latte'] },
   { id: 'black_coffee', name: 'Kaffee schwarz / Espresso', unitG: 250, kcal100: 2, prot100: 0.2, carbs100: 0.1, fat100: 0, fiber100: 0, sugar100: 0, kw: ['kaffee', 'kaffee schwarz', 'espresso', 'americano', 'kawa', 'czarna kawa'] },
-  { id: 'sugar_cube', name: 'Zucker / Würfelzucker', unitG: 3.5, kcal100: 400, prot100: 0, carbs100: 100.0, fat100: 0, fiber100: 0, sugar100: 100.0, kw: ['zucker', 'wurfel zucker', 'wurfelzucker', 'cukier', 'kostka cukru'] },
+  { id: 'sugar_cube', name: 'Zucker / Würfelzucker', unitG: 3.5, kcal100: 400, prot100: 0, carbs100: 100.0, fat100: 0, fiber100: 0, sugar100: 100.0, kw: ['zucker', 'wurfel zucker', 'wurfeln zucker', 'wurfelzucker', 'cukier', 'kostka cukru', 'kostki cukru'] },
   { id: 'chicken_breast', name: 'Hähnchenbrustfilet (gegart, mager)', unitG: 180, kcal100: 115, prot100: 23.5, carbs100: 0.5, fat100: 2.0, fiber100: 0, sugar100: 0, isLeanProtein: true, kw: ['hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'hahnchenfilet', 'piers z kurczaka', 'kurczak', 'indyk'] },
   { id: 'beef_lean', name: 'Rinderhack mager / Tatar / Rindersteak', unitG: 180, kcal100: 132, prot100: 21.5, carbs100: 0, fat100: 4.8, fiber100: 0, sugar100: 0, kw: ['rinderhack mager', 'tatar', 'rinderfilet', 'rindersteak', 'rindfleisch', 'wolowina', 'tatar wolowy'] },
   { id: 'salmon_fillet', name: 'Lachsfilet (gegart)', unitG: 160, kcal100: 206, prot100: 20.4, carbs100: 0, fat100: 13.6, fiber100: 0, sugar100: 0, kw: ['lachs', 'lachsfilet', 'losos'] },
@@ -2177,9 +2158,8 @@ function computeAndRenderWeeklyBankV2() {
   const todayData = getTodayData(todayISO);
   const todayKcal = todayData.meals.reduce((acc, m) => acc + numOr(m.kcal, 0), 0);
 
-  // Bestimme Montag der aktuellen Woche
   const now = new Date();
-  const dayOfWeek = now.getDay(); // 0 = So, 1 = Mo ...
+  const dayOfWeek = now.getDay();
   const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
   let bankBeforeToday = 0;
@@ -2230,23 +2210,18 @@ function computeAndRenderWeeklyBankV2() {
     }
   }
 
-  // 4-Zonen-Farbpsychologie (niemals alarmierendes Rot)
   if (barEl) {
     const ratio = todayKcal / dailyTarget;
     const widthPct = Math.min(100, Math.round(ratio * 100));
     barEl.style.width = `${widthPct}%`;
 
     if (ratio <= 1.0) {
-      // Zone 1: Emerald / Teal
       barEl.className = 'h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500';
     } else if (isBufferedByWeek) {
-      // Zone 2: Buffered overage (Teal / Cyan)
       barEl.className = 'h-full rounded-full bg-gradient-to-r from-teal-400 to-cyan-400 transition-all duration-500';
     } else if (ratio <= 1.10) {
-      // Zone 3: <= +10% Tolerance (Sky / Amber)
       barEl.className = 'h-full rounded-full bg-gradient-to-r from-sky-400 to-amber-400 transition-all duration-500';
     } else {
-      // Zone 4: > +10% Calm Amber / Indigo
       barEl.className = 'h-full rounded-full bg-gradient-to-r from-amber-400 to-indigo-400 transition-all duration-500';
     }
   }
@@ -2261,7 +2236,6 @@ function computeBmrTdeeAndFloor(customWeight) {
   const isMale = p.gender !== 'female';
   const pal = numOr(p.activity, 1.55);
 
-  // Mifflin-St Jeor BMR
   const bmr = Math.round(10 * w + 6.25 * h - 5 * age + (isMale ? 5 : -161));
   const tdee = Math.round(bmr * pal);
   const floor = Math.max(isMale ? 1500 : 1200, Math.round(0.90 * bmr));
@@ -2591,7 +2565,6 @@ function renderMetabolicCoachUI() {
     }
   }
 
-  // 1. Re-Kalibrierungs-Banner
   const recalBannerEl = document.getElementById('coachRecalBanner');
   if (recalBannerEl) {
     const rb = state.coach && state.coach.recalBanner;
@@ -2610,7 +2583,6 @@ function renderMetabolicCoachUI() {
     }
   }
 
-  // 2. Plateau-Breaker-Banner
   const plateauBannerEl = document.getElementById('coachPlateauBanner');
   if (plateauBannerEl) {
     const plateau = evaluatePlateauBreaker();
@@ -2633,7 +2605,6 @@ function renderMetabolicCoachUI() {
     }
   }
 
-  // 3. Smart Cheat-Rescue 2.0 Banner
   const cheatBannerEl = document.getElementById('coachCheatBanner');
   if (cheatBannerEl) {
     const cheat = evaluateCheatRescue();
@@ -2715,7 +2686,7 @@ function stripExclusions(text) {
     .trim();
 }
 
-function resolveSingleSegment(segText) {
+function resolveSingleSegment(segText, parentMultiplier = 1) {
   const norm = normalizeWordNumbers(stripExclusions(segText)).trim();
   if (!norm) return null;
 
@@ -2735,30 +2706,43 @@ function resolveSingleSegment(segText) {
 
   if (!bestEntry) return null;
 
+  const isEachModifier = /\b(?:je|jeweils|po)\b/.test(norm);
+  const effectiveParentMult = isEachModifier && parentMultiplier > 1 ? parentMultiplier : 1;
+
   let grams = bestEntry.unitG;
+  let detectedCount = 1;
+
   const gMatch = norm.match(/(\d+(?:[.,]\d+)?)\s*(?:g|gramm|gram|ml)\b/);
   const lMatch = norm.match(/(\d+(?:[.,]\d+)?)\s*(?:l|liter)\b/);
   const elMatch = norm.match(/(\d+(?:[.,]\d+)?)?\s*(?:el|essloffel|lyzka|lyzki)\b/);
   const tlMatch = norm.match(/(\d+(?:[.,]\d+)?)?\s*(?:tl|teeloffel|lyzeczka|lyzeczki)\b/);
-  const countPrefixMatch = norm.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|mal|stuck|scheibe|scheiben|tasse|tassen|becher|glas|portion|portionen|szt|sztuk|kromka|kromki)?\b/);
+  const jeCountMatch = norm.match(/\b(?:je|jeweils|po)\s*(\d+(?:[.,]\d+)?)/);
+  const countPrefixMatch = norm.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|mal|stuck|scheibe|scheiben|tasse|tassen|becher|glas|portion|portionen|wurfel|wurfeln|szt|sztuk|kromka|kromki)?\b/);
 
   if (gMatch) {
     const singleG = parseFloat(gMatch[1].replace(',', '.'));
-    const multMatch = norm.match(/^(\d+(?:[.,]\d+)?)\s+(?!g\b|gramm\b|ml\b)/);
-    const mult = (multMatch && /\b(?:a|à|je|x)\b/.test(norm)) ? parseFloat(multMatch[1].replace(',', '.')) : 1;
-    grams = singleG * mult;
+    const leadMultMatch = norm.match(/^(\d+(?:[.,]\d+)?)\s+(?!g\b|gramm\b|ml\b)/);
+    if (leadMultMatch && parseFloat(leadMultMatch[1].replace(',', '.')) !== singleG) {
+      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
+    }
+    grams = singleG * detectedCount * effectiveParentMult;
   } else if (lMatch) {
-    grams = parseFloat(lMatch[1].replace(',', '.')) * 1000;
+    grams = parseFloat(lMatch[1].replace(',', '.')) * 1000 * effectiveParentMult;
   } else if (elMatch) {
     const cnt = elMatch[1] ? parseFloat(elMatch[1].replace(',', '.')) : 1;
-    grams = cnt * 15;
+    grams = cnt * 15 * effectiveParentMult;
   } else if (tlMatch) {
     const cnt = tlMatch[1] ? parseFloat(tlMatch[1].replace(',', '.')) : 1;
-    grams = cnt * 5;
+    grams = cnt * 5 * effectiveParentMult;
+  } else if (jeCountMatch) {
+    const cnt = parseFloat(jeCountMatch[1].replace(',', '.'));
+    detectedCount = cnt * effectiveParentMult;
+    grams = detectedCount * bestEntry.unitG;
   } else if (countPrefixMatch) {
     const cnt = parseFloat(countPrefixMatch[1].replace(',', '.'));
-    if (cnt > 0 && cnt <= 25) {
-      grams = cnt * bestEntry.unitG;
+    if (cnt > 0 && cnt <= 30) {
+      detectedCount = cnt;
+      grams = cnt * bestEntry.unitG * effectiveParentMult;
     }
   }
 
@@ -2780,6 +2764,7 @@ function resolveSingleSegment(segText) {
   return {
     name: `${bestEntry.name} (${grams}g)`,
     grams,
+    detectedCount,
     kcal,
     prot: Math.round(bestEntry.prot100 * factor * 10) / 10,
     carbs: Math.round(bestEntry.carbs100 * factor * 10) / 10,
@@ -2794,42 +2779,35 @@ function resolveFromLexicon(rawInput) {
   const cleaned = stripExclusions(rawInput).trim();
   if (!cleaned) return null;
 
-  // Bei verschachtelten Multiplikatoren ("mit je 2...") und aktivem API-Key bevorzugt die 1.5s Direct-KI nutzen
-  const hasNestedMultiplier = /\b(?:mit\s+je|z\s+po|à|jeweils)\b/i.test(cleaned);
-  const hasKey = isValidGoogleApiKey((state && state.geminiApiKey) || recoverRedundantApiKey());
-  if (hasNestedMultiplier && hasKey) {
-    return null;
-  }
-
-  let primaryParts = cleaned
+  const primaryParts = cleaned
     .split(/(?:,|\+|\bund\b|\boraz\b|\bdazu\b)/i)
     .map(s => s.trim())
     .filter(Boolean);
 
   const finalSegments = [];
   primaryParts.forEach(part => {
-    const directTry = resolveSingleSegment(part);
     const subParts = part.split(/\b(?:mit|auf|z|ze)\b/i).map(s => s.trim()).filter(Boolean);
     if (subParts.length > 1) {
-      const subResolved = subParts.map(resolveSingleSegment);
+      const subResolved = subParts.map(sp => resolveSingleSegment(sp, 1));
       if (subResolved.every(Boolean)) {
         subParts.forEach(sp => finalSegments.push(sp));
         return;
       }
     }
-    if (directTry) {
-      finalSegments.push(part);
-    } else {
-      finalSegments.push(part);
-    }
+    finalSegments.push(part);
   });
 
   if (finalSegments.length === 0) return null;
 
   const components = [];
+  let activeParentCount = 1;
+
   for (let i = 0; i < finalSegments.length; i++) {
-    const comp = resolveSingleSegment(finalSegments[i]);
+    const comp = resolveSingleSegment(finalSegments[i], activeParentCount);
     if (!comp) return null;
+    if (i === 0 && comp.detectedCount > 1) {
+      activeParentCount = comp.detectedCount;
+    }
     components.push(comp);
   }
 
@@ -2934,7 +2912,6 @@ function reconcileVisionComponents(rawVisionResult) {
       }
     }
 
-    // 5g Vague Cooking Oil Cap
     if (/bratfett|bratol|kochfett|pfannenol/i.test(name) && grams > 5) {
       f = Math.min(f, 5.0);
     }
@@ -3333,7 +3310,6 @@ function renderDiaryUI() {
   setBar('fatProgress', sums.fat, g.fat);
   setBar('fiberProgress', sums.fiber, g.fiber);
 
-  // Sugar Bar mit 4-Zonen Ruhe-Psychologie (kein Alarm-Rot)
   const sugarBar = document.getElementById('sugarProgress');
   if (sugarBar) {
     const sRatio = sums.sugar / Math.max(1, g.sugar);
@@ -3343,16 +3319,13 @@ function renderDiaryUI() {
       : 'h-full bg-amber-400 rounded-full transition-all';
   }
 
-  // Wasser
   const waterMl = numOr(todayData.waterMl, 0);
   setTxt('waterConsumed', waterMl);
   setBar('waterProgress', waterMl, 2500);
 
-  // Wochenbank V2 & Smart Habits
   computeAndRenderWeeklyBankV2();
   renderSmartHabitChips();
 
-  // Tagebuch-Einträge mit Meal Quality Score Badge
   const listEl = document.getElementById('diaryLogList');
   if (listEl) {
     if (todayData.meals.length === 0) {
@@ -3843,12 +3816,12 @@ async function testApiKeyLive() {
   }
 
   resBox.className = 'rounded-2xl px-3.5 py-2.5 text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-200';
-  resBox.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i>Teste Key live gegen Google API (4.5s Timeout)...`;
+  resBox.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i>Teste Key live gegen Google API...`;
 
   try {
     let ok = false;
     if (clean.startsWith('AQ.')) {
-      const vertexUrl = `https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(clean)}`;
+      const vertexUrl = `https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(clean)}`;
       const r1 = await fetchWithIsolatedSignal(
         vertexUrl,
         {
@@ -3856,16 +3829,16 @@ async function testApiKeyLive() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'ping' }] }] })
         },
-        4500
+        6000
       );
       if (r1.ok) {
         ok = true;
       } else {
-        const r2 = await fetchWithIsolatedSignal(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(clean)}`, { method: 'GET' }, 4500);
+        const r2 = await fetchWithIsolatedSignal(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(clean)}`, { method: 'GET' }, 5000);
         ok = r2.ok;
       }
     } else {
-      const r = await fetchWithIsolatedSignal(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(clean)}`, { method: 'GET' }, 4500);
+      const r = await fetchWithIsolatedSignal(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(clean)}`, { method: 'GET' }, 5000);
       ok = r.ok;
     }
 
@@ -3943,7 +3916,6 @@ function activateGuestCode() {
   const raw = input ? input.value.trim() : '';
   if (!raw) return;
 
-  // Admin-Unlock: Eingabe eines echten AIza... oder AQ.... Schlüssels hebt Gast-Sperre auf
   if (isValidGoogleApiKey(raw)) {
     const cleanKey = sanitizeApiKey(raw);
     state.isGuestUser = false;
