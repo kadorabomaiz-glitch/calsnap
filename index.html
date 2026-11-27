@@ -1823,9 +1823,9 @@ function extractJSON(raw) {
   const repaired = repairTruncatedJSON(cleaned.slice(startIdx));
   return JSON.parse(repaired);
 }
-    // ============================================================================
-// TEIL 2.2 — 49-ENTRY 100g DE/PL FOOD LEXICON, GLOBAL NUTRITIONAL RIGOR,
-// I18N, SMART HABITS, MEAL QUALITY SCORE & ADAPTIVE METABOLIC COACH
+// ============================================================================
+// TEIL 2.2 — 49-ENTRY 100g DE/PL FOOD LEXICON (ZERO/LIGHT-GUARDED),
+// GLOBAL NUTRITIONAL RIGOR + LABEL OCR GROUND TRUTH, I18N & METABOLIC COACH
 // ============================================================================
 
 const FOOD_LEXICON = [
@@ -1834,7 +1834,7 @@ const FOOD_LEXICON = [
   { id: 'cottage_cheese', name: 'Hüttenkäse / Körniger Frischkäse', unitG: 200, kcal100: 98, prot100: 12.5, carbs100: 3.0, fat100: 4.0, fiber100: 0, sugar100: 3.0, naturalMatrix: true, kw: ['huttenkase', 'korniger frischkase', 'serek wiejski', 'cottage cheese'] },
   { id: 'egg_whole', name: 'Hühnerei (Gr. M)', unitG: 55, kcal100: 143, prot100: 12.6, carbs100: 0.7, fat100: 9.5, fiber100: 0, sugar100: 0.7, kw: ['ei', 'eier', 'spiegelei', 'ruhrei', 'gekochtes ei', 'jajko', 'jajka', 'jajecznica'] },
   { id: 'whey_shake', name: 'Whey Protein Shake (mit Wasser)', unitG: 30, kcal100: 375, prot100: 78.0, carbs100: 5.5, fat100: 4.5, fiber100: 0.5, sugar100: 3.5, kw: ['proteinshake', 'whey', 'whey shake', 'eiweissshake', 'odzywka bialkowa', 'shake'] },
-  { id: 'milk_15', name: 'Milch 1,5% Fett', unitG: 200, kcal100: 47, prot100: 3.4, carbs100: 4.8, fat100: 1.5, fiber100: 0, sugar100: 4.8, naturalMatrix: true, kw: ['milch', 'fettarme milch', 'mleko'] },
+  { id: 'milk_15', name: 'Milch 1,5% Fett', unitG: 200, kcal100: 47, prot100: 3.4, carbs100: 4.8, fat100: 1.5, fiber100: 0, sugar100: 4.8, naturalMatrix: true, kw: ['milch', 'fettarme milch', 'kuhmilch', 'mleko'] },
   { id: 'latte_macchiato', name: 'Latte Macchiato (ungesüßt)', unitG: 300, kcal100: 36, prot100: 2.5, carbs100: 3.6, fat100: 1.2, fiber100: 0, sugar100: 3.6, naturalMatrix: true, kw: ['latte macchiato', 'cappuccino', 'milchkaffee', 'kawa z mlekiem', 'latte'] },
   { id: 'black_coffee', name: 'Kaffee schwarz / Espresso', unitG: 250, kcal100: 2, prot100: 0.2, carbs100: 0.1, fat100: 0, fiber100: 0, sugar100: 0, kw: ['kaffee', 'kaffee schwarz', 'espresso', 'americano', 'kawa', 'czarna kawa'] },
   { id: 'sugar_cube', name: 'Zucker / Würfelzucker', unitG: 3.5, kcal100: 400, prot100: 0, carbs100: 100.0, fat100: 0, fiber100: 0, sugar100: 100.0, kw: ['zucker', 'wurfel zucker', 'wurfeln zucker', 'wurfelzucker', 'cukier', 'kostka cukru', 'kostki cukru'] },
@@ -1855,7 +1855,7 @@ const FOOD_LEXICON = [
   { id: 'pasta_cooked', name: 'Nudeln / Pasta (gekocht)', unitG: 200, kcal100: 152, prot100: 5.5, carbs100: 30.2, fat100: 0.9, fiber100: 1.6, sugar100: 0.6, kw: ['nudeln', 'pasta', 'spaghetti', 'makaron'] },
   { id: 'potatoes_boiled', name: 'Kartoffeln (gekocht / Salzkartoffeln)', unitG: 220, kcal100: 73, prot100: 2.0, carbs100: 15.4, fat100: 0.1, fiber100: 1.8, sugar100: 0.8, kw: ['kartoffel', 'kartoffeln', 'salzkartoffeln', 'pellkartoffeln', 'ziemniaki'] },
   { id: 'fries_baked', name: 'Pommes Frites', unitG: 180, kcal100: 275, prot100: 3.4, carbs100: 35.5, fat100: 13.2, fiber100: 3.1, sugar100: 0.5, kw: ['pommes', 'pommes frites', 'frytki'] },
-  { id: 'apple', name: 'Apfel (frisch)', unitG: 160, kcal100: 52, prot100: 0.3, carbs100: 11.4, fat100: 0.2, fiber100: 2.4, sugar100: 10.4, naturalMatrix: true, kw: ['apfel', 'apfel', 'jablko', 'jablka'] },
+  { id: 'apple', name: 'Apfel (frisch)', unitG: 160, kcal100: 52, prot100: 0.3, carbs100: 11.4, fat100: 0.2, fiber100: 2.4, sugar100: 10.4, naturalMatrix: true, kw: ['apfel', 'jablko', 'jablka'] },
   { id: 'banana', name: 'Banane', unitG: 125, kcal100: 89, prot100: 1.1, carbs100: 20.2, fat100: 0.3, fiber100: 2.6, sugar100: 12.2, naturalMatrix: true, kw: ['banane', 'bananen', 'banan', 'banany'] },
   { id: 'berries_mix', name: 'Beeren (Blaubeeren / Erdbeeren / Himbeeren)', unitG: 125, kcal100: 44, prot100: 0.9, carbs100: 7.8, fat100: 0.3, fiber100: 3.2, sugar100: 5.8, naturalMatrix: true, kw: ['beeren', 'blaubeeren', 'heidelbeeren', 'erdbeeren', 'himbeeren', 'borowki', 'truskawki', 'maliny', 'jagody'] },
   { id: 'broccoli', name: 'Brokkoli / Kaisergemüse (gedämpft)', unitG: 200, kcal100: 34, prot100: 2.8, carbs100: 4.4, fat100: 0.4, fiber100: 2.8, sugar100: 1.7, kw: ['brokkoli', 'gemuse', 'kaisergemuse', 'blumenkohl', 'brokuly', 'warzywa'] },
@@ -1866,8 +1866,8 @@ const FOOD_LEXICON = [
   { id: 'nuts_almonds', name: 'Mandeln / Walnüsse / Nüsse', unitG: 30, kcal100: 595, prot100: 20.5, carbs100: 6.5, fat100: 52.5, fiber100: 10.5, sugar100: 4.0, kw: ['mandeln', 'nusse', 'walnusse', 'cashews', 'orzechy', 'migdaly'] },
   { id: 'peanut_butter', name: 'Erdnussbutter / Nussmus', unitG: 20, kcal100: 588, prot100: 25.0, carbs100: 14.0, fat100: 50.0, fiber100: 6.0, sugar100: 6.0, kw: ['erdnussbutter', 'erdnussmus', 'mandelmus', 'maslo orzechowe'] },
   { id: 'honey_jam', name: 'Honig / Marmelade', unitG: 20, kcal100: 285, prot100: 0.3, carbs100: 71.0, fat100: 0.1, fiber100: 0.4, sugar100: 68.0, kw: ['honig', 'marmelade', 'konfiture', 'miod', 'dzem'] },
-  { id: 'cola_zero', name: 'Coca-Cola Zero / Light Softdrink', unitG: 330, kcal100: 0, prot100: 0, carbs100: 0, fat100: 0, fiber100: 0, sugar100: 0, kw: ['cola zero', 'coca cola zero', 'coca-cola zero', 'pepsi max', 'pepsi zero', 'cola light', 'zero cola'] },
-  { id: 'cola_regular', name: 'Coca-Cola / Spezi / Limonade', unitG: 330, kcal100: 42, prot100: 0, carbs100: 10.6, fat100: 0, fiber100: 0, sugar100: 10.6, kw: ['coca cola', 'coca-cola', 'cola', 'spezi', 'fanta', 'sprite', 'limonade'] },
+  { id: 'cola_zero', name: 'Zero / Light Softdrink (zuckerfrei)', unitG: 330, kcal100: 1, prot100: 0, carbs100: 0, fat100: 0, fiber100: 0, sugar100: 0, isZeroDrink: true, kw: ['cola zero', 'coca cola zero', 'coca-cola zero', 'fanta zero', 'fanta light', 'sprite zero', 'sprite light', 'spezi zero', 'mezzo mix zero', 'pepsi max', 'pepsi zero', 'cola light', 'zero cola', 'limonade zero', 'rheinfels lemon', 'mineralwasser lemon'] },
+  { id: 'cola_regular', name: 'Coca-Cola / Fanta / Spezi / Limonade (mit Zucker)', unitG: 330, kcal100: 42, prot100: 0, carbs100: 10.6, fat100: 0, fiber100: 0, sugar100: 10.6, isSugaryDrink: true, kw: ['coca cola', 'coca-cola', 'cola', 'spezi', 'fanta', 'sprite', 'limonade'] },
   { id: 'potato_chips', name: 'Kartoffelchips / Chipsy', unitG: 50, kcal100: 536, prot100: 6.2, carbs100: 51.0, fat100: 33.5, fiber100: 4.2, sugar100: 0.8, kw: ['kartoffelchips', 'chips', 'chipsy'] },
   { id: 'dark_chocolate', name: 'Schokolade / Vollmilchschokolade', unitG: 30, kcal100: 535, prot100: 7.2, carbs100: 56.5, fat100: 31.0, fiber100: 3.0, sugar100: 51.0, kw: ['schokolade', 'czekolada'] },
   { id: 'lasagne_bolognese', name: 'Lasagne Bolognese', unitG: 350, kcal100: 158, prot100: 8.8, carbs100: 14.2, fat100: 7.2, fiber100: 1.2, sugar100: 2.5, kw: ['lasagne', 'lasagne bolognese', 'lazania'] },
@@ -1883,10 +1883,21 @@ const FOOD_LEXICON = [
 function buildGlobalNutritionalRigorRules() {
   return `
 GLOBAL NUTRITIONAL RIGOR LAWS (MANDATORY SCIENTIFIC PRECISION):
-1. LAW 1 — SUBSTITUTION OVER ADDITION: If the user supplies both a photo and text notes, treat the text as a clarification or override of visible items (never double-count an item mentioned in text AND visible on the plate).
-2. LAW 2 — LEAN PROTEIN OVERRIDE & 5g OIL CAP: Unbreaded grilled/steamed lean meats (chicken breast, turkey breast, tuna, lean quark/skyr) MUST stay < 2.8g fat per 100g. Never invent invisible cooking fat > 5g (~45 kcal) unless deep-fried, breaded, or swimming in visible oil.
-3. LAW 3 — VISUAL SCALE & FILL-LEVEL ANCHORING: Anchor portion weights against standard dinner plates (26 cm outer rim, ~19 cm inner well), cutlery (19 cm fork/spoon), bread rolls (65–70 g), standard DACH/PL retail packs (250 g quark, 500 g skyr, 1 L milk), and actual pot fill depth. Ignore foil glare, shadows, or plate patterns.
-4. LAW 4 — CONTEXTUAL PREPARATION RIGOR: Distinguish strictly between steamed/boiled/grilled (low fat) vs. breaded/pan-fried/creamy sauce. Ensure sugar <= carbs and Atwater energy consistency (kcal ≈ 4*P + 4*C + 9*F + 2*Fiber).
+1. LAW 1 — ADD-ON vs. OVERRIDE DISCIPLINE:
+   - If the user adds an invisible ingredient in text (e.g. "Mit 2 Würfel Zucker", "mit 1 EL Öl"), KEEP the visible dish/drink estimation 100% UNCHANGED and simply ADD the text ingredient on top! Never shrink the visible milk in a milky coffee/cappuccino just because the user added "Mit 2 Würfel Zucker".
+   - Only replace/override a visible item if the text explicitly corrects what is visible (e.g. "Hafermilch statt Kuhmilch", "das ist Skyr"). Never double-count the same item.
+2. LAW 2 — LEAN PROTEIN OVERRIDE & 5g OIL CAP:
+   - Unbreaded grilled/steamed lean meats (chicken breast, turkey breast, tuna, lean quark/skyr) MUST stay < 2.8g fat per 100g. Never invent invisible cooking fat > 5g (~45 kcal) unless deep-fried, breaded, or swimming in visible oil.
+3. LAW 3 — VISUAL SCALE & BEVERAGE FOAM ANCHORING:
+   - Anchor portion weights against standard dinner plates (26 cm outer rim, ~19 cm inner well), cutlery (19 cm), bread rolls (65–70 g), standard DACH/PL retail packs (150 g yogurt, 250 g quark, 500 g skyr, 330 ml can, 500 ml bottle).
+   - A full mug/cup (250–300 ml) showing white milk foam/crema on top is a Milchkaffee / Cappuccino / Latte (~150–200 ml milk + ~50–80 ml espresso/coffee), NOT black coffee with 50 ml milk. 1 sugar cube = 3.5–4 g (~14–16 kcal, 100% carbs/sugar).
+4. LAW 4 — CONTEXTUAL PREPARATION RIGOR:
+   - Distinguish strictly between steamed/boiled/grilled vs. breaded/pan-fried/creamy sauce. Ensure sugar <= carbs.
+5. LAW 5 — UNBREAKABLE NUTRITION LABEL OCR GROUND TRUTH:
+   - Whenever a printed nutrition table ("Nährwerte" / "Wartości odżywcze") is visible in the photo, you MUST set "isNutritionLabel": true.
+   - STRICT kJ vs. kcal SEPARATION: ALWAYS read ONLY the "kcal" number! STRICTLY IGNORE "kJ" (e.g. "571 kJ / 136 kcal" -> 136 kcal; "2,9 kJ / 0,7 kcal" -> 0.7 kcal; "29 kJ / 7 kcal" -> 7 kcal).
+   - STRICT PER-100g/100ml vs. TOTAL VOLUME: Read exact printed values per 100g/100ml. If total package weight/volume is printed or clearly known (e.g. "150 g", "330 ml", "500 ml"), multiply by (total / 100) and state the exact grams/ml. If total volume is NOT visible, output for the printed reference amount (100 ml / 100 g) and state "(100ml)" or "(100g)" in the name.
+   - ZERO / LIGHT DRINKS: Printed values on Zero/Light products (e.g. Fanta Zero: 7 kcal, 0g protein, 0g carbs, 0g sugar, 0g fat — calories come from organic acids like citric acid) are 100% IMMUTABLE GROUND TRUTH. NEVER invent sugar/carbs and NEVER force 4P+4C+9F onto Zero/Light labels!
 `;
 }
 
@@ -2102,27 +2113,27 @@ function computeMealQualityScore(mealObj) {
     return { grade: 'B', score: 7.5, colorClass: 'bg-teal-500/15 text-teal-300 border-teal-500/30' };
   }
 
-  const kcal = Math.max(1, numOr(mealObj.kcal, 0));
+  const kcal = Math.max(0, numOr(mealObj.kcal, 0));
   const prot = Math.max(0, numOr(mealObj.prot, 0));
-  const carbs = Math.max(0, numOr(mealObj.carbs, 0));
   const fat = Math.max(0, numOr(mealObj.fat, 0));
   const fiber = Math.max(0, numOr(mealObj.fiber, 0));
   const sugar = Math.max(0, numOr(mealObj.sugar, 0));
   const titleLower = String(mealObj.name || mealObj.mealName || '').toLowerCase();
 
-  if (kcal <= 10) {
+  if (kcal <= 15 && sugar <= 1) {
     return { grade: 'A', score: 9.8, colorClass: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' };
   }
 
+  const safeKcal = Math.max(1, kcal);
   const isNaturalMatrix = /quark|skyr|twarog|joghurt|beeren|apfel|banane|obst|milch|latte|borowki|jablko/.test(titleLower);
 
-  const protShare = (prot * 4) / kcal;
-  const fatShare = (fat * 9) / kcal;
-  const sugarShare = (sugar * 4) / kcal;
+  const protShare = (prot * 4) / safeKcal;
+  const fatShare = (fat * 9) / safeKcal;
+  const sugarShare = (sugar * 4) / safeKcal;
 
   let points = 6.8;
   points += Math.min(2.2, protShare * 5.2);
-  points += Math.min(1.2, (fiber / (kcal / 150)) * 0.45);
+  points += Math.min(1.2, (fiber / (safeKcal / 150)) * 0.45);
 
   if (fatShare > 0.52) {
     points -= (fatShare - 0.52) * 3.8;
@@ -2629,8 +2640,8 @@ function renderMetabolicCoachUI() {
   }
 }
     // ============================================================================
-// TEIL 2.3 — LEXICON PARSER, VISION RECONCILIATION, 4 AI SCANNERS,
-// DIARY/PRESET/PROFILE HANDLERS, 6-LAYER VAULT UI & GUEST ISOLATION
+// TEIL 2.3 — ZERO-GUARDED LEXICON PARSER, IMMUTABLE LABEL-OCR RECONCILIATION,
+// 4 AI SCANNERS, DIARY/PRESET/PROFILE HANDLERS, 6-LAYER VAULT & GUEST ISOLATION
 // ============================================================================
 
 const WORD_NUMBERS = {
@@ -2640,6 +2651,8 @@ const WORD_NUMBERS = {
   jeden: 1, jedna: 1, jedno: 1, dwa: 2, dwie: 2, trzy: 3, cztery: 4, piec: 5, szesc: 6,
   pol: 0.5, poltora: 1.5
 };
+
+const ZERO_LIGHT_REGEX = /\b(?:zero|light|lite|zuckerfrei|sugar\s*free|bez\s*cukru|ohne\s*zucker|pepsi\s*max|0\s*kcal|0\s*g\s*zucker|mineralwasser\s*lemon|rheinfels\s*lemon)\b/i;
 
 function foldDiacritics(str) {
   if (!str) return '';
@@ -2681,8 +2694,9 @@ function matchKeywordWithBoundary(text, kw) {
 }
 
 function stripExclusions(text) {
+  // Schütze "ohne Zucker" / "bez cukru" als Zero-Signal, streiche nur andere Ausschlüsse ("ohne Soße")
   return String(text || '')
-    .replace(/\b(?:ohne|bez)\s+[a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ0-9-]+/gi, ' ')
+    .replace(/\b(?:ohne|bez)\s+(?!zucker\b|cukru\b)[a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ0-9-]+/gi, ' ')
     .trim();
 }
 
@@ -2690,11 +2704,16 @@ function resolveSingleSegment(segText, parentMultiplier = 1) {
   const norm = normalizeWordNumbers(stripExclusions(segText)).trim();
   if (!norm) return null;
 
+  const isZeroHint = ZERO_LIGHT_REGEX.test(norm);
+
   let bestEntry = null;
   let bestKwLen = 0;
 
   for (let i = 0; i < FOOD_LEXICON.length; i++) {
     const entry = FOOD_LEXICON[i];
+    // Harter Guard: Zero/Light-Signal darf NIEMALS zuckerhaltige Softdrinks matchen!
+    if (isZeroHint && entry.isSugaryDrink) continue;
+
     for (let k = 0; k < entry.kw.length; k++) {
       const kw = entry.kw[k];
       if (matchKeywordWithBoundary(norm, kw) && kw.length > bestKwLen) {
@@ -2704,30 +2723,52 @@ function resolveSingleSegment(segText, parentMultiplier = 1) {
     }
   }
 
+  // Fallback: Wenn Zero-Softdrink-Marke genannt wurde (z.B. "Mezzo Zero", "Limo Light")
+  if (!bestEntry && isZeroHint && /\b(?:fanta|cola|sprite|spezi|limo|limonade|eistee|energy|red bull|monster|schorle|lemon)\b/i.test(norm)) {
+    bestEntry = FOOD_LEXICON.find(e => e.id === 'cola_zero') || null;
+  }
+
   if (!bestEntry) return null;
 
-  const isEachModifier = /\b(?:je|jeweils|po)\b/.test(norm);
+  // Maskiere Fettprozente (1,5%, 3,5%, 0,3%, 45%) vor der Mengen-Extraktion
+  const qtyText = norm.replace(/\d+(?:[.,]\d+)?\s*%/g, ' ').replace(/\s+/g, ' ').trim();
+  const isEachModifier = /\b(?:je|jeweils|po)\b/.test(qtyText);
   const effectiveParentMult = isEachModifier && parentMultiplier > 1 ? parentMultiplier : 1;
 
   let grams = bestEntry.unitG;
   let detectedCount = 1;
 
-  const gMatch = norm.match(/(\d+(?:[.,]\d+)?)\s*(?:g|gramm|gram|ml)\b/);
-  const lMatch = norm.match(/(\d+(?:[.,]\d+)?)\s*(?:l|liter)\b/);
-  const elMatch = norm.match(/(\d+(?:[.,]\d+)?)?\s*(?:el|essloffel|lyzka|lyzki)\b/);
-  const tlMatch = norm.match(/(\d+(?:[.,]\d+)?)?\s*(?:tl|teeloffel|lyzeczka|lyzeczki)\b/);
-  const jeCountMatch = norm.match(/\b(?:je|jeweils|po)\s*(\d+(?:[.,]\d+)?)/);
-  const countPrefixMatch = norm.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|mal|stuck|scheibe|scheiben|tasse|tassen|becher|glas|portion|portionen|wurfel|wurfeln|szt|sztuk|kromka|kromki)?\b/);
+  // 1. Explizite Multiplikator-Syntax: "2x 400ml", "2 x 330 ml", "3 mal 150g"
+  const multUnitMatch = qtyText.match(/(\d+(?:[.,]\d+)?)\s*(?:x|mal)\s*(\d+(?:[.,]\d+)?)\s*(g|gramm|gram|ml|l|liter)\b/);
+  // 2. Klassische Gramm-/ml-Angabe: "2 Latte a 400ml" oder "250g Quark"
+  const gMatch = qtyText.match(/(\d+(?:[.,]\d+)?)\s*(?:g|gramm|gram|ml)\b/);
+  const lMatch = qtyText.match(/(\d+(?:[.,]\d+)?)\s*(?:l|liter)\b/);
+  const elMatch = qtyText.match(/(\d+(?:[.,]\d+)?)?\s*(?:el|essloffel|lyzka|lyzki)\b/);
+  const tlMatch = qtyText.match(/(\d+(?:[.,]\d+)?)?\s*(?:tl|teeloffel|lyzeczka|lyzeczki)\b/);
+  const jeCountMatch = qtyText.match(/\b(?:je|jeweils|po)\s*(\d+(?:[.,]\d+)?)/);
+  const countPrefixMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|mal|stuck|scheibe|scheiben|tasse|tassen|becher|glas|flasche|flaschen|dose|dosen|portion|portionen|wurfel|wurfeln|szt|sztuk|kromka|kromki)?\b/);
 
-  if (gMatch) {
+  if (multUnitMatch) {
+    detectedCount = parseFloat(multUnitMatch[1].replace(',', '.'));
+    const unitVal = parseFloat(multUnitMatch[2].replace(',', '.'));
+    const isLiter = /^l/.test(multUnitMatch[3]);
+    grams = (isLiter ? unitVal * 1000 : unitVal) * detectedCount * effectiveParentMult;
+  } else if (gMatch) {
     const singleG = parseFloat(gMatch[1].replace(',', '.'));
-    const leadMultMatch = norm.match(/^(\d+(?:[.,]\d+)?)\s+(?!g\b|gramm\b|ml\b)/);
-    if (leadMultMatch && parseFloat(leadMultMatch[1].replace(',', '.')) !== singleG) {
+    const leadMultMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s+(?!g\b|gramm\b|ml\b)/);
+    if (leadMultMatch && /\b(?:a|à|je|x|mal)\b/.test(qtyText)) {
+      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
+    } else if (leadMultMatch && parseFloat(leadMultMatch[1].replace(',', '.')) <= 20 && parseFloat(leadMultMatch[1].replace(',', '.')) !== singleG) {
       detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
     }
     grams = singleG * detectedCount * effectiveParentMult;
   } else if (lMatch) {
-    grams = parseFloat(lMatch[1].replace(',', '.')) * 1000 * effectiveParentMult;
+    const singleL = parseFloat(lMatch[1].replace(',', '.'));
+    const leadMultMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s+(?!l\b|liter\b)/);
+    if (leadMultMatch && /\b(?:a|à|je|x|mal)\b/.test(qtyText)) {
+      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
+    }
+    grams = singleL * 1000 * detectedCount * effectiveParentMult;
   } else if (elMatch) {
     const cnt = elMatch[1] ? parseFloat(elMatch[1].replace(',', '.')) : 1;
     grams = cnt * 15 * effectiveParentMult;
@@ -2746,9 +2787,9 @@ function resolveSingleSegment(segText, parentMultiplier = 1) {
     }
   }
 
-  if (/\b(?:gross|grosse|grosser|grosses|duzy|duza|duze)\b/.test(norm) && !gMatch) {
+  if (/\b(?:gross|grosse|grosser|grosses|duzy|duza|duze)\b/.test(qtyText) && !gMatch && !multUnitMatch) {
     grams *= 1.4;
-  } else if (/\b(?:klein|kleine|kleiner|kleines|maly|mala|male)\b/.test(norm) && !gMatch) {
+  } else if (/\b(?:klein|kleine|kleiner|kleines|maly|mala|male)\b/.test(qtyText) && !gMatch && !multUnitMatch) {
     grams *= 0.7;
   }
 
@@ -2756,13 +2797,15 @@ function resolveSingleSegment(segText, parentMultiplier = 1) {
   const factor = grams / 100;
 
   let kcal = Math.round(bestEntry.kcal100 * factor);
-  const explicitKcalMatch = norm.match(/(\d+)\s*kcal\b/);
+  const explicitKcalMatch = qtyText.match(/(\d+)\s*kcal\b/);
   if (explicitKcalMatch) {
     kcal = parseInt(explicitKcalMatch[1], 10);
   }
 
+  const unitLabel = bestEntry.isZeroDrink || bestEntry.isSugaryDrink || bestEntry.id === 'milk_15' || bestEntry.id === 'latte_macchiato' || bestEntry.id === 'black_coffee' ? 'ml' : 'g';
+
   return {
-    name: `${bestEntry.name} (${grams}g)`,
+    name: `${bestEntry.name} (${grams}${unitLabel})`,
     grams,
     detectedCount,
     kcal,
@@ -2840,10 +2883,13 @@ function resolveFromLexicon(rawInput) {
 function findLexiconReference(componentName) {
   const norm = foldDiacritics(componentName || '');
   if (!norm) return null;
+  const isZeroHint = ZERO_LIGHT_REGEX.test(norm);
+
   let best = null;
   let bestLen = 0;
   for (let i = 0; i < FOOD_LEXICON.length; i++) {
     const entry = FOOD_LEXICON[i];
+    if (isZeroHint && entry.isSugaryDrink) continue;
     for (let k = 0; k < entry.kw.length; k++) {
       const kw = entry.kw[k];
       if (matchKeywordWithBoundary(norm, kw) && kw.length > bestLen) {
@@ -2860,70 +2906,94 @@ function reconcileVisionComponents(rawVisionResult) {
     throw new Error('Ungültiges Analyse-Objekt.');
   }
 
-  const isLabel = Boolean(rawVisionResult.isNutritionLabel);
+  const mealTitle = String(rawVisionResult.mealName || rawVisionResult.name || 'Analysierte Mahlzeit').trim();
+  const isLabel = Boolean(rawVisionResult.isNutritionLabel || rawVisionResult.isLabel);
+  const mealIsZeroLight = ZERO_LIGHT_REGEX.test(mealTitle);
   const rawComps = Array.isArray(rawVisionResult.components) ? rawVisionResult.components : [];
 
   if (rawComps.length === 0) {
-    const p = Math.max(0, Math.round(numOr(rawVisionResult.prot || rawVisionResult.protein, 0)));
-    const c = Math.max(0, Math.round(numOr(rawVisionResult.carbs, 0)));
-    const f = Math.max(0, Math.round(numOr(rawVisionResult.fat, 0)));
-    const fib = Math.max(0, Math.round(numOr(rawVisionResult.fiber, 0)));
-    const sug = Math.min(c, Math.max(0, Math.round(numOr(rawVisionResult.sugar, 0))));
-    const atwater = Math.round(p * 4 + c * 4 + f * 9 + fib * 2);
-    const rawK = Math.round(numOr(rawVisionResult.kcal || rawVisionResult.calories, atwater));
+    const p = Math.max(0, numOr(rawVisionResult.prot ?? rawVisionResult.protein, 0));
+    const c = Math.max(0, numOr(rawVisionResult.carbs, 0));
+    const f = Math.max(0, numOr(rawVisionResult.fat, 0));
+    const fib = Math.max(0, numOr(rawVisionResult.fiber, 0));
+    const sug = Math.min(c, Math.max(0, numOr(rawVisionResult.sugar, 0)));
+    const atwater = p * 4 + c * 4 + f * 9 + fib * 2;
+    let rawK = Math.max(0, numOr(rawVisionResult.kcal ?? rawVisionResult.calories, atwater));
 
+    // kJ-vs-kcal-Schutz nur wenn eindeutig kJ (Faktor ~4.184) bei regulärem Lebensmittel abgelesen wurde
+    if (atwater >= 25 && rawK > atwater * 3.4 && rawK < atwater * 4.8) {
+      rawK = rawK / 4.184;
+    }
+
+    const finalKcal = (isLabel || mealIsZeroLight) ? Math.round(rawK) : Math.round(rawK * 0.5 + atwater * 0.5);
     return {
-      mealName: rawVisionResult.mealName || rawVisionResult.name || 'Analysierte Mahlzeit',
-      kcal: isLabel ? rawK : Math.round(rawK * 0.5 + atwater * 0.5),
-      prot: p,
-      carbs: c,
-      fat: f,
-      fiber: fib,
-      sugar: sug,
+      mealName: mealTitle,
+      kcal: finalKcal,
+      prot: Math.round(p),
+      carbs: Math.round(c),
+      fat: Math.round(f),
+      fiber: Math.round(fib),
+      sugar: Math.round(sug),
       components: [],
-      source: rawVisionResult.source || '3D Vision AI'
+      source: isLabel ? 'Nährwert-Etikett (Ground Truth)' : (rawVisionResult.source || '3D Vision AI')
     };
   }
 
   const reconciled = rawComps.map(comp => {
     const name = String(comp.name || 'Zutat').trim();
     const grams = Math.max(1, Math.round(numOr(comp.grams || comp.weightG, 100)));
-    let p = Math.max(0, numOr(comp.prot || comp.protein, 0));
+    let p = Math.max(0, numOr(comp.prot ?? comp.protein, 0));
     let c = Math.max(0, numOr(comp.carbs, 0));
     let f = Math.max(0, numOr(comp.fat, 0));
     let fib = Math.max(0, numOr(comp.fiber, 0));
     let sug = Math.max(0, numOr(comp.sugar, 0));
-    let kcal = Math.max(0, numOr(comp.kcal || comp.calories, 0));
+    let kcal = Math.max(0, numOr(comp.kcal ?? comp.calories, 0));
 
-    const lexRef = findLexiconReference(name);
-    const isBreadedOrFried = /paniert|frittiert|schnitzel|schabowy|pommes|chips|sahne|creme/i.test(name);
+    const compIsZeroLight = mealIsZeroLight || ZERO_LIGHT_REGEX.test(name);
+    const isImmutableGroundTruth = isLabel || compIsZeroLight;
 
-    if (lexRef && !isLabel && !isBreadedOrFried) {
-      const factor = grams / 100;
-      p = (lexRef.prot100 * factor) * 0.65 + p * 0.35;
-      c = (lexRef.carbs100 * factor) * 0.65 + c * 0.35;
-      f = (lexRef.fat100 * factor) * 0.65 + f * 0.35;
-      fib = (lexRef.fiber100 * factor) * 0.65 + fib * 0.35;
-      sug = (lexRef.sugar100 * factor) * 0.65 + sug * 0.35;
-
-      if (lexRef.isLeanProtein) {
-        const maxLeanFat = (grams / 100) * 2.8;
-        f = Math.min(f, maxLeanFat);
+    if (isImmutableGroundTruth) {
+      // UNBRECHBARE GROUND-TRUTH-REGEL:
+      // 0g Makros & gedruckte Etiketten-Kalorien (inkl. organischer Säuren wie 7 kcal bei Fanta Zero)
+      // werden 100% unverändert bewahrt — KEIN Lexikon-Blend, KEIN 4P+4C+9F-Zwang!
+      sug = Math.min(c, sug);
+      const atwaterRef = p * 4 + c * 4 + f * 9 + fib * 2;
+      if (!compIsZeroLight && atwaterRef >= 25 && kcal > atwaterRef * 3.4 && kcal < atwaterRef * 4.8) {
+        kcal = kcal / 4.184;
       }
+    } else {
+      const lexRef = findLexiconReference(name);
+      const isBreadedOrFried = /paniert|frittiert|schnitzel|schabowy|pommes|chips|sahne|creme/i.test(name);
+
+      if (lexRef && !isBreadedOrFried) {
+        const factor = grams / 100;
+        p = (lexRef.prot100 * factor) * 0.65 + p * 0.35;
+        c = (lexRef.carbs100 * factor) * 0.65 + c * 0.35;
+        f = (lexRef.fat100 * factor) * 0.65 + f * 0.35;
+        fib = (lexRef.fiber100 * factor) * 0.65 + fib * 0.35;
+        sug = (lexRef.sugar100 * factor) * 0.65 + sug * 0.35;
+
+        if (lexRef.isLeanProtein) {
+          const maxLeanFat = (grams / 100) * 2.8;
+          f = Math.min(f, maxLeanFat);
+        }
+      }
+
+      if (/bratfett|bratol|kochfett|pfannenol/i.test(name) && grams > 5) {
+        f = Math.min(f, 5.0);
+      }
+
+      sug = Math.min(c, sug);
+      const atwaterKcal = p * 4 + c * 4 + f * 9 + fib * 2;
+      if (atwaterKcal >= 25 && kcal > atwaterKcal * 3.4 && kcal < atwaterKcal * 4.8) {
+        kcal = kcal / 4.184;
+      }
+      kcal = kcal > 0 ? Math.round(atwaterKcal * 0.7 + kcal * 0.3) : Math.round(atwaterKcal);
     }
 
-    if (/bratfett|bratol|kochfett|pfannenol/i.test(name) && grams > 5) {
-      f = Math.min(f, 5.0);
-    }
-
-    sug = Math.min(c, sug);
-    const atwaterKcal = Math.round(p * 4 + c * 4 + f * 9 + fib * 2);
-    if (!isLabel) {
-      kcal = kcal > 0 ? Math.round(atwaterKcal * 0.7 + kcal * 0.3) : atwaterKcal;
-    }
-
+    const alreadyHasUnit = /\(\d+\s*(?:g|ml)\)/i.test(name);
     return {
-      name: name.includes('g)') ? name : `${name} (${grams}g)`,
+      name: alreadyHasUnit ? name : `${name} (${grams}g)`,
       grams,
       kcal: Math.round(kcal),
       prot: Math.round(p * 10) / 10,
@@ -2948,7 +3018,7 @@ function reconcileVisionComponents(rawVisionResult) {
   );
 
   return {
-    mealName: rawVisionResult.mealName || rawVisionResult.name || reconciled.map(r => r.name).join(' + '),
+    mealName: mealTitle || reconciled.map(r => r.name).join(' + '),
     kcal: Math.round(totals.kcal),
     prot: Math.round(totals.prot),
     carbs: Math.round(totals.carbs),
@@ -2956,7 +3026,7 @@ function reconcileVisionComponents(rawVisionResult) {
     fiber: Math.round(totals.fiber),
     sugar: Math.min(Math.round(totals.carbs), Math.round(totals.sugar)),
     components: reconciled,
-    source: rawVisionResult.source || '3D Vision Rigor'
+    source: isLabel ? 'Nährwert-Etikett (Ground Truth)' : (rawVisionResult.source || '3D Vision Rigor')
   };
 }
 
@@ -3041,7 +3111,7 @@ async function handleMealPhotoSelect(event) {
   abortActiveVisionRequest();
 
   try {
-    const base64 = await compressImageFile(file, 'standard');
+    const base64 = await compressImageFile(file, 'label');
     currentMealPhotoBase64 = base64;
     const container = document.getElementById('mealPreviewContainer');
     const img = document.getElementById('mealPreviewImg');
@@ -3108,15 +3178,19 @@ async function triggerMealAnalysis() {
 
   try {
     const langHint = state.lang === 'pl' ? 'Antworte auf Polnisch.' : 'Antworte auf Deutsch.';
-    const prompt = `Du bist ein präziser Ernährungs- & Computer-Vision-Analyst. ${langHint}
+    const prompt = `Du bist ein hochpräziser Ernährungs- & Label-OCR-Analyst. ${langHint}
 ${buildGlobalNutritionalRigorRules()}
-Benutzer-Notiz: "${userText || 'Keine Textnotiz, analysiere das Bild.'}"
-Gib AUSSCHLIESSLICH valides JSON im folgenden Schema zurück:
+WICHTIGE ENTSCHEIDUNG:
+- Siehst du auf dem Foto eine gedruckte Nährwerttabelle ("Nährwerte", "Brennwert", "kcal", "Wartości odżywcze")? Dann setze ZWINGEND "isNutritionLabel": true! Lies EXAKT die kcal-Zahl (NIEMALS kJ!) und die Makros ab. Bei Zero/Light-Getränken (z.B. 7 kcal, 0g Zucker, 0g Carbs, 0g Fett, 0g Protein) übernimm die abgelesenen Werte 1:1!
+- Siehst du ein Gericht/Getränk + eine additive Textnotiz (z.B. "Mit 2 Würfel Zucker")? Lass die sichtbare Portionsmenge (z.B. 180-200ml Milch in einer vollen Tasse Milchkaffee/Cappuccino mit Schaum) UNVERÄNDERT und füge die Textnotiz als zusätzliche Komponente hinzu!
+Benutzer-Textnotiz: "${userText || 'Keine Textnotiz, analysiere das Bild.'}"
+
+Gib AUSSCHLIESSLICH valides JSON in diesem Schema zurück:
 {
-  "mealName": "Name der Mahlzeit",
-  "isNutritionLabel": false,
+  "mealName": "Exakter Name (inkl. Zero/Light falls zutreffend)",
+  "isNutritionLabel": true_or_false,
   "components": [
-    { "name": "Zutat", "grams": 150, "kcal": 180, "prot": 25, "carbs": 5, "fat": 4, "fiber": 1, "sugar": 2 }
+    { "name": "Zutat oder Produktname", "grams": 150, "kcal": 180, "prot": 25, "carbs": 5, "fat": 4, "fiber": 1, "sugar": 2 }
   ]
 }`;
 
