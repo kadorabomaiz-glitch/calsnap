@@ -1895,23 +1895,12 @@ const FOOD_LEXICON = [
 
 function buildGlobalNutritionalRigorRules() {
   return `
-GLOBAL NUTRITIONAL RIGOR LAWS (MANDATORY SCIENTIFIC PRECISION):
-1. LAW 1 — ADD-ON vs. OVERRIDE DISCIPLINE:
-   - If the user adds an invisible ingredient in text (e.g. "Mit 2 Würfel Zucker", "mit 1 EL Öl"), KEEP the visible dish/drink estimation 100% UNCHANGED and simply ADD the text ingredient on top! Never shrink the visible milk in a milky coffee/cappuccino just because the user added "Mit 2 Würfel Zucker".
-   - Only replace/override a visible item if the text explicitly corrects what is visible (e.g. "Hafermilch statt Kuhmilch"). Never double-count the same item.
-2. LAW 2 — LEAN PROTEIN OVERRIDE & 5g OIL CAP:
-   - Unbreaded grilled/steamed lean meats (chicken breast, turkey breast, tuna, lean quark/skyr) MUST stay < 2.8g fat per 100g. Never invent invisible cooking fat > 5g (~45 kcal) unless deep-fried, breaded, or swimming in visible oil.
-3. LAW 3 — VISUAL SCALE, BEVERAGE FOAM & SUGAR SEPARATION:
-   - Anchor portion weights against standard dinner plates (26 cm outer rim, ~19 cm inner well), cutlery (19 cm), bread rolls (65–70 g), standard DACH/PL retail packs (150 g yogurt, 250 g quark, 500 g skyr, 330 ml can, 500 ml bottle).
-   - A full mug/cup (250–300 ml) showing white milk foam/crema is a Milchkaffee / Cappuccino / Latte (~150–200 ml milk + ~50–80 ml espresso/coffee), NOT black coffee with 50 ml milk.
-   - Sugar Cube Math: 1 standard sugar cube = 3.5g (2 cubes = 7g = 28 kcal, 7g added sugar). Keep added sugar (sugar cubes/syrup) cleanly separated as its own component from intrinsic milk lactose in Latte Macchiato / Milchkaffee.
-4. LAW 4 — CONTEXTUAL PREPARATION RIGOR:
-   - Distinguish strictly between steamed/boiled/grilled vs. breaded/pan-fried/creamy sauce. Ensure sugar <= carbs.
-5. LAW 5 — UNBREAKABLE NUTRITION LABEL OCR GROUND TRUTH:
-   - Whenever a printed nutrition table ("Nährwerte" / "Wartości odżywcze") is visible in the photo, you MUST set "isNutritionLabel": true.
-   - STRICT kJ vs. kcal SEPARATION: ALWAYS read ONLY the "kcal" number! STRICTLY IGNORE "kJ" (e.g. "571 kJ / 136 kcal" -> 136 kcal; "2,9 kJ / 0,7 kcal" -> 0.7 kcal; "29 kJ / 7 kcal" -> 7 kcal).
-   - STRICT PER-100g/100ml vs. TOTAL VOLUME: Read exact printed values per 100g/100ml. If total package weight/volume is printed or clearly known (e.g. "150 g", "330 ml", "500 ml"), multiply by (total / 100) and state the exact grams/ml. If total volume is NOT visible, output for the printed reference amount (100 ml / 100 g) and state "(100ml)" or "(100g)".
-   - ZERO / LIGHT DRINKS: Printed values on Zero/Light products (e.g. Fanta Zero: 7 kcal, 0g protein, 0g carbs, 0g sugar, 0g fat — calories come from organic acids like citric acid) are 100% IMMUTABLE GROUND TRUTH. NEVER invent sugar/carbs and NEVER force 4P+4C+9F onto Zero/Light labels!
+GLOBAL NUTRITIONAL RIGOR LAWS:
+1. ADD-ON vs. OVERRIDE: Keep visible food/drink unchanged when user adds an invisible text add-on ("Mit 2 Würfel Zucker"); only substitute if text explicitly corrects what is visible. Never double-count.
+2. LEAN PROTEIN & OIL CAP: Unbreaded grilled/steamed lean meats/quark/skyr stay <2.8g fat/100g. Never invent >5g (~45 kcal) invisible cooking oil unless fried/breaded/oily.
+3. VISUAL SCALE & SUGAR SEPARATION: Anchor to 26cm plate, 19cm cutlery, 70g roll, 150g/250g/500g packs, 330ml/500ml bottles. Full foamy mug (250-300ml) = 150-200ml milk + espresso, never 50ml milk. 1 sugar cube = 3.5g (2 cubes = 7g = 28 kcal added sugar), separated from intrinsic milk lactose.
+4. PREPARATION RIGOR: Distinguish steamed/grilled vs. breaded/creamy. Enforce sugar <= carbs.
+5. UNBREAKABLE NUTRITION LABEL OCR GROUND TRUTH: If a printed nutrition table is visible, MUST set "isNutritionLabel": true. Read ONLY kcal (NEVER kJ!). Scale per-100g/ml by visible/stated pack size; if pack size is unseen, output per 100ml/100g. Zero/Light printed labels (e.g. Fanta Zero: 7 kcal, 0g P/C/F/sugar from organic acids) are 100% immutable—never invent macros or force 4P+4C+9F.
 `;
 }
 
@@ -1925,30 +1914,20 @@ const WORD_NUMBERS = {
 
 const ZERO_LIGHT_REGEX = /\b(?:zero|light|lite|zuckerfrei|sugar\s*free|bez\s*cukru|ohne\s*zucker|pepsi\s*max|0\s*kcal|0\s*g\s*zucker|mineralwasser\s*lemon|rheinfels\s*lemon)\b/i;
 
+let lastChefRecipes = [];
+
 function foldDiacritics(str) {
   if (!str) return '';
-  return String(str)
-    .toLowerCase()
-    .replace(/ä/g, 'a')
-    .replace(/ö/g, 'o')
-    .replace(/ü/g, 'u')
-    .replace(/ß/g, 'ss')
-    .replace(/ą/g, 'a')
-    .replace(/ć/g, 'c')
-    .replace(/ę/g, 'e')
-    .replace(/ł/g, 'l')
-    .replace(/ń/g, 'n')
-    .replace(/ó/g, 'o')
-    .replace(/ś/g, 's')
-    .replace(/ź/g, 'z')
-    .replace(/ż/g, 'z');
+  return String(str).toLowerCase()
+    .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss')
+    .replace(/ą/g, 'a').replace(/ć/g, 'c').replace(/ę/g, 'e').replace(/ł/g, 'l')
+    .replace(/ń/g, 'n').replace(/ó/g, 'o').replace(/ś/g, 's').replace(/ź/g, 'z').replace(/ż/g, 'z');
 }
 
 function normalizeWordNumbers(text) {
   let out = foldDiacritics(text);
   Object.keys(WORD_NUMBERS).forEach(word => {
-    const re = new RegExp(`(^|\\s)${word}(?=\\s|$)`, 'g');
-    out = out.replace(re, `$1${WORD_NUMBERS[word]}`);
+    out = out.replace(new RegExp(`(^|\\s)${word}(?=\\s|$)`, 'g'), `$1${WORD_NUMBERS[word]}`);
   });
   return out;
 }
@@ -1960,8 +1939,7 @@ function escapeRegExp(str) {
 function matchKeywordWithBoundary(text, kw) {
   const cleanKw = foldDiacritics(kw).trim();
   if (!cleanKw) return false;
-  const pattern = `(?:^|[^a-z0-9])${escapeRegExp(cleanKw)}(?:$|[^a-z0-9])`;
-  return new RegExp(pattern, 'i').test(text);
+  return new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(cleanKw)}(?:$|[^a-z0-9])`, 'i').test(text);
 }
 
 function stripExclusions(text) {
@@ -1975,14 +1953,12 @@ function resolveSingleSegment(segText, parentMultiplier = 1) {
   if (!norm) return null;
 
   const isZeroHint = ZERO_LIGHT_REGEX.test(norm);
-
   let bestEntry = null;
   let bestKwLen = 0;
 
   for (let i = 0; i < FOOD_LEXICON.length; i++) {
     const entry = FOOD_LEXICON[i];
     if (isZeroHint && entry.isSugaryDrink) continue;
-
     for (let k = 0; k < entry.kw.length; k++) {
       const kw = entry.kw[k];
       if (matchKeywordWithBoundary(norm, kw) && kw.length > bestKwLen) {
@@ -1995,7 +1971,6 @@ function resolveSingleSegment(segText, parentMultiplier = 1) {
   if (!bestEntry && isZeroHint && /\b(?:fanta|cola|sprite|spezi|limo|limonade|eistee|energy|red bull|monster|schorle|lemon)\b/i.test(norm)) {
     bestEntry = FOOD_LEXICON.find(e => e.id === 'cola_zero') || null;
   }
-
   if (!bestEntry) return null;
 
   const qtyText = norm.replace(/\d+(?:[.,]\d+)?\s*%/g, ' ').replace(/\s+/g, ' ').trim();
@@ -2016,8 +1991,7 @@ function resolveSingleSegment(segText, parentMultiplier = 1) {
   if (multUnitMatch) {
     detectedCount = parseFloat(multUnitMatch[1].replace(',', '.'));
     const unitVal = parseFloat(multUnitMatch[2].replace(',', '.'));
-    const isLiter = /^l/.test(multUnitMatch[3]);
-    grams = (isLiter ? unitVal * 1000 : unitVal) * detectedCount * effectiveParentMult;
+    grams = (/^l/.test(multUnitMatch[3]) ? unitVal * 1000 : unitVal) * detectedCount * effectiveParentMult;
   } else if (gMatch) {
     const singleG = parseFloat(gMatch[1].replace(',', '.'));
     const leadMultMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s+(?!g\b|gramm\b|ml\b)/);
@@ -2030,19 +2004,14 @@ function resolveSingleSegment(segText, parentMultiplier = 1) {
   } else if (lMatch) {
     const singleL = parseFloat(lMatch[1].replace(',', '.'));
     const leadMultMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s+(?!l\b|liter\b)/);
-    if (leadMultMatch && /\b(?:a|à|je|x|mal)\b/.test(qtyText)) {
-      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
-    }
+    if (leadMultMatch && /\b(?:a|à|je|x|mal)\b/.test(qtyText)) detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
     grams = singleL * 1000 * detectedCount * effectiveParentMult;
   } else if (elMatch) {
-    const cnt = elMatch[1] ? parseFloat(elMatch[1].replace(',', '.')) : 1;
-    grams = cnt * 15 * effectiveParentMult;
+    grams = (elMatch[1] ? parseFloat(elMatch[1].replace(',', '.')) : 1) * 15 * effectiveParentMult;
   } else if (tlMatch) {
-    const cnt = tlMatch[1] ? parseFloat(tlMatch[1].replace(',', '.')) : 1;
-    grams = cnt * 5 * effectiveParentMult;
+    grams = (tlMatch[1] ? parseFloat(tlMatch[1].replace(',', '.')) : 1) * 5 * effectiveParentMult;
   } else if (jeCountMatch) {
-    const cnt = parseFloat(jeCountMatch[1].replace(',', '.'));
-    detectedCount = cnt * effectiveParentMult;
+    detectedCount = parseFloat(jeCountMatch[1].replace(',', '.')) * effectiveParentMult;
     grams = detectedCount * bestEntry.unitG;
   } else if (countPrefixMatch) {
     const cnt = parseFloat(countPrefixMatch[1].replace(',', '.'));
@@ -2052,40 +2021,28 @@ function resolveSingleSegment(segText, parentMultiplier = 1) {
     }
   }
 
-  if (/\b(?:gross|grosse|grosser|grosses|duzy|duza|duze)\b/.test(qtyText) && !gMatch && !multUnitMatch) {
-    grams *= 1.4;
-  } else if (/\b(?:klein|kleine|kleiner|kleines|maly|mala|male)\b/.test(qtyText) && !gMatch && !multUnitMatch) {
-    grams *= 0.7;
-  }
+  if (/\b(?:gross|grosse|grosser|grosses|duzy|duza|duze)\b/.test(qtyText) && !gMatch && !multUnitMatch) grams *= 1.4;
+  else if (/\b(?:klein|kleine|kleiner|kleines|maly|mala|male)\b/.test(qtyText) && !gMatch && !multUnitMatch) grams *= 0.7;
 
   grams = Math.max(1, Math.round(grams));
   const factor = grams / 100;
-
   let kcal = Math.round(bestEntry.kcal100 * factor);
   const explicitKcalMatch = qtyText.match(/(\d+)\s*kcal\b/);
-  if (explicitKcalMatch) {
-    kcal = parseInt(explicitKcalMatch[1], 10);
-  }
+  if (explicitKcalMatch) kcal = parseInt(explicitKcalMatch[1], 10);
 
   const totalSugar = Math.round(bestEntry.sugar100 * factor * 10) / 10;
-  const addedSugar = bestEntry.isAddedSugar ? totalSugar : 0;
-  const naturalSugar = bestEntry.naturalMatrix ? totalSugar : 0;
-
-  const isLiquid = bestEntry.isZeroDrink || bestEntry.isSugaryDrink || bestEntry.id === 'milk_15' || bestEntry.id === 'latte_macchiato' || bestEntry.id === 'black_coffee';
-  const unitLabel = isLiquid ? 'ml' : 'g';
+  const isLiquid = bestEntry.isZeroDrink || bestEntry.isSugaryDrink || ['milk_15', 'latte_macchiato', 'black_coffee'].includes(bestEntry.id);
 
   return {
-    name: `${bestEntry.name} (${grams}${unitLabel})`,
-    grams,
-    detectedCount,
-    kcal,
+    name: `${bestEntry.name} (${grams}${isLiquid ? 'ml' : 'g'})`,
+    grams, detectedCount, kcal,
     prot: Math.round(bestEntry.prot100 * factor * 10) / 10,
     carbs: Math.round(bestEntry.carbs100 * factor * 10) / 10,
     fat: Math.round(bestEntry.fat100 * factor * 10) / 10,
     fiber: Math.round(bestEntry.fiber100 * factor * 10) / 10,
     sugar: totalSugar,
-    addedSugar,
-    naturalSugar
+    addedSugar: bestEntry.isAddedSugar ? totalSugar : 0,
+    naturalSugar: bestEntry.naturalMatrix ? totalSugar : 0
   };
 }
 
@@ -2094,65 +2051,40 @@ function resolveFromLexicon(rawInput) {
   const cleaned = stripExclusions(rawInput).trim();
   if (!cleaned) return null;
 
-  const primaryParts = cleaned
-    .split(/(?:,|\+|\bund\b|\boraz\b|\bdazu\b)/i)
-    .map(s => s.trim())
-    .filter(Boolean);
-
+  const primaryParts = cleaned.split(/(?:,|\+|\bund\b|\boraz\b|\bdazu\b)/i).map(s => s.trim()).filter(Boolean);
   const finalSegments = [];
   primaryParts.forEach(part => {
     const subParts = part.split(/\b(?:mit|auf|z|ze)\b/i).map(s => s.trim()).filter(Boolean);
-    if (subParts.length > 1) {
-      const subResolved = subParts.map(sp => resolveSingleSegment(sp, 1));
-      if (subResolved.every(Boolean)) {
-        subParts.forEach(sp => finalSegments.push(sp));
-        return;
-      }
+    if (subParts.length > 1 && subParts.every(sp => resolveSingleSegment(sp, 1))) {
+      subParts.forEach(sp => finalSegments.push(sp));
+      return;
     }
     finalSegments.push(part);
   });
 
   if (finalSegments.length === 0) return null;
-
   const components = [];
   let activeParentCount = 1;
 
   for (let i = 0; i < finalSegments.length; i++) {
     const comp = resolveSingleSegment(finalSegments[i], activeParentCount);
     if (!comp) return null;
-    if (i === 0 && comp.detectedCount > 1) {
-      activeParentCount = comp.detectedCount;
-    }
+    if (i === 0 && comp.detectedCount > 1) activeParentCount = comp.detectedCount;
     components.push(comp);
   }
 
-  const totals = components.reduce(
-    (acc, c) => {
-      acc.kcal += c.kcal;
-      acc.prot += c.prot;
-      acc.carbs += c.carbs;
-      acc.fat += c.fat;
-      acc.fiber += c.fiber;
-      acc.sugar += c.sugar;
-      acc.addedSugar += numOr(c.addedSugar, 0);
-      acc.naturalSugar += numOr(c.naturalSugar, 0);
-      return acc;
-    },
-    { kcal: 0, prot: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, addedSugar: 0, naturalSugar: 0 }
-  );
+  const totals = components.reduce((acc, c) => {
+    acc.kcal += c.kcal; acc.prot += c.prot; acc.carbs += c.carbs; acc.fat += c.fat;
+    acc.fiber += c.fiber; acc.sugar += c.sugar; acc.addedSugar += numOr(c.addedSugar, 0); acc.naturalSugar += numOr(c.naturalSugar, 0);
+    return acc;
+  }, { kcal: 0, prot: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, addedSugar: 0, naturalSugar: 0 });
 
   return {
     mealName: components.map(c => c.name).join(' + '),
-    kcal: Math.round(totals.kcal),
-    prot: Math.round(totals.prot),
-    carbs: Math.round(totals.carbs),
-    fat: Math.round(totals.fat),
-    fiber: Math.round(totals.fiber),
-    sugar: Math.round(totals.sugar),
-    addedSugar: Math.round(totals.addedSugar),
-    naturalSugar: Math.round(totals.naturalSugar),
-    components,
-    source: 'Offline-Lexikon (0.0s)'
+    kcal: Math.round(totals.kcal), prot: Math.round(totals.prot), carbs: Math.round(totals.carbs),
+    fat: Math.round(totals.fat), fiber: Math.round(totals.fiber), sugar: Math.round(totals.sugar),
+    addedSugar: Math.round(totals.addedSugar), naturalSugar: Math.round(totals.naturalSugar),
+    components, source: 'Offline-Lexikon (0.0s)'
   };
 }
 
@@ -2160,17 +2092,14 @@ function findLexiconReference(componentName) {
   const norm = foldDiacritics(componentName || '');
   if (!norm) return null;
   const isZeroHint = ZERO_LIGHT_REGEX.test(norm);
-
-  let best = null;
-  let bestLen = 0;
+  let best = null; let bestLen = 0;
   for (let i = 0; i < FOOD_LEXICON.length; i++) {
     const entry = FOOD_LEXICON[i];
     if (isZeroHint && entry.isSugaryDrink) continue;
     for (let k = 0; k < entry.kw.length; k++) {
       const kw = entry.kw[k];
       if (matchKeywordWithBoundary(norm, kw) && kw.length > bestLen) {
-        best = entry;
-        bestLen = kw.length;
+        best = entry; bestLen = kw.length;
       }
     }
   }
@@ -2178,9 +2107,7 @@ function findLexiconReference(componentName) {
 }
 
 function reconcileVisionComponents(rawVisionResult) {
-  if (!rawVisionResult || typeof rawVisionResult !== 'object') {
-    throw new Error('Ungültiges Analyse-Objekt.');
-  }
+  if (!rawVisionResult || typeof rawVisionResult !== 'object') throw new Error('Ungültiges Analyse-Objekt.');
 
   const mealTitle = String(rawVisionResult.mealName || rawVisionResult.name || 'Analysierte Mahlzeit').trim();
   const isLabel = Boolean(rawVisionResult.isNutritionLabel || rawVisionResult.isLabel);
@@ -2195,23 +2122,13 @@ function reconcileVisionComponents(rawVisionResult) {
     const sug = Math.min(c, Math.max(0, numOr(rawVisionResult.sugar, 0)));
     const atwater = p * 4 + c * 4 + f * 9 + fib * 2;
     let rawK = Math.max(0, numOr(rawVisionResult.kcal ?? rawVisionResult.calories, atwater));
+    if (!mealIsZeroLight && atwater >= 25 && rawK > atwater * 3.4 && rawK < atwater * 4.8) rawK = rawK / 4.184;
 
-    if (!mealIsZeroLight && atwater >= 25 && rawK > atwater * 3.4 && rawK < atwater * 4.8) {
-      rawK = rawK / 4.184;
-    }
-
-    const finalKcal = (isLabel || mealIsZeroLight) ? Math.round(rawK) : Math.round(rawK * 0.5 + atwater * 0.5);
     return {
       mealName: mealTitle,
-      kcal: finalKcal,
-      prot: Math.round(p),
-      carbs: Math.round(c),
-      fat: Math.round(f),
-      fiber: Math.round(fib),
-      sugar: Math.round(sug),
-      addedSugar: 0,
-      naturalSugar: 0,
-      components: [],
+      kcal: (isLabel || mealIsZeroLight) ? Math.round(rawK) : Math.round(rawK * 0.5 + atwater * 0.5),
+      prot: Math.round(p), carbs: Math.round(c), fat: Math.round(f), fiber: Math.round(fib), sugar: Math.round(sug),
+      addedSugar: 0, naturalSugar: 0, components: [],
       source: isLabel ? 'Nährwert-Etikett (Ground Truth)' : (rawVisionResult.source || '3D Vision AI')
     };
   }
@@ -2228,21 +2145,16 @@ function reconcileVisionComponents(rawVisionResult) {
 
     const compIsZeroLight = mealIsZeroLight || ZERO_LIGHT_REGEX.test(name);
     const isImmutableGroundTruth = isLabel || compIsZeroLight;
-
     const isDairyOrFruit = /milch|latte|cappuccino|quark|skyr|joghurt|beeren|apfel|banane|obst|twarog|mleko/i.test(name);
     const isPureAddedSugar = /zucker|wurfel|sirup|honig|marmelade|cukier|kostk/i.test(name);
 
     if (isImmutableGroundTruth) {
-      // 100% IMMUTABLE GROUND TRUTH für Etiketten & Zero/Light-Getränke (inkl. organischer Säuren wie 7 kcal bei 0g P/C/F)
       sug = Math.min(c, sug);
       const atwaterRef = p * 4 + c * 4 + f * 9 + fib * 2;
-      if (!compIsZeroLight && atwaterRef >= 25 && kcal > atwaterRef * 3.4 && kcal < atwaterRef * 4.8) {
-        kcal = kcal / 4.184;
-      }
+      if (!compIsZeroLight && atwaterRef >= 25 && kcal > atwaterRef * 3.4 && kcal < atwaterRef * 4.8) kcal = kcal / 4.184;
     } else {
       const lexRef = findLexiconReference(name);
       const isBreadedOrFried = /paniert|frittiert|schnitzel|schabowy|pommes|chips|sahne|creme/i.test(name);
-
       if (lexRef && !isBreadedOrFried) {
         const factor = grams / 100;
         p = (lexRef.prot100 * factor) * 0.65 + p * 0.35;
@@ -2250,68 +2162,38 @@ function reconcileVisionComponents(rawVisionResult) {
         f = (lexRef.fat100 * factor) * 0.65 + f * 0.35;
         fib = (lexRef.fiber100 * factor) * 0.65 + fib * 0.35;
         sug = (lexRef.sugar100 * factor) * 0.65 + sug * 0.35;
-
-        if (lexRef.isLeanProtein) {
-          const maxLeanFat = (grams / 100) * 2.8;
-          f = Math.min(f, maxLeanFat);
-        }
+        if (lexRef.isLeanProtein) f = Math.min(f, (grams / 100) * 2.8);
       }
-
-      if (/bratfett|bratol|kochfett|pfannenol/i.test(name) && grams > 5) {
-        f = Math.min(f, 5.0);
-      }
-
+      if (/bratfett|bratol|kochfett|pfannenol/i.test(name) && grams > 5) f = Math.min(f, 5.0);
       sug = Math.min(c, sug);
       const atwaterKcal = p * 4 + c * 4 + f * 9 + fib * 2;
-      if (atwaterKcal >= 25 && kcal > atwaterKcal * 3.4 && kcal < atwaterKcal * 4.8) {
-        kcal = kcal / 4.184;
-      }
+      if (atwaterKcal >= 25 && kcal > atwaterKcal * 3.4 && kcal < atwaterKcal * 4.8) kcal = kcal / 4.184;
       kcal = kcal > 0 ? Math.round(atwaterKcal * 0.7 + kcal * 0.3) : Math.round(atwaterKcal);
     }
 
-    const addedSugar = isPureAddedSugar ? sug : 0;
-    const naturalSugar = isDairyOrFruit && !isPureAddedSugar ? sug : 0;
     const alreadyHasUnit = /\(\d+\s*(?:g|ml)\)/i.test(name);
-
     return {
       name: alreadyHasUnit ? name : `${name} (${grams}g)`,
-      grams,
-      kcal: Math.round(kcal),
-      prot: Math.round(p * 10) / 10,
-      carbs: Math.round(c * 10) / 10,
-      fat: Math.round(f * 10) / 10,
-      fiber: Math.round(fib * 10) / 10,
-      sugar: Math.round(sug * 10) / 10,
-      addedSugar: Math.round(addedSugar * 10) / 10,
-      naturalSugar: Math.round(naturalSugar * 10) / 10
+      grams, kcal: Math.round(kcal),
+      prot: Math.round(p * 10) / 10, carbs: Math.round(c * 10) / 10, fat: Math.round(f * 10) / 10,
+      fiber: Math.round(fib * 10) / 10, sugar: Math.round(sug * 10) / 10,
+      addedSugar: isPureAddedSugar ? Math.round(sug * 10) / 10 : 0,
+      naturalSugar: (isDairyOrFruit && !isPureAddedSugar) ? Math.round(sug * 10) / 10 : 0
     };
   });
 
-  const totals = reconciled.reduce(
-    (acc, item) => {
-      acc.kcal += item.kcal;
-      acc.prot += item.prot;
-      acc.carbs += item.carbs;
-      acc.fat += item.fat;
-      acc.fiber += item.fiber;
-      acc.sugar += item.sugar;
-      acc.addedSugar += numOr(item.addedSugar, 0);
-      acc.naturalSugar += numOr(item.naturalSugar, 0);
-      return acc;
-    },
-    { kcal: 0, prot: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, addedSugar: 0, naturalSugar: 0 }
-  );
+  const totals = reconciled.reduce((acc, item) => {
+    acc.kcal += item.kcal; acc.prot += item.prot; acc.carbs += item.carbs; acc.fat += item.fat;
+    acc.fiber += item.fiber; acc.sugar += item.sugar; acc.addedSugar += numOr(item.addedSugar, 0); acc.naturalSugar += numOr(item.naturalSugar, 0);
+    return acc;
+  }, { kcal: 0, prot: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, addedSugar: 0, naturalSugar: 0 });
 
   return {
     mealName: mealTitle || reconciled.map(r => r.name).join(' + '),
-    kcal: Math.round(totals.kcal),
-    prot: Math.round(totals.prot),
-    carbs: Math.round(totals.carbs),
-    fat: Math.round(totals.fat),
-    fiber: Math.round(totals.fiber),
+    kcal: Math.round(totals.kcal), prot: Math.round(totals.prot), carbs: Math.round(totals.carbs),
+    fat: Math.round(totals.fat), fiber: Math.round(totals.fiber),
     sugar: Math.min(Math.round(totals.carbs), Math.round(totals.sugar)),
-    addedSugar: Math.round(totals.addedSugar),
-    naturalSugar: Math.round(totals.naturalSugar),
+    addedSugar: Math.round(totals.addedSugar), naturalSugar: Math.round(totals.naturalSugar),
     components: reconciled,
     source: isLabel ? 'Nährwert-Etikett (Ground Truth)' : (rawVisionResult.source || '3D Vision Rigor')
   };
@@ -2320,20 +2202,14 @@ function reconcileVisionComponents(rawVisionResult) {
 function setPortionScale(scalePct) {
   const pct = Math.max(25, Math.min(250, Math.round(numOr(scalePct, 100))));
   currentPortionScale = pct;
-
   const slider = document.getElementById('portionScaleSlider');
   const label = document.getElementById('portionScaleValue');
   if (slider) slider.value = pct;
   if (label) label.textContent = `${pct}%`;
-
   if (!pendingMealAnalysis) return;
+
   const factor = pct / 100;
-
-  const setTxt = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  };
-
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   setTxt('resKcal', Math.round(pendingMealAnalysis.kcal * factor));
   setTxt('resProt', `${Math.round(pendingMealAnalysis.prot * factor)}g`);
   setTxt('resCarbs', `${Math.round(pendingMealAnalysis.carbs * factor)}g`);
@@ -2369,24 +2245,15 @@ function showMealResult(analysisObj) {
   const listEl = document.getElementById('resComponentsList');
 
   if (titleEl) titleEl.textContent = analysisObj.mealName || 'Mahlzeit';
-
   const q = computeMealQualityScore(analysisObj);
   if (badgeEl) {
     badgeEl.className = `inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border mb-1 ${q.colorClass}`;
     badgeEl.innerHTML = `<i class="fa-solid fa-award"></i><span>${escapeHTML(analysisObj.source || 'KI-Vision')} &bull; Score ${q.grade} (${q.score})</span>`;
   }
-
   if (listEl) {
-    if (Array.isArray(analysisObj.components) && analysisObj.components.length > 0) {
-      listEl.innerHTML = analysisObj.components
-        .map(c => `<div class="flex items-center justify-between bg-slate-950/60 px-2.5 py-1.5 rounded-xl border border-slate-800/80">
-          <span class="font-medium text-slate-200">${escapeHTML(c.name)}</span>
-          <span class="text-[11px] text-emerald-300 font-bold">${Math.round(c.kcal)} kcal &bull; ${Math.round(c.prot)}P/${Math.round(c.carbs)}C/${Math.round(c.fat)}F</span>
-        </div>`)
-        .join('');
-    } else {
-      listEl.innerHTML = '';
-    }
+    listEl.innerHTML = Array.isArray(analysisObj.components) && analysisObj.components.length > 0
+      ? analysisObj.components.map(c => `<div class="flex items-center justify-between bg-slate-950/60 px-2.5 py-1.5 rounded-xl border border-slate-800/80"><span class="font-medium text-slate-200">${escapeHTML(c.name)}</span><span class="text-[11px] text-emerald-300 font-bold">${Math.round(c.kcal)} kcal &bull; ${Math.round(c.prot)}P/${Math.round(c.carbs)}C/${Math.round(c.fat)}F</span></div>`).join('')
+      : '';
   }
 
   setPortionScale(100);
@@ -2403,16 +2270,13 @@ function resetAnalyzeButtonUI() {
   const btn = document.getElementById('analyzeMealBtn');
   if (!btn) return;
   btn.disabled = false;
-  const label = (state && state.lang === 'pl') ? 'Analiza 3D' : '3D Analyse';
-  btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span data-i18n="btnAnalyze">${label}</span>`;
+  btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span data-i18n="btnAnalyze">${state && state.lang === 'pl' ? 'Analiza 3D' : '3D Analyse'}</span>`;
 }
 
 async function handleMealPhotoSelect(event) {
   const file = event && event.target && event.target.files ? event.target.files[0] : null;
   if (!file) return;
-
   abortActiveVisionRequest();
-
   try {
     const base64 = await compressImageFile(file, 'label');
     currentMealPhotoBase64 = base64;
@@ -2453,7 +2317,6 @@ async function triggerMealAnalysis() {
     return;
   }
 
-  // 1. 0.0s Offline-Lexikon Fast-Path (wenn kein Foto aktiv ist)
   if (!hasPhoto && userText) {
     const offlineHit = resolveFromLexicon(userText);
     if (offlineHit) {
@@ -2464,15 +2327,10 @@ async function triggerMealAnalysis() {
     }
   }
 
-  if (isVisionBusy) {
-    abortActiveVisionRequest();
-  }
-
+  if (isVisionBusy) abortActiveVisionRequest();
   isVisionBusy = true;
   activeVisionController = new AbortController();
-  activeVisionWatchdogTimer = setTimeout(() => {
-    abortActiveVisionRequest();
-  }, MASTER_VISION_TIMEOUT_MS);
+  activeVisionWatchdogTimer = setTimeout(() => abortActiveVisionRequest(), MASTER_VISION_TIMEOUT_MS);
 
   const btn = document.getElementById('analyzeMealBtn');
   if (btn) {
@@ -2482,21 +2340,13 @@ async function triggerMealAnalysis() {
 
   try {
     const langHint = state.lang === 'pl' ? 'Antworte auf Polnisch.' : 'Antworte auf Deutsch.';
-    const prompt = `Du bist ein hochpräziser Ernährungs- & Label-OCR-Analyst. ${langHint}
+    const prompt = `Du bist ein Ernährungs- & Label-OCR-Analyst. ${langHint}
 ${buildGlobalNutritionalRigorRules()}
-WICHTIGE ENTSCHEIDUNG:
-- Siehst du auf dem Foto eine gedruckte Nährwerttabelle ("Nährwerte", "Brennwert", "kcal", "Wartości odżywcze")? Dann setze ZWINGEND "isNutritionLabel": true! Lies EXAKT die kcal-Zahl (NIEMALS kJ!) und die Makros ab. Bei Zero/Light-Getränken (z.B. Fanta Zero: 7 kcal, 0g Zucker, 0g Carbs, 0g Fett, 0g Protein) übernimm die abgelesenen Werte 1:1!
-- Siehst du ein Gericht/Getränk + eine additive Textnotiz (z.B. "Mit 2 Würfel Zucker")? Lass die sichtbare Portionsmenge (z.B. 180-200ml Milch in einer vollen Tasse Milchkaffee/Cappuccino mit Schaum) UNVERÄNDERT und füge die Textnotiz (2 Würfel Zucker = 7g, 28 kcal, 7g Carbs, 7g Zucker) als eigene zusätzliche Komponente hinzu!
-Benutzer-Textnotiz: "${userText || 'Keine Textnotiz, analysiere das Bild.'}"
-
-Gib AUSSCHLIESSLICH valides JSON in diesem Schema zurück:
-{
-  "mealName": "Exakter Name (inkl. Zero/Light falls zutreffend)",
-  "isNutritionLabel": true_or_false,
-  "components": [
-    { "name": "Zutat oder Produktname", "grams": 150, "kcal": 180, "prot": 25, "carbs": 5, "fat": 4, "fiber": 1, "sugar": 2 }
-  ]
-}`;
+- Gedruckte Nährwerttabelle sichtbar? ZWINGEND "isNutritionLabel": true, NUR kcal (nie kJ), Zero/Light 1:1 übernehmen!
+- Foto + Zusatztext (z.B. "Mit 2 Würfel Zucker")? Sichtbares Getränk/Gericht unverändert lassen, Textzutat (2 Würfel = 7g, 28 kcal) separat addieren!
+Benutzer-Notiz: "${userText || 'Keine Textnotiz, analysiere das Bild.'}"
+Gib NUR JSON zurück:
+{"mealName":"Name","isNutritionLabel":true_or_false,"components":[{"name":"Zutat","grams":150,"kcal":180,"prot":25,"carbs":5,"fat":4,"fiber":1,"sugar":2}]}`;
 
     const rawResult = await callGeminiRequest(prompt, currentMealPhotoBase64, activeVisionController.signal);
     const reconciled = reconcileVisionComponents(rawResult);
@@ -2504,15 +2354,10 @@ Gib AUSSCHLIESSLICH valides JSON in diesem Schema zurück:
     if (typeof recordRecentScan === 'function') recordRecentScan(reconciled);
     showToast('3D-Analyse abgeschlossen!', 'success');
   } catch (err) {
-    if (err && String(err.message).includes('abgebrochen')) {
-      return;
-    }
+    if (err && String(err.message).includes('abgebrochen')) return;
     showToast(err.message || 'Analyse fehlgeschlagen.', 'error');
   } finally {
-    if (activeVisionWatchdogTimer) {
-      clearTimeout(activeVisionWatchdogTimer);
-      activeVisionWatchdogTimer = null;
-    }
+    if (activeVisionWatchdogTimer) { clearTimeout(activeVisionWatchdogTimer); activeVisionWatchdogTimer = null; }
     activeVisionController = null;
     isVisionBusy = false;
     resetAnalyzeButtonUI();
@@ -2540,7 +2385,9 @@ function clearFridgePhoto() {
   currentFridgePhotoBase64 = null;
   const input = document.getElementById('fridgePhotoInput');
   const container = document.getElementById('fridgePreviewContainer');
+  const img = document.getElementById('fridgePreviewImg');
   if (input) input.value = '';
+  if (img) img.removeAttribute('src');
   if (container) container.classList.add('hidden');
 }
 
@@ -2556,51 +2403,68 @@ async function runFridgeLeftoverAI() {
   const container = document.getElementById('fridgeResultsContainer');
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Erstelle Rezepte...</span>`;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Prüfe Frische &amp; Rezepte...</span>`;
   }
 
   try {
+    const langHint = state.lang === 'pl' ? 'Antworte komplett auf Polnisch.' : 'Antworte komplett auf Deutsch.';
     const todayData = getTodayData();
     const eatenKcal = todayData.meals.reduce((a, m) => a + numOr(m.kcal, 0), 0);
     const remKcal = Math.max(350, state.goals.kcal - eatenKcal);
 
-    const prompt = `Du bist ein Fitness-Koch.
+    const prompt = `Du bist ein Fitness-Koch mit SMART EXPIRY GUARD. ${langHint}
 ${buildGlobalNutritionalRigorRules()}
-Restbudget heute: ${remKcal} kcal. Zusätzliche Zutaten/Notiz: "${extraText || 'Siehe Foto'}".
-Erstelle 3 High-Protein-Rezepte aus den Vorräten. Gib NUR JSON zurück:
-{
-  "recipes": [
-    { "name": "Rezeptname", "prepTime": "12 Min", "kcal": 520, "prot": 45, "carbs": 40, "fat": 16, "fiber": 6, "sugar": 5, "steps": "Kurze Anleitung" }
-  ]
-}`;
+Restbudget heute: ${remKcal} kcal. Vorräte/Notiz: "${extraText || 'Siehe Kühlschrank-Foto'}".
+Erkenne gezielt geöffnete, frische oder schnell verderbliche Lebensmittel (z.B. offener Quark, Geflügel, Hack, Beeren, Spinat, Milch, geschnittenes Gemüse, sichtbares MHD) und priorisiere sie zuerst!
+Erstelle 3 High-Protein-Rezepte (1 Portion). Gib NUR JSON zurück:
+{"recipes":[{"name":"Rezept","prepTime":"12 Min","urgency":"high","priorityIngredients":["Offener Quark","Frische Beeren"],"expiryNote":"Zuerst verbrauchen: offener Quark & frische Beeren","kcal":520,"prot":45,"carbs":40,"fat":16,"fiber":6,"sugar":5,"ingredients":["250g Quark","100g Beeren"],"steps":"Kurze Schritte"}]}`;
 
     const data = await callGeminiRequest(prompt, currentFridgePhotoBase64);
     const recipes = Array.isArray(data.recipes) ? data.recipes : [];
 
     if (container) {
-      container.innerHTML = recipes
-        .map(r => {
+      if (recipes.length === 0) {
+        container.innerHTML = `<div class="glass-card rounded-3xl p-4 text-xs text-slate-400 text-center">Keine Rezepte erkannt. Bitte deutlicher fotografieren oder Zutaten ergänzen.</div>`;
+        showToast('Keine Rezepte aus der Eingabe erkannt.', 'warning');
+      } else {
+        container.innerHTML = recipes.map(r => {
           const payload = encodeURIComponent(JSON.stringify(r));
-          return `<div class="glass-card rounded-3xl p-4 space-y-2 border border-cyan-500/30">
-            <div class="flex items-center justify-between">
+          const prios = Array.isArray(r.priorityIngredients) ? r.priorityIngredients.filter(Boolean) : [];
+          const isUrgent = r.urgency === 'high' || prios.length > 0 || Boolean(r.expiryNote);
+          const expiryBadge = isUrgent
+            ? `<div class="rounded-2xl bg-amber-500/15 border border-amber-400/35 px-3 py-2 space-y-1">
+                <div class="flex items-center gap-1.5 text-[11px] font-extrabold text-amber-300">
+                  <i class="fa-solid fa-bolt"></i><span>Zuerst verbrauchen / Frische-Check</span>
+                </div>
+                ${r.expiryNote ? `<p class="text-[11px] text-amber-100/90">${escapeHTML(r.expiryNote)}</p>` : ''}
+                ${prios.length > 0 ? `<div class="flex flex-wrap gap-1 pt-0.5">${prios.map(p => `<span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-[10px] font-bold text-amber-200">${escapeHTML(p)}</span>`).join('')}</div>` : ''}
+              </div>`
+            : '';
+          const ingHtml = Array.isArray(r.ingredients) && r.ingredients.length > 0
+            ? `<div class="flex flex-wrap gap-1">${r.ingredients.map(i => `<span class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300">${escapeHTML(i)}</span>`).join('')}</div>`
+            : '';
+          return `<div class="glass-card rounded-3xl p-4 space-y-2.5 border ${isUrgent ? 'border-amber-400/40' : 'border-cyan-500/30'}">
+            <div class="flex items-center justify-between gap-2">
               <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.name)}</h3>
-              <span class="text-[11px] font-bold text-cyan-300">${escapeHTML(r.prepTime || '15 Min')}</span>
+              <span class="text-[11px] font-bold text-cyan-300 shrink-0">${escapeHTML(r.prepTime || '15 Min')}</span>
             </div>
-            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Protein &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
+            ${expiryBadge}
+            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Prot &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
+            ${ingHtml}
             <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(r.steps || '')}</p>
             <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-200 font-bold text-xs">
-              Ins Tagebuch übernehmen
+              <i class="fa-solid fa-plus-circle mr-1"></i>Ins Tagebuch übernehmen
             </button>
           </div>`;
-        })
-        .join('');
+        }).join('');
+      }
     }
   } catch (err) {
     showToast(err.message || 'Kühlschrank-Analyse fehlgeschlagen.', 'error');
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-sparkles"></i><span>Rezepte aus Resten</span>`;
+      btn.innerHTML = `<i class="fa-solid fa-sparkles"></i><span data-i18n="btnRunFridge">${state && state.lang === 'pl' ? 'Przepisy z lodówki' : 'Rezepte aus Resten'}</span>`;
     }
   }
 }
@@ -2610,14 +2474,10 @@ function updateMenuBudgetBanner() {
   const todayData = getTodayData();
   const eatenKcal = todayData.meals.reduce((a, m) => a + numOr(m.kcal, 0), 0);
   const eatenProt = todayData.meals.reduce((a, m) => a + numOr(m.prot, 0), 0);
-
-  const remKcal = Math.max(0, Math.round(state.goals.kcal - eatenKcal));
-  const remProt = Math.max(0, Math.round(state.goals.prot - eatenProt));
-
   const kEl = document.getElementById('menuBudgetKcal');
   const pEl = document.getElementById('menuBudgetProt');
-  if (kEl) kEl.textContent = remKcal;
-  if (pEl) pEl.textContent = remProt;
+  if (kEl) kEl.textContent = Math.max(0, Math.round(state.goals.kcal - eatenKcal));
+  if (pEl) pEl.textContent = Math.max(0, Math.round(state.goals.prot - eatenProt));
 }
 
 async function handleMenuPhotoSelect(event) {
@@ -2639,7 +2499,9 @@ function clearMenuPhoto() {
   currentMenuPhotoBase64 = null;
   const input = document.getElementById('menuPhotoInput');
   const container = document.getElementById('menuPreviewContainer');
+  const img = document.getElementById('menuPreviewImg');
   if (input) input.value = '';
+  if (img) img.removeAttribute('src');
   if (container) container.classList.add('hidden');
 }
 
@@ -2655,50 +2517,111 @@ async function runMenuScannerAI() {
   const container = document.getElementById('menuResultsContainer');
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Prüfe Speisekarte...</span>`;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Prüfe Speisekarte (Ampel)...</span>`;
   }
 
   try {
     updateMenuBudgetBanner();
+    const langHint = state.lang === 'pl' ? 'Antworte komplett auf Polnisch.' : 'Antworte komplett auf Deutsch.';
     const remKcal = document.getElementById('menuBudgetKcal')?.textContent || '800';
     const remProt = document.getElementById('menuBudgetProt')?.textContent || '50';
 
-    const prompt = `Du bist ein Restaurant-Ernährungscoach.
+    const prompt = `Du bist ein Restaurant-Coach mit 3-STUFEN-AMPELSYSTEM. ${langHint}
 ${buildGlobalNutritionalRigorRules()}
-Offenes Tagesbudget: ${remKcal} kcal, ${remProt}g Protein. Notiz: "${extraText}".
-Wähle die Top-3-Gerichte von der Karte. Gib NUR JSON zurück:
-{
-  "recommendations": [
-    { "name": "Gericht", "kcal": 640, "prot": 48, "carbs": 52, "fat": 22, "fiber": 6, "sugar": 5, "tip": "Kurzer Bestell-Tipp" }
-  ]
-}`;
+Offenes Rest-Tagesbudget des Nutzers: ${remKcal} kcal, ${remProt}g Protein. Notiz: "${extraText || 'Siehe Speisekarten-Foto'}".
+Bewerte Gerichte von dieser Speisekarte in exakt 3 Ampel-Kategorien (mindestens 1x "green", 1x "yellow", 1x "red"):
+- "green" (GRÜN — Optimale Wahl): Passt ideal ins offene Budget & liefert viel Protein.
+- "yellow" (GELB — Smarter Kompromiss): Mittelkräftig, wird durch konkreten "orderHack" (z.B. Soße separat, Salat statt Pommes) fit.
+- "red" (ROT — Kalorienfalle / Achtung): Schwere Kalorien-/Fettbombe auf der Karte (z.B. überbacken, Sahnesoße, frittiert) mit klarer Warnung & Schadensbegrenzungs-Hack.
+Gib NUR JSON zurück:
+{"recommendations":[{"tier":"green","name":"Gericht","kcal":540,"prot":48,"carbs":42,"fat":16,"fiber":7,"sugar":4,"orderHack":"Dressing separat bestellen"},{"tier":"yellow","name":"Gericht 2","kcal":720,"prot":38,"carbs":65,"fat":28,"fiber":5,"sugar":6,"orderHack":"Salat statt Pommes wählen (-250 kcal)"},{"tier":"red","name":"Gyros überbacken mit Metaxasoße","kcal":1280,"prot":52,"carbs":68,"fat":86,"fiber":3,"sugar":9,"orderHack":"Kalorienfalle! Mit Begleitung teilen oder halbe Portion einpacken lassen"}]}`;
 
     const data = await callGeminiRequest(prompt, currentMenuPhotoBase64);
     const recs = Array.isArray(data.recommendations) ? data.recommendations : [];
 
+    const tierOrder = { green: 0, yellow: 1, red: 2 };
+    recs.sort((a, b) => (tierOrder[String(a.tier || 'yellow').toLowerCase()] ?? 1) - (tierOrder[String(b.tier || 'yellow').toLowerCase()] ?? 1));
+
     if (container) {
-      container.innerHTML = recs
-        .map(r => {
+      if (recs.length === 0) {
+        container.innerHTML = `<div class="glass-card rounded-3xl p-4 text-xs text-slate-400 text-center">Keine Gerichte erkannt. Bitte Speisekarte schärfer fotografieren oder Gerichte eintippen.</div>`;
+        showToast('Keine Gerichte von der Karte erkannt.', 'warning');
+      } else {
+        container.innerHTML = recs.map(r => {
+          const tier = String(r.tier || 'yellow').toLowerCase();
           const payload = encodeURIComponent(JSON.stringify(r));
-          return `<div class="glass-card rounded-3xl p-4 space-y-2 border border-amber-500/30">
+          const hackText = r.orderHack || r.tip || '';
+          const cfg = tier === 'green'
+            ? { border: 'border-emerald-500/45', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', label: '🟢 GRÜN · Optimale Wahl', btn: 'bg-emerald-500/20 hover:bg-emerald-500/30 border-emerald-500/40 text-emerald-200', hackCls: 'text-emerald-200/95 bg-emerald-500/10 border-emerald-500/25' }
+            : tier === 'red'
+              ? { border: 'border-red-500/45', badge: 'bg-red-500/20 text-red-300 border-red-500/40', label: '🔴 ROT · Kalorienfalle / Achtung', btn: 'bg-slate-800 hover:bg-slate-700 border-red-500/35 text-red-200', hackCls: 'text-red-200/95 bg-red-500/10 border-red-500/25' }
+              : { border: 'border-amber-500/45', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40', label: '🟡 GELB · Smarter Kompromiss', btn: 'bg-amber-500/20 hover:bg-amber-500/30 border-amber-500/40 text-amber-200', hackCls: 'text-amber-200/95 bg-amber-500/10 border-amber-500/25' };
+
+          return `<div class="glass-card rounded-3xl p-4 space-y-2.5 border ${cfg.border}">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${cfg.badge}">${cfg.label}</span>
+              <span class="text-xs font-black text-white">${Math.round(numOr(r.kcal, 0))} kcal</span>
+            </div>
             <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.name)}</h3>
-            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Protein &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
-            <p class="text-xs text-amber-200/90"><i class="fa-solid fa-lightbulb mr-1"></i>${escapeHTML(r.tip || '')}</p>
-            <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 font-bold text-xs">
-              Gericht direkt ins Tagebuch buchen
+            <p class="text-[11px] font-semibold text-slate-300">P: <b class="text-emerald-300">${Math.round(numOr(r.prot, 0))}g</b> &bull; C: <b class="text-sky-300">${Math.round(numOr(r.carbs, 0))}g</b> &bull; F: <b class="text-amber-300">${Math.round(numOr(r.fat, 0))}g</b> &bull; Bal: ${Math.round(numOr(r.fiber, 0))}g</p>
+            ${hackText ? `<div class="rounded-xl border px-2.5 py-1.5 text-xs ${cfg.hackCls}"><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i><b>Order-Hack:</b> ${escapeHTML(hackText)}</div>` : ''}
+            <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl border font-bold text-xs transition ${cfg.btn}">
+              <i class="fa-solid fa-plus-circle mr-1"></i>Gericht mit 1 Klick ins Tagebuch buchen
             </button>
           </div>`;
-        })
-        .join('');
+        }).join('');
+      }
     }
   } catch (err) {
     showToast(err.message || 'Menü-Scan fehlgeschlagen.', 'error');
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-magnifying-glass-chart"></i><span>Beste Wahl finden</span>`;
+      btn.innerHTML = `<i class="fa-solid fa-magnifying-glass-chart"></i><span data-i18n="btnRunMenu">${state && state.lang === 'pl' ? 'Znajdź najlepszy wybór' : 'Beste Wahl finden'}</span>`;
     }
   }
+}
+
+function selectChefPortion(idx, mult) {
+  const recipe = lastChefRecipes[idx];
+  if (!recipe) return;
+  const m = Number(mult) || 1;
+  recipe._selectedMult = m;
+
+  const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  const sKcal = Math.round(numOr(recipe.kcal, 0) * m);
+  const sProt = Math.round(numOr(recipe.prot, 0) * m);
+  const sCarbs = Math.round(numOr(recipe.carbs, 0) * m);
+  const sFat = Math.round(numOr(recipe.fat, 0) * m);
+  const sGrams = Math.round(numOr(recipe.portionGrams, 350) * m);
+
+  setTxt(`chefMacro_${idx}`, `${sKcal} kcal • ${sProt}g Prot • ${sCarbs}g C • ${sFat}g F (~${sGrams}g)`);
+  setTxt(`chefBookLbl_${idx}`, `${m}× Portion (${sKcal} kcal) ins Tagebuch buchen`);
+
+  [0.5, 1, 1.5, 2].forEach(val => {
+    const b = document.getElementById(`chefPortionBtn_${idx}_${String(val).replace('.', '_')}`);
+    if (!b) return;
+    b.className = val === m
+      ? 'flex-1 py-1 rounded-lg bg-emerald-500/25 border border-emerald-400/50 text-[11px] font-extrabold text-emerald-200 transition'
+      : 'flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-300 transition';
+  });
+}
+
+function bookChefPortion(idx) {
+  const r = lastChefRecipes[idx];
+  if (!r || !r.name) return;
+  const m = numOr(r._selectedMult, 1);
+  addMealEntry({
+    name: m === 1 ? `${r.name} (1 Portion)` : `${r.name} (${m}× Portion)`,
+    kcal: Math.round(numOr(r.kcal, 0) * m),
+    prot: Math.round(numOr(r.prot, 0) * m),
+    carbs: Math.round(numOr(r.carbs, 0) * m),
+    fat: Math.round(numOr(r.fat, 0) * m),
+    fiber: Math.round(numOr(r.fiber, 0) * m),
+    sugar: Math.round(numOr(r.sugar, 0) * m),
+    source: 'KI-Chefkoch'
+  });
+  switchTab('diary');
 }
 
 async function runChefRecipeAI() {
@@ -2711,48 +2634,68 @@ async function runChefRecipeAI() {
   const container = document.getElementById('chefResultsContainer');
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Koche Rezept...</span>`;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Koche Rezept &amp; berechne Portionen...</span>`;
   }
 
   try {
-    const prompt = `Du bist ein Fitness-Chefkoch.
+    const langHint = state.lang === 'pl' ? 'Antworte komplett auf Polnisch.' : 'Antworte komplett auf Deutsch.';
+    const prompt = `Du bist ein Fitness-Chefkoch & Topf-Portions-Architekt. ${langHint}
 ${buildGlobalNutritionalRigorRules()}
 Modus: ${mode}. Wunsch: "${wish || 'Überrasche mich mit einem High-Protein Fitness-Gericht'}".
-Erstelle 2 detaillierte Fitness-Rezepte (1 Portion). Gib NUR JSON zurück:
-{
-  "recipes": [
-    { "name": "Gericht", "kcal": 550, "prot": 48, "carbs": 45, "fat": 16, "fiber": 7, "sugar": 6, "ingredients": ["180g Hähnchenbrust", "200g Brokkoli"], "steps": "Zubereitung..." }
-  ]
-}`;
+Erstelle 2 Rezepte. Gib für jedes Rezept die Gesamtzahl der Portionen im Topf/Auflauf ("servings", z.B. 2 oder 4), die Gesamtkalorien des ganzen Topfes ("totalPotKcal"), das Portionsgewicht ("portionGrams") UND die EXAKTEN MAKROS PRO 1 EINZELNER PORTION ("kcal", "prot", "carbs", "fat", "fiber", "sugar") an!
+Gib NUR JSON zurück:
+{"recipes":[{"name":"Gericht","servings":4,"portionGrams":380,"totalPotKcal":2120,"kcal":530,"prot":48,"carbs":44,"fat":16,"fiber":7,"sugar":6,"ingredients":["720g Hähnchenbrust (4 Portionen)","800g Brokkoli"],"steps":"Zubereitung..."}]}`;
 
     const data = await callGeminiRequest(prompt, null);
     const list = Array.isArray(data.recipes) ? data.recipes : [];
+    lastChefRecipes = list.map(r => Object.assign({}, r, { _selectedMult: 1 }));
 
     if (container) {
-      container.innerHTML = list
-        .map(r => {
-          const payload = encodeURIComponent(JSON.stringify(r));
+      if (lastChefRecipes.length === 0) {
+        container.innerHTML = `<div class="glass-card rounded-3xl p-4 text-xs text-slate-400 text-center">Keine Rezepte generiert. Bitte Wunsch konkretisieren.</div>`;
+        showToast('Keine Rezepte generiert.', 'warning');
+      } else {
+        container.innerHTML = lastChefRecipes.map((r, idx) => {
+          const servings = Math.max(1, Math.round(numOr(r.servings, 2)));
+          const portionG = Math.max(100, Math.round(numOr(r.portionGrams, 350)));
+          const singleKcal = Math.round(numOr(r.kcal, 0));
+          const potKcal = Math.round(numOr(r.totalPotKcal, singleKcal * servings));
           const ingHtml = Array.isArray(r.ingredients)
             ? r.ingredients.map(i => `<span class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300">${escapeHTML(i)}</span>`).join(' ')
             : '';
-          return `<div class="glass-card rounded-3xl p-4 space-y-2.5 border border-emerald-500/30">
+
+          return `<div class="glass-card rounded-3xl p-4 space-y-2.5 border border-emerald-500/35">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/35">
+                🍲 1 Portion (von ${servings} Portionen · Topf gesamt: ${potKcal} kcal)
+              </span>
+            </div>
             <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.name)}</h3>
-            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Protein &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
+            <p id="chefMacro_${idx}" class="text-xs font-bold text-emerald-400">${singleKcal} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Prot &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F (~${portionG}g)</p>
             <div class="flex flex-wrap gap-1">${ingHtml}</div>
             <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(r.steps || '')}</p>
-            <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 font-bold text-xs">
-              Ins Tagebuch übernehmen
+            <div class="bg-slate-950/70 rounded-2xl p-2 border border-slate-800 space-y-1.5">
+              <span class="text-[10px] font-bold text-slate-400 block">Portions-Splitter (wähle deine gegessene Menge):</span>
+              <div class="flex items-center gap-1.5">
+                <button id="chefPortionBtn_${idx}_0_5" type="button" onclick="selectChefPortion(${idx}, 0.5)" class="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-300 transition">0,5×</button>
+                <button id="chefPortionBtn_${idx}_1" type="button" onclick="selectChefPortion(${idx}, 1)" class="flex-1 py-1 rounded-lg bg-emerald-500/25 border border-emerald-400/50 text-[11px] font-extrabold text-emerald-200 transition">1×</button>
+                <button id="chefPortionBtn_${idx}_1_5" type="button" onclick="selectChefPortion(${idx}, 1.5)" class="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-300 transition">1,5×</button>
+                <button id="chefPortionBtn_${idx}_2" type="button" onclick="selectChefPortion(${idx}, 2)" class="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-300 transition">2×</button>
+              </div>
+            </div>
+            <button type="button" onclick="bookChefPortion(${idx})" class="w-full py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 font-bold text-xs transition">
+              <i class="fa-solid fa-plus-circle mr-1"></i><span id="chefBookLbl_${idx}">1× Portion (${singleKcal} kcal) ins Tagebuch buchen</span>
             </button>
           </div>`;
-        })
-        .join('');
+        }).join('');
+      }
     }
   } catch (err) {
     showToast(err.message || 'Rezept-Generierung fehlgeschlagen.', 'error');
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-hat-chef"></i><span>Fitness-Rezept generieren</span>`;
+      btn.innerHTML = `<i class="fa-solid fa-hat-chef"></i><span data-i18n="btnRunChef">${state && state.lang === 'pl' ? 'Generuj przepis fitness' : 'Fitness-Rezept generieren'}</span>`;
     }
   }
 }
