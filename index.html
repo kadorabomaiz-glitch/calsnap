@@ -48,7 +48,7 @@
             <h1 class="text-sm sm:text-base font-extrabold tracking-tight bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent">CalSnap AI</h1>
             <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">v4.6.2</span>
           </div>
-          <p id="headerSubTitle" data-i18n="headerSub" class="text-[11px] text-slate-400 leading-none">Enterprise Vision & Metabolic Coach</p>
+          <p id="headerSubTitle" data-i18n="headerSub" class="text-[11px] text-slate-400 leading-none">Enterprise Vision &amp; Metabolic Coach</p>
         </div>
       </div>
 
@@ -93,7 +93,7 @@
           </div>
         </div>
 
-        <!-- Haupt-Fortschrittsbalken (4-Zonen-Farbpsychologie) -->
+        <!-- Haupt-Fortschrittsbalken (Ruhige 4-Zonen-Farbpsychologie — null Alarm-Rot) -->
         <div class="w-full h-3 bg-slate-800/90 rounded-full overflow-hidden p-0.5 border border-slate-700/60">
           <div id="kcalProgress" class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" style="width: 0%"></div>
         </div>
@@ -177,7 +177,7 @@
             </div>
             <div>
               <h2 data-i18n="coachTitle" class="text-xs sm:text-sm font-extrabold text-white">Adaptiver Metabolic Coach</h2>
-              <p data-i18n="coachSub" class="text-[11px] text-slate-400">7-Tage-EWMA-Trend & TDEE-Auto-Kalibrierung</p>
+              <p data-i18n="coachSub" class="text-[11px] text-slate-400">7-Tage-EWMA-Trend &amp; TDEE-Auto-Kalibrierung</p>
             </div>
           </div>
           <span id="coachStatusBadge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Aktiv</span>
@@ -217,7 +217,7 @@
         <div id="coachCheatBanner" class="hidden rounded-2xl bg-teal-500/15 border border-teal-500/30 p-3 text-xs text-teal-100 space-y-2"></div>
       </div>
 
-      <!-- MAHLZEITEN-SCANNER & OFFLINE-LEXIKON INPUT -->
+      <!-- MAHLZEITEN-SCANNER, GEWOHNHEITEN / ZULETZT GESCANNT & OFFLINE-LEXIKON -->
       <div class="glass-card rounded-3xl p-4 shadow-xl space-y-3">
         <div class="flex items-center justify-between">
           <h2 data-i18n="scannerTitle" class="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2">
@@ -227,9 +227,15 @@
           <span class="text-[10px] font-semibold text-teal-300 bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/20">0.0s Lexikon + 3D Vision</span>
         </div>
 
-        <!-- Smart Habit Chips -->
-        <div id="smartHabitSection" class="hidden space-y-1.5">
-          <span data-i18n="smartHabitTitle" class="text-[10px] font-bold uppercase tracking-wider text-teal-300 block">Smart Habits (1-Klick Gewohnheiten)</span>
+        <!-- Dynamische Gewohnheiten & Zuletzt gescannt (1-Klick Re-Log) -->
+        <div id="smartHabitSection" class="hidden rounded-2xl bg-slate-900/70 border border-teal-500/25 p-2.5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span data-i18n="smartHabitTitle" class="text-[10px] font-bold uppercase tracking-wider text-teal-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+              <span>Gewohnheiten &amp; Zuletzt gescannt</span>
+            </span>
+            <span class="text-[9px] text-slate-400">1-Klick Buchen</span>
+          </div>
           <div id="smartHabitChips" class="flex flex-wrap gap-1.5"></div>
         </div>
 
@@ -263,7 +269,7 @@
 
         <!-- Texteingabe -->
         <div class="relative">
-          <textarea id="mealTextInput" rows="2" placeholder="z.B. 250g Magerquark mit 100g Beeren oder 2 Latte Macchiato à 400ml..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl pl-3.5 pr-9 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 resize-none"></textarea>
+          <textarea id="mealTextInput" rows="2" placeholder="z.B. 250g Magerquark mit 100g Beeren oder 2 Latte Macchiato à 400ml mit je 2 Würfeln Zucker..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl pl-3.5 pr-9 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 resize-none"></textarea>
           <button type="button" onclick="clearMealText()" class="absolute right-2.5 top-2.5 w-6 h-6 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs flex items-center justify-center" title="Text löschen">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -323,6 +329,9 @@
               <span id="resSugar" class="text-xs font-bold text-indigo-300">0g</span>
             </div>
           </div>
+
+          <!-- Zucker-Aufschlüsselung (Intrinsische Laktose/Frucht vs. zugesetzter Zucker) -->
+          <div id="resSugarBreakdown" class="hidden rounded-xl bg-indigo-500/10 border border-indigo-400/25 px-2.5 py-1.5 text-[11px] text-indigo-200"></div>
 
           <!-- Komponenten-Aufschlüsselung -->
           <div id="resComponentsList" class="space-y-1 text-xs text-slate-300 max-h-40 overflow-y-auto"></div>
@@ -783,8 +792,8 @@
   </nav>
   <script>
 // ============================================================================
-// TEIL 2.1 — CORE STATE, 6-LAYER ADMIN VAULT, WEBKIT GPU PIPELINE &
-// FREE-TIER ROUTING (14s VISION WINDOW + LIVE MODEL DISCOVERY)
+// TEIL 2.1 — CORE STATE, 6-LAYER ADMIN VAULT (AQ./AIza), WEBKIT GPU PIPELINE
+// & FAST FREE-TIER DIRECT ROUTING (14s VISION WINDOW + LIVE MODEL DISCOVERY)
 // ============================================================================
 
 const STORAGE_KEY_V2 = 'calsnap_ai_state_v2';
@@ -797,8 +806,10 @@ const GUEST_LOCK_STORAGE_KEY = 'calsnap_guest_lock_v41';
 const GUEST_LOCK_COOKIE_NAME = 'calsnap_gl';
 const GUEST_REGEX = /^FIT-[A-Z0-9ÄÖÜĄĘĆŁŃÓŚŹŻ]{1,12}-\d{2,6}$/i;
 
-const FAST_MODEL_KEY = 'calsnap_fast_model_v466';
+const FAST_MODEL_KEY = 'calsnap_fast_model_v468';
 const STALE_FAST_MODEL_KEYS = [
+  'calsnap_fast_model_v467',
+  'calsnap_fast_model_v466',
   'calsnap_fast_model_v465',
   'calsnap_fast_model_v464',
   'calsnap_fast_model_v463',
@@ -808,7 +819,7 @@ const STALE_FAST_MODEL_KEYS = [
   'calsnap_fast_model'
 ];
 
-// Aktive Free-Tier-Modelle (abgeschaltetes gemini-1.5-flash komplett entfernt)
+// Aktive Free-Tier-Modelle (abgeschaltetes gemini-1.5-flash komplett ausgeschlossen)
 const FREE_TIER_DIRECT_MODELS = [
   'gemini-2.5-flash-lite',
   'gemini-2.5-flash',
@@ -910,6 +921,7 @@ function createDefaultState() {
     },
     days: {},
     weightLog: {},
+    recentScans: [],
     coach: {
       lastCalibratedWeight: 80,
       lastRecalibrationDate: null,
@@ -1157,6 +1169,7 @@ function loadState() {
     state.coach = Object.assign({}, defaults.coach, (parsed && parsed.coach) || {});
     state.days = (parsed && parsed.days && typeof parsed.days === 'object') ? parsed.days : {};
     state.weightLog = (parsed && parsed.weightLog && typeof parsed.weightLog === 'object') ? parsed.weightLog : {};
+    state.recentScans = Array.isArray(parsed && parsed.recentScans) ? parsed.recentScans : [];
     state.savedRecipes = Array.isArray(parsed && parsed.savedRecipes) ? parsed.savedRecipes : [];
 
     syncGoalsBridge(state);
@@ -1300,6 +1313,7 @@ function renderImageToJpegBase64(img, maxDim = 820, quality = 0.75, objectUrlToR
     canvas.height = targetH;
     ctx = canvas.getContext('2d', { alpha: false });
 
+    // 5-Stage WebKit Metal-GPU Lifecycle
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, targetW, targetH);
     ctx.drawImage(img, 0, 0, targetW, targetH);
@@ -1473,7 +1487,6 @@ async function buildLiveResilientQueue(apiKey = '') {
     }
   }
 
-  // Live-Discovery der für diesen Key freigeschalteten Modelle als Sicherheitsnetz
   const cleanKey = sanitizeApiKey(apiKey || (state && state.geminiApiKey) || recoverRedundantApiKey());
   if (isValidGoogleApiKey(cleanKey)) {
     if (Array.isArray(liveDiscoveredModelsCache) && liveDiscoveredModelsCache.length > 0) {
@@ -1823,9 +1836,9 @@ function extractJSON(raw) {
   const repaired = repairTruncatedJSON(cleaned.slice(startIdx));
   return JSON.parse(repaired);
 }
-// ============================================================================
-// TEIL 2.2 — 49-ENTRY 100g DE/PL FOOD LEXICON (ZERO/LIGHT-GUARDED),
-// GLOBAL NUTRITIONAL RIGOR + LABEL OCR GROUND TRUTH, I18N & METABOLIC COACH
+    // ============================================================================
+// TEIL 2.2 — 49-ENTRY DE/PL FOOD LEXICON (ZERO/LIGHT-GUARDED), GLOBAL RIGOR,
+// IMMUTABLE LABEL-OCR RECONCILIATION & ALL 4 AI VISION/TEXT SCANNERS
 // ============================================================================
 
 const FOOD_LEXICON = [
@@ -1837,7 +1850,7 @@ const FOOD_LEXICON = [
   { id: 'milk_15', name: 'Milch 1,5% Fett', unitG: 200, kcal100: 47, prot100: 3.4, carbs100: 4.8, fat100: 1.5, fiber100: 0, sugar100: 4.8, naturalMatrix: true, kw: ['milch', 'fettarme milch', 'kuhmilch', 'mleko'] },
   { id: 'latte_macchiato', name: 'Latte Macchiato (ungesüßt)', unitG: 300, kcal100: 36, prot100: 2.5, carbs100: 3.6, fat100: 1.2, fiber100: 0, sugar100: 3.6, naturalMatrix: true, kw: ['latte macchiato', 'cappuccino', 'milchkaffee', 'kawa z mlekiem', 'latte'] },
   { id: 'black_coffee', name: 'Kaffee schwarz / Espresso', unitG: 250, kcal100: 2, prot100: 0.2, carbs100: 0.1, fat100: 0, fiber100: 0, sugar100: 0, kw: ['kaffee', 'kaffee schwarz', 'espresso', 'americano', 'kawa', 'czarna kawa'] },
-  { id: 'sugar_cube', name: 'Zucker / Würfelzucker', unitG: 3.5, kcal100: 400, prot100: 0, carbs100: 100.0, fat100: 0, fiber100: 0, sugar100: 100.0, kw: ['zucker', 'wurfel zucker', 'wurfeln zucker', 'wurfelzucker', 'cukier', 'kostka cukru', 'kostki cukru'] },
+  { id: 'sugar_cube', name: 'Zucker / Würfelzucker', unitG: 3.5, kcal100: 400, prot100: 0, carbs100: 100.0, fat100: 0, fiber100: 0, sugar100: 100.0, isAddedSugar: true, kw: ['zucker', 'wurfel zucker', 'wurfeln zucker', 'wurfelzucker', 'cukier', 'kostka cukru', 'kostki cukru'] },
   { id: 'chicken_breast', name: 'Hähnchenbrustfilet (gegart, mager)', unitG: 180, kcal100: 115, prot100: 23.5, carbs100: 0.5, fat100: 2.0, fiber100: 0, sugar100: 0, isLeanProtein: true, kw: ['hahnchenbrust', 'hahnchen', 'putenbrust', 'pute', 'hahnchenfilet', 'piers z kurczaka', 'kurczak', 'indyk'] },
   { id: 'beef_lean', name: 'Rinderhack mager / Tatar / Rindersteak', unitG: 180, kcal100: 132, prot100: 21.5, carbs100: 0, fat100: 4.8, fiber100: 0, sugar100: 0, kw: ['rinderhack mager', 'tatar', 'rinderfilet', 'rindersteak', 'rindfleisch', 'wolowina', 'tatar wolowy'] },
   { id: 'salmon_fillet', name: 'Lachsfilet (gegart)', unitG: 160, kcal100: 206, prot100: 20.4, carbs100: 0, fat100: 13.6, fiber100: 0, sugar100: 0, kw: ['lachs', 'lachsfilet', 'losos'] },
@@ -1865,11 +1878,11 @@ const FOOD_LEXICON = [
   { id: 'butter', name: 'Butter', unitG: 10, kcal100: 741, prot100: 0.7, carbs100: 0.6, fat100: 82.5, fiber100: 0, sugar100: 0.6, kw: ['butter', 'maslo'] },
   { id: 'nuts_almonds', name: 'Mandeln / Walnüsse / Nüsse', unitG: 30, kcal100: 595, prot100: 20.5, carbs100: 6.5, fat100: 52.5, fiber100: 10.5, sugar100: 4.0, kw: ['mandeln', 'nusse', 'walnusse', 'cashews', 'orzechy', 'migdaly'] },
   { id: 'peanut_butter', name: 'Erdnussbutter / Nussmus', unitG: 20, kcal100: 588, prot100: 25.0, carbs100: 14.0, fat100: 50.0, fiber100: 6.0, sugar100: 6.0, kw: ['erdnussbutter', 'erdnussmus', 'mandelmus', 'maslo orzechowe'] },
-  { id: 'honey_jam', name: 'Honig / Marmelade', unitG: 20, kcal100: 285, prot100: 0.3, carbs100: 71.0, fat100: 0.1, fiber100: 0.4, sugar100: 68.0, kw: ['honig', 'marmelade', 'konfiture', 'miod', 'dzem'] },
+  { id: 'honey_jam', name: 'Honig / Marmelade', unitG: 20, kcal100: 285, prot100: 0.3, carbs100: 71.0, fat100: 0.1, fiber100: 0.4, sugar100: 68.0, isAddedSugar: true, kw: ['honig', 'marmelade', 'konfiture', 'miod', 'dzem'] },
   { id: 'cola_zero', name: 'Zero / Light Softdrink (zuckerfrei)', unitG: 330, kcal100: 1, prot100: 0, carbs100: 0, fat100: 0, fiber100: 0, sugar100: 0, isZeroDrink: true, kw: ['cola zero', 'coca cola zero', 'coca-cola zero', 'fanta zero', 'fanta light', 'sprite zero', 'sprite light', 'spezi zero', 'mezzo mix zero', 'pepsi max', 'pepsi zero', 'cola light', 'zero cola', 'limonade zero', 'rheinfels lemon', 'mineralwasser lemon'] },
-  { id: 'cola_regular', name: 'Coca-Cola / Fanta / Spezi / Limonade (mit Zucker)', unitG: 330, kcal100: 42, prot100: 0, carbs100: 10.6, fat100: 0, fiber100: 0, sugar100: 10.6, isSugaryDrink: true, kw: ['coca cola', 'coca-cola', 'cola', 'spezi', 'fanta', 'sprite', 'limonade'] },
+  { id: 'cola_regular', name: 'Coca-Cola / Fanta / Spezi / Limonade (mit Zucker)', unitG: 330, kcal100: 42, prot100: 0, carbs100: 10.6, fat100: 0, fiber100: 0, sugar100: 10.6, isSugaryDrink: true, isAddedSugar: true, kw: ['coca cola', 'coca-cola', 'cola', 'spezi', 'fanta', 'sprite', 'limonade'] },
   { id: 'potato_chips', name: 'Kartoffelchips / Chipsy', unitG: 50, kcal100: 536, prot100: 6.2, carbs100: 51.0, fat100: 33.5, fiber100: 4.2, sugar100: 0.8, kw: ['kartoffelchips', 'chips', 'chipsy'] },
-  { id: 'dark_chocolate', name: 'Schokolade / Vollmilchschokolade', unitG: 30, kcal100: 535, prot100: 7.2, carbs100: 56.5, fat100: 31.0, fiber100: 3.0, sugar100: 51.0, kw: ['schokolade', 'czekolada'] },
+  { id: 'dark_chocolate', name: 'Schokolade / Vollmilchschokolade', unitG: 30, kcal100: 535, prot100: 7.2, carbs100: 56.5, fat100: 31.0, fiber100: 3.0, sugar100: 51.0, isAddedSugar: true, kw: ['schokolade', 'czekolada'] },
   { id: 'lasagne_bolognese', name: 'Lasagne Bolognese', unitG: 350, kcal100: 158, prot100: 8.8, carbs100: 14.2, fat100: 7.2, fiber100: 1.2, sugar100: 2.5, kw: ['lasagne', 'lasagne bolognese', 'lazania'] },
   { id: 'pierogi_ruskie', name: 'Pierogi Ruskie / Teigtaschen', unitG: 280, kcal100: 192, prot100: 6.5, carbs100: 29.5, fat100: 5.2, fiber100: 1.8, sugar100: 1.5, kw: ['pierogi', 'pierogi ruskie', 'pierogi z miesem', 'maultaschen'] },
   { id: 'bigos_stew', name: 'Bigos (Polnischer Krauteintopf)', unitG: 320, kcal100: 112, prot100: 7.8, carbs100: 5.4, fat100: 6.5, fiber100: 2.6, sugar100: 2.2, kw: ['bigos', 'krauteintopf', 'sauerkrauteintopf'] },
@@ -1885,21 +1898,871 @@ function buildGlobalNutritionalRigorRules() {
 GLOBAL NUTRITIONAL RIGOR LAWS (MANDATORY SCIENTIFIC PRECISION):
 1. LAW 1 — ADD-ON vs. OVERRIDE DISCIPLINE:
    - If the user adds an invisible ingredient in text (e.g. "Mit 2 Würfel Zucker", "mit 1 EL Öl"), KEEP the visible dish/drink estimation 100% UNCHANGED and simply ADD the text ingredient on top! Never shrink the visible milk in a milky coffee/cappuccino just because the user added "Mit 2 Würfel Zucker".
-   - Only replace/override a visible item if the text explicitly corrects what is visible (e.g. "Hafermilch statt Kuhmilch", "das ist Skyr"). Never double-count the same item.
+   - Only replace/override a visible item if the text explicitly corrects what is visible (e.g. "Hafermilch statt Kuhmilch"). Never double-count the same item.
 2. LAW 2 — LEAN PROTEIN OVERRIDE & 5g OIL CAP:
    - Unbreaded grilled/steamed lean meats (chicken breast, turkey breast, tuna, lean quark/skyr) MUST stay < 2.8g fat per 100g. Never invent invisible cooking fat > 5g (~45 kcal) unless deep-fried, breaded, or swimming in visible oil.
-3. LAW 3 — VISUAL SCALE & BEVERAGE FOAM ANCHORING:
+3. LAW 3 — VISUAL SCALE, BEVERAGE FOAM & SUGAR SEPARATION:
    - Anchor portion weights against standard dinner plates (26 cm outer rim, ~19 cm inner well), cutlery (19 cm), bread rolls (65–70 g), standard DACH/PL retail packs (150 g yogurt, 250 g quark, 500 g skyr, 330 ml can, 500 ml bottle).
-   - A full mug/cup (250–300 ml) showing white milk foam/crema on top is a Milchkaffee / Cappuccino / Latte (~150–200 ml milk + ~50–80 ml espresso/coffee), NOT black coffee with 50 ml milk. 1 sugar cube = 3.5–4 g (~14–16 kcal, 100% carbs/sugar).
+   - A full mug/cup (250–300 ml) showing white milk foam/crema is a Milchkaffee / Cappuccino / Latte (~150–200 ml milk + ~50–80 ml espresso/coffee), NOT black coffee with 50 ml milk.
+   - Sugar Cube Math: 1 standard sugar cube = 3.5g (2 cubes = 7g = 28 kcal, 7g added sugar). Keep added sugar (sugar cubes/syrup) cleanly separated as its own component from intrinsic milk lactose in Latte Macchiato / Milchkaffee.
 4. LAW 4 — CONTEXTUAL PREPARATION RIGOR:
    - Distinguish strictly between steamed/boiled/grilled vs. breaded/pan-fried/creamy sauce. Ensure sugar <= carbs.
 5. LAW 5 — UNBREAKABLE NUTRITION LABEL OCR GROUND TRUTH:
    - Whenever a printed nutrition table ("Nährwerte" / "Wartości odżywcze") is visible in the photo, you MUST set "isNutritionLabel": true.
    - STRICT kJ vs. kcal SEPARATION: ALWAYS read ONLY the "kcal" number! STRICTLY IGNORE "kJ" (e.g. "571 kJ / 136 kcal" -> 136 kcal; "2,9 kJ / 0,7 kcal" -> 0.7 kcal; "29 kJ / 7 kcal" -> 7 kcal).
-   - STRICT PER-100g/100ml vs. TOTAL VOLUME: Read exact printed values per 100g/100ml. If total package weight/volume is printed or clearly known (e.g. "150 g", "330 ml", "500 ml"), multiply by (total / 100) and state the exact grams/ml. If total volume is NOT visible, output for the printed reference amount (100 ml / 100 g) and state "(100ml)" or "(100g)" in the name.
+   - STRICT PER-100g/100ml vs. TOTAL VOLUME: Read exact printed values per 100g/100ml. If total package weight/volume is printed or clearly known (e.g. "150 g", "330 ml", "500 ml"), multiply by (total / 100) and state the exact grams/ml. If total volume is NOT visible, output for the printed reference amount (100 ml / 100 g) and state "(100ml)" or "(100g)".
    - ZERO / LIGHT DRINKS: Printed values on Zero/Light products (e.g. Fanta Zero: 7 kcal, 0g protein, 0g carbs, 0g sugar, 0g fat — calories come from organic acids like citric acid) are 100% IMMUTABLE GROUND TRUTH. NEVER invent sugar/carbs and NEVER force 4P+4C+9F onto Zero/Light labels!
 `;
 }
+
+const WORD_NUMBERS = {
+  ein: 1, eine: 1, einer: 1, einem: 1, einen: 1,
+  zwei: 2, drei: 3, vier: 4, funf: 5, fuenf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9, zehn: 10,
+  halbe: 0.5, halber: 0.5, halbes: 0.5, anderthalb: 1.5,
+  jeden: 1, jedna: 1, jedno: 1, dwa: 2, dwie: 2, trzy: 3, cztery: 4, piec: 5, szesc: 6,
+  pol: 0.5, poltora: 1.5
+};
+
+const ZERO_LIGHT_REGEX = /\b(?:zero|light|lite|zuckerfrei|sugar\s*free|bez\s*cukru|ohne\s*zucker|pepsi\s*max|0\s*kcal|0\s*g\s*zucker|mineralwasser\s*lemon|rheinfels\s*lemon)\b/i;
+
+function foldDiacritics(str) {
+  if (!str) return '';
+  return String(str)
+    .toLowerCase()
+    .replace(/ä/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/ü/g, 'u')
+    .replace(/ß/g, 'ss')
+    .replace(/ą/g, 'a')
+    .replace(/ć/g, 'c')
+    .replace(/ę/g, 'e')
+    .replace(/ł/g, 'l')
+    .replace(/ń/g, 'n')
+    .replace(/ó/g, 'o')
+    .replace(/ś/g, 's')
+    .replace(/ź/g, 'z')
+    .replace(/ż/g, 'z');
+}
+
+function normalizeWordNumbers(text) {
+  let out = foldDiacritics(text);
+  Object.keys(WORD_NUMBERS).forEach(word => {
+    const re = new RegExp(`(^|\\s)${word}(?=\\s|$)`, 'g');
+    out = out.replace(re, `$1${WORD_NUMBERS[word]}`);
+  });
+  return out;
+}
+
+function escapeRegExp(str) {
+  return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function matchKeywordWithBoundary(text, kw) {
+  const cleanKw = foldDiacritics(kw).trim();
+  if (!cleanKw) return false;
+  const pattern = `(?:^|[^a-z0-9])${escapeRegExp(cleanKw)}(?:$|[^a-z0-9])`;
+  return new RegExp(pattern, 'i').test(text);
+}
+
+function stripExclusions(text) {
+  return String(text || '')
+    .replace(/\b(?:ohne|bez)\s+(?!zucker\b|cukru\b)[a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ0-9-]+/gi, ' ')
+    .trim();
+}
+
+function resolveSingleSegment(segText, parentMultiplier = 1) {
+  const norm = normalizeWordNumbers(stripExclusions(segText)).trim();
+  if (!norm) return null;
+
+  const isZeroHint = ZERO_LIGHT_REGEX.test(norm);
+
+  let bestEntry = null;
+  let bestKwLen = 0;
+
+  for (let i = 0; i < FOOD_LEXICON.length; i++) {
+    const entry = FOOD_LEXICON[i];
+    if (isZeroHint && entry.isSugaryDrink) continue;
+
+    for (let k = 0; k < entry.kw.length; k++) {
+      const kw = entry.kw[k];
+      if (matchKeywordWithBoundary(norm, kw) && kw.length > bestKwLen) {
+        bestEntry = entry;
+        bestKwLen = kw.length;
+      }
+    }
+  }
+
+  if (!bestEntry && isZeroHint && /\b(?:fanta|cola|sprite|spezi|limo|limonade|eistee|energy|red bull|monster|schorle|lemon)\b/i.test(norm)) {
+    bestEntry = FOOD_LEXICON.find(e => e.id === 'cola_zero') || null;
+  }
+
+  if (!bestEntry) return null;
+
+  const qtyText = norm.replace(/\d+(?:[.,]\d+)?\s*%/g, ' ').replace(/\s+/g, ' ').trim();
+  const isEachModifier = /\b(?:je|jeweils|po)\b/.test(qtyText);
+  const effectiveParentMult = isEachModifier && parentMultiplier > 1 ? parentMultiplier : 1;
+
+  let grams = bestEntry.unitG;
+  let detectedCount = 1;
+
+  const multUnitMatch = qtyText.match(/(\d+(?:[.,]\d+)?)\s*(?:x|mal)\s*(\d+(?:[.,]\d+)?)\s*(g|gramm|gram|ml|l|liter)\b/);
+  const gMatch = qtyText.match(/(\d+(?:[.,]\d+)?)\s*(?:g|gramm|gram|ml)\b/);
+  const lMatch = qtyText.match(/(\d+(?:[.,]\d+)?)\s*(?:l|liter)\b/);
+  const elMatch = qtyText.match(/(\d+(?:[.,]\d+)?)?\s*(?:el|essloffel|lyzka|lyzki)\b/);
+  const tlMatch = qtyText.match(/(\d+(?:[.,]\d+)?)?\s*(?:tl|teeloffel|lyzeczka|lyzeczki)\b/);
+  const jeCountMatch = qtyText.match(/\b(?:je|jeweils|po)\s*(\d+(?:[.,]\d+)?)/);
+  const countPrefixMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|mal|stuck|scheibe|scheiben|tasse|tassen|becher|glas|flasche|flaschen|dose|dosen|portion|portionen|wurfel|wurfeln|szt|sztuk|kromka|kromki)?\b/);
+
+  if (multUnitMatch) {
+    detectedCount = parseFloat(multUnitMatch[1].replace(',', '.'));
+    const unitVal = parseFloat(multUnitMatch[2].replace(',', '.'));
+    const isLiter = /^l/.test(multUnitMatch[3]);
+    grams = (isLiter ? unitVal * 1000 : unitVal) * detectedCount * effectiveParentMult;
+  } else if (gMatch) {
+    const singleG = parseFloat(gMatch[1].replace(',', '.'));
+    const leadMultMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s+(?!g\b|gramm\b|ml\b)/);
+    if (leadMultMatch && /\b(?:a|à|je|x|mal)\b/.test(qtyText)) {
+      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
+    } else if (leadMultMatch && parseFloat(leadMultMatch[1].replace(',', '.')) <= 20 && parseFloat(leadMultMatch[1].replace(',', '.')) !== singleG) {
+      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
+    }
+    grams = singleG * detectedCount * effectiveParentMult;
+  } else if (lMatch) {
+    const singleL = parseFloat(lMatch[1].replace(',', '.'));
+    const leadMultMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s+(?!l\b|liter\b)/);
+    if (leadMultMatch && /\b(?:a|à|je|x|mal)\b/.test(qtyText)) {
+      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
+    }
+    grams = singleL * 1000 * detectedCount * effectiveParentMult;
+  } else if (elMatch) {
+    const cnt = elMatch[1] ? parseFloat(elMatch[1].replace(',', '.')) : 1;
+    grams = cnt * 15 * effectiveParentMult;
+  } else if (tlMatch) {
+    const cnt = tlMatch[1] ? parseFloat(tlMatch[1].replace(',', '.')) : 1;
+    grams = cnt * 5 * effectiveParentMult;
+  } else if (jeCountMatch) {
+    const cnt = parseFloat(jeCountMatch[1].replace(',', '.'));
+    detectedCount = cnt * effectiveParentMult;
+    grams = detectedCount * bestEntry.unitG;
+  } else if (countPrefixMatch) {
+    const cnt = parseFloat(countPrefixMatch[1].replace(',', '.'));
+    if (cnt > 0 && cnt <= 30) {
+      detectedCount = cnt;
+      grams = cnt * bestEntry.unitG * effectiveParentMult;
+    }
+  }
+
+  if (/\b(?:gross|grosse|grosser|grosses|duzy|duza|duze)\b/.test(qtyText) && !gMatch && !multUnitMatch) {
+    grams *= 1.4;
+  } else if (/\b(?:klein|kleine|kleiner|kleines|maly|mala|male)\b/.test(qtyText) && !gMatch && !multUnitMatch) {
+    grams *= 0.7;
+  }
+
+  grams = Math.max(1, Math.round(grams));
+  const factor = grams / 100;
+
+  let kcal = Math.round(bestEntry.kcal100 * factor);
+  const explicitKcalMatch = qtyText.match(/(\d+)\s*kcal\b/);
+  if (explicitKcalMatch) {
+    kcal = parseInt(explicitKcalMatch[1], 10);
+  }
+
+  const totalSugar = Math.round(bestEntry.sugar100 * factor * 10) / 10;
+  const addedSugar = bestEntry.isAddedSugar ? totalSugar : 0;
+  const naturalSugar = bestEntry.naturalMatrix ? totalSugar : 0;
+
+  const isLiquid = bestEntry.isZeroDrink || bestEntry.isSugaryDrink || bestEntry.id === 'milk_15' || bestEntry.id === 'latte_macchiato' || bestEntry.id === 'black_coffee';
+  const unitLabel = isLiquid ? 'ml' : 'g';
+
+  return {
+    name: `${bestEntry.name} (${grams}${unitLabel})`,
+    grams,
+    detectedCount,
+    kcal,
+    prot: Math.round(bestEntry.prot100 * factor * 10) / 10,
+    carbs: Math.round(bestEntry.carbs100 * factor * 10) / 10,
+    fat: Math.round(bestEntry.fat100 * factor * 10) / 10,
+    fiber: Math.round(bestEntry.fiber100 * factor * 10) / 10,
+    sugar: totalSugar,
+    addedSugar,
+    naturalSugar
+  };
+}
+
+function resolveFromLexicon(rawInput) {
+  if (!rawInput || typeof rawInput !== 'string') return null;
+  const cleaned = stripExclusions(rawInput).trim();
+  if (!cleaned) return null;
+
+  const primaryParts = cleaned
+    .split(/(?:,|\+|\bund\b|\boraz\b|\bdazu\b)/i)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const finalSegments = [];
+  primaryParts.forEach(part => {
+    const subParts = part.split(/\b(?:mit|auf|z|ze)\b/i).map(s => s.trim()).filter(Boolean);
+    if (subParts.length > 1) {
+      const subResolved = subParts.map(sp => resolveSingleSegment(sp, 1));
+      if (subResolved.every(Boolean)) {
+        subParts.forEach(sp => finalSegments.push(sp));
+        return;
+      }
+    }
+    finalSegments.push(part);
+  });
+
+  if (finalSegments.length === 0) return null;
+
+  const components = [];
+  let activeParentCount = 1;
+
+  for (let i = 0; i < finalSegments.length; i++) {
+    const comp = resolveSingleSegment(finalSegments[i], activeParentCount);
+    if (!comp) return null;
+    if (i === 0 && comp.detectedCount > 1) {
+      activeParentCount = comp.detectedCount;
+    }
+    components.push(comp);
+  }
+
+  const totals = components.reduce(
+    (acc, c) => {
+      acc.kcal += c.kcal;
+      acc.prot += c.prot;
+      acc.carbs += c.carbs;
+      acc.fat += c.fat;
+      acc.fiber += c.fiber;
+      acc.sugar += c.sugar;
+      acc.addedSugar += numOr(c.addedSugar, 0);
+      acc.naturalSugar += numOr(c.naturalSugar, 0);
+      return acc;
+    },
+    { kcal: 0, prot: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, addedSugar: 0, naturalSugar: 0 }
+  );
+
+  return {
+    mealName: components.map(c => c.name).join(' + '),
+    kcal: Math.round(totals.kcal),
+    prot: Math.round(totals.prot),
+    carbs: Math.round(totals.carbs),
+    fat: Math.round(totals.fat),
+    fiber: Math.round(totals.fiber),
+    sugar: Math.round(totals.sugar),
+    addedSugar: Math.round(totals.addedSugar),
+    naturalSugar: Math.round(totals.naturalSugar),
+    components,
+    source: 'Offline-Lexikon (0.0s)'
+  };
+}
+
+function findLexiconReference(componentName) {
+  const norm = foldDiacritics(componentName || '');
+  if (!norm) return null;
+  const isZeroHint = ZERO_LIGHT_REGEX.test(norm);
+
+  let best = null;
+  let bestLen = 0;
+  for (let i = 0; i < FOOD_LEXICON.length; i++) {
+    const entry = FOOD_LEXICON[i];
+    if (isZeroHint && entry.isSugaryDrink) continue;
+    for (let k = 0; k < entry.kw.length; k++) {
+      const kw = entry.kw[k];
+      if (matchKeywordWithBoundary(norm, kw) && kw.length > bestLen) {
+        best = entry;
+        bestLen = kw.length;
+      }
+    }
+  }
+  return best;
+}
+
+function reconcileVisionComponents(rawVisionResult) {
+  if (!rawVisionResult || typeof rawVisionResult !== 'object') {
+    throw new Error('Ungültiges Analyse-Objekt.');
+  }
+
+  const mealTitle = String(rawVisionResult.mealName || rawVisionResult.name || 'Analysierte Mahlzeit').trim();
+  const isLabel = Boolean(rawVisionResult.isNutritionLabel || rawVisionResult.isLabel);
+  const mealIsZeroLight = ZERO_LIGHT_REGEX.test(mealTitle);
+  const rawComps = Array.isArray(rawVisionResult.components) ? rawVisionResult.components : [];
+
+  if (rawComps.length === 0) {
+    const p = Math.max(0, numOr(rawVisionResult.prot ?? rawVisionResult.protein, 0));
+    const c = Math.max(0, numOr(rawVisionResult.carbs, 0));
+    const f = Math.max(0, numOr(rawVisionResult.fat, 0));
+    const fib = Math.max(0, numOr(rawVisionResult.fiber, 0));
+    const sug = Math.min(c, Math.max(0, numOr(rawVisionResult.sugar, 0)));
+    const atwater = p * 4 + c * 4 + f * 9 + fib * 2;
+    let rawK = Math.max(0, numOr(rawVisionResult.kcal ?? rawVisionResult.calories, atwater));
+
+    if (!mealIsZeroLight && atwater >= 25 && rawK > atwater * 3.4 && rawK < atwater * 4.8) {
+      rawK = rawK / 4.184;
+    }
+
+    const finalKcal = (isLabel || mealIsZeroLight) ? Math.round(rawK) : Math.round(rawK * 0.5 + atwater * 0.5);
+    return {
+      mealName: mealTitle,
+      kcal: finalKcal,
+      prot: Math.round(p),
+      carbs: Math.round(c),
+      fat: Math.round(f),
+      fiber: Math.round(fib),
+      sugar: Math.round(sug),
+      addedSugar: 0,
+      naturalSugar: 0,
+      components: [],
+      source: isLabel ? 'Nährwert-Etikett (Ground Truth)' : (rawVisionResult.source || '3D Vision AI')
+    };
+  }
+
+  const reconciled = rawComps.map(comp => {
+    const name = String(comp.name || 'Zutat').trim();
+    const grams = Math.max(1, Math.round(numOr(comp.grams || comp.weightG, 100)));
+    let p = Math.max(0, numOr(comp.prot ?? comp.protein, 0));
+    let c = Math.max(0, numOr(comp.carbs, 0));
+    let f = Math.max(0, numOr(comp.fat, 0));
+    let fib = Math.max(0, numOr(comp.fiber, 0));
+    let sug = Math.max(0, numOr(comp.sugar, 0));
+    let kcal = Math.max(0, numOr(comp.kcal ?? comp.calories, 0));
+
+    const compIsZeroLight = mealIsZeroLight || ZERO_LIGHT_REGEX.test(name);
+    const isImmutableGroundTruth = isLabel || compIsZeroLight;
+
+    const isDairyOrFruit = /milch|latte|cappuccino|quark|skyr|joghurt|beeren|apfel|banane|obst|twarog|mleko/i.test(name);
+    const isPureAddedSugar = /zucker|wurfel|sirup|honig|marmelade|cukier|kostk/i.test(name);
+
+    if (isImmutableGroundTruth) {
+      // 100% IMMUTABLE GROUND TRUTH für Etiketten & Zero/Light-Getränke (inkl. organischer Säuren wie 7 kcal bei 0g P/C/F)
+      sug = Math.min(c, sug);
+      const atwaterRef = p * 4 + c * 4 + f * 9 + fib * 2;
+      if (!compIsZeroLight && atwaterRef >= 25 && kcal > atwaterRef * 3.4 && kcal < atwaterRef * 4.8) {
+        kcal = kcal / 4.184;
+      }
+    } else {
+      const lexRef = findLexiconReference(name);
+      const isBreadedOrFried = /paniert|frittiert|schnitzel|schabowy|pommes|chips|sahne|creme/i.test(name);
+
+      if (lexRef && !isBreadedOrFried) {
+        const factor = grams / 100;
+        p = (lexRef.prot100 * factor) * 0.65 + p * 0.35;
+        c = (lexRef.carbs100 * factor) * 0.65 + c * 0.35;
+        f = (lexRef.fat100 * factor) * 0.65 + f * 0.35;
+        fib = (lexRef.fiber100 * factor) * 0.65 + fib * 0.35;
+        sug = (lexRef.sugar100 * factor) * 0.65 + sug * 0.35;
+
+        if (lexRef.isLeanProtein) {
+          const maxLeanFat = (grams / 100) * 2.8;
+          f = Math.min(f, maxLeanFat);
+        }
+      }
+
+      if (/bratfett|bratol|kochfett|pfannenol/i.test(name) && grams > 5) {
+        f = Math.min(f, 5.0);
+      }
+
+      sug = Math.min(c, sug);
+      const atwaterKcal = p * 4 + c * 4 + f * 9 + fib * 2;
+      if (atwaterKcal >= 25 && kcal > atwaterKcal * 3.4 && kcal < atwaterKcal * 4.8) {
+        kcal = kcal / 4.184;
+      }
+      kcal = kcal > 0 ? Math.round(atwaterKcal * 0.7 + kcal * 0.3) : Math.round(atwaterKcal);
+    }
+
+    const addedSugar = isPureAddedSugar ? sug : 0;
+    const naturalSugar = isDairyOrFruit && !isPureAddedSugar ? sug : 0;
+    const alreadyHasUnit = /\(\d+\s*(?:g|ml)\)/i.test(name);
+
+    return {
+      name: alreadyHasUnit ? name : `${name} (${grams}g)`,
+      grams,
+      kcal: Math.round(kcal),
+      prot: Math.round(p * 10) / 10,
+      carbs: Math.round(c * 10) / 10,
+      fat: Math.round(f * 10) / 10,
+      fiber: Math.round(fib * 10) / 10,
+      sugar: Math.round(sug * 10) / 10,
+      addedSugar: Math.round(addedSugar * 10) / 10,
+      naturalSugar: Math.round(naturalSugar * 10) / 10
+    };
+  });
+
+  const totals = reconciled.reduce(
+    (acc, item) => {
+      acc.kcal += item.kcal;
+      acc.prot += item.prot;
+      acc.carbs += item.carbs;
+      acc.fat += item.fat;
+      acc.fiber += item.fiber;
+      acc.sugar += item.sugar;
+      acc.addedSugar += numOr(item.addedSugar, 0);
+      acc.naturalSugar += numOr(item.naturalSugar, 0);
+      return acc;
+    },
+    { kcal: 0, prot: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, addedSugar: 0, naturalSugar: 0 }
+  );
+
+  return {
+    mealName: mealTitle || reconciled.map(r => r.name).join(' + '),
+    kcal: Math.round(totals.kcal),
+    prot: Math.round(totals.prot),
+    carbs: Math.round(totals.carbs),
+    fat: Math.round(totals.fat),
+    fiber: Math.round(totals.fiber),
+    sugar: Math.min(Math.round(totals.carbs), Math.round(totals.sugar)),
+    addedSugar: Math.round(totals.addedSugar),
+    naturalSugar: Math.round(totals.naturalSugar),
+    components: reconciled,
+    source: isLabel ? 'Nährwert-Etikett (Ground Truth)' : (rawVisionResult.source || '3D Vision Rigor')
+  };
+}
+
+function setPortionScale(scalePct) {
+  const pct = Math.max(25, Math.min(250, Math.round(numOr(scalePct, 100))));
+  currentPortionScale = pct;
+
+  const slider = document.getElementById('portionScaleSlider');
+  const label = document.getElementById('portionScaleValue');
+  if (slider) slider.value = pct;
+  if (label) label.textContent = `${pct}%`;
+
+  if (!pendingMealAnalysis) return;
+  const factor = pct / 100;
+
+  const setTxt = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  setTxt('resKcal', Math.round(pendingMealAnalysis.kcal * factor));
+  setTxt('resProt', `${Math.round(pendingMealAnalysis.prot * factor)}g`);
+  setTxt('resCarbs', `${Math.round(pendingMealAnalysis.carbs * factor)}g`);
+  setTxt('resFat', `${Math.round(pendingMealAnalysis.fat * factor)}g`);
+  setTxt('resFiber', `${Math.round(pendingMealAnalysis.fiber * factor)}g`);
+  setTxt('resSugar', `${Math.round(pendingMealAnalysis.sugar * factor)}g`);
+
+  const breakdownEl = document.getElementById('resSugarBreakdown');
+  if (breakdownEl) {
+    const natS = Math.round(numOr(pendingMealAnalysis.naturalSugar, 0) * factor);
+    const addS = Math.round(numOr(pendingMealAnalysis.addedSugar, 0) * factor);
+    if (natS > 0 && addS > 0) {
+      breakdownEl.classList.remove('hidden');
+      breakdownEl.innerHTML = `<i class="fa-solid fa-cubes-stacked mr-1.5 text-indigo-300"></i>Zucker-Trennung: <b>${natS}g</b> natürliche Milch-/Frucht-Laktose &bull; <b>${addS}g</b> zugesetzter Zucker`;
+    } else if (natS > 0 && addS === 0) {
+      breakdownEl.classList.remove('hidden');
+      breakdownEl.innerHTML = `<i class="fa-solid fa-leaf mr-1.5 text-emerald-300"></i><b>${natS}g</b> natürlicher Milch-/Fruchtzucker (0g zugesetzter Zucker)`;
+    } else {
+      breakdownEl.classList.add('hidden');
+      breakdownEl.innerHTML = '';
+    }
+  }
+}
+
+function showMealResult(analysisObj) {
+  if (!analysisObj) return;
+  pendingMealAnalysis = analysisObj;
+  currentPortionScale = 100;
+
+  const box = document.getElementById('mealAnalysisResult');
+  const titleEl = document.getElementById('resMealTitle');
+  const badgeEl = document.getElementById('resSourceBadge');
+  const listEl = document.getElementById('resComponentsList');
+
+  if (titleEl) titleEl.textContent = analysisObj.mealName || 'Mahlzeit';
+
+  const q = computeMealQualityScore(analysisObj);
+  if (badgeEl) {
+    badgeEl.className = `inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border mb-1 ${q.colorClass}`;
+    badgeEl.innerHTML = `<i class="fa-solid fa-award"></i><span>${escapeHTML(analysisObj.source || 'KI-Vision')} &bull; Score ${q.grade} (${q.score})</span>`;
+  }
+
+  if (listEl) {
+    if (Array.isArray(analysisObj.components) && analysisObj.components.length > 0) {
+      listEl.innerHTML = analysisObj.components
+        .map(c => `<div class="flex items-center justify-between bg-slate-950/60 px-2.5 py-1.5 rounded-xl border border-slate-800/80">
+          <span class="font-medium text-slate-200">${escapeHTML(c.name)}</span>
+          <span class="text-[11px] text-emerald-300 font-bold">${Math.round(c.kcal)} kcal &bull; ${Math.round(c.prot)}P/${Math.round(c.carbs)}C/${Math.round(c.fat)}F</span>
+        </div>`)
+        .join('');
+    } else {
+      listEl.innerHTML = '';
+    }
+  }
+
+  setPortionScale(100);
+  if (box) box.classList.remove('hidden');
+}
+
+function hideMealResult() {
+  pendingMealAnalysis = null;
+  const box = document.getElementById('mealAnalysisResult');
+  if (box) box.classList.add('hidden');
+}
+
+function resetAnalyzeButtonUI() {
+  const btn = document.getElementById('analyzeMealBtn');
+  if (!btn) return;
+  btn.disabled = false;
+  const label = (state && state.lang === 'pl') ? 'Analiza 3D' : '3D Analyse';
+  btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span data-i18n="btnAnalyze">${label}</span>`;
+}
+
+async function handleMealPhotoSelect(event) {
+  const file = event && event.target && event.target.files ? event.target.files[0] : null;
+  if (!file) return;
+
+  abortActiveVisionRequest();
+
+  try {
+    const base64 = await compressImageFile(file, 'label');
+    currentMealPhotoBase64 = base64;
+    const container = document.getElementById('mealPreviewContainer');
+    const img = document.getElementById('mealPreviewImg');
+    if (img) img.src = `data:image/jpeg;base64,${base64}`;
+    if (container) container.classList.remove('hidden');
+    showToast('Foto komprimiert & bereit für 3D-Analyse.', 'info');
+  } catch (err) {
+    showToast(err.message || 'Foto konnte nicht verarbeitet werden.', 'error');
+  }
+}
+
+function clearMealPhoto() {
+  abortActiveVisionRequest();
+  currentMealPhotoBase64 = null;
+  const input = document.getElementById('mealPhotoInput');
+  const container = document.getElementById('mealPreviewContainer');
+  const img = document.getElementById('mealPreviewImg');
+  if (input) input.value = '';
+  if (img) img.removeAttribute('src');
+  if (container) container.classList.add('hidden');
+  resetAnalyzeButtonUI();
+}
+
+function clearMealText() {
+  const input = document.getElementById('mealTextInput');
+  if (input) input.value = '';
+}
+
+async function triggerMealAnalysis() {
+  const textEl = document.getElementById('mealTextInput');
+  const userText = textEl ? textEl.value.trim() : '';
+  const hasPhoto = Boolean(currentMealPhotoBase64);
+
+  if (!hasPhoto && !userText) {
+    showToast('Bitte ein Foto aufnehmen oder eine Mahlzeit ins Textfeld eingeben.', 'warning');
+    return;
+  }
+
+  // 1. 0.0s Offline-Lexikon Fast-Path (wenn kein Foto aktiv ist)
+  if (!hasPhoto && userText) {
+    const offlineHit = resolveFromLexicon(userText);
+    if (offlineHit) {
+      showMealResult(offlineHit);
+      if (typeof recordRecentScan === 'function') recordRecentScan(offlineHit);
+      showToast('In 0.0s über Offline-Lexikon berechnet!', 'success');
+      return;
+    }
+  }
+
+  if (isVisionBusy) {
+    abortActiveVisionRequest();
+  }
+
+  isVisionBusy = true;
+  activeVisionController = new AbortController();
+  activeVisionWatchdogTimer = setTimeout(() => {
+    abortActiveVisionRequest();
+  }, MASTER_VISION_TIMEOUT_MS);
+
+  const btn = document.getElementById('analyzeMealBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Analysiere...</span>`;
+  }
+
+  try {
+    const langHint = state.lang === 'pl' ? 'Antworte auf Polnisch.' : 'Antworte auf Deutsch.';
+    const prompt = `Du bist ein hochpräziser Ernährungs- & Label-OCR-Analyst. ${langHint}
+${buildGlobalNutritionalRigorRules()}
+WICHTIGE ENTSCHEIDUNG:
+- Siehst du auf dem Foto eine gedruckte Nährwerttabelle ("Nährwerte", "Brennwert", "kcal", "Wartości odżywcze")? Dann setze ZWINGEND "isNutritionLabel": true! Lies EXAKT die kcal-Zahl (NIEMALS kJ!) und die Makros ab. Bei Zero/Light-Getränken (z.B. Fanta Zero: 7 kcal, 0g Zucker, 0g Carbs, 0g Fett, 0g Protein) übernimm die abgelesenen Werte 1:1!
+- Siehst du ein Gericht/Getränk + eine additive Textnotiz (z.B. "Mit 2 Würfel Zucker")? Lass die sichtbare Portionsmenge (z.B. 180-200ml Milch in einer vollen Tasse Milchkaffee/Cappuccino mit Schaum) UNVERÄNDERT und füge die Textnotiz (2 Würfel Zucker = 7g, 28 kcal, 7g Carbs, 7g Zucker) als eigene zusätzliche Komponente hinzu!
+Benutzer-Textnotiz: "${userText || 'Keine Textnotiz, analysiere das Bild.'}"
+
+Gib AUSSCHLIESSLICH valides JSON in diesem Schema zurück:
+{
+  "mealName": "Exakter Name (inkl. Zero/Light falls zutreffend)",
+  "isNutritionLabel": true_or_false,
+  "components": [
+    { "name": "Zutat oder Produktname", "grams": 150, "kcal": 180, "prot": 25, "carbs": 5, "fat": 4, "fiber": 1, "sugar": 2 }
+  ]
+}`;
+
+    const rawResult = await callGeminiRequest(prompt, currentMealPhotoBase64, activeVisionController.signal);
+    const reconciled = reconcileVisionComponents(rawResult);
+    showMealResult(reconciled);
+    if (typeof recordRecentScan === 'function') recordRecentScan(reconciled);
+    showToast('3D-Analyse abgeschlossen!', 'success');
+  } catch (err) {
+    if (err && String(err.message).includes('abgebrochen')) {
+      return;
+    }
+    showToast(err.message || 'Analyse fehlgeschlagen.', 'error');
+  } finally {
+    if (activeVisionWatchdogTimer) {
+      clearTimeout(activeVisionWatchdogTimer);
+      activeVisionWatchdogTimer = null;
+    }
+    activeVisionController = null;
+    isVisionBusy = false;
+    resetAnalyzeButtonUI();
+  }
+}
+
+const callGeminiVisionAPI = triggerMealAnalysis;
+
+async function handleFridgePhotoSelect(event) {
+  const file = event && event.target && event.target.files ? event.target.files[0] : null;
+  if (!file) return;
+  try {
+    const base64 = await compressImageFile(file, 'standard');
+    currentFridgePhotoBase64 = base64;
+    const container = document.getElementById('fridgePreviewContainer');
+    const img = document.getElementById('fridgePreviewImg');
+    if (img) img.src = `data:image/jpeg;base64,${base64}`;
+    if (container) container.classList.remove('hidden');
+  } catch (err) {
+    showToast(err.message || 'Kühlschrank-Foto Fehler.', 'error');
+  }
+}
+
+function clearFridgePhoto() {
+  currentFridgePhotoBase64 = null;
+  const input = document.getElementById('fridgePhotoInput');
+  const container = document.getElementById('fridgePreviewContainer');
+  if (input) input.value = '';
+  if (container) container.classList.add('hidden');
+}
+
+async function runFridgeLeftoverAI() {
+  const extraEl = document.getElementById('fridgeExtraInput');
+  const extraText = extraEl ? extraEl.value.trim() : '';
+  if (!currentFridgePhotoBase64 && !extraText) {
+    showToast('Bitte ein Kühlschrank-Foto wählen oder vorhandene Zutaten eingeben.', 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('runFridgeBtn');
+  const container = document.getElementById('fridgeResultsContainer');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Erstelle Rezepte...</span>`;
+  }
+
+  try {
+    const todayData = getTodayData();
+    const eatenKcal = todayData.meals.reduce((a, m) => a + numOr(m.kcal, 0), 0);
+    const remKcal = Math.max(350, state.goals.kcal - eatenKcal);
+
+    const prompt = `Du bist ein Fitness-Koch.
+${buildGlobalNutritionalRigorRules()}
+Restbudget heute: ${remKcal} kcal. Zusätzliche Zutaten/Notiz: "${extraText || 'Siehe Foto'}".
+Erstelle 3 High-Protein-Rezepte aus den Vorräten. Gib NUR JSON zurück:
+{
+  "recipes": [
+    { "name": "Rezeptname", "prepTime": "12 Min", "kcal": 520, "prot": 45, "carbs": 40, "fat": 16, "fiber": 6, "sugar": 5, "steps": "Kurze Anleitung" }
+  ]
+}`;
+
+    const data = await callGeminiRequest(prompt, currentFridgePhotoBase64);
+    const recipes = Array.isArray(data.recipes) ? data.recipes : [];
+
+    if (container) {
+      container.innerHTML = recipes
+        .map(r => {
+          const payload = encodeURIComponent(JSON.stringify(r));
+          return `<div class="glass-card rounded-3xl p-4 space-y-2 border border-cyan-500/30">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.name)}</h3>
+              <span class="text-[11px] font-bold text-cyan-300">${escapeHTML(r.prepTime || '15 Min')}</span>
+            </div>
+            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Protein &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
+            <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(r.steps || '')}</p>
+            <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-200 font-bold text-xs">
+              Ins Tagebuch übernehmen
+            </button>
+          </div>`;
+        })
+        .join('');
+    }
+  } catch (err) {
+    showToast(err.message || 'Kühlschrank-Analyse fehlgeschlagen.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-sparkles"></i><span>Rezepte aus Resten</span>`;
+    }
+  }
+}
+
+function updateMenuBudgetBanner() {
+  syncGoalsBridge(state);
+  const todayData = getTodayData();
+  const eatenKcal = todayData.meals.reduce((a, m) => a + numOr(m.kcal, 0), 0);
+  const eatenProt = todayData.meals.reduce((a, m) => a + numOr(m.prot, 0), 0);
+
+  const remKcal = Math.max(0, Math.round(state.goals.kcal - eatenKcal));
+  const remProt = Math.max(0, Math.round(state.goals.prot - eatenProt));
+
+  const kEl = document.getElementById('menuBudgetKcal');
+  const pEl = document.getElementById('menuBudgetProt');
+  if (kEl) kEl.textContent = remKcal;
+  if (pEl) pEl.textContent = remProt;
+}
+
+async function handleMenuPhotoSelect(event) {
+  const file = event && event.target && event.target.files ? event.target.files[0] : null;
+  if (!file) return;
+  try {
+    const base64 = await compressImageFile(file, 'menu');
+    currentMenuPhotoBase64 = base64;
+    const container = document.getElementById('menuPreviewContainer');
+    const img = document.getElementById('menuPreviewImg');
+    if (img) img.src = `data:image/jpeg;base64,${base64}`;
+    if (container) container.classList.remove('hidden');
+  } catch (err) {
+    showToast(err.message || 'Speisekarten-Foto Fehler.', 'error');
+  }
+}
+
+function clearMenuPhoto() {
+  currentMenuPhotoBase64 = null;
+  const input = document.getElementById('menuPhotoInput');
+  const container = document.getElementById('menuPreviewContainer');
+  if (input) input.value = '';
+  if (container) container.classList.add('hidden');
+}
+
+async function runMenuScannerAI() {
+  const extraEl = document.getElementById('menuExtraInput');
+  const extraText = extraEl ? extraEl.value.trim() : '';
+  if (!currentMenuPhotoBase64 && !extraText) {
+    showToast('Bitte die Speisekarte fotografieren oder Gerichte eingeben.', 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('runMenuBtn');
+  const container = document.getElementById('menuResultsContainer');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Prüfe Speisekarte...</span>`;
+  }
+
+  try {
+    updateMenuBudgetBanner();
+    const remKcal = document.getElementById('menuBudgetKcal')?.textContent || '800';
+    const remProt = document.getElementById('menuBudgetProt')?.textContent || '50';
+
+    const prompt = `Du bist ein Restaurant-Ernährungscoach.
+${buildGlobalNutritionalRigorRules()}
+Offenes Tagesbudget: ${remKcal} kcal, ${remProt}g Protein. Notiz: "${extraText}".
+Wähle die Top-3-Gerichte von der Karte. Gib NUR JSON zurück:
+{
+  "recommendations": [
+    { "name": "Gericht", "kcal": 640, "prot": 48, "carbs": 52, "fat": 22, "fiber": 6, "sugar": 5, "tip": "Kurzer Bestell-Tipp" }
+  ]
+}`;
+
+    const data = await callGeminiRequest(prompt, currentMenuPhotoBase64);
+    const recs = Array.isArray(data.recommendations) ? data.recommendations : [];
+
+    if (container) {
+      container.innerHTML = recs
+        .map(r => {
+          const payload = encodeURIComponent(JSON.stringify(r));
+          return `<div class="glass-card rounded-3xl p-4 space-y-2 border border-amber-500/30">
+            <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.name)}</h3>
+            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Protein &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
+            <p class="text-xs text-amber-200/90"><i class="fa-solid fa-lightbulb mr-1"></i>${escapeHTML(r.tip || '')}</p>
+            <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 font-bold text-xs">
+              Gericht direkt ins Tagebuch buchen
+            </button>
+          </div>`;
+        })
+        .join('');
+    }
+  } catch (err) {
+    showToast(err.message || 'Menü-Scan fehlgeschlagen.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-magnifying-glass-chart"></i><span>Beste Wahl finden</span>`;
+    }
+  }
+}
+
+async function runChefRecipeAI() {
+  const modeEl = document.getElementById('chefModeSelect');
+  const promptEl = document.getElementById('chefPromptInput');
+  const mode = modeEl ? modeEl.value : 'high_protein';
+  const wish = promptEl ? promptEl.value.trim() : '';
+
+  const btn = document.getElementById('runChefBtn');
+  const container = document.getElementById('chefResultsContainer');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Koche Rezept...</span>`;
+  }
+
+  try {
+    const prompt = `Du bist ein Fitness-Chefkoch.
+${buildGlobalNutritionalRigorRules()}
+Modus: ${mode}. Wunsch: "${wish || 'Überrasche mich mit einem High-Protein Fitness-Gericht'}".
+Erstelle 2 detaillierte Fitness-Rezepte (1 Portion). Gib NUR JSON zurück:
+{
+  "recipes": [
+    { "name": "Gericht", "kcal": 550, "prot": 48, "carbs": 45, "fat": 16, "fiber": 7, "sugar": 6, "ingredients": ["180g Hähnchenbrust", "200g Brokkoli"], "steps": "Zubereitung..." }
+  ]
+}`;
+
+    const data = await callGeminiRequest(prompt, null);
+    const list = Array.isArray(data.recipes) ? data.recipes : [];
+
+    if (container) {
+      container.innerHTML = list
+        .map(r => {
+          const payload = encodeURIComponent(JSON.stringify(r));
+          const ingHtml = Array.isArray(r.ingredients)
+            ? r.ingredients.map(i => `<span class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300">${escapeHTML(i)}</span>`).join(' ')
+            : '';
+          return `<div class="glass-card rounded-3xl p-4 space-y-2.5 border border-emerald-500/30">
+            <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.name)}</h3>
+            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Protein &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
+            <div class="flex flex-wrap gap-1">${ingHtml}</div>
+            <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(r.steps || '')}</p>
+            <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 font-bold text-xs">
+              Ins Tagebuch übernehmen
+            </button>
+          </div>`;
+        })
+        .join('');
+    }
+  } catch (err) {
+    showToast(err.message || 'Rezept-Generierung fehlgeschlagen.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-hat-chef"></i><span>Fitness-Rezept generieren</span>`;
+    }
+  }
+}
+
+const runPotScannerAI = runChefRecipeAI;
+    // ============================================================================
+// TEIL 2.3 — I18N, DYNAMIC HABIT & RECENT SCAN CHIPS, MEAL QUALITY SCORE,
+// NON-PUNITIVE 4-ZONE WEEKLY BANK, ADAPTIVE METABOLIC COACH, DIARY/PROFILE/
+// BACKUP/VAULT/INVITE HANDLERS & BOOTSTRAP INIT
+// ============================================================================
 
 const UI_I18N = {
   de: {
@@ -1919,7 +2782,7 @@ const UI_I18N = {
     coachTdeeLabel: 'TDEE / BMR',
     coachFloorLabel: 'Safety Floor',
     scannerTitle: 'Mahlzeit erfassen (Foto & Text)',
-    smartHabitTitle: 'Smart Habits (1-Klick Gewohnheiten)',
+    smartHabitTitle: 'Gewohnheiten & Zuletzt gescannt',
     presetApple: 'Apfel',
     presetEggs: '2 Eier',
     presetShake: 'Shake',
@@ -1967,7 +2830,7 @@ const UI_I18N = {
     coachTdeeLabel: 'TDEE / BMR',
     coachFloorLabel: 'Safety Floor',
     scannerTitle: 'Dodaj posiłek (Zdjęcie i Tekst)',
-    smartHabitTitle: 'Smart Habits (Szybkie nawyki 1-klik)',
+    smartHabitTitle: 'Nawyki i Ostatnio skanowane',
     presetApple: 'Jabłko',
     presetEggs: '2 Jajka',
     presetShake: 'Shake',
@@ -2025,6 +2888,40 @@ function applyLanguage() {
   }
 }
 
+function recordRecentScan(mealObj) {
+  if (!mealObj || typeof mealObj !== 'object') return;
+  const cleanName = String(mealObj.mealName || mealObj.name || '').trim();
+  if (!cleanName) return;
+
+  if (!Array.isArray(state.recentScans)) {
+    state.recentScans = [];
+  }
+
+  const normalizedKey = cleanName.toLowerCase();
+  state.recentScans = state.recentScans.filter(item => item && String(item.name || '').trim().toLowerCase() !== normalizedKey);
+
+  state.recentScans.unshift({
+    name: cleanName,
+    kcal: Math.round(numOr(mealObj.kcal, 0)),
+    prot: Math.round(numOr(mealObj.prot, 0)),
+    carbs: Math.round(numOr(mealObj.carbs, 0)),
+    fat: Math.round(numOr(mealObj.fat, 0)),
+    fiber: Math.round(numOr(mealObj.fiber, 0)),
+    sugar: Math.round(numOr(mealObj.sugar, 0)),
+    addedSugar: Math.round(numOr(mealObj.addedSugar, 0)),
+    naturalSugar: Math.round(numOr(mealObj.naturalSugar, 0)),
+    source: mealObj.source || 'Zuletzt gescannt',
+    ts: Date.now()
+  });
+
+  if (state.recentScans.length > 12) {
+    state.recentScans = state.recentScans.slice(0, 12);
+  }
+
+  saveState();
+  renderSmartHabitChips();
+}
+
 function renderSmartHabitChips() {
   const section = document.getElementById('smartHabitSection');
   const container = document.getElementById('smartHabitChips');
@@ -2034,6 +2931,7 @@ function renderSmartHabitChips() {
   const hourNow = new Date().getHours();
   const isMorningWindow = hourNow >= 5 && hourNow <= 11;
 
+  // Stufe A: 14-Tage-Häufigkeits-Miner + Morgen-Priorisierung
   for (let d = 0; d < 14; d++) {
     const iso = getOffsetISO(-d);
     const dayObj = state.days && state.days[iso];
@@ -2051,8 +2949,11 @@ function renderSmartHabitChips() {
           fat: Math.round(numOr(m.fat, 0)),
           fiber: Math.round(numOr(m.fiber, 0)),
           sugar: Math.round(numOr(m.sugar, 0)),
+          addedSugar: Math.round(numOr(m.addedSugar, 0)),
+          naturalSugar: Math.round(numOr(m.naturalSugar, 0)),
           count: 0,
-          morningHits: 0
+          morningHits: 0,
+          chipKind: 'habit'
         };
       }
       freqMap[key].count += 1;
@@ -2063,29 +2964,64 @@ function renderSmartHabitChips() {
     });
   }
 
-  const candidates = Object.values(freqMap)
-    .filter(item => item.count >= 2 && item.kcal > 0)
+  const topHabits = Object.values(freqMap)
+    .filter(item => item.count >= 2)
     .sort((a, b) => {
       const scoreA = a.count + (isMorningWindow ? a.morningHits * 1.5 : 0);
       const scoreB = b.count + (isMorningWindow ? b.morningHits * 1.5 : 0);
       return scoreB - scoreA;
-    })
-    .slice(0, 4);
+    });
 
-  if (candidates.length === 0) {
+  // Stufe B: Persistente "Zuletzt gescannt"-Einträge (sofort ab dem 1. Foto-/Text-Scan inkl. Zero-Getränke!)
+  const combined = [];
+  const seenKeys = new Set();
+
+  topHabits.forEach(h => {
+    const k = h.name.toLowerCase();
+    if (!seenKeys.has(k) && combined.length < 4) {
+      seenKeys.add(k);
+      combined.push(h);
+    }
+  });
+
+  const recentList = Array.isArray(state.recentScans) ? state.recentScans : [];
+  recentList.forEach(r => {
+    if (!r || !r.name) return;
+    const k = r.name.trim().toLowerCase();
+    if (!seenKeys.has(k) && combined.length < 6) {
+      seenKeys.add(k);
+      combined.push(Object.assign({}, r, { chipKind: 'recent' }));
+    }
+  });
+
+  // Fallback aus einzelnen Tagebuch-Einträgen falls recentScans noch leer ist
+  Object.values(freqMap).forEach(entry => {
+    const k = entry.name.toLowerCase();
+    if (!seenKeys.has(k) && combined.length < 6) {
+      seenKeys.add(k);
+      combined.push(Object.assign({}, entry, { chipKind: 'recent' }));
+    }
+  });
+
+  if (combined.length === 0) {
     section.classList.add('hidden');
     container.innerHTML = '';
     return;
   }
 
   section.classList.remove('hidden');
-  container.innerHTML = candidates
+  container.innerHTML = combined
     .map(item => {
       const payload = encodeURIComponent(JSON.stringify(item));
-      return `<button type="button" onclick="logSmartHabit('${payload}')" class="px-2.5 py-1 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 border border-teal-500/30 text-[11px] font-semibold text-teal-200 flex items-center gap-1.5 transition">
-        <i class="fa-solid fa-bolt text-teal-400 text-[10px]"></i>
-        <span>${escapeHTML(item.name)}</span>
-        <span class="text-[10px] text-teal-300/80">(${item.kcal} kcal)</span>
+      const isHabit = item.chipKind === 'habit';
+      const iconCls = isHabit ? 'fa-bolt text-emerald-400' : 'fa-clock-rotate-left text-teal-300';
+      const styleCls = isHabit
+        ? 'bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/30 text-emerald-100'
+        : 'bg-teal-500/15 hover:bg-teal-500/25 border-teal-500/30 text-teal-100';
+      return `<button type="button" onclick="logSmartHabit('${payload}')" class="px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition max-w-full ${styleCls}">
+        <i class="fa-solid ${iconCls} text-[10px] shrink-0"></i>
+        <span class="truncate max-w-[160px]">${escapeHTML(item.name)}</span>
+        <span class="text-[10px] opacity-80 shrink-0">(${Math.round(numOr(item.kcal, 0))} kcal)</span>
       </button>`;
     })
     .join('');
@@ -2103,7 +3039,9 @@ function logSmartHabit(encodedPayload) {
       fat: numOr(item.fat, 0),
       fiber: numOr(item.fiber, 0),
       sugar: numOr(item.sugar, 0),
-      source: 'Smart Habit'
+      addedSugar: numOr(item.addedSugar, 0),
+      naturalSugar: numOr(item.naturalSugar, 0),
+      source: item.chipKind === 'habit' ? 'Gewohnheit' : 'Zuletzt gescannt'
     });
   } catch (_) {}
 }
@@ -2118,6 +3056,7 @@ function computeMealQualityScore(mealObj) {
   const fat = Math.max(0, numOr(mealObj.fat, 0));
   const fiber = Math.max(0, numOr(mealObj.fiber, 0));
   const sugar = Math.max(0, numOr(mealObj.sugar, 0));
+  const addedSugar = numOr(mealObj.addedSugar, -1);
   const titleLower = String(mealObj.name || mealObj.mealName || '').toLowerCase();
 
   if (kcal <= 15 && sugar <= 1) {
@@ -2126,10 +3065,11 @@ function computeMealQualityScore(mealObj) {
 
   const safeKcal = Math.max(1, kcal);
   const isNaturalMatrix = /quark|skyr|twarog|joghurt|beeren|apfel|banane|obst|milch|latte|borowki|jablko/.test(titleLower);
+  const effectivePenaltySugar = addedSugar >= 0 ? addedSugar : sugar;
 
   const protShare = (prot * 4) / safeKcal;
   const fatShare = (fat * 9) / safeKcal;
-  const sugarShare = (sugar * 4) / safeKcal;
+  const sugarShare = (effectivePenaltySugar * 4) / safeKcal;
 
   let points = 6.8;
   points += Math.min(2.2, protShare * 5.2);
@@ -2140,7 +3080,7 @@ function computeMealQualityScore(mealObj) {
   }
 
   if (sugarShare > 0.25) {
-    const penaltyFactor = isNaturalMatrix ? 1.1 : 4.2;
+    const penaltyFactor = (isNaturalMatrix && addedSugar < 0) ? 1.1 : 4.0;
     points -= (sugarShare - 0.25) * penaltyFactor;
   }
 
@@ -2221,18 +3161,23 @@ function computeAndRenderWeeklyBankV2() {
     }
   }
 
+  // Non-Punitive 4-Zone Progress Bar Colors (null Alarm-Rot!)
   if (barEl) {
     const ratio = todayKcal / dailyTarget;
     const widthPct = Math.min(100, Math.round(ratio * 100));
     barEl.style.width = `${widthPct}%`;
 
     if (ratio <= 1.0) {
+      // Zone 1: Zielbereich (Emerald / Teal)
       barEl.className = 'h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500';
     } else if (isBufferedByWeek) {
+      // Zone 2: Vollständig vom Wochenpuffer geschützt (Teal / Cyan)
       barEl.className = 'h-full rounded-full bg-gradient-to-r from-teal-400 to-cyan-400 transition-all duration-500';
     } else if (ratio <= 1.10) {
-      barEl.className = 'h-full rounded-full bg-gradient-to-r from-sky-400 to-amber-400 transition-all duration-500';
+      // Zone 3: Leichtes Plus bis +10% (Ruhiges Amber / Slate)
+      barEl.className = 'h-full rounded-full bg-gradient-to-r from-amber-400 to-slate-400 transition-all duration-500';
     } else {
+      // Zone 4: > +10% (Gedämpftes Amber / Indigo — kein Alarm-Rot)
       barEl.className = 'h-full rounded-full bg-gradient-to-r from-amber-400 to-indigo-400 transition-all duration-500';
     }
   }
@@ -2639,589 +3584,13 @@ function renderMetabolicCoachUI() {
     }
   }
 }
-    // ============================================================================
-// TEIL 2.3 — ZERO-GUARDED LEXICON PARSER, IMMUTABLE LABEL-OCR RECONCILIATION,
-// 4 AI SCANNERS, DIARY/PRESET/PROFILE HANDLERS, 6-LAYER VAULT & GUEST ISOLATION
-// ============================================================================
-
-const WORD_NUMBERS = {
-  ein: 1, eine: 1, einer: 1, einem: 1, einen: 1,
-  zwei: 2, drei: 3, vier: 4, funf: 5, fuenf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9, zehn: 10,
-  halbe: 0.5, halber: 0.5, halbes: 0.5, anderthalb: 1.5,
-  jeden: 1, jedna: 1, jedno: 1, dwa: 2, dwie: 2, trzy: 3, cztery: 4, piec: 5, szesc: 6,
-  pol: 0.5, poltora: 1.5
-};
-
-const ZERO_LIGHT_REGEX = /\b(?:zero|light|lite|zuckerfrei|sugar\s*free|bez\s*cukru|ohne\s*zucker|pepsi\s*max|0\s*kcal|0\s*g\s*zucker|mineralwasser\s*lemon|rheinfels\s*lemon)\b/i;
-
-function foldDiacritics(str) {
-  if (!str) return '';
-  return String(str)
-    .toLowerCase()
-    .replace(/ä/g, 'a')
-    .replace(/ö/g, 'o')
-    .replace(/ü/g, 'u')
-    .replace(/ß/g, 'ss')
-    .replace(/ą/g, 'a')
-    .replace(/ć/g, 'c')
-    .replace(/ę/g, 'e')
-    .replace(/ł/g, 'l')
-    .replace(/ń/g, 'n')
-    .replace(/ó/g, 'o')
-    .replace(/ś/g, 's')
-    .replace(/ź/g, 'z')
-    .replace(/ż/g, 'z');
-}
-
-function normalizeWordNumbers(text) {
-  let out = foldDiacritics(text);
-  Object.keys(WORD_NUMBERS).forEach(word => {
-    const re = new RegExp(`(^|\\s)${word}(?=\\s|$)`, 'g');
-    out = out.replace(re, `$1${WORD_NUMBERS[word]}`);
-  });
-  return out;
-}
-
-function escapeRegExp(str) {
-  return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function matchKeywordWithBoundary(text, kw) {
-  const cleanKw = foldDiacritics(kw).trim();
-  if (!cleanKw) return false;
-  const pattern = `(?:^|[^a-z0-9])${escapeRegExp(cleanKw)}(?:$|[^a-z0-9])`;
-  return new RegExp(pattern, 'i').test(text);
-}
-
-function stripExclusions(text) {
-  // Schütze "ohne Zucker" / "bez cukru" als Zero-Signal, streiche nur andere Ausschlüsse ("ohne Soße")
-  return String(text || '')
-    .replace(/\b(?:ohne|bez)\s+(?!zucker\b|cukru\b)[a-zA-ZäöüÄÖÜßąćęłńóśźżĄĆĘŁŃÓŚŹŻ0-9-]+/gi, ' ')
-    .trim();
-}
-
-function resolveSingleSegment(segText, parentMultiplier = 1) {
-  const norm = normalizeWordNumbers(stripExclusions(segText)).trim();
-  if (!norm) return null;
-
-  const isZeroHint = ZERO_LIGHT_REGEX.test(norm);
-
-  let bestEntry = null;
-  let bestKwLen = 0;
-
-  for (let i = 0; i < FOOD_LEXICON.length; i++) {
-    const entry = FOOD_LEXICON[i];
-    // Harter Guard: Zero/Light-Signal darf NIEMALS zuckerhaltige Softdrinks matchen!
-    if (isZeroHint && entry.isSugaryDrink) continue;
-
-    for (let k = 0; k < entry.kw.length; k++) {
-      const kw = entry.kw[k];
-      if (matchKeywordWithBoundary(norm, kw) && kw.length > bestKwLen) {
-        bestEntry = entry;
-        bestKwLen = kw.length;
-      }
-    }
-  }
-
-  // Fallback: Wenn Zero-Softdrink-Marke genannt wurde (z.B. "Mezzo Zero", "Limo Light")
-  if (!bestEntry && isZeroHint && /\b(?:fanta|cola|sprite|spezi|limo|limonade|eistee|energy|red bull|monster|schorle|lemon)\b/i.test(norm)) {
-    bestEntry = FOOD_LEXICON.find(e => e.id === 'cola_zero') || null;
-  }
-
-  if (!bestEntry) return null;
-
-  // Maskiere Fettprozente (1,5%, 3,5%, 0,3%, 45%) vor der Mengen-Extraktion
-  const qtyText = norm.replace(/\d+(?:[.,]\d+)?\s*%/g, ' ').replace(/\s+/g, ' ').trim();
-  const isEachModifier = /\b(?:je|jeweils|po)\b/.test(qtyText);
-  const effectiveParentMult = isEachModifier && parentMultiplier > 1 ? parentMultiplier : 1;
-
-  let grams = bestEntry.unitG;
-  let detectedCount = 1;
-
-  // 1. Explizite Multiplikator-Syntax: "2x 400ml", "2 x 330 ml", "3 mal 150g"
-  const multUnitMatch = qtyText.match(/(\d+(?:[.,]\d+)?)\s*(?:x|mal)\s*(\d+(?:[.,]\d+)?)\s*(g|gramm|gram|ml|l|liter)\b/);
-  // 2. Klassische Gramm-/ml-Angabe: "2 Latte a 400ml" oder "250g Quark"
-  const gMatch = qtyText.match(/(\d+(?:[.,]\d+)?)\s*(?:g|gramm|gram|ml)\b/);
-  const lMatch = qtyText.match(/(\d+(?:[.,]\d+)?)\s*(?:l|liter)\b/);
-  const elMatch = qtyText.match(/(\d+(?:[.,]\d+)?)?\s*(?:el|essloffel|lyzka|lyzki)\b/);
-  const tlMatch = qtyText.match(/(\d+(?:[.,]\d+)?)?\s*(?:tl|teeloffel|lyzeczka|lyzeczki)\b/);
-  const jeCountMatch = qtyText.match(/\b(?:je|jeweils|po)\s*(\d+(?:[.,]\d+)?)/);
-  const countPrefixMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|mal|stuck|scheibe|scheiben|tasse|tassen|becher|glas|flasche|flaschen|dose|dosen|portion|portionen|wurfel|wurfeln|szt|sztuk|kromka|kromki)?\b/);
-
-  if (multUnitMatch) {
-    detectedCount = parseFloat(multUnitMatch[1].replace(',', '.'));
-    const unitVal = parseFloat(multUnitMatch[2].replace(',', '.'));
-    const isLiter = /^l/.test(multUnitMatch[3]);
-    grams = (isLiter ? unitVal * 1000 : unitVal) * detectedCount * effectiveParentMult;
-  } else if (gMatch) {
-    const singleG = parseFloat(gMatch[1].replace(',', '.'));
-    const leadMultMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s+(?!g\b|gramm\b|ml\b)/);
-    if (leadMultMatch && /\b(?:a|à|je|x|mal)\b/.test(qtyText)) {
-      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
-    } else if (leadMultMatch && parseFloat(leadMultMatch[1].replace(',', '.')) <= 20 && parseFloat(leadMultMatch[1].replace(',', '.')) !== singleG) {
-      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
-    }
-    grams = singleG * detectedCount * effectiveParentMult;
-  } else if (lMatch) {
-    const singleL = parseFloat(lMatch[1].replace(',', '.'));
-    const leadMultMatch = qtyText.match(/^(\d+(?:[.,]\d+)?)\s+(?!l\b|liter\b)/);
-    if (leadMultMatch && /\b(?:a|à|je|x|mal)\b/.test(qtyText)) {
-      detectedCount = parseFloat(leadMultMatch[1].replace(',', '.'));
-    }
-    grams = singleL * 1000 * detectedCount * effectiveParentMult;
-  } else if (elMatch) {
-    const cnt = elMatch[1] ? parseFloat(elMatch[1].replace(',', '.')) : 1;
-    grams = cnt * 15 * effectiveParentMult;
-  } else if (tlMatch) {
-    const cnt = tlMatch[1] ? parseFloat(tlMatch[1].replace(',', '.')) : 1;
-    grams = cnt * 5 * effectiveParentMult;
-  } else if (jeCountMatch) {
-    const cnt = parseFloat(jeCountMatch[1].replace(',', '.'));
-    detectedCount = cnt * effectiveParentMult;
-    grams = detectedCount * bestEntry.unitG;
-  } else if (countPrefixMatch) {
-    const cnt = parseFloat(countPrefixMatch[1].replace(',', '.'));
-    if (cnt > 0 && cnt <= 30) {
-      detectedCount = cnt;
-      grams = cnt * bestEntry.unitG * effectiveParentMult;
-    }
-  }
-
-  if (/\b(?:gross|grosse|grosser|grosses|duzy|duza|duze)\b/.test(qtyText) && !gMatch && !multUnitMatch) {
-    grams *= 1.4;
-  } else if (/\b(?:klein|kleine|kleiner|kleines|maly|mala|male)\b/.test(qtyText) && !gMatch && !multUnitMatch) {
-    grams *= 0.7;
-  }
-
-  grams = Math.max(1, Math.round(grams));
-  const factor = grams / 100;
-
-  let kcal = Math.round(bestEntry.kcal100 * factor);
-  const explicitKcalMatch = qtyText.match(/(\d+)\s*kcal\b/);
-  if (explicitKcalMatch) {
-    kcal = parseInt(explicitKcalMatch[1], 10);
-  }
-
-  const unitLabel = bestEntry.isZeroDrink || bestEntry.isSugaryDrink || bestEntry.id === 'milk_15' || bestEntry.id === 'latte_macchiato' || bestEntry.id === 'black_coffee' ? 'ml' : 'g';
-
-  return {
-    name: `${bestEntry.name} (${grams}${unitLabel})`,
-    grams,
-    detectedCount,
-    kcal,
-    prot: Math.round(bestEntry.prot100 * factor * 10) / 10,
-    carbs: Math.round(bestEntry.carbs100 * factor * 10) / 10,
-    fat: Math.round(bestEntry.fat100 * factor * 10) / 10,
-    fiber: Math.round(bestEntry.fiber100 * factor * 10) / 10,
-    sugar: Math.round(bestEntry.sugar100 * factor * 10) / 10
-  };
-}
-
-function resolveFromLexicon(rawInput) {
-  if (!rawInput || typeof rawInput !== 'string') return null;
-  const cleaned = stripExclusions(rawInput).trim();
-  if (!cleaned) return null;
-
-  const primaryParts = cleaned
-    .split(/(?:,|\+|\bund\b|\boraz\b|\bdazu\b)/i)
-    .map(s => s.trim())
-    .filter(Boolean);
-
-  const finalSegments = [];
-  primaryParts.forEach(part => {
-    const subParts = part.split(/\b(?:mit|auf|z|ze)\b/i).map(s => s.trim()).filter(Boolean);
-    if (subParts.length > 1) {
-      const subResolved = subParts.map(sp => resolveSingleSegment(sp, 1));
-      if (subResolved.every(Boolean)) {
-        subParts.forEach(sp => finalSegments.push(sp));
-        return;
-      }
-    }
-    finalSegments.push(part);
-  });
-
-  if (finalSegments.length === 0) return null;
-
-  const components = [];
-  let activeParentCount = 1;
-
-  for (let i = 0; i < finalSegments.length; i++) {
-    const comp = resolveSingleSegment(finalSegments[i], activeParentCount);
-    if (!comp) return null;
-    if (i === 0 && comp.detectedCount > 1) {
-      activeParentCount = comp.detectedCount;
-    }
-    components.push(comp);
-  }
-
-  const totals = components.reduce(
-    (acc, c) => {
-      acc.kcal += c.kcal;
-      acc.prot += c.prot;
-      acc.carbs += c.carbs;
-      acc.fat += c.fat;
-      acc.fiber += c.fiber;
-      acc.sugar += c.sugar;
-      return acc;
-    },
-    { kcal: 0, prot: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0 }
-  );
-
-  return {
-    mealName: components.map(c => c.name).join(' + '),
-    kcal: Math.round(totals.kcal),
-    prot: Math.round(totals.prot),
-    carbs: Math.round(totals.carbs),
-    fat: Math.round(totals.fat),
-    fiber: Math.round(totals.fiber),
-    sugar: Math.round(totals.sugar),
-    components,
-    source: 'Offline-Lexikon (0.0s)'
-  };
-}
-
-function findLexiconReference(componentName) {
-  const norm = foldDiacritics(componentName || '');
-  if (!norm) return null;
-  const isZeroHint = ZERO_LIGHT_REGEX.test(norm);
-
-  let best = null;
-  let bestLen = 0;
-  for (let i = 0; i < FOOD_LEXICON.length; i++) {
-    const entry = FOOD_LEXICON[i];
-    if (isZeroHint && entry.isSugaryDrink) continue;
-    for (let k = 0; k < entry.kw.length; k++) {
-      const kw = entry.kw[k];
-      if (matchKeywordWithBoundary(norm, kw) && kw.length > bestLen) {
-        best = entry;
-        bestLen = kw.length;
-      }
-    }
-  }
-  return best;
-}
-
-function reconcileVisionComponents(rawVisionResult) {
-  if (!rawVisionResult || typeof rawVisionResult !== 'object') {
-    throw new Error('Ungültiges Analyse-Objekt.');
-  }
-
-  const mealTitle = String(rawVisionResult.mealName || rawVisionResult.name || 'Analysierte Mahlzeit').trim();
-  const isLabel = Boolean(rawVisionResult.isNutritionLabel || rawVisionResult.isLabel);
-  const mealIsZeroLight = ZERO_LIGHT_REGEX.test(mealTitle);
-  const rawComps = Array.isArray(rawVisionResult.components) ? rawVisionResult.components : [];
-
-  if (rawComps.length === 0) {
-    const p = Math.max(0, numOr(rawVisionResult.prot ?? rawVisionResult.protein, 0));
-    const c = Math.max(0, numOr(rawVisionResult.carbs, 0));
-    const f = Math.max(0, numOr(rawVisionResult.fat, 0));
-    const fib = Math.max(0, numOr(rawVisionResult.fiber, 0));
-    const sug = Math.min(c, Math.max(0, numOr(rawVisionResult.sugar, 0)));
-    const atwater = p * 4 + c * 4 + f * 9 + fib * 2;
-    let rawK = Math.max(0, numOr(rawVisionResult.kcal ?? rawVisionResult.calories, atwater));
-
-    // kJ-vs-kcal-Schutz nur wenn eindeutig kJ (Faktor ~4.184) bei regulärem Lebensmittel abgelesen wurde
-    if (atwater >= 25 && rawK > atwater * 3.4 && rawK < atwater * 4.8) {
-      rawK = rawK / 4.184;
-    }
-
-    const finalKcal = (isLabel || mealIsZeroLight) ? Math.round(rawK) : Math.round(rawK * 0.5 + atwater * 0.5);
-    return {
-      mealName: mealTitle,
-      kcal: finalKcal,
-      prot: Math.round(p),
-      carbs: Math.round(c),
-      fat: Math.round(f),
-      fiber: Math.round(fib),
-      sugar: Math.round(sug),
-      components: [],
-      source: isLabel ? 'Nährwert-Etikett (Ground Truth)' : (rawVisionResult.source || '3D Vision AI')
-    };
-  }
-
-  const reconciled = rawComps.map(comp => {
-    const name = String(comp.name || 'Zutat').trim();
-    const grams = Math.max(1, Math.round(numOr(comp.grams || comp.weightG, 100)));
-    let p = Math.max(0, numOr(comp.prot ?? comp.protein, 0));
-    let c = Math.max(0, numOr(comp.carbs, 0));
-    let f = Math.max(0, numOr(comp.fat, 0));
-    let fib = Math.max(0, numOr(comp.fiber, 0));
-    let sug = Math.max(0, numOr(comp.sugar, 0));
-    let kcal = Math.max(0, numOr(comp.kcal ?? comp.calories, 0));
-
-    const compIsZeroLight = mealIsZeroLight || ZERO_LIGHT_REGEX.test(name);
-    const isImmutableGroundTruth = isLabel || compIsZeroLight;
-
-    if (isImmutableGroundTruth) {
-      // UNBRECHBARE GROUND-TRUTH-REGEL:
-      // 0g Makros & gedruckte Etiketten-Kalorien (inkl. organischer Säuren wie 7 kcal bei Fanta Zero)
-      // werden 100% unverändert bewahrt — KEIN Lexikon-Blend, KEIN 4P+4C+9F-Zwang!
-      sug = Math.min(c, sug);
-      const atwaterRef = p * 4 + c * 4 + f * 9 + fib * 2;
-      if (!compIsZeroLight && atwaterRef >= 25 && kcal > atwaterRef * 3.4 && kcal < atwaterRef * 4.8) {
-        kcal = kcal / 4.184;
-      }
-    } else {
-      const lexRef = findLexiconReference(name);
-      const isBreadedOrFried = /paniert|frittiert|schnitzel|schabowy|pommes|chips|sahne|creme/i.test(name);
-
-      if (lexRef && !isBreadedOrFried) {
-        const factor = grams / 100;
-        p = (lexRef.prot100 * factor) * 0.65 + p * 0.35;
-        c = (lexRef.carbs100 * factor) * 0.65 + c * 0.35;
-        f = (lexRef.fat100 * factor) * 0.65 + f * 0.35;
-        fib = (lexRef.fiber100 * factor) * 0.65 + fib * 0.35;
-        sug = (lexRef.sugar100 * factor) * 0.65 + sug * 0.35;
-
-        if (lexRef.isLeanProtein) {
-          const maxLeanFat = (grams / 100) * 2.8;
-          f = Math.min(f, maxLeanFat);
-        }
-      }
-
-      if (/bratfett|bratol|kochfett|pfannenol/i.test(name) && grams > 5) {
-        f = Math.min(f, 5.0);
-      }
-
-      sug = Math.min(c, sug);
-      const atwaterKcal = p * 4 + c * 4 + f * 9 + fib * 2;
-      if (atwaterKcal >= 25 && kcal > atwaterKcal * 3.4 && kcal < atwaterKcal * 4.8) {
-        kcal = kcal / 4.184;
-      }
-      kcal = kcal > 0 ? Math.round(atwaterKcal * 0.7 + kcal * 0.3) : Math.round(atwaterKcal);
-    }
-
-    const alreadyHasUnit = /\(\d+\s*(?:g|ml)\)/i.test(name);
-    return {
-      name: alreadyHasUnit ? name : `${name} (${grams}g)`,
-      grams,
-      kcal: Math.round(kcal),
-      prot: Math.round(p * 10) / 10,
-      carbs: Math.round(c * 10) / 10,
-      fat: Math.round(f * 10) / 10,
-      fiber: Math.round(fib * 10) / 10,
-      sugar: Math.round(sug * 10) / 10
-    };
-  });
-
-  const totals = reconciled.reduce(
-    (acc, item) => {
-      acc.kcal += item.kcal;
-      acc.prot += item.prot;
-      acc.carbs += item.carbs;
-      acc.fat += item.fat;
-      acc.fiber += item.fiber;
-      acc.sugar += item.sugar;
-      return acc;
-    },
-    { kcal: 0, prot: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0 }
-  );
-
-  return {
-    mealName: mealTitle || reconciled.map(r => r.name).join(' + '),
-    kcal: Math.round(totals.kcal),
-    prot: Math.round(totals.prot),
-    carbs: Math.round(totals.carbs),
-    fat: Math.round(totals.fat),
-    fiber: Math.round(totals.fiber),
-    sugar: Math.min(Math.round(totals.carbs), Math.round(totals.sugar)),
-    components: reconciled,
-    source: isLabel ? 'Nährwert-Etikett (Ground Truth)' : (rawVisionResult.source || '3D Vision Rigor')
-  };
-}
-
-function setPortionScale(scalePct) {
-  const pct = Math.max(25, Math.min(250, Math.round(numOr(scalePct, 100))));
-  currentPortionScale = pct;
-
-  const slider = document.getElementById('portionScaleSlider');
-  const label = document.getElementById('portionScaleValue');
-  if (slider) slider.value = pct;
-  if (label) label.textContent = `${pct}%`;
-
-  if (!pendingMealAnalysis) return;
-  const factor = pct / 100;
-
-  const setTxt = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  };
-
-  setTxt('resKcal', Math.round(pendingMealAnalysis.kcal * factor));
-  setTxt('resProt', `${Math.round(pendingMealAnalysis.prot * factor)}g`);
-  setTxt('resCarbs', `${Math.round(pendingMealAnalysis.carbs * factor)}g`);
-  setTxt('resFat', `${Math.round(pendingMealAnalysis.fat * factor)}g`);
-  setTxt('resFiber', `${Math.round(pendingMealAnalysis.fiber * factor)}g`);
-  setTxt('resSugar', `${Math.round(pendingMealAnalysis.sugar * factor)}g`);
-}
-
-function showMealResult(analysisObj) {
-  if (!analysisObj) return;
-  pendingMealAnalysis = analysisObj;
-  currentPortionScale = 100;
-
-  const box = document.getElementById('mealAnalysisResult');
-  const titleEl = document.getElementById('resMealTitle');
-  const badgeEl = document.getElementById('resSourceBadge');
-  const listEl = document.getElementById('resComponentsList');
-
-  if (titleEl) titleEl.textContent = analysisObj.mealName || 'Mahlzeit';
-
-  const q = computeMealQualityScore(analysisObj);
-  if (badgeEl) {
-    badgeEl.className = `inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border mb-1 ${q.colorClass}`;
-    badgeEl.innerHTML = `<i class="fa-solid fa-award"></i><span>${escapeHTML(analysisObj.source || 'KI-Vision')} &bull; Score ${q.grade} (${q.score})</span>`;
-  }
-
-  if (listEl) {
-    if (Array.isArray(analysisObj.components) && analysisObj.components.length > 0) {
-      listEl.innerHTML = analysisObj.components
-        .map(c => `<div class="flex items-center justify-between bg-slate-950/60 px-2.5 py-1.5 rounded-xl border border-slate-800/80">
-          <span class="font-medium text-slate-200">${escapeHTML(c.name)}</span>
-          <span class="text-[11px] text-emerald-300 font-bold">${Math.round(c.kcal)} kcal &bull; ${Math.round(c.prot)}P/${Math.round(c.carbs)}C/${Math.round(c.fat)}F</span>
-        </div>`)
-        .join('');
-    } else {
-      listEl.innerHTML = '';
-    }
-  }
-
-  setPortionScale(100);
-  if (box) box.classList.remove('hidden');
-}
-
-function hideMealResult() {
-  pendingMealAnalysis = null;
-  const box = document.getElementById('mealAnalysisResult');
-  if (box) box.classList.add('hidden');
-}
-
-function resetAnalyzeButtonUI() {
-  const btn = document.getElementById('analyzeMealBtn');
-  if (!btn) return;
-  btn.disabled = false;
-  const label = (state && state.lang === 'pl') ? 'Analiza 3D' : '3D Analyse';
-  btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span data-i18n="btnAnalyze">${label}</span>`;
-}
-
-async function handleMealPhotoSelect(event) {
-  const file = event && event.target && event.target.files ? event.target.files[0] : null;
-  if (!file) return;
-
-  abortActiveVisionRequest();
-
-  try {
-    const base64 = await compressImageFile(file, 'label');
-    currentMealPhotoBase64 = base64;
-    const container = document.getElementById('mealPreviewContainer');
-    const img = document.getElementById('mealPreviewImg');
-    if (img) img.src = `data:image/jpeg;base64,${base64}`;
-    if (container) container.classList.remove('hidden');
-    showToast('Foto komprimiert & bereit für 3D-Analyse.', 'info');
-  } catch (err) {
-    showToast(err.message || 'Foto konnte nicht verarbeitet werden.', 'error');
-  }
-}
-
-function clearMealPhoto() {
-  abortActiveVisionRequest();
-  currentMealPhotoBase64 = null;
-  const input = document.getElementById('mealPhotoInput');
-  const container = document.getElementById('mealPreviewContainer');
-  const img = document.getElementById('mealPreviewImg');
-  if (input) input.value = '';
-  if (img) img.removeAttribute('src');
-  if (container) container.classList.add('hidden');
-  resetAnalyzeButtonUI();
-}
-
-function clearMealText() {
-  const input = document.getElementById('mealTextInput');
-  if (input) input.value = '';
-}
-
-async function triggerMealAnalysis() {
-  const textEl = document.getElementById('mealTextInput');
-  const userText = textEl ? textEl.value.trim() : '';
-  const hasPhoto = Boolean(currentMealPhotoBase64);
-
-  if (!hasPhoto && !userText) {
-    showToast('Bitte ein Foto aufnehmen oder eine Mahlzeit ins Textfeld eingeben.', 'warning');
-    return;
-  }
-
-  // 1. 0.0s Offline-Lexikon Fast-Path (wenn kein Foto aktiv ist)
-  if (!hasPhoto && userText) {
-    const offlineHit = resolveFromLexicon(userText);
-    if (offlineHit) {
-      showMealResult(offlineHit);
-      showToast('In 0.0s über Offline-Lexikon berechnet!', 'success');
-      return;
-    }
-  }
-
-  if (isVisionBusy) {
-    abortActiveVisionRequest();
-  }
-
-  isVisionBusy = true;
-  activeVisionController = new AbortController();
-  activeVisionWatchdogTimer = setTimeout(() => {
-    abortActiveVisionRequest();
-  }, MASTER_VISION_TIMEOUT_MS);
-
-  const btn = document.getElementById('analyzeMealBtn');
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Analysiere...</span>`;
-  }
-
-  try {
-    const langHint = state.lang === 'pl' ? 'Antworte auf Polnisch.' : 'Antworte auf Deutsch.';
-    const prompt = `Du bist ein hochpräziser Ernährungs- & Label-OCR-Analyst. ${langHint}
-${buildGlobalNutritionalRigorRules()}
-WICHTIGE ENTSCHEIDUNG:
-- Siehst du auf dem Foto eine gedruckte Nährwerttabelle ("Nährwerte", "Brennwert", "kcal", "Wartości odżywcze")? Dann setze ZWINGEND "isNutritionLabel": true! Lies EXAKT die kcal-Zahl (NIEMALS kJ!) und die Makros ab. Bei Zero/Light-Getränken (z.B. 7 kcal, 0g Zucker, 0g Carbs, 0g Fett, 0g Protein) übernimm die abgelesenen Werte 1:1!
-- Siehst du ein Gericht/Getränk + eine additive Textnotiz (z.B. "Mit 2 Würfel Zucker")? Lass die sichtbare Portionsmenge (z.B. 180-200ml Milch in einer vollen Tasse Milchkaffee/Cappuccino mit Schaum) UNVERÄNDERT und füge die Textnotiz als zusätzliche Komponente hinzu!
-Benutzer-Textnotiz: "${userText || 'Keine Textnotiz, analysiere das Bild.'}"
-
-Gib AUSSCHLIESSLICH valides JSON in diesem Schema zurück:
-{
-  "mealName": "Exakter Name (inkl. Zero/Light falls zutreffend)",
-  "isNutritionLabel": true_or_false,
-  "components": [
-    { "name": "Zutat oder Produktname", "grams": 150, "kcal": 180, "prot": 25, "carbs": 5, "fat": 4, "fiber": 1, "sugar": 2 }
-  ]
-}`;
-
-    const rawResult = await callGeminiRequest(prompt, currentMealPhotoBase64, activeVisionController.signal);
-    const reconciled = reconcileVisionComponents(rawResult);
-    showMealResult(reconciled);
-    showToast('3D-Analyse abgeschlossen!', 'success');
-  } catch (err) {
-    if (err && String(err.message).includes('abgebrochen')) {
-      return;
-    }
-    showToast(err.message || 'Analyse fehlgeschlagen.', 'error');
-  } finally {
-    if (activeVisionWatchdogTimer) {
-      clearTimeout(activeVisionWatchdogTimer);
-      activeVisionWatchdogTimer = null;
-    }
-    activeVisionController = null;
-    isVisionBusy = false;
-    resetAnalyzeButtonUI();
-  }
-}
-
-const callGeminiVisionAPI = triggerMealAnalysis;
 
 function quickAddPreset(presetType) {
   const presets = {
-    apple: { name: 'Apfel frisch (160g)', kcal: 83, prot: 0.5, carbs: 18.2, fat: 0.3, fiber: 3.8, sugar: 16.6, source: 'Schnellwahl' },
-    eggs: { name: '2 Hühnereier Gr. M (110g)', kcal: 157, prot: 13.9, carbs: 0.8, fat: 10.5, fiber: 0, sugar: 0.8, source: 'Schnellwahl' },
-    shake: { name: 'Whey Protein Shake (30g Pulver)', kcal: 113, prot: 23.4, carbs: 1.7, fat: 1.4, fiber: 0.2, sugar: 1.1, source: 'Schnellwahl' },
-    coffee: { name: 'Kaffee schwarz (250ml)', kcal: 5, prot: 0.5, carbs: 0.2, fat: 0, fiber: 0, sugar: 0, source: 'Schnellwahl' }
+    apple: { name: 'Apfel frisch (160g)', kcal: 83, prot: 0.5, carbs: 18.2, fat: 0.3, fiber: 3.8, sugar: 16.6, addedSugar: 0, naturalSugar: 16.6, source: 'Schnellwahl' },
+    eggs: { name: '2 Hühnereier Gr. M (110g)', kcal: 157, prot: 13.9, carbs: 0.8, fat: 10.5, fiber: 0, sugar: 0.8, addedSugar: 0, naturalSugar: 0, source: 'Schnellwahl' },
+    shake: { name: 'Whey Protein Shake (30g Pulver)', kcal: 113, prot: 23.4, carbs: 1.7, fat: 1.4, fiber: 0.2, sugar: 1.1, addedSugar: 0, naturalSugar: 1.1, source: 'Schnellwahl' },
+    coffee: { name: 'Kaffee schwarz (250ml)', kcal: 5, prot: 0.5, carbs: 0.2, fat: 0, fiber: 0, sugar: 0, addedSugar: 0, naturalSugar: 0, source: 'Schnellwahl' }
   };
 
   const item = presets[presetType];
@@ -3264,6 +3633,8 @@ function addMealEntry(customEntry) {
       fat: Math.round(pendingMealAnalysis.fat * factor),
       fiber: Math.round(pendingMealAnalysis.fiber * factor),
       sugar: Math.round(pendingMealAnalysis.sugar * factor),
+      addedSugar: Math.round(numOr(pendingMealAnalysis.addedSugar, 0) * factor),
+      naturalSugar: Math.round(numOr(pendingMealAnalysis.naturalSugar, 0) * factor),
       source: pendingMealAnalysis.source || '3D Vision'
     };
   }
@@ -3274,7 +3645,7 @@ function addMealEntry(customEntry) {
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   const todayData = getTodayData();
 
-  todayData.meals.unshift({
+  const savedEntry = {
     id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
     time: timeStr,
     name: entryData.name,
@@ -3284,9 +3655,13 @@ function addMealEntry(customEntry) {
     fat: Math.round(numOr(entryData.fat, 0)),
     fiber: Math.round(numOr(entryData.fiber, 0)),
     sugar: Math.round(numOr(entryData.sugar, 0)),
+    addedSugar: Math.round(numOr(entryData.addedSugar, 0)),
+    naturalSugar: Math.round(numOr(entryData.naturalSugar, 0)),
     source: entryData.source || 'Tagebuch'
-  });
+  };
 
+  todayData.meals.unshift(savedEntry);
+  recordRecentScan(savedEntry);
   saveState();
 
   if (!customEntry) {
@@ -3430,244 +3805,6 @@ function renderDiaryUI() {
     }
   }
 }
-
-async function handleFridgePhotoSelect(event) {
-  const file = event && event.target && event.target.files ? event.target.files[0] : null;
-  if (!file) return;
-  try {
-    const base64 = await compressImageFile(file, 'standard');
-    currentFridgePhotoBase64 = base64;
-    const container = document.getElementById('fridgePreviewContainer');
-    const img = document.getElementById('fridgePreviewImg');
-    if (img) img.src = `data:image/jpeg;base64,${base64}`;
-    if (container) container.classList.remove('hidden');
-  } catch (err) {
-    showToast(err.message || 'Kühlschrank-Foto Fehler.', 'error');
-  }
-}
-
-function clearFridgePhoto() {
-  currentFridgePhotoBase64 = null;
-  const input = document.getElementById('fridgePhotoInput');
-  const container = document.getElementById('fridgePreviewContainer');
-  if (input) input.value = '';
-  if (container) container.classList.add('hidden');
-}
-
-async function runFridgeLeftoverAI() {
-  const extraEl = document.getElementById('fridgeExtraInput');
-  const extraText = extraEl ? extraEl.value.trim() : '';
-  if (!currentFridgePhotoBase64 && !extraText) {
-    showToast('Bitte ein Kühlschrank-Foto wählen oder vorhandene Zutaten eingeben.', 'warning');
-    return;
-  }
-
-  const btn = document.getElementById('runFridgeBtn');
-  const container = document.getElementById('fridgeResultsContainer');
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Erstelle Rezepte...</span>`;
-  }
-
-  try {
-    const todayData = getTodayData();
-    const eatenKcal = todayData.meals.reduce((a, m) => a + numOr(m.kcal, 0), 0);
-    const remKcal = Math.max(350, state.goals.kcal - eatenKcal);
-
-    const prompt = `Du bist ein Fitness-Koch.
-${buildGlobalNutritionalRigorRules()}
-Restbudget heute: ${remKcal} kcal. Zusätzliche Zutaten/Notiz: "${extraText || 'Siehe Foto'}".
-Erstelle 3 High-Protein-Rezepte aus den Vorräten. Gib NUR JSON zurück:
-{
-  "recipes": [
-    { "name": "Rezeptname", "prepTime": "12 Min", "kcal": 520, "prot": 45, "carbs": 40, "fat": 16, "fiber": 6, "sugar": 5, "steps": "Kurze Anleitung" }
-  ]
-}`;
-
-    const data = await callGeminiRequest(prompt, currentFridgePhotoBase64);
-    const recipes = Array.isArray(data.recipes) ? data.recipes : [];
-
-    if (container) {
-      container.innerHTML = recipes
-        .map(r => {
-          const payload = encodeURIComponent(JSON.stringify(r));
-          return `<div class="glass-card rounded-3xl p-4 space-y-2 border border-cyan-500/30">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.name)}</h3>
-              <span class="text-[11px] font-bold text-cyan-300">${escapeHTML(r.prepTime || '15 Min')}</span>
-            </div>
-            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Protein &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
-            <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(r.steps || '')}</p>
-            <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-200 font-bold text-xs">
-              Ins Tagebuch übernehmen
-            </button>
-          </div>`;
-        })
-        .join('');
-    }
-  } catch (err) {
-    showToast(err.message || 'Kühlschrank-Analyse fehlgeschlagen.', 'error');
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-sparkles"></i><span>Rezepte aus Resten</span>`;
-    }
-  }
-}
-
-function updateMenuBudgetBanner() {
-  syncGoalsBridge(state);
-  const todayData = getTodayData();
-  const eatenKcal = todayData.meals.reduce((a, m) => a + numOr(m.kcal, 0), 0);
-  const eatenProt = todayData.meals.reduce((a, m) => a + numOr(m.prot, 0), 0);
-
-  const remKcal = Math.max(0, Math.round(state.goals.kcal - eatenKcal));
-  const remProt = Math.max(0, Math.round(state.goals.prot - eatenProt));
-
-  const kEl = document.getElementById('menuBudgetKcal');
-  const pEl = document.getElementById('menuBudgetProt');
-  if (kEl) kEl.textContent = remKcal;
-  if (pEl) pEl.textContent = remProt;
-}
-
-async function handleMenuPhotoSelect(event) {
-  const file = event && event.target && event.target.files ? event.target.files[0] : null;
-  if (!file) return;
-  try {
-    const base64 = await compressImageFile(file, 'menu');
-    currentMenuPhotoBase64 = base64;
-    const container = document.getElementById('menuPreviewContainer');
-    const img = document.getElementById('menuPreviewImg');
-    if (img) img.src = `data:image/jpeg;base64,${base64}`;
-    if (container) container.classList.remove('hidden');
-  } catch (err) {
-    showToast(err.message || 'Speisekarten-Foto Fehler.', 'error');
-  }
-}
-
-function clearMenuPhoto() {
-  currentMenuPhotoBase64 = null;
-  const input = document.getElementById('menuPhotoInput');
-  const container = document.getElementById('menuPreviewContainer');
-  if (input) input.value = '';
-  if (container) container.classList.add('hidden');
-}
-
-async function runMenuScannerAI() {
-  const extraEl = document.getElementById('menuExtraInput');
-  const extraText = extraEl ? extraEl.value.trim() : '';
-  if (!currentMenuPhotoBase64 && !extraText) {
-    showToast('Bitte die Speisekarte fotografieren oder Gerichte eingeben.', 'warning');
-    return;
-  }
-
-  const btn = document.getElementById('runMenuBtn');
-  const container = document.getElementById('menuResultsContainer');
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Prüfe Speisekarte...</span>`;
-  }
-
-  try {
-    updateMenuBudgetBanner();
-    const remKcal = document.getElementById('menuBudgetKcal')?.textContent || '800';
-    const remProt = document.getElementById('menuBudgetProt')?.textContent || '50';
-
-    const prompt = `Du bist ein Restaurant-Ernährungscoach.
-${buildGlobalNutritionalRigorRules()}
-Offenes Tagesbudget: ${remKcal} kcal, ${remProt}g Protein. Notiz: "${extraText}".
-Wähle die Top-3-Gerichte von der Karte. Gib NUR JSON zurück:
-{
-  "recommendations": [
-    { "name": "Gericht", "kcal": 640, "prot": 48, "carbs": 52, "fat": 22, "fiber": 6, "sugar": 5, "tip": "Kurzer Bestell-Tipp" }
-  ]
-}`;
-
-    const data = await callGeminiRequest(prompt, currentMenuPhotoBase64);
-    const recs = Array.isArray(data.recommendations) ? data.recommendations : [];
-
-    if (container) {
-      container.innerHTML = recs
-        .map(r => {
-          const payload = encodeURIComponent(JSON.stringify(r));
-          return `<div class="glass-card rounded-3xl p-4 space-y-2 border border-amber-500/30">
-            <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.name)}</h3>
-            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Protein &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
-            <p class="text-xs text-amber-200/90"><i class="fa-solid fa-lightbulb mr-1"></i>${escapeHTML(r.tip || '')}</p>
-            <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 font-bold text-xs">
-              Gericht direkt ins Tagebuch buchen
-            </button>
-          </div>`;
-        })
-        .join('');
-    }
-  } catch (err) {
-    showToast(err.message || 'Menü-Scan fehlgeschlagen.', 'error');
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-magnifying-glass-chart"></i><span>Beste Wahl finden</span>`;
-    }
-  }
-}
-
-async function runChefRecipeAI() {
-  const modeEl = document.getElementById('chefModeSelect');
-  const promptEl = document.getElementById('chefPromptInput');
-  const mode = modeEl ? modeEl.value : 'high_protein';
-  const wish = promptEl ? promptEl.value.trim() : '';
-
-  const btn = document.getElementById('runChefBtn');
-  const container = document.getElementById('chefResultsContainer');
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Koche Rezept...</span>`;
-  }
-
-  try {
-    const prompt = `Du bist ein Fitness-Chefkoch.
-${buildGlobalNutritionalRigorRules()}
-Modus: ${mode}. Wunsch: "${wish || 'Überrasche mich mit einem High-Protein Fitness-Gericht'}".
-Erstelle 2 detaillierte Fitness-Rezepte (1 Portion). Gib NUR JSON zurück:
-{
-  "recipes": [
-    { "name": "Gericht", "kcal": 550, "prot": 48, "carbs": 45, "fat": 16, "fiber": 7, "sugar": 6, "ingredients": ["180g Hähnchenbrust", "200g Brokkoli"], "steps": "Zubereitung..." }
-  ]
-}`;
-
-    const data = await callGeminiRequest(prompt, null);
-    const list = Array.isArray(data.recipes) ? data.recipes : [];
-
-    if (container) {
-      container.innerHTML = list
-        .map(r => {
-          const payload = encodeURIComponent(JSON.stringify(r));
-          const ingHtml = Array.isArray(r.ingredients)
-            ? r.ingredients.map(i => `<span class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300">${escapeHTML(i)}</span>`).join(' ')
-            : '';
-          return `<div class="glass-card rounded-3xl p-4 space-y-2.5 border border-emerald-500/30">
-            <h3 class="text-sm font-extrabold text-white">${escapeHTML(r.name)}</h3>
-            <p class="text-xs font-bold text-emerald-400">${Math.round(numOr(r.kcal, 0))} kcal &bull; ${Math.round(numOr(r.prot, 0))}g Protein &bull; ${Math.round(numOr(r.carbs, 0))}g C &bull; ${Math.round(numOr(r.fat, 0))}g F</p>
-            <div class="flex flex-wrap gap-1">${ingHtml}</div>
-            <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(r.steps || '')}</p>
-            <button type="button" onclick="addStoredRecipe('${payload}')" class="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 font-bold text-xs">
-              Ins Tagebuch übernehmen
-            </button>
-          </div>`;
-        })
-        .join('');
-    }
-  } catch (err) {
-    showToast(err.message || 'Rezept-Generierung fehlgeschlagen.', 'error');
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-hat-chef"></i><span>Fitness-Rezept generieren</span>`;
-    }
-  }
-}
-
-const runPotScannerAI = runChefRecipeAI;
 
 function updateWeightDiffBanner() {
   const wEl = document.getElementById('profWeight');
